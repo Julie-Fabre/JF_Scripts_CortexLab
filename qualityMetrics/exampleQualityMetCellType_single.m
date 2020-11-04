@@ -44,7 +44,7 @@ param.minSScore = 0.01;
 param.minSpatDeKlowbound = 1.5;
 
 param.maxNumPeak = 3;
-param.minAmpli = 15;
+param.minAmpli = 77;
 param.maxRPV = 2;
 param.somaCluster = 1;
 param.plotMetricsCtypes = 0;
@@ -57,7 +57,7 @@ param.minPeakRatio = 0.7;
 param.maxdt = 10;
 % for cell-type classification
 param.cellTypeDuration = 400;
-param.cellTypePostS = 50;
+param.cellTypePostS = 40;
 
 % parameters to load raw data
 raw.n_channels = 384; % number of channels
