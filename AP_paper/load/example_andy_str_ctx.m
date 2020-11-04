@@ -5,9 +5,7 @@ disp('Choiceworld trial activity (striatum domain)')
 
 trained_passive_animals = { 'AP028', 'AP029'};
 trained_animals = {'AP024', 'AP025', 'AP026', 'AP027', 'AP028', 'AP029'};
-%trained_animals = {'AP024', 'AP025', 'AP026', 'AP027', 'AP028', 'AP029'};
 naive_animals = {'AP032', 'AP033', 'AP034', 'AP035', 'AP036'}; %'AP034',
-%32 33 35 36 copied over. 34 copying. 33 35 36 check 
 ctx_passive_animals =  {'AP043', 'AP060', 'AP061'};
 trained = 0; %use trained or naive animals
 passive = 1;
@@ -54,7 +52,7 @@ redo = 0; %re-calculate quality metrics and ephys params for cell type classific
 for curr_animal = 1:length(animals)
 
     animal = animals{curr_animal};
-    %protocol = 'vanillaChoiceworld';
+    
     if ctxpassive ==1
         experiments = AP_find_experimentsJF(animal, protocol, protocol2, corona);
     else
@@ -64,10 +62,7 @@ for curr_animal = 1:length(animals)
 
     disp(['Loading ', animal]);
     allExps{curr_animal, :} = experiments;
-    %     if curr_animal == length(animals)
-    %
-    %     redo = 1;
-    %     end
+    
     for curr_day = 1:length(experiments)
         thisCount = thisCount + 1;
         day = experiments(curr_day).day;
@@ -85,9 +80,7 @@ for curr_animal = 1:length(animals)
 
         if timeline_exists
             AP_load_experimentJF;
-            %size(trial_choice)
-            %size(wheel_move_time)
-            % Pull out trial data
+           
             if ephys_exists
                 
                     AP_ctx_str_grab_trial_dataJF_SUA;
