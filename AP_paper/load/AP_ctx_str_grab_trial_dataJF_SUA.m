@@ -59,13 +59,13 @@ if task_dataset
         ~signals_events.repeatTrialValues(1:n_trials)' & ...
         stim_to_feedback < 1.5;
     use_align_move = wheel_move_time;
-use_align_move(isnan(use_align_move)) = 0;
-use_align_outcome = signals_events.responseTimes';
-use_align_outcome(isnan(use_align_outcome)) = 0;
-t_peri_event_move = bsxfun(@plus, use_align_move, t);
-t_peri_event_bins_move = [t_peri_event_move - raster_sample_rate / 2, t_peri_event_move(:, end) + raster_sample_rate / 2];
-t_peri_event_outcome = bsxfun(@plus, use_align_outcome, t);
-t_peri_event_bins_outcome = [t_peri_event_outcome - raster_sample_rate / 2, t_peri_event_outcome(:, end) + raster_sample_rate / 2];
+    use_align_move(isnan(use_align_move)) = 0;
+    use_align_outcome = signals_events.responseTimes';
+    use_align_outcome(isnan(use_align_outcome)) = 0;
+    t_peri_event_move = bsxfun(@plus, use_align_move, t);
+    t_peri_event_bins_move = [t_peri_event_move - raster_sample_rate / 2, t_peri_event_move(:, end) + raster_sample_rate / 2];
+    t_peri_event_outcome = bsxfun(@plus, use_align_outcome, t);
+    t_peri_event_bins_outcome = [t_peri_event_outcome - raster_sample_rate / 2, t_peri_event_outcome(:, end) + raster_sample_rate / 2];
 
 else
     use_trials = true(size(stimIDs));
@@ -95,359 +95,178 @@ else % If passive dataset
 end
 
 %% Load cell-types
-previous = 0;
-if ~previous
-    celltype_path = fullfile('E:/', animal, thisDate, '/analysis/');
 
-    if exist([celltype_path, 'qMetric.mat'], 'file') && redo == 0
-        load([celltype_path, 'qMetric.mat']);
-        load([celltype_path, 'ephysParams.mat']);
-        load([celltype_path, 'param.mat']);
-        load([celltype_path, 'ephysData.mat']);
-    else
-        thisAnimal = animal;
-        thisExperiment = experiment;
-        exampleQualityMetCellType_single;
-    end
+celltype_path = fullfile('E:/', animal, thisDate, '/analysis/');
 
-    goodUnits = qMetric.numSpikes >= param.minNumSpikes & qMetric.waveformRawAmpli .* 0.195 >= param.minAmpli & ...
-        qMetric.fractionRPVchunk <= param.maxRPV  ...
-        & ephysParams.somatic == param.somaCluster; %waveforms, amplis, isolation, isiviolations
-    
-
-
-    %QQ add isoD metrics 
-  
-    % goodUnits = qMetric.numSpikes >= param.minNumSpikes & qMetric.waveformRawAmpli .* 0.195 >= param.minAmpli & ...
-    %     qMetric.spatialDecayTemp1 >= param.minSpatDeKlowbound & qMetric.fractionRPVchunk <= param.maxRPV & ...
-    %     qMetric.numPeaksTroughsTemp <= param.maxNumPeak & ...
-    %     ephysParams.somatic == param.somaCluster & ephysParams.templateDuration < 800;
-        
-    msn = ephysParams.postSpikeSuppressionBf < 40 & ephysParams.templateDuration > param.cellTypeDuration;
-    fsi = ephysParams.prop_long_isi < 0.15 & ...
-        ephysParams.postSpikeSuppressionBf < param.cellTypePostS & ...
-        ephysParams.templateDuration < param.cellTypeDuration;
-    tan = ephysParams.postSpikeSuppressionBf > param.cellTypePostS & ephysParams.templateDuration > param.cellTypeDuration;
-    tan2 = ephysParams.postSpikeSuppressionBf >= 40 & ephysParams.postSpikeSuppressionBf <= param.cellTypePostS & ephysParams.templateDuration > param.cellTypeDuration ;
-    th = ephysParams.prop_long_isi < 0.8 & ephysParams.prop_long_isi >0.15 &...
-        ephysParams.postSpikeSuppressionBf < param.cellTypePostS & ...
-        ephysParams.templateDuration < param.cellTypeDuration;
-    noise = ephysParams.prop_long_isi > 0.8 &...
-        ephysParams.postSpikeSuppressionBf < param.cellTypePostS & ...
-        ephysParams.templateDuration < param.cellTypeDuration;
-    
- 
-    n_celltypes = 6;
-
-    if param.strOnly
-        theseMSNs_strIdx = find(msn);
-        theseFSIs_strIdx = find(fsi);
-        theseTANs_strIdx = find(tan);
-        theseMSNs = qMetric.thisUnit(theseMSNs_strIdx);
-        theseFSIs = qMetric.thisUnit(theseFSIs_strIdx);
-        theseTAN2s = qMetric.thisUnit(theseFSIs_strIdx);
-    else
-        theseMSNs = find(msn);
-        theseFSIs = find(fsi);
-        theseTANs = find(tan);
-        theseTAN2s = find(tan2);
-        theseTHs = find(th);
-        theseNoises = find(noise);
-    end
-
-    % get all ctype spike idxs
-
-    %%QQ add counts
-    theseNeurons = [theseMSNs, theseFSIs, theseTANs, theseTHs, theseNoises, theseTAN2s];
-    
- 
-    %checking 
-    %trial_data.postSpikeSuppressionBf(size(theseMSNs,2)+size(theseFSIs,2)+1:size(theseMSNs,2)+size(theseFSIs,2)+size(theseTANs,2))
-    
-    
-    allGroupsSpikes = nan(size(spike_templates, 1), 1);
-    allGroups = nan(numel(theseNeurons), 1);
-    allAnimals = nan(numel(theseNeurons), 1);
-    allDepths = nan(numel(theseNeurons), 1);
-    allDays = nan(numel(theseNeurons), 1);
-    allExperiments = nan(numel(theseNeurons), 1);
-    %%QQ add counts
-    msnCount = 0;
-    theseNeurons = [];
-    for iMSN = 1:size(theseMSNs, 2)
-        theseSpikes = spike_templates == theseMSNs(iMSN);
-
-        %get depth group
-        thisDepth = unique(depth_group(theseSpikes));
-        if ~isnan(thisDepth)
-
-            msnCount = msnCount + 1;
-            allGroups(msnCount) = thisDepth;
-            allDepths(msnCount) = template_depths(theseMSNs(iMSN));
-            allAnimals(msnCount)=curr_animal;
-            allDays(msnCount)=curr_day;
-            allExperiments(msnCount)=experiment;
-            theseNeurons = [theseNeurons, theseMSNs(iMSN)];
-            if numel(thisDepth) > 1
-                error('more than one depth group for this unit. something is wrong')
-            else
-                allGroupsSpikes(theseSpikes) = thisDepth; %1 - 4:MSNs
-            end
-
-        end
-    end
-    fsiCount = 0;
-    for iFSI = 1:size(theseFSIs, 2)
-        theseSpikes = spike_templates == theseFSIs(iFSI);
-
-        %get depth group
-        thisDepth = unique(depth_group(theseSpikes));
-        if ~isnan(thisDepth)
-            fsiCount = fsiCount + 1;
-            allGroups(msnCount+fsiCount) = thisDepth + n_depths;
-            allDepths(msnCount+fsiCount) = template_depths(theseFSIs(iFSI));
-            allAnimals(msnCount+fsiCount)=curr_animal;
-            allDays(msnCount+fsiCount)=curr_day;
-            allExperiments(msnCount+fsiCount)=experiment;
-            theseNeurons = [theseNeurons, theseFSIs(iFSI)];
-            if numel(thisDepth) > 1
-                error('more than one depth group for this unit. something is wrong')
-            else
-                allGroupsSpikes(theseSpikes) = thisDepth + n_depths; %5 - 8:FSIs
-            end
-
-        end
-    end
-
-    tanCount = 0;
-    for iTAN = 1:size(theseTANs, 2)
-        theseSpikes = spike_templates == theseTANs(iTAN);
-
-        %get depth group
-        thisDepth = unique(depth_group(theseSpikes));
-        if ~isnan(thisDepth)
-            tanCount = tanCount + 1;
-            allGroups(msnCount+fsiCount+tanCount) = thisDepth + (n_depths * 2);
-            allDepths(msnCount+fsiCount+tanCount) = template_depths(theseTANs(iTAN));
-            allAnimals(msnCount+fsiCount+tanCount)=curr_animal;
-            allDays(msnCount+fsiCount+tanCount)=curr_day;
-            allExperiments(msnCount+fsiCount+tanCount)=experiment;
-            theseNeurons = [theseNeurons, theseTANs(iTAN)];
-            if numel(thisDepth) > 1
-                error('more than one depth group for this unit. something is wrong')
-            else
-                allGroupsSpikes(theseSpikes) = thisDepth + (n_depths * 2); %9 - 12:TANs
-            end
-
-        end
-    end
-    
-    thCount = 0;
-    for iTH = 1:size(theseTHs, 2)
-        theseSpikes = spike_templates == theseTHs(iTH);
-
-        %get depth group
-        thisDepth = unique(depth_group(theseSpikes));
-        if ~isnan(thisDepth)
-            thCount = thCount + 1;
-            allGroups(msnCount+fsiCount+tanCount+thCount) = thisDepth + (n_depths * 3);
-            allDepths(msnCount+fsiCount+tanCount+thCount) = template_depths(theseTHs(iTH));
-            allAnimals(msnCount+fsiCount+tanCount+thCount)=curr_animal;
-            allDays(msnCount+fsiCount+tanCount+thCount)=curr_day;
-            allExperiments(msnCount+fsiCount+tanCount+thCount)=experiment;
-            theseNeurons = [theseNeurons, theseTHs(iTH)];
-            if numel(thisDepth) > 1
-                error('more than one depth group for this unit. something is wrong')
-            else
-                allGroupsSpikes(theseSpikes) = thisDepth + (n_depths * 3); %9 - 12:TANs
-            end
-
-        end
-    end
-    
-  
-    noiseCount = 0;
-    for iNoise = 1:size(theseNoises, 2)
-        theseSpikes = spike_templates == theseNoises(iNoise);
-
-        %get depth group
-        thisDepth = unique(depth_group(theseSpikes));
-        if ~isnan(thisDepth)
-            noiseCount = noiseCount + 1;
-            allGroups(msnCount+fsiCount+tanCount +thCount +noiseCount) = thisDepth + ...
-                (n_depths * 4);
-            allDepths(msnCount+fsiCount+tanCount+thCount+noiseCount) =...
-                template_depths(theseNoises(iNoise));
-            allAnimals(msnCount+fsiCount+tanCount+thCount+noiseCount)=curr_animal;
-            allDays(msnCount+fsiCount+tanCount+thCount+noiseCount)=curr_day;
-            allExperiments(msnCount+fsiCount+tanCount+thCount+noiseCount)=experiment;
-            theseNeurons = [theseNeurons, theseNoises(iNoise)];
-            
-            if numel(thisDepth) > 1
-                error('more than one depth group for this unit. something is wrong')
-            else
-                allGroupsSpikes(theseSpikes) = thisDepth + (n_depths * 4); %9 - 12:TANs
-            end
-
-        end
-    end
-     
-    tan2Count = 0;
-    for iTAN2 = 1:size(theseTAN2s, 2)
-        theseSpikes = spike_templates == theseTAN2s(iTAN2);
-
-        %get depth group
-        thisDepth = unique(depth_group(theseSpikes));
-        if ~isnan(thisDepth)
-            tan2Count = tan2Count + 1;
-            allGroups(msnCount+fsiCount+tanCount+thCount+noiseCount+tan2Count) = thisDepth + (n_depths * 5);
-            allDepths(msnCount+fsiCount+tanCount+thCount+noiseCount+tan2Count) = template_depths(theseTAN2s(iTAN2));
-            allAnimals(msnCount+fsiCount+tanCount+thCount+noiseCount+tan2Count)=curr_animal;
-            allDays(msnCount+fsiCount+tanCount+thCount+noiseCount+tan2Count)=curr_day;
-            allExperiments(msnCount+fsiCount+tanCount+thCount+noiseCount+tan2Count)=experiment;
-            theseNeurons = [theseNeurons, theseTAN2s(iTAN2)];
-            if numel(thisDepth) > 1
-                error('more than one depth group for this unit. something is wrong')
-            else
-                allGroupsSpikes(theseSpikes) = thisDepth + (n_depths * 5); %9 - 12:TANs
-            end
-
-        end
-    end     
-    
-    trial_data.numSpikes = qMetric.numSpikes(theseNeurons);
-    trial_data.waveformRawAmpli = qMetric.waveformRawAmpli(theseNeurons);
-    trial_data.fractionRPVchunk = qMetric.fractionRPVchunk(theseNeurons);
-    trial_data.somatic = ephysParams.somatic(theseNeurons);
-    trial_data.spatialDecayTemp1 = qMetric.spatialDecayTemp1(theseNeurons);
-    trial_data.templateDuration = ephysParams.templateDuration(theseNeurons);
-    trial_data.useTimeChunk = qMetric.useTimeChunk(theseNeurons,:);
-    trial_data.symSpikesMissing = qMetric.symSpikesMissing(theseNeurons);
-    trial_data.percent_missing_ndtr = qMetric.percent_missing_ndtr(:,theseNeurons);
-    trial_data.timeChunks = ephysData.timeChunks;
-    trial_data.numPeaksTroughs = qMetric.numPeaksTroughs(theseNeurons);
-    trial_data.acg = ephysParams.ACG(theseNeurons,:); 
-    trial_data.wv = qMetric.waveformUnit(theseNeurons,:);
-    trial_data.goodUnits = goodUnits(theseNeurons); 
-    trial_data.postSpikeSuppressionBf = ephysParams.postSpikeSuppressionBf(theseNeurons);
-    trial_data.prop_long_isi = ephysParams.prop_long_isi(theseNeurons);
-    
-    
-%     ff=find(allGroups== 9);
-%     figure();plot(nanmean(trial_data.acg(ff,:)))
-%     figure();plot(nanmean(ephysParams.ACG(theseTANs,:)))
+if exist([celltype_path, 'qMetric.mat'], 'file') && redo == 0
+    load([celltype_path, 'qMetric.mat']);
+    load([celltype_path, 'ephysParams.mat']);
+    load([celltype_path, 'param.mat']);
+    load([celltype_path, 'ephysData.mat']);
 else
+    thisAnimal = animal;
+    thisExperiment = experiment;
+    exampleQualityMetCellType_single;
+end
 
-    goodUnits = qMetrics(thisCount).numSpike > 300 & qMetricsAddI(thisCount).uQ > 1 & qMetricsAdd(thisCount).nmP < 4 &...
-        qMetrics(thisCount).waveformRawAmpli > 80 ...
-        & qMetrics(thisCount).fractionRPVchunk < 0.05 ...
-        & qMetrics(thisCount).somaCluster == 1 & min(qMetrics(thisCount).percMssgAmpli(:, :)') < 30; %waveforms, amplis, isolation, isiviolations
+goodUnits = qMetric.numSpikes >= param.minNumSpikes & qMetric.waveformRawAmpli >= param.minAmpli & ...
+    qMetric.fractionRPVchunk <= param.maxRPV ...
+    & ephysParams.somatic == param.somaCluster & nanmin(qmetric.percent_missing_ndtr(2:end, :)) < param.maxPercMissing;
 
-     
-    AlldurationC = qMetrics(thisCount).duration;
-    AllpSC = ephysParams(thisCount).postSpikeSuppression;
-    durLim = 400;
-    maxLim=50;
-    theseFSIs = find(goodUnits & AlldurationC < durLim) ;
-    theseTANs = find(goodUnits & AlldurationC > durLim & AllpSC > maxLim);
-    theseMSNs =  find(goodUnits & AlldurationC > durLim & AllpSC < maxLim);
-    % get all ctype spike idxs
 
-    %%QQ add counts
-    theseNeurons = [theseMSNs, theseFSIs, theseTANs];
+msn = ephysParams.postSpikeSuppression < 40 & ephysParams.templateDuration > param.cellTypeDuration;
+fsi = ephysParams.prop_long_isi < 0.1 & ...
+    ephysParams.postSpikeSuppression < param.cellTypePostS & ...
+    ephysParams.templateDuration < param.cellTypeDuration;
+tan = ephysParams.postSpikeSuppression >= 40 & ephysParams.templateDuration > param.cellTypeDuration;
+th = ephysParams.prop_long_isi > 0.1 & ...
+    ephysParams.postSpikeSuppression < param.cellTypePostS & ...
+    ephysParams.templateDuration < param.cellTypeDuration;
 
-    allGroupsSpikes = nan(size(spike_templates, 1), 1);
-    allGroups = nan(numel(theseNeurons), 1);
-    allAnimals = nan(numel(theseNeurons), 1);
-    allDepths = nan(numel(theseNeurons), 1);
-    allDays = nan(numel(theseNeurons), 1);
-    allExperiments = nan(numel(theseNeurons), 1);
-    %%QQ add counts
-    msnCount = 0;
-    theseNeurons = [];
-    [strUnits, ~] = find(ephysData(thisCount).str_templates);
-    for iMSN = 1:size(theseMSNs, 2)
-        
-        %% load data 
-        thisUnit = strUnits(theseMSNs(iMSN));
-        theseSpikes = spike_templates == thisUnit;
+n_celltypes = 4;
 
-        %get depth group
-        thisDepth = unique(depth_group(theseSpikes));
-        if ~isnan(thisDepth)
+if param.strOnly
+    theseMSNs_strIdx = find(msn);
+    theseFSIs_strIdx = find(fsi);
+    theseTANs_strIdx = find(tan);
+    theseMSNs = qMetric.thisUnit(theseMSNs_strIdx);
+    theseFSIs = qMetric.thisUnit(theseFSIs_strIdx);
+    theseTAN2s = qMetric.thisUnit(theseFSIs_strIdx);
+else
+    theseMSNs = find(msn);
+    theseFSIs = find(fsi);
+    theseTANs = find(tan);
+    theseTHs = find(th);
+end
 
-            msnCount = msnCount + 1;
-            allGroups(msnCount) = thisDepth;
-            allDepths(msnCount+fsiCount) = template_depths(theseFSIs(iFSI));
-            allAnimals(msnCount+fsiCount)=animal;
-            allDays(msnCount+fsiCount)=thisDate;
-            allExperiments(msnCount+fsiCount)=thisDate;
-            theseNeurons = [theseNeurons, thisUnit];
-            if numel(thisDepth) > 1
-                error('more than one depth group for this unit. something is wrong')
-            else
-                allGroupsSpikes(theseSpikes) = thisDepth; %1 - 4:MSNs
-                
-            end
 
+theseNeurons = [theseMSNs, theseFSIs, theseTANs, theseTHs];
+
+
+allGroupsSpikes = nan(size(spike_templates, 1), 1);
+allGroups = nan(numel(theseNeurons), 1);
+allAnimals = nan(numel(theseNeurons), 1);
+allDepths = nan(numel(theseNeurons), 1);
+allDays = nan(numel(theseNeurons), 1);
+allExperiments = nan(numel(theseNeurons), 1);
+
+msnCount = 0;
+theseNeurons = [];
+for iMSN = 1:size(theseMSNs, 2)
+    theseSpikes = spike_templates == theseMSNs(iMSN);
+
+    %get depth group
+    thisDepth = unique(depth_group(theseSpikes));
+    if ~isnan(thisDepth)
+
+        msnCount = msnCount + 1;
+        allGroups(msnCount) = thisDepth;
+        allDepths(msnCount) = template_depths(theseMSNs(iMSN));
+        allAnimals(msnCount) = curr_animal;
+        allDays(msnCount) = curr_day;
+        allExperiments(msnCount) = experiment;
+        theseNeurons = [theseNeurons, theseMSNs(iMSN)];
+        if numel(thisDepth) > 1
+            error('more than one depth group for this unit. something is wrong')
+        else
+            allGroupsSpikes(theseSpikes) = thisDepth; %1 - 4:MSNs
         end
+
     end
-    fsiCount = 0;
-    for iFSI = 1:size(theseFSIs, 2)
-         thisUnit = strUnits(theseFSIs(iFSI));
-        theseSpikes = spike_templates == thisUnit;
+end
+fsiCount = 0;
+for iFSI = 1:size(theseFSIs, 2)
+    theseSpikes = spike_templates == theseFSIs(iFSI);
 
-
-        %get depth group
-        thisDepth = unique(depth_group(theseSpikes));
-        if ~isnan(thisDepth)
-            fsiCount = fsiCount + 1;
-            allGroups(msnCount+fsiCount) = thisDepth + n_depths;
-             allDepths(msnCount+fsiCount) = template_depths(theseFSIs(iFSI));
-            allAnimals(msnCount+fsiCount)=animal;
-            allDays(msnCount+fsiCount)=thisDate;
-            allExperiments(msnCount+fsiCount)=thisDate;
-            theseNeurons = [theseNeurons, thisUnit];
-            if numel(thisDepth) > 1
-                error('more than one depth group for this unit. something is wrong')
-            else
-                allGroupsSpikes(theseSpikes) = thisDepth + n_depths; %5 - 8:FSIs
-            end
-
+    %get depth group
+    thisDepth = unique(depth_group(theseSpikes));
+    if ~isnan(thisDepth)
+        fsiCount = fsiCount + 1;
+        allGroups(msnCount+fsiCount) = thisDepth + n_depths;
+        allDepths(msnCount+fsiCount) = template_depths(theseFSIs(iFSI));
+        allAnimals(msnCount+fsiCount) = curr_animal;
+        allDays(msnCount+fsiCount) = curr_day;
+        allExperiments(msnCount+fsiCount) = experiment;
+        theseNeurons = [theseNeurons, theseFSIs(iFSI)];
+        if numel(thisDepth) > 1
+            error('more than one depth group for this unit. something is wrong')
+        else
+            allGroupsSpikes(theseSpikes) = thisDepth + n_depths; %5 - 8:FSIs
         end
-    end
 
-    tanCount = 0;
-    for iTAN = 1:size(theseTANs, 2)
-         thisUnit = strUnits(theseTANs(iTAN));
-        theseSpikes = spike_templates == thisUnit;
-
-
-        %get depth group
-        thisDepth = unique(depth_group(theseSpikes));
-        if ~isnan(thisDepth)
-            tanCount = tanCount + 1;
-            allGroups(msnCount+fsiCount+tanCount) = thisDepth + (n_depths * 2);
-            allDepths(msnCount+fsiCount+tanCount) = template_depths(theseTANs(iTAN));
-            allAnimals(msnCount+fsiCount+tanCount)=animal;
-            allDays(msnCount+fsiCount+tanCount)=thisDate;
-            allExperiments(msnCount+fsiCount+tanCount)=thisDate;
-            theseNeurons = [theseNeurons, thisUnit];
-            if numel(thisDepth) > 1
-                error('more than one depth group for this unit. something is wrong')
-            else
-                allGroupsSpikes(theseSpikes) = thisDepth + (n_depths * 2); %9 - 12:TANs
-            end
-
-        end
     end
 end
 
+tanCount = 0;
+for iTAN = 1:size(theseTANs, 2)
+    theseSpikes = spike_templates == theseTANs(iTAN);
+
+    %get depth group
+    thisDepth = unique(depth_group(theseSpikes));
+    if ~isnan(thisDepth)
+        tanCount = tanCount + 1;
+        allGroups(msnCount+fsiCount+tanCount) = thisDepth + (n_depths * 2);
+        allDepths(msnCount+fsiCount+tanCount) = template_depths(theseTANs(iTAN));
+        allAnimals(msnCount+fsiCount+tanCount) = curr_animal;
+        allDays(msnCount+fsiCount+tanCount) = curr_day;
+        allExperiments(msnCount+fsiCount+tanCount) = experiment;
+        theseNeurons = [theseNeurons, theseTANs(iTAN)];
+        if numel(thisDepth) > 1
+            error('more than one depth group for this unit. something is wrong')
+        else
+            allGroupsSpikes(theseSpikes) = thisDepth + (n_depths * 2); %9 - 12:TANs
+        end
+
+    end
+end
+
+thCount = 0;
+for iTH = 1:size(theseTHs, 2)
+    theseSpikes = spike_templates == theseTHs(iTH);
+
+    %get depth group
+    thisDepth = unique(depth_group(theseSpikes));
+    if ~isnan(thisDepth)
+        thCount = thCount + 1;
+        allGroups(msnCount+fsiCount+tanCount+thCount) = thisDepth + (n_depths * 3);
+        allDepths(msnCount+fsiCount+tanCount+thCount) = template_depths(theseTHs(iTH));
+        allAnimals(msnCount+fsiCount+tanCount+thCount) = curr_animal;
+        allDays(msnCount+fsiCount+tanCount+thCount) = curr_day;
+        allExperiments(msnCount+fsiCount+tanCount+thCount) = experiment;
+        theseNeurons = [theseNeurons, theseTHs(iTH)];
+        if numel(thisDepth) > 1
+            error('more than one depth group for this unit. something is wrong')
+        else
+            allGroupsSpikes(theseSpikes) = thisDepth + (n_depths * 3); %9 - 12:TANs
+        end
+
+    end
+end
+
+
+trial_data.numSpikes = qMetric.numSpikes(theseNeurons);
+trial_data.waveformRawAmpli = qMetric.waveformRawAmpli(theseNeurons);
+trial_data.fractionRPVchunk = qMetric.fractionRPVchunk(theseNeurons);
+trial_data.somatic = ephysParams.somatic(theseNeurons);
+trial_data.spatialDecayTemp1 = qMetric.spatialDecayTemp1(theseNeurons);
+trial_data.templateDuration = ephysParams.templateDuration(theseNeurons);
+trial_data.useTimeChunk = qMetric.useTimeChunk(theseNeurons, :);
+trial_data.symSpikesMissing = qMetric.symSpikesMissing(theseNeurons);
+trial_data.percent_missing_ndtr = qMetric.percent_missing_ndtr(:, theseNeurons);
+trial_data.timeChunks = ephysData.timeChunks;
+trial_data.numPeaksTroughs = qMetric.numPeaksTroughs(theseNeurons);
+trial_data.acg = ephysParams.ACG(theseNeurons, :);
+trial_data.wv = qMetric.waveformUnit(theseNeurons, :);
+trial_data.goodUnits = goodUnits(theseNeurons);
+trial_data.postSpikeSuppressionBf = ephysParams.postSpikeSuppressionBf(theseNeurons);
+trial_data.prop_long_isi = ephysParams.prop_long_isi(theseNeurons);
+trial_data.numSpikes = qMetric.waveforms_mean(theseNeurons, :, qMetric.thisChannelRaw(theseNeurons));
+
 %% Trial-align data
 
-if verbose;
+if verbose
     disp('Trial-aligning data...');
-end;
+end
 
 % Cortical fluorescence
 event_aligned_V = ...
@@ -462,19 +281,13 @@ for iDepth = 1:numel(theseNeurons)
 
     % (skip if no spikes at this depth)
     if isempty(curr_spikes)
-        %disp('empty')
+
         continue
     end
 
     event_aligned_mua(:, :, iDepth) = cell2mat(arrayfun(@(x) ...
         histcounts(curr_spikes, t_peri_event_bins(x, :)), ...
         [1:size(t_peri_event, 1)]', 'uni', false)) ./ raster_sample_rate;
-%     event_aligned_move_mua(:, :, iDepth) = cell2mat(arrayfun(@(x) ...
-%         histcounts(curr_spikes, t_peri_event_bins_move(x, :)), ...
-%         [1:size(t_peri_event_move, 1)]', 'uni', false)) ./ raster_sample_rate;
-%     event_aligned_outcome_mua(:, :, iDepth) = cell2mat(arrayfun(@(x) ...
-%         histcounts(curr_spikes, t_peri_event_bins_outcome(x, :)), ...
-%         [1:size(t_peri_event_outcome, 1)]', 'uni', false)) ./ raster_sample_rate;
 
 end
 
@@ -530,8 +343,8 @@ end;
 regression_params.use_svs = 1:100;
 regression_params.skip_seconds = 20;
 regression_params.upsample_factor = 1;
-regression_params.kernel_t = [-0.1,0.1];
-regression_params.zs = [false,false];
+regression_params.kernel_t = [-0.1, 0.1];
+regression_params.zs = [false, false];
 regression_params.cvfold = 5;
 regression_params.use_constant = true;
 % Get time points to bin
@@ -706,7 +519,7 @@ if task_dataset
         stim_center_regressors(curr_contrast, :) = histcounts(curr_prereward_photodiode_times, time_bins);
 
     end
-%if task_dataset
+    %if task_dataset
     % Move onset regressors (L/R)
     move_onset_regressors = zeros(2, length(time_bin_centers));
     move_onset_regressors(1, :) = histcounts(wheel_move_time(trial_choice == -1), time_bins);
@@ -744,13 +557,13 @@ if task_dataset
         [-0.5, 1]; ... % move
         [0, 0.5]; ... % go cue
         [0, 0.5]}; % outcome
-% else
-%      task_regressors = {stim_regressors};
-%     task_regressor_labels = {'Stim'};
-% 
-%     task_t_shifts = { ...
-%         [0, 0.5]}; % stim
-% end
+    % else
+    %      task_regressors = {stim_regressors};
+    %     task_regressor_labels = {'Stim'};
+    %
+    %     task_t_shifts = { ...
+    %         [0, 0.5]}; % stim
+    % end
     task_regressor_sample_shifts = cellfun(@(x) round(x(1)*(sample_rate)): ...
         round(x(2)*(sample_rate)), task_t_shifts, 'uni', false);
     lambda = 0;
@@ -814,7 +627,6 @@ end
 %% Store everything into structure
 
 
-
 trial_data.trial_info_all = trial_info;
 
 trial_data.fluor_all = event_aligned_V(use_trials, :, :, :);
@@ -832,16 +644,16 @@ end
 
 trial_data.ctx_wheel_k_all = ctx_wheel_k_recast;
 trial_data.wheel_ctxpred_all = event_aligned_wheel_ctxpred(use_trials, :, :);
-   trial_data.allGroups = allGroups;
-    trial_data.allDepths = allDepths;
-    trial_data.allAnimals = allAnimals;
-    trial_data.allDays = allDays;
-    trial_data.allExperiments = allExperiments;
-    trial_data.allNeurons = theseNeurons;
-    
+trial_data.allGroups = allGroups;
+trial_data.allDepths = allDepths;
+trial_data.allAnimals = allAnimals;
+trial_data.allDays = allDays;
+trial_data.allExperiments = allExperiments;
+trial_data.allNeurons = theseNeurons;
+
 if task_dataset
- 
-    
+
+
     trial_data.outcome_all = event_aligned_outcome(use_trials, :, :);
 
     trial_data.mua_taskpred_k_all = mua_taskpred_k;
