@@ -353,21 +353,22 @@ else
     acgfr = NaN;
 end
 ephysParams.postSpikeSuppression(iUnit) = acgfr;
+% no longer used below (buggy function) 
 % postS = find(ephysParams.ACG(iUnit, 500:1000) >= ...
 %     spike_rate);
-[thisACG, ~, ~] = crosscorrelogram(theseSpikes, theseSpikes, [-param.ACGduration, param.ACGduration]); % 50 ms time window on either side, 0.1ms bins
-thisACG(thisACG == 0) = [];
-ephysParams.ACGBf(iUnit, :) = histcounts(thisACG, param.histBins); %  1 ms time bins
-
-acgf = find(ephysParams.ACGBf(iUnit, 500:1000) >= ...
-    nanmean(ephysParams.ACGBf(iUnit, 600:900)));
-
-if ~isempty(acgf)
-    acgf = acgf(1);
-else
-    acgf = NaN;
-end
-ephysParams.postSpikeSuppressionBf(iUnit) = acgf;
+% [thisACG, ~, ~] = crosscorrelogram(theseSpikes, theseSpikes, [-param.ACGduration, param.ACGduration]); % 50 ms time window on either side, 0.1ms bins
+% thisACG(thisACG == 0) = [];
+% ephysParams.ACGBf(iUnit, :) = histcounts(thisACG, param.histBins); %  1 ms time bins
+% 
+% acgf = find(ephysParams.ACGBf(iUnit, 500:1000) >= ...
+%     nanmean(ephysParams.ACGBf(iUnit, 600:900)));
+% 
+% if ~isempty(acgf)
+%     acgf = acgf(1);
+% else
+%     acgf = NaN;
+% end
+% ephysParams.postSpikeSuppressionBf(iUnit) = acgf;
 
 %% prop isi
 
