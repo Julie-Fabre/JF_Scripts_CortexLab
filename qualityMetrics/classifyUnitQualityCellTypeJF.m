@@ -86,10 +86,7 @@ else
                 % using symetry %%QQ can i really do this?
                 qMetric.symSpikesMissing(iChunk, iUnit) = prctgMissingSymetry(theseAmplis);
 
-                %% is somatic? if trough before peak or peak-trough-peak.
-
-                %% clear variables
-
+               
             end
 
             percent_missing_ndtr = squeeze(qMetric.percent_missing_ndtr(:, iUnit));
@@ -125,7 +122,6 @@ else
 
             qMetric.useTimeChunk(iUnit, :) = useTimeChunk;
             param.drift = 1;
-            %            [qMetric.drift, ephysParams.drift] = qualityMetEphysParamJF(qMetric.drift, ephysParams.drift, ephysData, raw, param, allT, iUnit, ephysData.str_templates, useTimeChunk);
         end
 
     end
@@ -143,17 +139,15 @@ end
 %% label 'good' units : vector the size of unique(ephysData.spike_templates)
 
 
-goodUnits = qMetric.numSpikes >= param.minNumSpikes & qMetric.waveformRawAmpli .* 0.195 >= param.minAmpli & ...
+goodUnits = qMetric.numSpikes >= param.minNumSpikes & qMetric.waveformRawAmpli >= param.minAmpli & ...
     qMetric.spatialDecayTemp1 >= param.minSpatDeKlowbound & qMetric.fractionRPVchunk <= param.maxRPV & ...
     qMetric.numPeaksTroughsTemp <= param.maxNumPeak & ...
     ephysParams.somatic == param.somaCluster & ephysParams.templateDuration < 800;
-Fgain
-%qMetric.silhouetteScore >= param.minSScore &
 
-%% label celltypes
-msn = goodUnits & ephysParams.postSpikeSuppressionBf < 50 & ephysParams.templateDuration > param.cellTypeDuration;
-fsi = goodUnits & ephysParams.postSpikeSuppressionBf < 50 & ephysParams.templateDuration < param.cellTypeDuration;
-tan = goodUnits & ephysParams.postSpikeSuppressionBf > 50;
+%% label celltypes - previous mehod. UINs now added with prop_isi. 
+msn = goodUnits & ephysParams.postSpikeSuppression < 40 & ephysParams.templateDuration > param.cellTypeDuration;
+fsi = goodUnits & ephysParams.postSpikeSuppression < 40 & ephysParams.templateDuration < param.cellTypeDuration;
+tan = goodUnits & ephysParams.postSpikeSuppression >= 40;
 
 %% plot plot plot
 if param.plotMetricsCtypes
@@ -168,7 +162,7 @@ if param.plotMetricsCtypes
     breakxaxis([1000, 0.999 * max(qMetric.numSpikes)])
 
     subplot(4, 4, 2)
-    hist(qMetric.waveformRawAmpli.*0.195, 70); %use raw otherwise nothing makes sense
+    hist(qMetric.waveformRawAmpli, 70); %use raw otherwise nothing makes sense
     ylabel('# units')
     xlabel('amplitude')
     makepretty;

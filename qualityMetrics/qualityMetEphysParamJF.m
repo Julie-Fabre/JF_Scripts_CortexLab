@@ -1,8 +1,7 @@
 
 %% compute quality metrics for certain quality metrics
 function [qMetric, ephysParams] = qualityMetEphysParamJF(qMetric, ephysParams, ephysData, raw, param, allT, iUnit, str_templates, timeChunks)
-%qMetric = struct;
-%ephysParams = struct;
+
 thisRawUnit = allT(iUnit);
 qMetric.thisRawUnit(iUnit) = thisRawUnit;
 if param.strOnly
@@ -12,7 +11,7 @@ else
     thisUnit = iUnit;
 end
 qMetric.thisUnit(iUnit) = thisUnit;
-%%qq addeParams, add somatic
+
 
 if ~isempty(timeChunks)
     theseSpikesIdx = ephysData.spike_templates == thisUnit & ephysData.spike_times_timeline >= timeChunks(1) ...
@@ -43,8 +42,8 @@ qMetric.numSpikes(iUnit) = numel(theseSpikes);
 if param.raw
 
     %% get raw data and raw ampli
-    % gg = find(ephysData.good_templates);
-    curr_template = thisRawUnit; %gg(iUnit);
+   
+    curr_template = thisRawUnit;
     ns = find(ephysData.new_spike_idx == curr_template);
 
     curr_spikes_idx = find(ephysData.spike_templates_full == ns);
@@ -343,9 +342,8 @@ ephysParams.spike_rateAP(iUnit) = spike_rate;
 ephysParams.acgFR(iUnit) = nanmean(ephysParams.ACG(iUnit, 190:200));
 
 %% post spike suppression
-acgfr = find(ephysParams.ACG(iUnit, 500:1000) >= ...
-    nanmean(ephysParams.ACG(iUnit, 900:1000)));
-%QQ smooth
+pss = find(ephysParams.ACG(iUnit, 500:1000) >= ...
+    nanmean(ephysParams.ACG(iUnit, 600:900)));
 
 if ~isempty(acgfr)
     acgfr = acgfr(1);
@@ -353,22 +351,6 @@ else
     acgfr = NaN;
 end
 ephysParams.postSpikeSuppression(iUnit) = acgfr;
-% no longer used below (buggy function) 
-% postS = find(ephysParams.ACG(iUnit, 500:1000) >= ...
-%     spike_rate);
-% [thisACG, ~, ~] = crosscorrelogram(theseSpikes, theseSpikes, [-param.ACGduration, param.ACGduration]); % 50 ms time window on either side, 0.1ms bins
-% thisACG(thisACG == 0) = [];
-% ephysParams.ACGBf(iUnit, :) = histcounts(thisACG, param.histBins); %  1 ms time bins
-% 
-% acgf = find(ephysParams.ACGBf(iUnit, 500:1000) >= ...
-%     nanmean(ephysParams.ACGBf(iUnit, 600:900)));
-% 
-% if ~isempty(acgf)
-%     acgf = acgf(1);
-% else
-%     acgf = NaN;
-% end
-% ephysParams.postSpikeSuppressionBf(iUnit) = acgf;
 
 %% prop isi
 
