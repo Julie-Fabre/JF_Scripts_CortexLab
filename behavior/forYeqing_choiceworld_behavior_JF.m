@@ -10,7 +10,29 @@ for iAnimal = 1:size(animalsAll, 2)
     experiments = AP_find_experimentsJF(animal, protocol, protocol); %find the experiments with the choiceworld protocol
 
     bhv = struct; %initialize structure
+ for curr_day = 1:length(experiments)
 
+        day = experiments(curr_day).day;
+        experiment_num = experiments(curr_day).experiment;
+
+        % If multiple experiments, only use the last one (usually multiple
+        % happens if mess ups and final one is good)
+        for curr_experiment = length(experiment_num)
+
+            experiment = experiment_num(curr_experiment);
+
+            [block_filename, block_exists] = AP_cortexlab_filenameJF(animal, day, experiment, 'block');
+
+            % Load the block file
+            load(block_filename)
+            if length(block.events.hitTimes) <=1
+                removeThis(curr_day)=1;
+            else
+                removeThis(curr_day)=0;
+            end
+        end
+ end
+ experiments(logical(removeThis))=[];
     for curr_day = 1:length(experiments)
 
         day = experiments(curr_day).day;
