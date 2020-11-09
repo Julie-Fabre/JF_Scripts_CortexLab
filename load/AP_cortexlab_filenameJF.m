@@ -157,13 +157,13 @@ switch file
         % (the raw action potential band data file)
         
         % Old open ephys
-        filepattern = [animal filesep day filesep 'ephys' site_dir filesep 'experiment1_10*-0_0.dat'];
+        filepattern = [animal filesep day filesep 'ephys' site_dir filesep 'experiment*_10*-0_0.dat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
         
         % New open ephys
         if ~file_exists
             filepattern = [animal filesep day filesep ...
-                'ephys' site_dir filesep 'experiment1' filesep 'recording1' ...
+                'ephys' site_dir filesep 'experiment*' filesep 'recording*' ...
                 filesep 'continuous'  filesep 'Neuropix-3a-100.0' filesep 'continuous.dat'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
