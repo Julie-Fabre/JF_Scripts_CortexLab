@@ -1,0 +1,39 @@
+
+%% look at a chunk of raw data: ap and lfp
+
+%% recording info
+animal = 'JF017';
+day = '2020-10-22';
+site = 2;
+ephys_sample_rate = 30000; 
+theseTimes = [1,10];%time in s 
+n_channels = 384;
+
+apPath = AP_cortexlab_filenameJF(animal, day, [], 'ephys_ap', site, []);
+chanPath = AP_cortexlab_filenameJF(animal, day, [], 'ephys', site, []);
+lfpPath = [apPath, '\..\..\Neuropix-3a-100.1\continuous.dat'];
+chanMap_0idx = readNPY([chanPath, filesep, 'channel_map.npy']);
+chansToPlot = 1:max(chanMap);
+
+ephys_datatype = 'int16';
+dat = dir([apPath filesep '*.dat']);
+ephys_ap_filename = [dat(1).folder filesep dat(1).name];
+ap_dat_dir = dir(ephys_ap_filename);
+pull_spikeT = -40:41;%number of points to pull for each spike
+microVoltscaling = 0.19499999284744263;%in structure.oebin for openephys
+used_channels_idx = chanMap_0idx + 1;
+dataTypeNBytes = numel(typecast(cast(0, ephys_datatype), 'uint8')); % determine number of bytes per sample
+n_samples = ap_dat_dir.bytes/(n_channels*dataTypeNBytes);  % Number of samples per channel
+ap_data = memmapfile(ephys_ap_filename,'Format',{ephys_datatype,[n_channels,n_samples],'data'});
+dynamicRawPlot(ap_data.data.data, ephysData);
+memMapData = 
+timeChunkStart = theseTimes(1)*ephys_sample_rate;
+timeChunkStop = theseTimes(2)*ephys_sample_rate;
+
+
+
+t = timeChunkStart:timeChunkStop;
+LinePlotReducer(@plot, t, double(memMapData(chansToPlot, timeChunkStart:timeChunkStop)), 'k');
+LinePlotExplorer(gcf);
+
+%% load lfp data
