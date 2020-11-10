@@ -11,7 +11,6 @@ structure_3d = isosurface(permute(av(1:slice_spacing:end, ...
 structure_alpha = 0.2;
 
 %get all VIS Ctx experiments
-for iInjection = 1:size()
 expIDs = findAllenExperiments('injection', 'VISam', 'line', '0', 'primary', true);
 proj = getProjectionDataFromExperiment(expIDs(1));
 %plot proj to caudoputamen, projection_intensity, projection volume,
@@ -35,4 +34,3 @@ theseTargets = ismember([projData.structure_id], 83) & [projData.max_voxel_densi
 hold on;
 scatter3([projData(theseTargets).max_voxel_x]/10, [projData(theseTargets).max_voxel_z]/10,[projData(theseTargets).max_voxel_y]/10,...
     [projData(theseTargets).normalized_projection_volume]*100,'r', 'filled')
-end
