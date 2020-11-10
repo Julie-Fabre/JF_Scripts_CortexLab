@@ -11,20 +11,28 @@ structure_3d = isosurface(permute(av(1:slice_spacing:end, ...
 structure_alpha = 0.2;
 
 %get all VIS Ctx experiments
-injectionAreas = {'VISp', 'VISl',  'VISpl', 'VISpm', 'VISal', 'VISam'};
+injectionAreas = {'VISp', 'VISl', 'VISpl', 'VISpm', 'VISal', 'VISam'};
 injectionColors = [rgb('DarkRed'); rgb('OrangeRed'); rgb('DarkGreen'); rgb('MediumBlue'); rgb('Purple'); rgb('HotPink'); rgb('SkyBlue')];
-viewVals = [0,90;0,0;90,0];
+viewVals = [0, 90; 0, 0; 90, 0];
 figure();
-for iInjection = 1:size(injectionAreas,2)
-    expIDs = findAllenExperiments('injection', injectionAreas{iInjection}, 'line', '0', 'primary', true);
-    
-    proj = getProjectionDataFromExperiment(expIDs(1));
+for iInjection = 1:size(injectionAreas, 2)
+    if ~exist(['C:\Users\Julie\Dropbox\MATLAB\JF_scripts_CortexLab\queryAllenAtlas\' injectionAreas{iInjection} '.mat'], 'file')
+        expIDs = findAllenExperiments('injection', injectionAreas{iInjection}, 'primary', true);
 
+        proj = [];
+        for iExpID = 1:size(expIDs, 2)
+            proj_temp = getProjectionDataFromExperiment(expIDs(iExpID));
+            proj = [proj, proj_temp{1, 1}];
+        end
+        save(['C:\Users\Julie\Dropbox\MATLAB\JF_scripts_CortexLab\queryAllenAtlas\' injectionAreas{iInjection} '.mat'],'proj')
+    else
+        load(['C:\Users\Julie\Dropbox\MATLAB\JF_scripts_CortexLab\queryAllenAtlas\' injectionAreas{iInjection} '.mat'])
+    end
     for iView = 1:3
-        ss = subplot(3, size(injectionAreas, 2), (size(injectionAreas, 2))*(iView-1)+iInjection);
+        ss = subplot(3, size(injectionAreas, 2), (size(injectionAreas, 2))*(iView - 1)+iInjection);
         %[~, brain_outline] = plotBrainGrid([], ss);
         hold on;
-        view(viewVals(iView,:))
+        view(viewVals(iView, :))
         [ap_max, dv_max, ml_max] = size(tv);
         xlim([-10, ap_max + 10])
         ylim([-10, ml_max + 10])
@@ -34,10 +42,10 @@ for iInjection = 1:size(injectionAreas,2)
             'FaceColor', 'k', 'EdgeColor', 'none', 'FaceAlpha', structure_alpha);
 
 
-        projData = proj{1, 1};
+        projData = proj;
         theseTargets = ismember([projData.structure_id], double(curr_plot_structure)) & [projData.max_voxel_density] > 0;
         hold on;
         scatter3([projData(theseTargets).max_voxel_x]/10, [projData(theseTargets).max_voxel_z]/10, [projData(theseTargets).max_voxel_y]/10, ...
-            [projData(theseTargets).normalized_projection_volume]*10, injectionColors(iInjection,:), 'filled')
+            [projData(theseTargets).normalized_projection_volume]*10, injectionColors(iInjection, :), 'filled')
     end
 end
