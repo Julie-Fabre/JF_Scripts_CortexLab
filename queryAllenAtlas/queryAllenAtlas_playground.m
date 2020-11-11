@@ -2,14 +2,15 @@ allen_atlas_path = 'C:\Users\Julie\Dropbox\Atlas\allenCCF';
 tv = readNPY([allen_atlas_path, filesep, 'template_volume_10um.npy']); % grey-scale "background signal intensity"
 av = readNPY([allen_atlas_path, filesep, 'annotation_volume_10um_by_index.npy']); % the number at each pixel labels the area, see note below
 st = loadStructureTree([allen_atlas_path, filesep, 'structure_tree_safe_2017.csv']); % a table of what all the labels mean
-curr_plot_structure = st.id(find(contains(st.name, 'audoputamen')));
+curr_plot_structure_idx = find(contains( st.name, 'audoputamen'));
 slice_spacing = 10;
 plot_structure_color = hex2dec(reshape(st.color_hex_triplet{curr_plot_structure}, 2, [])') ./ 255;
 
 structure_3d = isosurface(permute(av(1:slice_spacing:end, ...
-    1:slice_spacing:end, 1:slice_spacing:end) == curr_plot_structure, [3, 1, 2]), 0);
+    1:slice_spacing:end, 1:slice_spacing:end) == curr_plot_structure_idx, [3, 1, 2]), 0);
 structure_alpha = 0.2;
 
+curr_plot_structure = st.id(find(contains(st.name, 'audoputamen')));
 %get all VIS Ctx experiments
 injectionAreas = {'VISp', 'VISl', 'VISpl', 'VISpm', 'VISal', 'VISam'};
 injectionColors = [rgb('DarkRed'); rgb('OrangeRed'); rgb('DarkGreen'); rgb('MediumBlue'); rgb('Purple'); rgb('HotPink'); rgb('SkyBlue')];
@@ -59,7 +60,7 @@ for iInjection = 1:size(injectionAreas, 2)
             max_voxel_y = [projData.max_voxel_y]/10;
             max_voxel_z = [projData.max_voxel_z]/10;
         end
-
+%[~, brain_outline] = plotBrainGrid([],[]);
         structure_patch = patch('Vertices', structure_3d.vertices*slice_spacing, ...
             'Faces', structure_3d.faces, ...
             'FaceColor', 'k', 'EdgeColor', 'none', 'FaceAlpha', structure_alpha);
