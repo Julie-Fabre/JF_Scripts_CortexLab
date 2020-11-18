@@ -109,6 +109,7 @@ elseif n_channels == 3
 end
 for curr_channel = 1:n_channels
    %image(im_resized{1,curr_channel})
+  hh= figure();
    curr_montage = montage(nameS(1,curr_channel));
    
    im_montage{curr_channel} = curr_montage.CData;
@@ -117,13 +118,13 @@ for curr_channel = 1:n_channels
    im_hist_deriv = diff(smooth(im_hist,10));
    
    [~,bg_median] = max(im_hist);
-   bg_signal_min = find(im_hist_deriv(bg_median-1:end) > 0,1) + bg_median;
-   [~,bg_median_rel] = max(im_hist(bg_signal_min-1:end));
-   signal_median = bg_median_rel + bg_signal_min;
+   bg_signal_min = find(im_hist_deriv(1:end) > 0,1);%-1 b/c of diff 
+   [~,bg_median_rel] = max(im_hist(1:end));
+   signal_median = bg_median_rel + bg_median;
    
-   cmin = bg_signal_min;
-   cmax = signal_median*3;
-   %caxis([cmin,cmax]);
+   cmin = min(min(curr_montage.CData));
+   cmax = max(max(curr_montage.CData));
+   caxis([cmin,cmax]);
    
    channel_caxis(curr_channel,:) = [cmin,cmax];
    
