@@ -436,7 +436,7 @@ if block_exists
             % Get rid of the first one for now
             trial_conditions = trial_conditions(2:end);
             stimIDs = stimIDs(2:end);
-        case {'JF_GratingPassive', 'JF_GratingPassiveVarITI'}
+        case {'JF_GratingPassive', 'JF_GratingPassiveVarITI', 'JF_GratingPassiveVarITI_moreComb'}
             stimOn_times = photodiode_flip_times(2:2:end);
             %n_trials = length(signals_events.endTrialTimes);
             % sanity check: times between stim on times in signals

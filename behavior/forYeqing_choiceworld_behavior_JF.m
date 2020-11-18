@@ -1,7 +1,7 @@
 
 %% Get and plot single mouse behavior (vanillaChoiceworld and choiceWorldJF)
 corona = 0;
-animalsAll = {'JF014', 'JF015'}; %chnage to the names of the animals you want here
+animalsAll = {'AP085', 'AP086', 'AP087'}; %chnage to the names of the animals you want here
 for iAnimal = 1:size(animalsAll, 2)
 
     animal = animalsAll{1, iAnimal}; %this animal

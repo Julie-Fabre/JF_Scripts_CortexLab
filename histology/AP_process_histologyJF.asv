@@ -133,9 +133,9 @@ end
 close(h)
 
 % Get order of colors
-color_order_gun = {'red'; 'blue'; 'green'};
+color_order_gun = {'red';'green';'blue'};
 [~,color_order_slide] = ismember(channel_color,color_order_gun);
-%color_order_slide(color_order_slide==0)=[];
+
 % Display montage of final balanced image, sort color channels by RGB
 im_montage_rgb = zeros(size(im_montage{1},1),size(im_montage{1},2),3);
 im_montage_rgb(:,:,color_order_slide) = ...
