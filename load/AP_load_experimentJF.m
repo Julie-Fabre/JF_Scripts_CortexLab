@@ -972,7 +972,8 @@ if ephys_exists && load_parts.ephys
             experiment_idx = idx; 
             flipper_flip_times_ephys = sync(flipper_sync_idx).timestamps( ...
             flipper_expt_idx(experiment_idx):flipper_expt_idx(experiment_idx+1)-1);
-        
+             sync_timeline = flipper_flip_times_timeline;
+            sync_ephys = flipper_flip_times_ephys;
         elseif length(flipper_flip_times_ephys) ~= length(flipper_flip_times_timeline)
             % If different number of flips in ephys/timeline, best
             % contiguous set via xcorr of diff
