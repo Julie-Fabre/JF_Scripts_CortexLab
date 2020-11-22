@@ -45,12 +45,24 @@ for iMouse = 1:size(mice, 2)
                             day = experiments(curr_day).day;
                             experimentThese = experiments(curr_day).experiment; % experiment number
                             
-                            thisProtocol = find(ismember(recInfo.Protocol_number, [experimentThese]) & ...
-                                ismember(recInfo.Date, day));
-                            find(structfin(@isempty, recInfo.ephys_not_started{thisProtocol}))% &...
-                                isempty(recInfo.ephys_not_started{thisProtocol})) 
                             % remove experiments where bug (eg
                             % timeline/ephys not started) 
+                            thisProtocol = find(ismember(recInfo.Protocol_number, [experimentThese]) & ...
+                                ismember(recInfo.Date, day));
+                            %
+                            if ~isnan(recInfo.ephys_not_started(1) )
+                                ephysOK = cellfun(@isempty, recInfo.ephys_not_started(thisProtocol));
+                            else
+                                ephysOK = ones(length(experimentThese),1);
+                            end
+                            if ~isnan(recInfo.timeleine_not_started(1) )
+                                timelineOK = cellfun(@isempty, recInfo.timeline_not_started(thisProtocol));
+                            else
+                                ephysOK = ones(length(experimentThese),1);
+                            end
+                            
+                            experimentThese = experimentThese(ephysOK & timelineOK);
+                            
                             
                             %experiment = experiment(probe2ephys(probe).site);
                             verbose = false; % display load progress and some info figures
