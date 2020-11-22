@@ -19,7 +19,9 @@ for iMouse = 1:size(mice, 2)
     load(histoFile)
     probe2ephysFile = AP_cortexlab_filenameJF(animal, [], [], 'probe2ephys', [], []);
     load(probe2ephysFile)
-
+    
+    recInfoFile = AP_cortexlab_filenameJF(animal, [], [], 'acuteRecInfo', [], []);
+    recInfo = readtable(recInfoFile); 
     for iDate = 1:size(experiments, 1)
         corrDay = find(arrayfun(@(x) probe2ephys(x).day == iDate, 1:numel(probe2ephys)));
         for iCorrDay = 1:size(corrDay, 2)
@@ -42,6 +44,16 @@ for iMouse = 1:size(mice, 2)
                             curr_day = probe2ephys(probe).day;
                             day = experiments(curr_day).day;
                             experimentThese = experiments(curr_day).experiment; % experiment number
+                            
+                            % remove experiments where bug (eg
+                            % timeline/ephys not started) 
+                            thisProtocol = find(ismember(recInfo.Protocol_number, [experimentThese]) & ...
+                                ismember(recInfo.Date, day));
+                            ephysOK = cellfun(@isempty, recInfo.ephys_not_started(thisProtocol));
+                            timelineOK = cellfun(@isempty, recInfo.timeline_not_started(thisProtocol));
+                            experimentThese = experimentThese(ephysOK & timelineOK);
+                            
+                            
                             %experiment = experiment(probe2ephys(probe).site);
                             verbose = false; % display load progress and some info figures
                             load_parts.cam = false;

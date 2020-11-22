@@ -1003,8 +1003,13 @@ if ephys_exists && load_parts.ephys
                 flipper_lag = flipper_lags(flipper_lag_idx);
                 % (at the moment, assuming only dropped from ephys)
                 sync_ephys = flipper_flip_times_ephys;
-                sync_timeline = flipper_flip_times_timeline(flipper_lag+1: ...
-                    flipper_lag+1:flipper_lag+length(flipper_flip_times_ephys));
+                if length(flipper_flip_times_timeline) > length(flipper_flip_times_ephys)
+                    sync_timeline = flipper_flip_times_timeline(flipper_lag+1: ...
+                        flipper_lag+1:flipper_lag+length(flipper_flip_times_ephys));
+                else
+                    sync_timeline = flipper_flip_times_timeline(1: ...
+                        1:-flipper_lag+length(flipper_flip_times_ephys));
+                end
                 if length(diff(sync_ephys)) ~= length(diff(sync_timeline))
                     bad_flipper = true;
                 end
