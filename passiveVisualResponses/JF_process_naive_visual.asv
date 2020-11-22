@@ -1,7 +1,7 @@
 
 %% load naive visual recordings
 corona = 0;
-mice = {'AP080', 'AP082', 'JF017', 'JF019'}; % JF020 doesn't have histology yet. JF021 and JF022 to come, and many more 
+mice = {'AP080', 'AP082', 'JF017', 'JF019'}; % JF020 doesn't have histology yet. JF021 and JF022 to come, and many more
 locations = {'CP', 'SNr', 'GPe', 'GPi', 'STN'};
 protocols = {'JF_natural_images', 'JF_locations', 'JF_GratingsPassive'};
 ephysData = struct;
@@ -29,17 +29,22 @@ for iMouse = 1:size(mice, 2)
             corrSite = find(arrayfun(@(x) probe2ephys(x).site == iSite, 1:numel(probe2ephys)));
             for iLocation = 1:size(locations, 2)
                 probe = intersect(corrDay, corrSite);
+                %disp(probe)
+                thisP = probe;
                 if ~isempty(probe)
                     this_ccf = probe_ccf(probe); %find if contains location of interest
-                    if ~any(structfun(@isempty, this_ccf))
+                    if ~any(structfun(@isempty, this_ccf)) %check hewre
                         theseLocations = allenAt.acronym(this_ccf.trajectory_areas);
                         theseLocationsInterest = contains(theseLocations, locations{iLocation});
                         theseDepths = this_ccf.probe_depths(theseLocationsInterest);
-                        if ~isempty(find(theseDepths))
+                        if ~isempty(find(theseDepths)) %check hewre
                             %load experiment
                             curr_day = probe2ephys(probe).day;
                             day = experiments(curr_day).day;
                             experimentThese = experiments(curr_day).experiment; % experiment number
+                            % remove experiments where bug (eg
+                            % timeline/ephys not started) 
+                            
                             %experiment = experiment(probe2ephys(probe).site);
                             verbose = false; % display load progress and some info figures
                             load_parts.cam = false;
@@ -68,7 +73,7 @@ for iMouse = 1:size(mice, 2)
                                 ephysData(thisCount).protocol = expDef;
                                 ephysData(thisCount).animal = animal;
                                 ephysData(thisCount).date = day;
-                                ephysData(thisCount).site = site;
+                                ephysData(thisCount).site = thisP;
                                 ephysData(thisCount).experiment = experiment;
                                 ephysData(thisCount).location = locations(iLocation);
                                 thisCount = thisCount + 1;
@@ -80,27 +85,35 @@ for iMouse = 1:size(mice, 2)
         end
     end
 end
-%     indexes = probe_ccf .* 10;
-%     av(indexes)
-%     av(round(probe_ccf(:, 1)), probe_ccf(:, 2), probe_ccf(:, 3))
 
-%% plot responses - Striatum 
 
-%find == 'CP' 
-striatumData = find(arrayfun(@(x) contains(ephysData(x).location,'CP'), 1:numel(ephysData)));
+%% plot responses - Striatum
+
+%find == 'CP'
+striatumData = find(arrayfun(@(x) contains(ephysData(x).location, 'CP'), 1:numel(ephysData)));
+
+%find striatum limits - allen atlas
 allen_atlas_path = 'C:\Users\Julie\Dropbox\Atlas\allenCCF';
 tv = readNPY([allen_atlas_path, filesep, 'template_volume_10um.npy']); % grey-scale "background signal intensity"
 av = readNPY([allen_atlas_path, filesep, 'annotation_volume_10um_by_index.npy']); % the number at each pixel labels the area, see note below
 st = loadStructureTree([allen_atlas_path, filesep, 'structure_tree_safe_2017.csv']); % a table of what all the labels mean
-curr_plot_structure = find(contains( st.name, 'audoputamen'));
+curr_plot_structure = find(contains(st.name, 'audoputamen'));
 slice_spacing = 10;
 plot_structure_color = hex2dec(reshape(st.color_hex_triplet{curr_plot_structure}, 2, [])') ./ 255;
 
+%get limits and bins
+binSize = 100;
 structure_3d_lims = permute(av(1:slice_spacing:end, ...
     1:slice_spacing:end, 1:slice_spacing:end) == curr_plot_structure, [3, 1, 2]);
-[r,c,v] = ind2sub(size(structure_3d_lims),find(structure_3d_lims));
-x_lim = [min(r), max(r)].*10;
-y_lim = [min(c), max(c)].*10;
-z_lim = [min(v), max(v)].*10;
-dataBinsX_Y = 
+[r, c, v] = ind2sub(size(structure_3d_lims), find(structure_3d_lims));
+x_lim_um = [min(r), max(r)] .* 100;
+y_lim_um = [min(c), max(c)] .* 100;
+z_lim_um = [min(v), max(v)] .* 100;
+dataBinsX = x_lim_um(1):binSize:x_lim_um(2);
+dataBinsY = y_lim_um(1):binSize:y_lim_um(2);
+dataBinsZ = z_lim_um(1):binSize:z_lim_um(2);
 
+%find which bins striatal templates belong to 
+uniqueRecordings = arrayfun(@(x) [ephysData(x).animal, ephysData(x).date, num2str(ephysData(x).site)], 1:numel(ephysData),'UniformOutput', false);%unique date + site
+unique(uniqueRecordings, 'rows')
+%allTemplates = 

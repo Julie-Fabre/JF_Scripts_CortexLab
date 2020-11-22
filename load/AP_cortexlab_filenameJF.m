@@ -88,6 +88,9 @@ switch file
     case 'histo'
         filepattern = [animal filesep 'Histology/processed/slices/probe_ccf.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
+    case 'acuteRecInfo'
+        filepattern = [animal filesep 'Acute_rec_' animal '.ods'];
+        [filename,file_exists] = check_locations(filepattern,server_location);
     case 'probe2ephys'
         filepattern = [animal filesep 'Histology/processed/probe2ephys.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);

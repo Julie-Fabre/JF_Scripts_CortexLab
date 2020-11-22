@@ -29,7 +29,7 @@ for iMouse = 1:size(mice, 2)
             corrSite = find(arrayfun(@(x) probe2ephys(x).site == iSite, 1:numel(probe2ephys)));
             for iLocation = 1:size(locations, 2)
                 probe = intersect(corrDay, corrSite);
-                disp(probe)
+                %disp(probe)
                 thisP = probe;
                 if ~isempty(probe)
                     this_ccf = probe_ccf(probe); %find if contains location of interest
