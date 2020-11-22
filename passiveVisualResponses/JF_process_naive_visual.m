@@ -83,11 +83,14 @@ for iMouse = 1:size(mice, 2)
                                 %save info
                                 ephysData(thisCount).spike_times_timeline = spike_times_timeline(theseSpikes);
                                 ephysData(thisCount).spike_templates = spike_templates(theseSpikes);
-                                ephysData(thisCount).spike_amplitudes = template_amplitudes(theseSpikes);
+                                try
+                                    ephysData(thisCount).spike_amplitudes = template_amplitudes(theseSpikes);
+                                end
                                 ephysData(thisCount).templatesOI = theseTemplates;
                                 ephysData(thisCount).template_depths = template_depths(theseTemplates);
-                                ephysData(thisCount).template_wf = waveforms(theseTemplates, waveform_peak(~isnan(new_spike_idx))- ...
-                                    4:waveform_peak(~isnan(new_spike_idx))+4);
+                                
+                                ephysData(thisCount).template_wf = waveforms(theseTemplates, :);
+                                
                                 ephysData(thisCount).template_location = closestLocation;
                                 ephysData(thisCount).protocol = expDef;
                                 ephysData(thisCount).animal = animal;
@@ -95,6 +98,8 @@ for iMouse = 1:size(mice, 2)
                                 ephysData(thisCount).site = thisP;
                                 ephysData(thisCount).experiment = experiment;
                                 ephysData(thisCount).location = locations(iLocation);
+                                ephysData(thisCount).stimOn_times = stimOn_times;
+                                ephysData(thisCount).stimIDs = stimIDs;
                                 thisCount = thisCount + 1;
                             end
                         end
@@ -134,5 +139,11 @@ dataBinsZ = z_lim_um(1):binSize:z_lim_um(2);
 
 %find which bins striatal templates belong to 
 uniqueRecordings = arrayfun(@(x) [ephysData(x).animal, ephysData(x).date, num2str(ephysData(x).site)], 1:numel(ephysData),'UniformOutput', false);%unique date + site
-unique(uniqueRecordings, 'rows')
-%allTemplates = 
+[uniqueId, uniqueIdx ] =  unique(uniqueRecordings, 'rows');
+%psth 
+for iUniqueRec = 1:size()
+    for iProtocol = 1:size()
+    end
+end
+%cell type 
+%allTemplates = ephysData(uniqueIdx).spike_templates 

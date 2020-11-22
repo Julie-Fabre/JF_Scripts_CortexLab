@@ -985,8 +985,12 @@ if ephys_exists && load_parts.ephys
             flipper_lag = flipper_lags(flipper_lag_idx);
             % (at the moment, assuming only dropped from ephys)
             sync_ephys = flipper_flip_times_ephys;
-            sync_timeline = flipper_flip_times_timeline(flipper_lag+1: ...
-                flipper_lag+1:flipper_lag+length(flipper_flip_times_ephys));
+            try
+                sync_timeline = flipper_flip_times_timeline(flipper_lag+1: ...
+                    flipper_lag+1:flipper_lag+length(flipper_flip_times_ephys));
+            catch
+                sync_timeline = flipper_flip_times_timeline;
+            end
             if length(diff(sync_ephys)) ~= length(diff(sync_timeline))
                 experiment_idx = idx; 
                 flipper_flip_times_ephys = sync(flipper_sync_idx).timestamps( ...
