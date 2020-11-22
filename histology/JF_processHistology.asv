@@ -1,4 +1,4 @@
-animal = 'JF019';
+animal = 'AP080';
 
 %% get histology slices and copy locally
 locationHisto = ['//znas.cortexlab.net/Subjects/', animal, '/Histology/']; % copy files over to local disk
@@ -83,6 +83,7 @@ save([im_path, '/probe2ephys.mat'], 'probe2ephys')
 
 %% align ephys
 % Align histology to electrophysiology
+load([im_path, '/probe2ephys.mat'])
 dontAnalyze=0;
 for iProbe = 1:size(probe2ephys, 2)
     use_probe = iProbe;

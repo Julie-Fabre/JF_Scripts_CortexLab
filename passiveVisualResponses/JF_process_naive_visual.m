@@ -29,13 +29,15 @@ for iMouse = 1:size(mice, 2)
             corrSite = find(arrayfun(@(x) probe2ephys(x).site == iSite, 1:numel(probe2ephys)));
             for iLocation = 1:size(locations, 2)
                 probe = intersect(corrDay, corrSite);
+                disp(probe)
+                thisP = probe;
                 if ~isempty(probe)
                     this_ccf = probe_ccf(probe); %find if contains location of interest
-                    if ~any(structfun(@isempty, this_ccf))
+                    if ~any(structfun(@isempty, this_ccf)) %check hewre
                         theseLocations = allenAt.acronym(this_ccf.trajectory_areas);
                         theseLocationsInterest = contains(theseLocations, locations{iLocation});
                         theseDepths = this_ccf.probe_depths(theseLocationsInterest);
-                        if ~isempty(find(theseDepths))
+                        if ~isempty(find(theseDepths)) %check hewre
                             %load experiment
                             curr_day = probe2ephys(probe).day;
                             day = experiments(curr_day).day;
@@ -68,7 +70,7 @@ for iMouse = 1:size(mice, 2)
                                 ephysData(thisCount).protocol = expDef;
                                 ephysData(thisCount).animal = animal;
                                 ephysData(thisCount).date = day;
-                                ephysData(thisCount).site = probe;
+                                ephysData(thisCount).site = thisP;
                                 ephysData(thisCount).experiment = experiment;
                                 ephysData(thisCount).location = locations(iLocation);
                                 thisCount = thisCount + 1;
