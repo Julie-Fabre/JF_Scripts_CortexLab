@@ -50,12 +50,12 @@ for iMouse = 1:size(mice, 2)
                             thisProtocol = find(ismember(recInfo.Protocol_number, [experimentThese]) & ...
                                 ismember(recInfo.Date, day));
                             %
-                            if ~isnan(recInfo.ephys_not_started(1) )
+                            if iscell(recInfo.ephys_not_started(1) )
                                 ephysOK = cellfun(@isempty, recInfo.ephys_not_started(thisProtocol));
                             else
                                 ephysOK = ones(length(experimentThese),1);
                             end
-                            if ~isnan(recInfo.timeline_not_started(1) )
+                            if iscell(recInfo.timeline_not_started(1) )
                                 timelineOK = cellfun(@isempty, recInfo.timeline_not_started(thisProtocol));
                             else
                                 timelineOK = ones(length(experimentThese),1);
