@@ -19,9 +19,9 @@ for iMouse = 1:size(mice, 2)
     load(histoFile)
     probe2ephysFile = AP_cortexlab_filenameJF(animal, [], [], 'probe2ephys', [], []);
     load(probe2ephysFile)
-    
+
     recInfoFile = AP_cortexlab_filenameJF(animal, [], [], 'acuteRecInfo', [], []);
-    recInfo = readtable(recInfoFile); 
+    recInfo = readtable(recInfoFile);
     for iDate = 1:size(experiments, 1)
         corrDay = find(arrayfun(@(x) probe2ephys(x).day == iDate, 1:numel(probe2ephys)));
         for iCorrDay = 1:size(corrDay, 2)
@@ -44,26 +44,26 @@ for iMouse = 1:size(mice, 2)
                             curr_day = probe2ephys(probe).day;
                             day = experiments(curr_day).day;
                             experimentThese = experiments(curr_day).experiment; % experiment number
-                            
+
                             % remove experiments where bug (eg
-                            % timeline/ephys not started) 
+                            % timeline/ephys not started)
                             thisProtocol = find(ismember(recInfo.Protocol_number, [experimentThese]) & ...
                                 ismember(recInfo.Date, day));
                             %
-                            if iscell(recInfo.ephys_not_started(1) )
+                            if iscell(recInfo.ephys_not_started(1))
                                 ephysOK = cellfun(@isempty, recInfo.ephys_not_started(thisProtocol));
                             else
-                                ephysOK = ones(length(experimentThese),1);
+                                ephysOK = ones(length(experimentThese), 1);
                             end
-                            if iscell(recInfo.timeline_not_started(1) )
+                            if iscell(recInfo.timeline_not_started(1))
                                 timelineOK = cellfun(@isempty, recInfo.timeline_not_started(thisProtocol));
                             else
-                                timelineOK = ones(length(experimentThese),1);
+                                timelineOK = ones(length(experimentThese), 1);
                             end
-                            
+
                             experimentThese = experimentThese(ephysOK & timelineOK);
-                            
-                            
+
+
                             %experiment = experiment(probe2ephys(probe).site);
                             verbose = false; % display load progress and some info figures
                             load_parts.cam = false;
@@ -88,9 +88,9 @@ for iMouse = 1:size(mice, 2)
                                 end
                                 ephysData(thisCount).templatesOI = theseTemplates;
                                 ephysData(thisCount).template_depths = template_depths(theseTemplates);
-                                
+
                                 ephysData(thisCount).template_wf = waveforms(theseTemplates, :);
-                                
+
                                 ephysData(thisCount).template_location = closestLocation;
                                 ephysData(thisCount).protocol = expDef;
                                 ephysData(thisCount).animal = animal;
@@ -109,7 +109,6 @@ for iMouse = 1:size(mice, 2)
         end
     end
 end
-
 
 %% plot responses - Striatum
 
@@ -137,32 +136,37 @@ dataBinsX = x_lim_um(1):binSize:x_lim_um(2);
 dataBinsY = y_lim_um(1):binSize:y_lim_um(2);
 dataBinsZ = z_lim_um(1):binSize:z_lim_um(2);
 
-%find which bins striatal templates belong to 
-uniqueRecordings = arrayfun(@(x) [ephysData(x).animal, ephysData(x).date, num2str(ephysData(x).site)],...
-    1:numel(ephysData),'UniformOutput', false);%unique date + site
-[uniqueId, uniqueIdx ] =  unique(uniqueRecordings, 'rows');
+%find which bins striatal templates belong to
+uniqueRecordings = arrayfun(@(x) [ephysData(x).animal, ephysData(x).date, num2str(ephysData(x).site)], ...
+    1:numel(ephysData), 'UniformOutput', false); %unique date + site
+[uniqueId, uniqueIdx] = unique(uniqueRecordings, 'rows');
 %psth - combining all protocols
-posBinSize = 100; 
+posBinSize = 100;
 timeBinSize = 0.1;
 win = [0, 0.5];
 bslWin = [-0.2, 0];
 
-for iUniqueRec = 1:size(uniqueId,2)
-    theseRecs = find(contains(uniqueRecordings,uniqueId(iUniqueRec))); 
-    
-    for iProtocol = 1:size(theseRecs,2)
-        
+for iUniqueRec = 1:size(uniqueId, 2)
+    theseRecs = find(contains(uniqueRecordings, uniqueId(iUniqueRec)));
+
+    for iProtocol = 1:size(theseRecs, 2)
+
         spikeTimes = ephysData(theseRecs(iProtocol)).spike_times_timeline;
-        for iTemp = 1:size(ephysData(theseRecs(iProtocol)).template_location,1)
-            find(ephysData(theseRecs(iProtocol)).spike_templates == ephysData(theseRecs(iProtocol)).template_location(iTemp))
+        uniqueTemp = unique(ephysData(theseRecs(iProtocol)).spike_templates);
+        spikePos = nan(size(spikeTimes, 1), 3);
+        for iTemp = 1:size(uniqueTemp, 1)
+            theseSp = find(ephysData(theseRecs(iProtocol)).spike_templates == uniqueTemp(iTemp));
+            spikePos(theseSp, 1) = ephysData(theseRecs(iProtocol)).template_location(iTemp, 1);
+            spikePos(theseSp, 2) = ephysData(theseRecs(iProtocol)).template_location(iTemp, 2);
+            spikePos(theseSp, 3) = ephysData(theseRecs(iProtocol)).template_location(iTemp, 3);
         end
         eventTimes = ephysData(theseRecs(iProtocol)).stimOn_times;
-        [timeBins, posBins, allP, normVals] = psthByPos(spikeTimes, spikePos, posBinSize, timeBinSize, eventTimes, win, bslWin);
-        
+        [timeBins, posBins, allP, normVals] = psthByPos1D(spikeTimes, spikePos, posBinSize, timeBinSize, eventTimes, win, bslWin);
+
     end
-    
+
 end
 
 %psth per grating, location, orientation, sp. frequency, nat. image
 
-%cell type 
+%cell type

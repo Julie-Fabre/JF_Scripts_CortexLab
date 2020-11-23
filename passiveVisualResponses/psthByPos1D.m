@@ -1,6 +1,6 @@
 
 
-function [timeBins, posBins, allP, normVals] = psthByPos(spikeTimes, spikePos, posBinSize, timeBinSize, eventTimes, win, bslWin, varargin)
+function [timeBins, posBins, allP, normVals] = psthByPos1D(spikeTimes, spikePos, posBinSize, timeBinSize, eventTimes, win, bslWin, varargin)
 % function [timeBins, depthBins, allP] = psthByDepth(spikeTimes, ...
 %   spikeDepths, depthBinSize, timeBinSize, eventTimes, win, bslWin[, bslEvents])
 %

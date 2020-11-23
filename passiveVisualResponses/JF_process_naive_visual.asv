@@ -73,7 +73,7 @@ for iMouse = 1:size(mice, 2)
                             for iExperiment = 1:size(experimentThese, 2)
                                 experiment = experimentThese(iExperiment);
                                 AP_load_experimentJF;
-                                theseTemplates = template_depths >= min(theseDepths) & template_depths <= max(theseDepths); %correct depth units
+                                theseTemplates = find(template_depths >= min(theseDepths) & template_depths <= max(theseDepths)); %correct depth units
                                 %find closest depth and get closest location
                                 A = repmat(this_ccf.probe_depths, [1, length(template_depths)]);
                                 [minValue, closestIndex] = min(abs(A-template_depths'));
@@ -153,8 +153,13 @@ for iUniqueRec = 1:size(uniqueId,2)
     for iProtocol = 1:size(theseRecs,2)
         
         spikeTimes = ephysData(theseRecs(iProtocol)).spike_times_timeline;
-        for iTemp =
-        find(ephysData(theseRecs(iProtocol)).spike_templates == ephysData(theseRecs(iProtocol)).template_location(x))
+        uniqueTemp = unique(ephysData(theseRecs(iProtocol)).spike_templates);
+        spikePos = nan(size(spikeTimes,1),3);
+        for iTemp = 1:size(uniqueTemp,1)
+            theseSp = find(ephysData(theseRecs(iProtocol)).spike_templates == uniqueTemp);
+            spikePos
+            ephysData(theseRecs(iProtocol)).template_location(iTemp,:))
+        end
         eventTimes = ephysData(theseRecs(iProtocol)).stimOn_times;
         [timeBins, posBins, allP, normVals] = psthByPos(spikeTimes, spikePos, posBinSize, timeBinSize, eventTimes, win, bslWin);
         
