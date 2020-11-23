@@ -73,7 +73,7 @@ for iMouse = 1:size(mice, 2)
                             for iExperiment = 1:size(experimentThese, 2)
                                 experiment = experimentThese(iExperiment);
                                 AP_load_experimentJF;
-                                theseTemplates = template_depths >= min(theseDepths) & template_depths <= max(theseDepths); %correct depth units
+                                theseTemplates = find(template_depths >= min(theseDepths) & template_depths <= max(theseDepths)); %correct depth units
                                 %find closest depth and get closest location
                                 A = repmat(this_ccf.probe_depths, [1, length(template_depths)]);
                                 [minValue, closestIndex] = min(abs(A-template_depths'));
@@ -142,15 +142,25 @@ uniqueRecordings = arrayfun(@(x) [ephysData(x).animal, ephysData(x).date, num2st
     1:numel(ephysData),'UniformOutput', false);%unique date + site
 [uniqueId, uniqueIdx ] =  unique(uniqueRecordings, 'rows');
 %psth - combining all protocols
+posBinSize = 100; 
+timeBinSize = 0.1;
+win = [0, 0.5];
+bslWin = [-0.2, 0];
+
 for iUniqueRec = 1:size(uniqueId,2)
     theseRecs = find(contains(uniqueRecordings,uniqueId(iUniqueRec))); 
     
     for iProtocol = 1:size(theseRecs,2)
-        ephysData(theseRecs(iProtocol)).spike_times_timeline
-        ephysData(theseRecs(iProtocol)).spike_templates
         
-        [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = psthAndBA(spikeTimes, eventTimes, thisWindow, psthBinSize)
+        spikeTimes = ephysData(theseRecs(iProtocol)).spike_times_timeline;
+        for iTemp = 1:size(ephysData(theseRecs(iProtocol)).template_location,1)
+            find(ephysData(theseRecs(iProtocol)).spike_templates == ephysData(theseRecs(iProtocol)).template_location(iTemp))
+        end
+        eventTimes = ephysData(theseRecs(iProtocol)).stimOn_times;
+        [timeBins, posBins, allP, normVals] = psthByPos(spikeTimes, spikePos, posBinSize, timeBinSize, eventTimes, win, bslWin);
+        
     end
+    
 end
 
 %psth per grating, location, orientation, sp. frequency, nat. image
