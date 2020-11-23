@@ -1,6 +1,6 @@
 
 
-function [timeBins, posBins1, posBins2, posBins3, allP, normVals] = psthByPos3D(spikeTimes, spikePos1, spikePos2, spikePos3, posBinSize, timeBinSize, eventTimes, win, bslWin, varargin)
+function [timeBins, posBins1_full, posBins2, posBins3, allP, normVals] = psthByPos3D(spikeTimes, spikePos1, spikePos2, spikePos3, posBinSize, timeBinSize, eventTimes, win, bslWin, varargin)
 % function [timeBins, depthBins, allP] = psthByDepth(spikeTimes, ...
 %   spikeDepths, depthBinSize, timeBinSize, eventTimes, win, bslWin[, bslEvents])
 %
@@ -30,32 +30,37 @@ else
     bslEventTimes = eventTimes;
 end
 
+combs = combvec(1:nD1,1:nD2,1:nD3);
 if ~isempty(bslWin)
-    normVals = zeros(nD, 2);
+    normVals = zeros(size(combs,2), 2);
 else
     normVals = [];
 end
-allP = zeros(nD, nD2, nD3, length(psth));
-for d1 = 1:nD1
-    for d2 = 1:nD2
-        for d3 = 1:nD3
-            theseSp = spikePos1 > posBins1(d1) & spikePos1 <= posBins1(d1+1) & spikePos2 > posBins2(d2) & spikePos2 <= posBins2(d2+1) &...
-                spikePos3 > posBins3(d3) & spikePos3 <= posBins3(d3+1);
 
-            if ~isempty(bslWin)
-                [psth, ~, ~, ~, ~, ~] = psthAndBA(spikeTimes(theseSp), bslEventTimes, bslWin, timeBinSize);
-                normMn = mean(psth);
-                normStd = std(psth);
-            end
+for iComb = 1:size(combs, 2)
+    d1 = combs(1, iComb);
+    d2 = combs(2, iComb);
+    d3 = combs(3, iComb);
+    theseSp = spikePos1 > posBins1(d1) & spikePos1 <= posBins1(d1+1) & spikePos2 > posBins2(d2) & spikePos2 <= posBins2(d2+1) & ...
+        spikePos3 > posBins3(d3) & spikePos3 <= posBins3(d3+1);
 
-            [psth, timeBins, ~, ~, ~, ~] = psthAndBA(spikeTimes(theseSp), eventTimes, win, timeBinSize);
-
-            if ~isempty(bslWin) && normStd > 0
-                allP(d, :) = (psth - normMn) ./ normStd;
-                normVals(d, :) = [normMn, normStd];
-            else
-                allP(d, :) = psth;
-            end
-        end
+    if ~isempty(bslWin)
+        [psth, ~, ~, ~, ~, ~] = psthAndBA(spikeTimes(theseSp), bslEventTimes, bslWin, timeBinSize);
+        normMn = mean(psth);
+        normStd = std(psth);
     end
+
+    [psth, timeBins, ~, ~, ~, ~] = psthAndBA(spikeTimes(theseSp), eventTimes, win, timeBinSize);
+    if iComb == 1
+            allP = zeros(iComb, length(psth));
+    end
+        
+    if ~isempty(bslWin) && normStd > 0
+        allP(iComb, :) = (psth - normMn) ./ normStd;
+        normVals(iComb, :) = [normMn, normStd];
+    else
+        allP(iComb, :) = psth;
+    end
+
+
 end

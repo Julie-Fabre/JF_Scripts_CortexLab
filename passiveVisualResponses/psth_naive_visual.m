@@ -36,12 +36,13 @@ bslWin = [-0.2, 0];
 allP_allprotocols_allrecs = [];
 posBinsX_allprotocols_allrecs = [];
 posBinsY_allprotocols_allrecs = [];
-
+posBinsZ_allprotocols_allrecs = [];
 for iUniqueRec = 1:size(uniqueId, 2)
     theseRecs = find(contains(uniqueRecordings, uniqueId(iUniqueRec)));
     allP_allprotocols = [];
     posBinsX_allprotocols = [];
     posBinsY_allprotocols = [];
+    posBinsZ_allprotocols = [];
     for iProtocol = 1:size(theseRecs, 2)
 
         spikeTimes = ephysData(theseRecs(iProtocol)).spike_times_timeline;
@@ -54,55 +55,78 @@ for iUniqueRec = 1:size(uniqueId, 2)
             spikePos(theseSp, 3) = ephysData(theseRecs(iProtocol)).template_location(iTemp, 3);
         end
         eventTimes = ephysData(theseRecs(iProtocol)).stimOn_times;
-    %disp(nanmean(nanmean(spikePos)))
+        %disp(nanmean(nanmean(spikePos)))
         if (max(spikePos(:, 1)) - min(spikePos(:, 1))) > posBinSize && (max(spikePos(:, 3)) - min(spikePos(:, 3))) > posBinSize
-            [timeBins, posBinsX, posBinsY, posBinsZ, allP, normVals] = psthByPos3D(spikeTimes, spikePos(:, 1), squeeze(spikePos(:, 3)),...
+            [timeBins, posBinsX, posBinsY, posBinsZ, allP, normVals] = psthByPos3D(spikeTimes, spikePos(:, 1), squeeze(spikePos(:, 3)), ...
                 squeeze(spikePos(:, 2)), ...
                 posBinSize, timeBinSize, eventTimes, win, bslWin);
-            posBinsX(1:end-1) = nanmean([posBinsX(1:end-1);posBinsX(2:end)]);
+            posBinsX(1:end-1) = nanmean([posBinsX(1:end-1); posBinsX(2:end)]);
             posBinsX(end) = [];
-            posBinsY(1:end-1) = nanmean([posBinsY(1:end-1);posBinsY(2:end)]);
+            posBinsY(1:end-1) = nanmean([posBinsY(1:end-1); posBinsY(2:end)]);
             posBinsY(end) = [];
-            posBinsZ(1:end-1) = nanmean([posBinsZ(1:end-1);posBinsZ(2:end)]);
+            posBinsZ(1:end-1) = nanmean([posBinsZ(1:end-1); posBinsZ(2:end)]);
             posBinsZ(end) = [];
         elseif (max(spikePos(:, 1)) - min(spikePos(:, 1))) > posBinSize
-            [timeBins, posBinsX, posBinsZ,allP, normVals] = psthByPos2D(spikeTimes, spikePos(:, 1), ...
+            [timeBins, posBinsX, posBinsZ, allP, normVals] = psthByPos2D(spikeTimes, spikePos(:, 1), ...
                 squeeze(spikePos(:, 2)), posBinSize, timeBinSize, eventTimes, win, bslWin);
-            posBinsY = nan(1,size(posBinsX, 2)-1);
-            posBinsY(:) = nanmean(spikePos(:, 2));
-            posBinsX(1:end-1) = nanmean([posBinsX(1:end-1);posBinsX(2:end)]);
+            posBinsY = nan(1, size(posBinsX, 2)-1);
+            posBinsY(:) = nanmean(spikePos(:, 3));
+            posBinsX(1:end-1) = nanmean([posBinsX(1:end-1); posBinsX(2:end)]);
             posBinsX(end) = [];
-            posBinsZ(1:end-1) = nanmean([posBinsZ(1:end-1);posBinsZ(2:end)]);
+            posBinsZ(1:end-1) = nanmean([posBinsZ(1:end-1); posBinsZ(2:end)]);
             posBinsZ(end) = [];
         elseif (max(spikePos(:, 3)) - min(spikePos(:, 3))) > posBinSize
-            [timeBins, posBinsY, posBinsZ,allP, normVals] = psthByPos2D(spikeTimes, squeeze(spikePos(:, 2)), ...
+            [timeBins, posBinsY, posBinsZ, allP, normVals] = psthByPos2D(spikeTimes, squeeze(spikePos(:, 2)), ...
                 squeeze(spikePos(:, 3)), posBinSize, timeBinSize, eventTimes, win, bslWin);
-            posBinsX = nan(1,size(posBinsY, 2)-1);
+            posBinsX = nan(1, size(posBinsY, 2)-1);
             posBinsX(:) = nanmean(spikePos(:, 1));
-            posBinsY(1:end-1) = nanmean([posBinsY(1:end-1);posBinsY(2:end)]);
+            posBinsY(1:end-1) = nanmean([posBinsY(1:end-1); posBinsY(2:end)]);
             posBinsY(end) = [];
-            posBinsZ(1:end-1) = nanmean([posBinsZ(1:end-1);posBinsZ(2:end)]);
+            posBinsZ(1:end-1) = nanmean([posBinsZ(1:end-1); posBinsZ(2:end)]);
             posBinsZ(end) = [];
         else
-            [timeBins, posBinsZ,allP, normVals] = psthByPos1D(spikeTimes,  ...
+            [timeBins, posBinsZ, allP, normVals] = psthByPos1D(spikeTimes, ...
                 squeeze(spikePos(:, 2)), posBinSize, timeBinSize, eventTimes, win, bslWin);
-            
-            posBinsZ(1:end-1) = nanmean([posBinsZ(1:end-1);posBinsZ(2:end)]);
+
+            posBinsZ(1:end-1) = nanmean([posBinsZ(1:end-1); posBinsZ(2:end)]);
             posBinsZ(end) = [];
-            posBinsX = nanmean(spikePos(:, 1));
-            posBinsY = nanmean(spikePos(:, 2));
+            posBinsX = nan(1, size(posBinsZ, 2));
+            posBinsX(:) = nanmean(spikePos(:, 1));
+            posBinsY = nan(1, size(posBinsZ, 2));
+            posBinsY(:) = nanmean(spikePos(:, 3));
         end
+
         allP_allprotocols = [allP_allprotocols; allP];
-        posBinsX_allprotocols = [posBinsX_allprotocols, posBinsX];
-        posBinsY_allprotocols = [posBinsY_allprotocols, posBinsY];
+        posBinsX_allprotocols = [posBinsX_allprotocols, round(posBinsX/posBinSize) * posBinSize];
+        posBinsY_allprotocols = [posBinsY_allprotocols, round(posBinsY/posBinSize) * posBinSize];
+        posBinsZ_allprotocols = [posBinsZ_allprotocols, round(posBinsZ/posBinSize) * posBinSize];
     end
     allP_allprotocols_allrecs = [allP_allprotocols_allrecs; allP_allprotocols];
     posBinsX_allprotocols_allrecs = [posBinsX_allprotocols_allrecs, posBinsX_allprotocols];
     posBinsY_allprotocols_allrecs = [posBinsY_allprotocols_allrecs, posBinsY_allprotocols];
-
+    posBinsZ_allprotocols_allrecs = [posBinsZ_allprotocols_allrecs, posBinsZ_allprotocols];
 end
 
+figure(); %position of recordings (binned by posBinSize)
+scatter3(posBinsX_allprotocols_allrecs, posBinsY_allprotocols_allrecs, posBinsZ_allprotocols_allrecs)
+
+
 %psth per grating, location, orientation, sp. frequency, nat. image
-figure(); 
-imagesc(posBinsX_allprotocols_allrecs,posBinsY_allprotocols_allrecs,mean(allP_allprotocols_allrecs ,2))
+%average same
+
+[uniqueXY, uniqueXY_id] = unique([posBinsX_allprotocols_allrecs', posBinsY_allprotocols_allrecs'], 'rows');
+uniqueX = unique([posBinsX_allprotocols_allrecs]);
+uniqueXrange = min(uniqueX):posBinSize:max(uniqueX);
+uniqueY = unique([posBinsY_allprotocols_allrecs]);
+uniqueYrange = min(uniqueY):posBinSize:max(uniqueY);
+for iUniqueX = 1:length(uniqueXrange)
+    for iUniqueY = 1:length(uniqueYrange)
+        allP_meanUniK_XY(iUniqueX, iUniqueY) = nanmean(nanmean(allP_allprotocols_allrecs(posBinsX_allprotocols_allrecs == uniqueXrange(iUniqueX) & ...
+            posBinsY_allprotocols_allrecs == uniqueYrange(iUniqueY))));
+    end
+end
+figure();
+imagesc(uniqueYrange(:, 1), uniqueXrange(:, 2), allP_meanUniK_XY)
+
+
 %cell type

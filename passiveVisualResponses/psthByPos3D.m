@@ -1,6 +1,6 @@
 
 
-function [timeBins, posBins1, posBins2, posBins3, allP, normVals] = psthByPos3D(spikeTimes, spikePos1, spikePos2, spikePos3, posBinSize, timeBinSize, eventTimes, win, bslWin, varargin)
+function [timeBins, posBins1_full, posBins2_full, posBins3_full, allP, normVals] = psthByPos3D(spikeTimes, spikePos1, spikePos2, spikePos3, posBinSize, timeBinSize, eventTimes, win, bslWin, varargin)
 % function [timeBins, depthBins, allP] = psthByDepth(spikeTimes, ...
 %   spikeDepths, depthBinSize, timeBinSize, eventTimes, win, bslWin[, bslEvents])
 %
@@ -30,7 +30,10 @@ else
     bslEventTimes = eventTimes;
 end
 
-combs = combvec(1:nD1,1:nD2,1:nD3);
+combs = allcomb((1:nD1,1:nD2,1:nD3);
+posBins1_full = posBins1(combs(1,:));
+posBins2_full = posBins2(combs(2,:));
+posBins3_full = posBins3(combs(3,:));
 if ~isempty(bslWin)
     normVals = zeros(size(combs,2), 2);
 else

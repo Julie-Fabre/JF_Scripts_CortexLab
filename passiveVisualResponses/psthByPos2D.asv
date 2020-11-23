@@ -1,6 +1,6 @@
 
 
-function [timeBins, posBins1, posBins2, allP, normVals] = psthByPos2D(spikeTimes, spikePos1, spikePos2, posBinSize, timeBinSize, eventTimes, win, bslWin, varargin)
+function [timeBins, posBins1_full, posBins2_full, allP, normVals] = psthByPos2D(spikeTimes, spikePos1, spikePos2, posBinSize, timeBinSize, eventTimes, win, bslWin, varargin)
 % function [timeBins, depthBins, allP] = psthByDepth(spikeTimes, ...
 %   spikeDepths, depthBinSize, timeBinSize, eventTimes, win, bslWin[, bslEvents])
 %
@@ -25,14 +25,19 @@ if ~isempty(varargin)
 else
     bslEventTimes = eventTimes;
 end
-
+[A,B]=meshgrid(1:nD1,1:nD2);
+c=cat(2,A',B');
+combs=reshape(c,[],2);
 if ~isempty(bslWin)
-    normVals = zeros(max(nD1, nD2), 2);
+    normVals = zeros(size(combs,2), 2);
 else
     normVals = [];
 end
-combs = combvec(1:nD1,1:nD2);
+posBins1_full = posBins1(combs(1,:));
+posBins2_full = posBins2(combs(2,:));
 for iComb = 1:size(combs,2)
+    d1 = combs(1,iComb);
+    d2 = combs(2,iComb);
        theseSp = spikePos1 > posBins1(d1) & spikePos1 <= posBins1(d1+1) & spikePos2 > posBins2(d2) & spikePos2 <= posBins2(d2+1);
 
         if ~isempty(bslWin)
@@ -43,14 +48,14 @@ for iComb = 1:size(combs,2)
 
         [psth, timeBins, ~, ~, ~, ~] = psthAndBA(spikeTimes(theseSp), eventTimes, win, timeBinSize);
 
-        if d1 == 1
-            allP = zeros(max(nD1, nD2), length(psth));
+        if iComb == 1
+            allP = zeros(iComb, length(psth));
         end
         if ~isempty(bslWin) && normStd > 0
-            allP(d, :) = (psth - normMn) ./ normStd;
-            normVals(d, :) = [normMn, normStd];
+            allP(iComb, :) = (psth - normMn) ./ normStd;
+            normVals(iComb, :) = [normMn, normStd];
         else
-            allP(d, :) = psth;
+            allP(iComb, :) = psth;
         end
     end
 end
