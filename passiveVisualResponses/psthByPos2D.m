@@ -25,16 +25,17 @@ if ~isempty(varargin)
 else
     bslEventTimes = eventTimes;
 end
-
+combs = combvec(1:nD1,1:nD2);
 if ~isempty(bslWin)
-    normVals = zeros(max(nD1, nD2), 2);
+    normVals = zeros(size(combs,2), 2);
 else
     normVals = [];
 end
 
-for d1 = 1:nD1
-    for d2 = 1:nD2
-        theseSp = spikePos1 > posBins1(d1) & spikePos1 <= posBins1(d1+1) & spikePos2 > posBins2(d2) & spikePos2 <= posBins2(d2+1);
+for iComb = 1:size(combs,2)
+    d1 = combs(1,iComb);
+    d2 = combs(2,iComb);
+       theseSp = spikePos1 > posBins1(d1) & spikePos1 <= posBins1(d1+1) & spikePos2 > posBins2(d2) & spikePos2 <= posBins2(d2+1);
 
         if ~isempty(bslWin)
             [psth, ~, ~, ~, ~, ~] = psthAndBA(spikeTimes(theseSp), bslEventTimes, bslWin, timeBinSize);
@@ -44,14 +45,14 @@ for d1 = 1:nD1
 
         [psth, timeBins, ~, ~, ~, ~] = psthAndBA(spikeTimes(theseSp), eventTimes, win, timeBinSize);
 
-        if d == 1
-            allP = zeros(max(nD1, nD2), length(psth));
+        if iComb == 1
+            allP = zeros(iComb, length(psth));
         end
         if ~isempty(bslWin) && normStd > 0
-            allP(d, :) = (psth - normMn) ./ normStd;
-            normVals(d, :) = [normMn, normStd];
+            allP(iComb, :) = (psth - normMn) ./ normStd;
+            normVals(iComb, :) = [normMn, normStd];
         else
-            allP(d, :) = psth;
+            allP(iComb, :) = psth;
         end
     end
 end
