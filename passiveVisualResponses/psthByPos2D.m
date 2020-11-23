@@ -27,7 +27,7 @@ else
 end
 
 if ~isempty(bslWin)
-    normVals = zeros(nD, 2);
+    normVals = zeros(max(nD1, nD2), 2);
 else
     normVals = [];
 end
@@ -45,7 +45,7 @@ for d1 = 1:nD1
         [psth, timeBins, ~, ~, ~, ~] = psthAndBA(spikeTimes(theseSp), eventTimes, win, timeBinSize);
 
         if d == 1
-            allP = zeros(nD, length(psth));
+            allP = zeros(max(nD1, nD2), length(psth));
         end
         if ~isempty(bslWin) && normStd > 0
             allP(d, :) = (psth - normMn) ./ normStd;

@@ -141,14 +141,20 @@ uniqueRecordings = arrayfun(@(x) [ephysData(x).animal, ephysData(x).date, num2st
     1:numel(ephysData), 'UniformOutput', false); %unique date + site
 [uniqueId, uniqueIdx] = unique(uniqueRecordings, 'rows');
 %psth - combining all protocols
-posBinSize = 100;
-timeBinSize = 0.1;
+posBinSize = 50;
+timeBinSize = 0.01;
 win = [0, 0.5];
 bslWin = [-0.2, 0];
 
+allP_allprotocols_allrecs = [];
+posBinsX_allprotocols_allrecs = [];
+posBinsY_allprotocols_allrecs = [];
+
 for iUniqueRec = 1:size(uniqueId, 2)
     theseRecs = find(contains(uniqueRecordings, uniqueId(iUniqueRec)));
-
+    allP_allprotocols = [];
+    posBinsX_allprotocols = [];
+    posBinsY_allprotocols = [];
     for iProtocol = 1:size(theseRecs, 2)
 
         spikeTimes = ephysData(theseRecs(iProtocol)).spike_times_timeline;
@@ -161,9 +167,40 @@ for iUniqueRec = 1:size(uniqueId, 2)
             spikePos(theseSp, 3) = ephysData(theseRecs(iProtocol)).template_location(iTemp, 3);
         end
         eventTimes = ephysData(theseRecs(iProtocol)).stimOn_times;
-        [timeBins, posBins, allP, normVals] = psthByPos1D(spikeTimes, spikePos, posBinSize, timeBinSize, eventTimes, win, bslWin);
 
+        if (max(spikePos(:, 1)) - min(spikePos(:, 1))) > posBinSize && (max(spikePos(:, 2)) - min(spikePos(:, 2))) > posBinSize
+            [timeBins, posBinsX, posBinsY, allP, normVals] = psthByPos2D(spikeTimes, spikePos(:, 1), squeeze(spikePos(:, 2)), ...
+                posBinSize, timeBinSize, eventTimes, win, bslWin);
+
+        elseif (max(spikePos(:, 1)) - min(spikePos(:, 1))) > posBinSize
+            [timeBins, posBinsX, allP, normVals] = psthByPos1D(spikeTimes, spikePos(:, 1), ...
+                posBinSize, timeBinSize, eventTimes, win, bslWin);
+            posBinsY = nan(size(posBinsX, 2), 1);
+            posBinsY(:) = nanmean(spikePos(:, 2));
+
+        elseif (max(spikePos(:, 2)) - min(spikePos(:, 2))) > posBinSize
+            [timeBins, posBinsY, allP, normVals] = psthByPos1D(spikeTimes, squeeze(spikePos(:, 2)), ...
+                posBinSize, timeBinSize, eventTimes, win, bslWin);
+            posBinsX = nan(size(posBinsY, 2), 1);
+            posBinsX(:) = nanmean(spikePos(:, 1));
+        else
+            [psth, ~, ~, ~, ~, ~] = psthAndBA(spikeTimes, eventTimes, bslWin, timeBinSize);
+            normMn = mean(psth);
+            normStd = std(psth);
+
+            [psth, ~, ~, ~, ~, ~] = psthandBA(spikeTimes, ...
+                eventTimes, win, timeBinSize);
+            allP = (psth - normMn) ./ normStd;
+            posBinsX = nanmean(spikePos(:, 1));
+            posBinsY = nanmean(spikePos(:, 2));
+        end
+        allP_allprotocols = [allP_allprotocols, allP];
+        posBinsX_allprotocols = [posBinsX_allprotocols, posBinsX];
+        posBinsY_allprotocols = [posBinsY_allprotocols, posBinsY];
     end
+    allP_allprotocols_allrecs = [allP_allprotocols_allrecs, allP_allprotocols];
+    posBinsX_allprotocols_allrecs = [posBinsX_allprotocols_allrecs, posBinsX_allprotocols];
+    posBinsY_allprotocols_allrecs = [posBinsY_allprotocols_allrecs, posBinsY_allprotocols];
 
 end
 
