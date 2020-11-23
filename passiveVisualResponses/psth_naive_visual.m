@@ -81,11 +81,11 @@ for iUniqueRec = 1:size(uniqueId, 2)
             posBinsX = nanmean(spikePos(:, 1));
             posBinsY = nanmean(spikePos(:, 2));
         end
-        allP_allprotocols = [allP_allprotocols, allP];
-        posBinsX_allprotocols = [posBinsX_allprotocols, posBinsX];
-        posBinsY_allprotocols = [posBinsY_allprotocols, posBinsY];
+        allP_allprotocols = [allP_allprotocols; allP];
+        posBinsX_allprotocols = [posBinsX_allprotocols; posBinsX];
+        posBinsY_allprotocols = [posBinsY_allprotocols; posBinsY];
     end
-    allP_allprotocols_allrecs = [allP_allprotocols_allrecs, allP_allprotocols];
+    allP_allprotocols_allrecs = [allP_allprotocols_allrecs; allP_allprotocols];
     posBinsX_allprotocols_allrecs = [posBinsX_allprotocols_allrecs, posBinsX_allprotocols];
     posBinsY_allprotocols_allrecs = [posBinsY_allprotocols_allrecs, posBinsY_allprotocols];
 
