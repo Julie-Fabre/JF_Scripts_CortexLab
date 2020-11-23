@@ -138,12 +138,21 @@ dataBinsY = y_lim_um(1):binSize:y_lim_um(2);
 dataBinsZ = z_lim_um(1):binSize:z_lim_um(2);
 
 %find which bins striatal templates belong to 
-uniqueRecordings = arrayfun(@(x) [ephysData(x).animal, ephysData(x).date, num2str(ephysData(x).site)], 1:numel(ephysData),'UniformOutput', false);%unique date + site
+uniqueRecordings = arrayfun(@(x) [ephysData(x).animal, ephysData(x).date, num2str(ephysData(x).site)],...
+    1:numel(ephysData),'UniformOutput', false);%unique date + site
 [uniqueId, uniqueIdx ] =  unique(uniqueRecordings, 'rows');
-%psth 
-for iUniqueRec = 1:size()
-    for iProtocol = 1:size()
+%psth - combining all protocols
+for iUniqueRec = 1:size(uniqueId,2)
+    theseRecs = find(contains(uniqueRecordings,uniqueId(iUniqueRec))); 
+    
+    for iProtocol = 1:size(theseRecs,2)
+        ephysData(theseRecs(iProtocol)).spike_times_timeline
+        ephysData(theseRecs(iProtocol)).spike_templates
+        
+        [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = psthAndBA(spikeTimes, eventTimes, thisWindow, psthBinSize)
     end
 end
+
+%psth per grating, location, orientation, sp. frequency, nat. image
+
 %cell type 
-%allTemplates = ephysData(uniqueIdx).spike_templates 
