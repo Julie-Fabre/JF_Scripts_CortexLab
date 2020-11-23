@@ -64,15 +64,12 @@ for iUniqueRec = 1:size(uniqueId, 2)
                 posBinSize, timeBinSize, eventTimes, win, bslWin);
             posBinsY = nan(1,size(posBinsX, 2)-1);
             posBinsY(:) = nanmean(spikePos(:, 2));
-            posBinsX(1:end-1) = nanmean([posBinsX(1:end-1);posBinsX(2:end)]);
-            posBinsX(end) = [];
+            posBinsX(1:end-1)=nanmean([posBinsX(1:end-1);posBinsX(2:end)])
         elseif (max(spikePos(:, 2)) - min(spikePos(:, 2))) > posBinSize
             [timeBins, posBinsY, allP, normVals] = psthByPos1D(spikeTimes, squeeze(spikePos(:, 2)), ...
                 posBinSize, timeBinSize, eventTimes, win, bslWin);
             posBinsX = nan(1,size(posBinsY, 2)-1);
             posBinsX(:) = nanmean(spikePos(:, 1));
-            posBinsY(1:end-1) = nanmean([posBinsY(1:end-1);posBinsY(2:end)]);
-            posBinsY(end) = [];
         else
             [psth, ~, ~, ~, ~, ~] = psthAndBA(spikeTimes, eventTimes, bslWin, timeBinSize);
             normMn = mean(psth);
