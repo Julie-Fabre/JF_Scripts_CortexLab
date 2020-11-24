@@ -1,7 +1,7 @@
 
 %% load naive visual recordings
 corona = 0;
-mice = {'AP080', 'AP082', 'JF017', 'JF019'}; % JF020 doesn't have histology yet. JF021 and JF022 to come, and many more
+mice = {'AP080', 'AP082', 'JF017', 'JF019','JF020'}; % JF020 doesn't have histology yet. JF021 and JF022 to come, and many more
 locations = {'CP', 'SNr', 'GPe', 'GPi', 'STN'};
 protocols = {'JF_natural_images', 'JF_locations', 'JF_GratingsPassive'};
 ephysData = struct;
@@ -73,6 +73,20 @@ for iMouse = 1:size(mice, 2)
                             for iExperiment = 1:size(experimentThese, 2)
                                 experiment = experimentThese(iExperiment);
                                 AP_load_experimentJF;
+                                try
+                                    AP_cellrasterJF({stimOn_times}, ...
+                                        {trial_conditions(:, 1) + trial_conditions(:, 2) + trial_conditions(:, 3), ...
+                                        trial_conditions(:, 4)});
+                                catch
+                                    try
+                                        AP_cellrasterJF({stimOn_times}, ...
+                                            {trial_conditions(:, 1) + trial_conditions(:, 2) + trial_conditions(:, 3), ...
+                                            });
+                                    catch
+                                        AP_cellrasterJF({stimOn_times}, ...
+                                            {stimIDs});
+                                    end
+                                end
                                 theseTemplates = find(template_depths >= min(theseDepths) & template_depths <= max(theseDepths)); %correct depth units
                                 %find closest depth and get closest location
                                 A = repmat(this_ccf.probe_depths, [1, length(template_depths)]);

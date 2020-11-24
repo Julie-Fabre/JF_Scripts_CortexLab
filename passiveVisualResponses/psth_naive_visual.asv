@@ -30,8 +30,8 @@ uniqueRecordings = arrayfun(@(x) [ephysData(x).animal, ephysData(x).date, num2st
 %psth - combining all protocols
 posBinSize = 50;
 timeBinSize = 0.01;
-win = [0, 0.5];
-bslWin = [-0.2, 0];
+win = [-0.2, 0.5];
+bslWin = [];% [-0.2, 0];
 
 allP_allprotocols_allrecs = [];
 posBinsX_allprotocols_allrecs = [];
@@ -100,6 +100,9 @@ for iUniqueRec = 1:size(uniqueId, 2)
         posBinsX_allprotocols = [posBinsX_allprotocols, round(posBinsX/posBinSize) * posBinSize];
         posBinsY_allprotocols = [posBinsY_allprotocols, round(posBinsY/posBinSize) * posBinSize];
         posBinsZ_allprotocols = [posBinsZ_allprotocols, round(posBinsZ/posBinSize) * posBinSize];
+if iProtocol == size(theseRecs, 2)
+figure(); imagesc(allP_allprotocols)
+end
     end
     allP_allprotocols_allrecs = [allP_allprotocols_allrecs; allP_allprotocols];
     posBinsX_allprotocols_allrecs = [posBinsX_allprotocols_allrecs, posBinsX_allprotocols];
@@ -109,6 +112,9 @@ end
 
 figure(); %position of recordings (binned by posBinSize)
 scatter3(posBinsX_allprotocols_allrecs, posBinsY_allprotocols_allrecs, posBinsZ_allprotocols_allrecs)
+
+figure();
+imagesc(allP_allprotocols_allrecs);
 
 
 %psth per grating, location, orientation, sp. frequency, nat. image
@@ -121,12 +127,53 @@ uniqueY = unique([posBinsY_allprotocols_allrecs]);
 uniqueYrange = min(uniqueY):posBinSize:max(uniqueY);
 for iUniqueX = 1:length(uniqueXrange)
     for iUniqueY = 1:length(uniqueYrange)
-        allP_meanUniK_XY(iUniqueXY) = nanmean(nanmean(allP_allprotocols_allrecs(posBinsX_allprotocols_allrecs == uniqueXY(iUniqueXY, 1) & ...
-            posBinsY_allprotocols_allrecs == uniqueXY(iUniqueXY, 2))));
+        thisVal = nanmean(nanmax(allP_allprotocols_allrecs(posBinsX_allprotocols_allrecs == uniqueXrange(iUniqueX) & ...
+            posBinsY_allprotocols_allrecs == uniqueYrange(iUniqueY), 1:20)));
+        if ~isempty(thisVal)
+            allP_meanUniK_XY(iUniqueX, iUniqueY) = nanmean(nanmax(thisVal));
+        else
+            allP_meanUniK_XY(iUniqueX, iUniqueY) = NaN;
+        end
+
     end
 end
 figure();
-imagesc(uniqueXY(:, 1), uniqueXY(:, 2), allP_meanUniK_XY)
+b1 = imagesc(uniqueXrange, uniqueYrange, allP_meanUniK_XY);
+set(b1, 'AlphaData', ~isnan(allP_meanUniK_XY) & allP_meanUniK_XY ~= 0)
+colorbar;
 
+uniqueZ = unique([posBinsZ_allprotocols_allrecs]);
+uniqueZrange = min(uniqueZ):posBinSize:max(uniqueZ);
+for iUniqueX = 1:length(uniqueXrange)
+    for iUniqueZ = 1:length(uniqueZrange)
+       thisVal = nanmean(nanmax(allP_allprotocols_allrecs(posBinsX_allprotocols_allrecs == uniqueXrange(iUniqueX) & ...
+            posBinsZ_allprotocols_allrecs == uniqueZrange(iUniqueZ), 1:20)));
+        if ~isempty(thisVal)
+            allP_meanUniK_XZ(iUniqueX, iUniqueZ) = nanmean(nanmax(thisVal));
+        else
+            allP_meanUniK_XZ(iUniqueX, iUniqueZ) = NaN;
+        end
+    end
+end
+figure();
+b2 = imagesc(uniqueXrange, uniqueZrange, allP_meanUniK_XZ);
+set(b2, 'AlphaData', ~isnan(allP_meanUniK_XZ) & allP_meanUniK_XZ ~= 0)
+colorbar;
 
+for iUniqueY = 1:length(uniqueYrange)
+    for iUniqueZ = 1:length(uniqueZrange)
+        thisVal = nanmean(nanmax(allP_allprotocols_allrecs(posBinsY_allprotocols_allrecs == uniqueYrange(iUniqueY) & ...
+            posBinsZ_allprotocols_allrecs == uniqueZrange(iUniqueZ), 1:20)));
+        if ~isempty(thisVal)
+            allP_meanUniK_YZ(iUniqueY, iUniqueZ) = nanmean(nanmax(thisVal));
+        else
+            allP_meanUniK_YZ(iUniqueY, iUniqueZ) = NaN;
+        end
+    end
+end
+figure();
+b = imagesc(uniqueYrange, uniqueZrange, allP_meanUniK_YZ);
+set(b, 'AlphaData', ~isnan(allP_meanUniK_YZ) & allP_meanUniK_YZ ~= 0)
+colorbar;
 %cell type
+% tod o replace zweros by nans, plot all *grey*

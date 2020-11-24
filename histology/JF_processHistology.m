@@ -1,4 +1,4 @@
-animal = 'JF017';
+animal = 'JF020';
 
 %% get histology slices and copy locally
 locationHisto = ['//znas.cortexlab.net/Subjects/', animal, '/Histology/']; % copy files over to local disk
@@ -52,7 +52,7 @@ probe2ephys.animal = animal;
 probe2ephys(1).day = 1;
 probe2ephys(1).site = 1;
 
-probe2ephys(2).day = 1;
+probe2ephys(2).day = 2;
 probe2ephys(2).site = 1;
 
 probe2ephys(3).day = 1;
