@@ -68,8 +68,8 @@ for iInjection = 1:size(injectionAreas, 2)
 
     load('C:\Users\Julie\Dropbox\MATLAB\JF_scripts_CortexLab\queryAllenAtlas\VIS_Str.mat')
 
-    for iView = 1:3
-        h1 = subplot(3, size(injectionAreas, 2), (size(injectionAreas, 2))*(iView - 1)+iInjection);
+    for iView = 1%:3
+        h1 = subplot(1, size(injectionAreas, 2), (size(injectionAreas, 2))*(iView - 1)+iInjection);
         %[~, brain_outline] = plotBrainGrid([], ss);
         hold on;
         axis equal
@@ -127,5 +127,10 @@ for iInjection = 1:size(injectionAreas, 2)
         if iView ~= 1
             set(h1, 'Ydir', 'reverse')
         end
+set(h1, 'box','off','XTickLabel',[],'XTick',[],'YTickLabel',[],'YTick',[])
+xlim([300 800])
+set(gca,'Visible','off')
+makeprettyLite;
+title(injectionAreas{iInjection})
     end
 end

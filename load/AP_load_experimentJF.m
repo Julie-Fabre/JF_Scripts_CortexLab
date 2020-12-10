@@ -476,7 +476,7 @@ if block_exists
             [~,trial_id] = ismember(trial_conditions,conditions,'rows');
             [~,stimIDs] = ismember(trial_conditions,conditions,'rows');
             
-        case {'JF_natural_images', 'JF_natural_imagesVarITI'}
+        case {'JF_natural_images', 'JF_natural_imagesVarITI','JF_natural_images_VarITI'}
             stimOn_times = photodiode_flip_times(2:2:end);
             %n_trials = length(signals_events.endTrialTimes);
             % sanity check: times between stim on times in signals

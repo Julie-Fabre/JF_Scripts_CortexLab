@@ -1,16 +1,38 @@
-animal = 'JF020';
+animal = 'AP083';
+im_type = 'tiffUnmerged';
 
 %% get histology slices and copy locally
 locationHisto = ['//znas.cortexlab.net/Subjects/', animal, '/Histology/']; % copy files over to local disk
-imageFolders = dir(locationHisto);
-imageFolders(1:2) = []; % remove current dir and one above
+
 % Set paths for histology images and directory to save slice/alignment
-im_dir = 'D:\';
-im_path = [im_dir, filesep, animal];
-slice_path = [im_dir, filesep, animal, filesep, 'slices'];
-mkdir(slice_path)
-for iFolder = 1:size(imageFolders, 1)
-    copyfile([locationHisto, imageFolders(iFolder).name], im_path)
+if strcmp(im_type, 'o') == 1
+    imageFolders = dir(locationHisto);
+imageFolders(1:2) = []; % remove current dir and one above
+    im_dir = 'D:\';
+    im_path = [im_dir, animal];
+    slice_path = [im_dir, filesep, animal, filesep, 'slices'];
+    mkdir(slice_path)
+    for iFolder = 1:size(imageFolders, 1)
+        copyfile([locationHisto, imageFolders(iFolder).name], im_path)
+    end
+elseif strcmp(im_type, 'tiffUnmerged') == 1
+    imageFolders = dir(locationHisto);
+    imageFolders(1:2) = []; % remove current dir and one above
+
+    %rename correctly 
+    im_dir = 'D:\';
+    im_path = [im_dir, animal];
+    slice_path = [im_dir, filesep, animal, filesep, 'slices'];
+    mkdir(slice_path)
+    for iFolder = 1:size(imageFolders, 1)
+        imageFolders2 = dir([locationHisto, imageFolders(iFolder).name, filesep, 'Default']);
+        imageFolders2(1:2) = []; 
+        for i = 1:size(imageFolders2,1)
+            copyfile([locationHisto, imageFolders(iFolder).name, filesep, 'Default', filesep, imageFolders2(i).name], im_path)
+            theseImges = dir([im_path, '/img_*.tif']);
+            movefile([im_path filesep theseImges.name],[im_path filesep 'img', num2str(iFolder), 'channel', num2str(i), '.tif'],'f');
+        end
+    end
 end
 
 %% Allen atlas
@@ -21,7 +43,7 @@ st = loadStructureTreeJF([allen_atlas_path, filesep, 'structure_tree_safe_2017.c
 
 %% Set white balance and resize slide images, extract slice images
 mkdir([im_path, filesep, 'resized'])
-AP_process_histologyJF(im_path, 'ot');
+AP_process_histologyJF(im_path, im_type);
 
 %% (optional) Rotate, pad, and center slice images
 AP_rotate_histologyJF(slice_path);
@@ -85,7 +107,7 @@ save([im_path, '/probe2ephys.mat'], 'probe2ephys')
 % Align histology to electrophysiology %% NOTE: YOU HAVE TO DO THESE ONE BY
 % ONE RN (NOT IN LOOP) FOR THINGS TO SAVE PROPERLY
 load([im_path, '/probe2ephys.mat'])
-dontAnalyze=0;
+dontAnalyze = 0;
 for iProbe = 1:size(probe2ephys, 2)
     use_probe = iProbe;
     corona = 0;
@@ -95,7 +117,7 @@ for iProbe = 1:size(probe2ephys, 2)
     curr_day = probe2ephys(iProbe).day;
     day = experiments(curr_day).day;
     experiment = experiments(curr_day).experiment; % experiment number
-    
+
     experiment = experiment(probe2ephys(iProbe).site);
     verbose = false; % display load progress and some info figures
     load_parts.cam = false;
@@ -104,7 +126,7 @@ for iProbe = 1:size(probe2ephys, 2)
     site = probe2ephys(iProbe).site;
     lfp_channel = 'all';
     AP_load_experimentJF;
-    
+
     if dontAnalyze == 0
         AP_align_probe_histologyJF(st, slice_path, ...
             spike_times, spike_templates, template_depths, ...
@@ -112,7 +134,7 @@ for iProbe = 1:size(probe2ephys, 2)
             use_probe);
     else
         experiment = experiments(curr_day).experiment; % experiment number
-        experiment = experiment(probe2ephys(iProbe).site)+1;
+        experiment = experiment(probe2ephys(iProbe).site) + 1;
         verbose = false; % display load progress and some info figures
         load_parts.cam = false;
         load_parts.imaging = false;
@@ -122,12 +144,12 @@ for iProbe = 1:size(probe2ephys, 2)
         try
             AP_load_experimentJF;
             AP_align_probe_histologyJF(st, slice_path, ...
-            spike_times, spike_templates, template_depths, ...
-            lfp, channel_positions(:, 2), ...
-            use_probe);
+                spike_times, spike_templates, template_depths, ...
+                lfp, channel_positions(:, 2), ...
+                use_probe);
         catch
             experiment = experiments(curr_day).experiment; % experiment number
-            experiment = experiment(probe2ephys(iProbe).site)+2;
+            experiment = experiment(probe2ephys(iProbe).site) + 2;
             verbose = false; % display load progress and some info figures
             load_parts.cam = false;
             load_parts.imaging = false;
@@ -136,18 +158,18 @@ for iProbe = 1:size(probe2ephys, 2)
             lfp_channel = 'all';
             AP_load_experimentJF;
             AP_align_probe_histologyJF(st, slice_path, ...
-            spike_times, spike_templates, template_depths, ...
-            lfp, channel_positions(:, 2), ...
-            use_probe);
+                spike_times, spike_templates, template_depths, ...
+                lfp, channel_positions(:, 2), ...
+                use_probe);
         end
-    end 
-    
+    end
 
-%     indexes = probe_ccf .* 10;
-%     av(indexes)
-%     av(round(probe_ccf(:, 1)), probe_ccf(:, 2), probe_ccf(:, 3))
+
+    %     indexes = probe_ccf .* 10;
+    %     av(indexes)
+    %     av(round(probe_ccf(:, 1)), probe_ccf(:, 2), probe_ccf(:, 3))
 end
 
 %% save on server
-mkdir([locationHisto 'processed/']);
-copyfile(im_path,[locationHisto 'processed/']); 
+mkdir([locationHisto, 'processed/']);
+copyfile(im_path, [locationHisto, 'processed/']);
