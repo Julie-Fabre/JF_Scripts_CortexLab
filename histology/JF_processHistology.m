@@ -7,7 +7,7 @@ locationHisto = ['//znas.cortexlab.net/Subjects/', animal, '/Histology/']; % cop
 % Set paths for histology images and directory to save slice/alignment
 if strcmp(im_type, 'o') == 1
     imageFolders = dir(locationHisto);
-imageFolders(1:2) = []; % remove current dir and one above
+    imageFolders(1:2) = []; % remove current dir and one above
     im_dir = 'D:\';
     im_path = [im_dir, animal];
     slice_path = [im_dir, filesep, animal, filesep, 'slices'];
@@ -25,8 +25,7 @@ elseif strcmp(im_type, 'tiffUnmerged') == 1
     slice_path = [im_dir, filesep, animal, filesep, 'slices'];
     mkdir(slice_path)
     for iFolder = 1:size(imageFolders, 1)
-        imageFolders2 = dir([locationHisto, imageFolders(iFolder).name, filesep, 'Default']);
-        imageFolders2(1:2) = []; 
+        imageFolders2 = dir([locationHisto, imageFolders(iFolder).name, filesep, 'Default', filesep, '*.tif']);
         for i = 1:size(imageFolders2,1)
             copyfile([locationHisto, imageFolders(iFolder).name, filesep, 'Default', filesep, imageFolders2(i).name], im_path)
             theseImges = dir([im_path, '/img_*.tif']);

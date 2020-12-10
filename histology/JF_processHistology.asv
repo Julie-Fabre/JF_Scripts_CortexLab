@@ -24,13 +24,13 @@ elseif strcmp(im_type, 'tiffUnmerged') == 1
     im_path = [im_dir, animal];
     slice_path = [im_dir, filesep, animal, filesep, 'slices'];
     mkdir(slice_path)
-    for iFolder = 1:size(imageFolders, 1)
-        imageFolders2 = dir([locationHisto, imageFolders(iFolder).name, filesep, 'Default']);
+    for iFolder = 1%:size(theseImges, 1)
+        imageFolders2 = dir([locationHisto, imageFolders(iFolder).name, filesep, 'Default', filesep, '*.tif']);
         imageFolders2(1:2) = []; 
-        for i = 1:size(theseImges,1)
+        for i = 1:size(imageFolders2,1)
             copyfile([locationHisto, imageFolders(iFolder).name, filesep, 'Default', filesep, imageFolders2(i).name], im_path)
             theseImges = dir([im_path, '/img_*.tif']);
-            movefile([im_path filesep theseImges.name],[im_path filesep 'img', num2str(iFolder), 'channel', num2str(i)],'f');
+            movefile([im_path filesep theseImges.name],[im_path filesep 'img', num2str(iFolder), 'channel', num2str(i), '.tif'],'f');
         end
     end
 end
