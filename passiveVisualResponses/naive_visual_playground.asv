@@ -90,17 +90,13 @@ for iProbe = 1:size(probe2ephys, 2) %probe
     day = uniqueD{curr_day};
     dayBreaks = find(day =='/'); 
     if dayBreaks(1)==2 && dayBreaks(2)==4
-        day = strcat(day(dayBreaks(2)+1:end), '-0', day(dayBreaks(1)+1:dayBreaks(2)-1),...
+        day = strcat(day(dayBreaks(2)+1:end), '-', day(dayBreaks(1)+1:dayBreaks(2)-1),...
         '-0', day(1:dayBreaks(1)-1)); %in standard format 
     elseif dayBreaks(1)==2
         day = strcat(day(dayBreaks(2)+1:end), '-', day(dayBreaks(1)+1:dayBreaks(2)-1),...
         '-0', day(1:dayBreaks(1)-1)); %in standard format 
     elseif dayBreaks(2)==5
-        day = strcat(day(dayBreaks(2)+1:end), '-0', day(dayBreaks(1)+1:dayBreaks(2)-1),...
-        '-', day(1:dayBreaks(1)-1)); %in standard format 
-    else
-        day = strcat(day(dayBreaks(2)+1:end), '-', day(dayBreaks(1)+1:dayBreaks(2)-1),...
-        '-', day(1:dayBreaks(1)-1)); %in standard format 
+    else     
     end
     
     theseExpDates = strcmp(recInfo.Date,uniqueD(curr_day));

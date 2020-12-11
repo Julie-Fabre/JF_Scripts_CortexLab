@@ -574,7 +574,7 @@ if exist('Timeline','var') && load_parts.cam
             eyeCamStrobe_up_t = Timeline.rawDAQTimestamps(eyeCamStrobe_up);
             
             % Get sync times for cameras (or load if already done)
-            [eyecam_sync_frames,n_eyecam_frames] = AP_get_cam_sync_frames(eyecam_fn);
+            [eyecam_sync_frames,n_eyecam_frames] = AP_get_cam_sync_framesJF(eyecam_fn);
             
             if ~isempty(eyecam_sync_frames)
                 % Get the closest cam strobe to sync start, find offset and frame idx
@@ -623,7 +623,7 @@ if exist('Timeline','var') && load_parts.cam
             faceCamStrobe_up_t = Timeline.rawDAQTimestamps(faceCamStrobe_up);
             
             % Get sync times for cameras (or load if already done)
-            [facecam_sync_frames,n_facecam_frames] = AP_get_cam_sync_frames(facecam_fn);
+            [facecam_sync_frames,n_facecam_frames] = AP_get_cam_sync_framesJF(facecam_fn);
             
             if ~isempty(facecam_sync_frames)
                 % Get the closest cam strobe to sync start, find offset and frame idx
