@@ -458,7 +458,8 @@ if block_exists
                 signals_events.stimOrientationValues'];
             [~,trial_id] = ismember(trial_conditions,conditions,'rows');
             [~,stimIDs] = ismember(trial_conditions,conditions,'rows');
-        case {'JF_Locations', 'JF_LocationsFit', 'JF_LocationsVarITI', 'JF_locations', 'JF_locationsFit', 'JF_locationsVarITI'}
+        case {'JF_Locations', 'JF_LocationsFit', 'JF_LocationsVarITI', 'JF_locations', 'JF_locationsFit', 'JF_locationsVarITI', ...
+                'JF_locationsFitVarITIGrating'}
              stimOn_times = photodiode_flip_times(2:2:end);
             %n_trials = length(signals_events.endTrialTimes);
             % sanity check: times between stim on times in signals
