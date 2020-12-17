@@ -122,8 +122,9 @@ switch eventdata.Key
         
         % Upload gui data
         guidata(gui_fig,gui_data);
-    case 'toparrow'
-        probeN = str2num(cell2mat(inputdlg('How many probes?')));
+    case 'insert'
+        
+        probeN = str2num(cell2mat(inputdlg('Probe #: ')));
         curr_probe = probeN;
         
         if curr_probe > gui_data.n_probes
@@ -131,7 +132,7 @@ switch eventdata.Key
            return
         end
         
-        set(gui_data.histology_ax_title,'String',['Draw probe ' eventdata.Key]);
+        set(gui_data.histology_ax_title,'String',['Draw probe ' num2str(curr_probe)]);
         curr_line = imline;
         % If the line is just a click, don't include
         curr_line_length = sqrt(sum(abs(diff(curr_line.getPosition,[],1)).^2));
