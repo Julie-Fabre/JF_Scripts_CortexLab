@@ -65,6 +65,7 @@ ylim([-10, ml_max + 10])
 zlim([-10, dv_max + 10])
 
 %% ~~ GPi (AP083) ~~
+
 %% load all data
 animal = 'AP083';
 AP_preprocess_phase3_newOEJF('AP083', '2020-12-05')
@@ -159,7 +160,7 @@ for iProbe = 1:size(probe2ephys, 2) %probe
         end
     end
 end
-save('C:\Users\Julie\Dropbox\passiveAP083GPi','ephysData')
+save('C:\Users\Julie\Dropbox\passiveAP083GPi', 'ephysData')
 
 clear all;
 
@@ -224,8 +225,8 @@ for iProbe = 1:size(probe2ephys, 2) %probe
             %get correct templates (location of interest)
             this_ccf = probe_ccf(iProbe);
             theseLocations = allenAt.acronym(this_ccf.trajectory_areas);
-            theseLocationsInterest = contains(theseLocations, locations{1});% | ...
-                %contains(theseLocations, locations{2});
+            theseLocationsInterest = contains(theseLocations, locations{1}); % | ...
+            %contains(theseLocations, locations{2});
             theseDepths = this_ccf.probe_depths(theseLocationsInterest);
             if ~isempty(theseDepths)
                 %save data in structure
@@ -256,7 +257,7 @@ for iProbe = 1:size(probe2ephys, 2) %probe
         end
     end
 end
-save('C:\Users\Julie\Dropbox\passiveAP083VTA','ephysData')
+save('C:\Users\Julie\Dropbox\passiveAP083VTA', 'ephysData')
 
 clear all;
 
@@ -321,8 +322,8 @@ for iProbe = 1:size(probe2ephys, 2) %probe
             %get correct templates (location of interest)
             this_ccf = probe_ccf(iProbe);
             theseLocations = allenAt.acronym(this_ccf.trajectory_areas);
-            theseLocationsInterest = contains(theseLocations, locations{1});% | ...
-                %contains(theseLocations, locations{2});
+            theseLocationsInterest = contains(theseLocations, locations{1}); % | ...
+            %contains(theseLocations, locations{2});
             theseDepths = this_ccf.probe_depths(theseLocationsInterest);
             if ~isempty(theseDepths)
                 %save data in structure
@@ -353,22 +354,42 @@ for iProbe = 1:size(probe2ephys, 2) %probe
         end
     end
 end
-save('C:\Users\Julie\Dropbox\passiveAP083PF','ephysData')
-%save AP083 GPi data 
-%also get PF and VTA .. 
-
+save('C:\Users\Julie\Dropbox\passiveAP083PF', 'ephysData')
+%save AP083 GPi data
+%also get PF and VTA ..
 
 %% plot pop averages
+for iLocation = 1:3
+    for iProtocol = 1:3
+        %psth for each rec to location, nat image, grating
+        colorsT = {'r', 'k', 'b', 'g', 'm'};
+        figure();
+        thisWindow = [-0.2, 0.5];
+        psthBinSize = 0.01;
+        for i = 1:5
+            theseSpikes = dataGrating(i).spike_times_timeline(dataGrating(i).spike_depths > dataGrating(i).depth(1) & dataGrating(i).spike_depths < dataGrating(i).depth(2));
+            [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = psthAndBA(theseSpikes, dataGrating(i).stimOn, thisWindow, psthBinSize);
+            [psthbaseline, bins, rasterX, rasterY, spikeCounts, binnedArrayBase] = psthAndBA(theseSpikes, dataGrating(i).stimOn, [-0.2, 0], psthBinSize);
+            psth = (psth - nanmean(psthbaseline)) / nanstd(psthbaseline);
+            w = gausswin(10);
+            y = filter(w, 1, (binnedArray ./ 0.01 - -nanmean(psthbaseline))/nanstd(psthbaseline));
+            AP_errorfillJF([-0.2:0.01:0.5 - 0.01]', psth', std(y)./sqrt(size(binnedArray, 1)), colorsT{i})
+            makepretty;
+            hold on;
+        end
+    end
+    ylabel('dFR/FR')
+    xlabel('time from grating (s)')
+    set(gcf, 'color', 'w');
+end
+%average all
 
-%psth for each rec to location, nat image, grating 
+%split by orientatiojn, sp freq, location, nat image(mtx)
 
-%average all 
+%split all
 
-%split by orientatiojn, sp freq, location, nat image(mtx) 
-
-%split all 
 %% plot cell selectivity
 
-%% cell examples 
+%% cell examples
 
-%% matrix correlation 
+%% matrix correlation

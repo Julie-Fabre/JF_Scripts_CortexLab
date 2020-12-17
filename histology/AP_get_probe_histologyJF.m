@@ -122,6 +122,36 @@ switch eventdata.Key
         
         % Upload gui data
         guidata(gui_fig,gui_data);
+    case 'toparrow'
+        probeN = str2num(cell2mat(inputdlg('How many probes?')));
+        curr_probe = probeN;
+        
+        if curr_probe > gui_data.n_probes
+           disp(['Probe ' eventdata.Key ' selected, only ' num2str(gui_data.n_probes) ' available']);
+           return
+        end
+        
+        set(gui_data.histology_ax_title,'String',['Draw probe ' eventdata.Key]);
+        curr_line = imline;
+        % If the line is just a click, don't include
+        curr_line_length = sqrt(sum(abs(diff(curr_line.getPosition,[],1)).^2));
+        if curr_line_length == 0
+            return
+        end
+        gui_data.probe_points_histology{gui_data.curr_slice,curr_probe} = ...
+            curr_line.getPosition;
+        set(gui_data.histology_ax_title,'String', ...
+            ['Arrows to move, Number to draw probe [' num2str(1:gui_data.n_probes) '], Esc to save/quit']);
+        
+        % Delete movable line, draw line object
+        curr_line.delete;
+        gui_data.probe_lines(curr_probe) = ...
+            line(gui_data.probe_points_histology{gui_data.curr_slice,curr_probe}(:,1), ...
+            gui_data.probe_points_histology{gui_data.curr_slice,curr_probe}(:,2), ...
+            'linewidth',3,'color',gui_data.probe_color(curr_probe,:));
+        
+        % Upload gui data
+        guidata(gui_fig,gui_data);
         
     case 'escape'
         opts.Default = 'Yes';

@@ -1,9 +1,9 @@
 
 clear all;
 
-animal = 'AP083';
-day = '2020-10-19';
-experiment = 1;
+animal = 'JF022';
+day = '2020-12-12';
+experiment = 2;
 lilrig_load_experimentJF;
 lilrig_retinotopyJF;
 set(gcf,'color','w');

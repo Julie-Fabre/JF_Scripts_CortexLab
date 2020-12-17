@@ -1,4 +1,4 @@
-animal = 'AP083';
+animal = 'AP084';
 im_type = 'tiffUnmerged';
 
 %% get histology slices and copy locally
@@ -71,31 +71,31 @@ AP_get_probe_histologyJF(tv, av, st, slice_path);
 probe2ephys = struct;
 probe2ephys.animal = animal;
 probe2ephys(1).day = 3;
-probe2ephys(1).site = 2;
+probe2ephys(1).site = 1;
 
 probe2ephys(2).day = 2;
 probe2ephys(2).site = 3;
 
-probe2ephys(3).day = 1;
+probe2ephys(3).day = 2;
 probe2ephys(3).site = 2;
 
-probe2ephys(4).day = 3;
+probe2ephys(4).day = 1;
 probe2ephys(4).site = 2;
 
-probe2ephys(5).day = 2;
-probe2ephys(5).site = 2;
+probe2ephys(5).day = [];
+probe2ephys(5).site = [];
 
-probe2ephys(6).day = 3;
+probe2ephys(6).day = 2;
 probe2ephys(6).site = 1;
 
-probe2ephys(7).day = 2;
-probe2ephys(7).site = 1;
+probe2ephys(7).day = 3;
+probe2ephys(7).site = 3;
 
-probe2ephys(8).day = 1;
+probe2ephys(8).day = 4;
 probe2ephys(8).site = 1;
 
-% probe2ephys(9).day = 4;
-% probe2ephys(9).site = 1;
+ probe2ephys(9).day = 1;
+ probe2ephys(9).site = 1;
 % 
 % probe2ephys(10).day = 4;
 % probe2ephys(10).site = 2;
@@ -114,15 +114,17 @@ for iProbe = 1:size(probe2ephys, 2)
     experiments = AP_find_experimentsJF(animal, protocol, protocol);
     experiments = experiments([experiments.ephys]);
     curr_day = probe2ephys(iProbe).day;
+    if ~isemtpy(curr_day)
     day = experiments(curr_day).day;
     experiment = experiments(curr_day).experiment; % experiment number
 
-    experiment = experiment(probe2ephys(iProbe).site);
+    experiment = experiment(probe2ephys(iProbe).site)+1;
     verbose = false; % display load progress and some info figures
     load_parts.cam = false;
     load_parts.imaging = false;
     load_parts.ephys = true;
     site = probe2ephys(iProbe).site;
+    
     lfp_channel = 'all';
     AP_load_experimentJF;
 
@@ -162,7 +164,7 @@ for iProbe = 1:size(probe2ephys, 2)
                 use_probe);
         end
     end
-
+    end
 
     %     indexes = probe_ccf .* 10;
     %     av(indexes)
