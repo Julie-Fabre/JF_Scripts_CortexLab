@@ -60,8 +60,12 @@ for iMouse = 1:size(mice, 2)
                             else
                                 timelineOK = ones(length(experimentThese), 1);
                             end
-
-                            experimentThese = experimentThese(ephysOK & timelineOK);
+                            if iscell(recInfo.error(1))
+                                errorOK = cellfun(@isempty, recInfo.error(thisProtocol));
+                            else
+                                errorOK = ones(length(experimentThese), 1);
+                            end
+                            experimentThese = experimentThese(ephysOK & timelineOK & errorOK);
 
 
                             %experiment = experiment(probe2ephys(probe).site);

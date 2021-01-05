@@ -114,7 +114,7 @@ for iProbe = 1:size(probe2ephys, 2)
     experiments = AP_find_experimentsJF(animal, protocol, protocol);
     experiments = experiments([experiments.ephys]);
     curr_day = probe2ephys(iProbe).day;
-    if ~isemtpy(curr_day)
+    if ~isempty(curr_day)
     day = experiments(curr_day).day;
     experiment = experiments(curr_day).experiment; % experiment number
 
@@ -129,6 +129,7 @@ for iProbe = 1:size(probe2ephys, 2)
     AP_load_experimentJF;
 
     if dontAnalyze == 0
+        AP_cellrasterJF({stimOn_times}, {stimIDs})
         AP_align_probe_histologyJF(st, slice_path, ...
             spike_times, spike_templates, template_depths, ...
             lfp, channel_positions(:, 2), ...

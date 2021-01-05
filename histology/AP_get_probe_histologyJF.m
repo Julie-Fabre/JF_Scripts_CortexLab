@@ -122,7 +122,7 @@ switch eventdata.Key
         
         % Upload gui data
         guidata(gui_fig,gui_data);
-    case 'insert'
+    case 'insert'% if probe # > 9, need an input dialog
         
         probeN = str2num(cell2mat(inputdlg('Probe #: ')));
         curr_probe = probeN;
