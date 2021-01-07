@@ -1,3 +1,4 @@
+AP_preprocess_phase3_newOEJF_onlysync('JF020', '2020-11-19')
 animal = 'AP084';
 im_type = 'tiffUnmerged';
 
@@ -71,27 +72,27 @@ AP_get_probe_histologyJF(tv, av, st, slice_path);
 probe2ephys = struct;
 probe2ephys.animal = animal;
 probe2ephys(1).day = 3;
-probe2ephys(1).site = 1;
+probe2ephys(1).site = 2;
 
 probe2ephys(2).day = 2;
 probe2ephys(2).site = 3;
 
-probe2ephys(3).day = 2;
+probe2ephys(3).day = 1;
 probe2ephys(3).site = 2;
 
-probe2ephys(4).day = 1;
-probe2ephys(4).site = 2;
+probe2ephys(4).day = 3;
+probe2ephys(4).site = 3;
 
-probe2ephys(5).day = [];
-probe2ephys(5).site = [];
+probe2ephys(5).day = 2;
+probe2ephys(5).site = 2;
 
-probe2ephys(6).day = 2;
+probe2ephys(6).day = 3;
 probe2ephys(6).site = 1;
 
-probe2ephys(7).day = 3;
-probe2ephys(7).site = 3;
+probe2ephys(7).day = 1;
+probe2ephys(7).site = 1;
 
-probe2ephys(8).day = 4;
+probe2ephys(8).day = 2;
 probe2ephys(8).site = 1;
 
  probe2ephys(9).day = 1;
