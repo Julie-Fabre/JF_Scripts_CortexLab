@@ -1,7 +1,7 @@
 
 %% load simple, check aligning
 clear all;
-animal = 'JF019';
+animal = 'JF022';
 protString = 'mage';
 histoFile = AP_cortexlab_filenameJF(animal, [], [], 'histo', [], []);
 load(histoFile)
@@ -112,6 +112,6 @@ for iProbe = 1:size(probe2ephys, 2)
     AP_cellrasterJF({stimOn_times}, {stimIDs})
 
     % align to movement onset
-   AP_cellrasterJF({}, {})
+    AP_cellrasterJF({wheel_move_time}, {})
     
 end

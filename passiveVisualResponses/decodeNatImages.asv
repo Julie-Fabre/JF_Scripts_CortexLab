@@ -13,7 +13,7 @@ for iAnimal = 1:size(theseAnimals)
     theseProbes = toLoad.Probe(find(strcmp(toLoad.Animal, animal))); %get probes to load
     theseDepthsCorr = toLoad.Depth(find(strcmp(toLoad.Animal, animal))); %get probes to load
     theseLocationsCorr = toLoad.Location(find(strcmp(toLoad.Animal, animal))); %get probes to load
-
+    
     protString = 'mage';
     histoFile = AP_cortexlab_filenameJF(animal, [], [], 'histo', [], []);
     load(histoFile)
@@ -87,9 +87,9 @@ for iAnimal = 1:size(theseAnimals)
         elseif isa(recInfo.ephys_not_started, 'cell') && isa(recInfo.timeline_not_started, 'double')
             theseExpErrors = strlength(recInfo.ephys_not_started) > 0 ...
                 | ~isnan(recInfo.timeline_not_started);
-        elseif isa(recInfo.ephys_not_started, 'cell') && isa(recInfo.timeline_not_started, 'cell')
+             elseif isa(recInfo.ephys_not_started, 'cell') && isa(recInfo.timeline_not_started, 'cell')
             theseExpErrors = strlength(recInfo.ephys_not_started) > 0 ...
-                | strlength(recInfo.timeline_not_started) > 0;
+                | strlength(recInfo.timeline_not_started) > 0 ;
         elseif isa(recInfo.ephys_not_started, 'double') && isa(recInfo.timeline_not_started, 'string')
             theseExpErrors = ~isnan(recInfo.ephys_not_started) ...
                 | strlength(recInfo.timeline_not_started) > 0;
@@ -119,27 +119,27 @@ for iAnimal = 1:size(theseAnimals)
             AP_load_experimentJF;
         end
         % plot alignement stuffs
-        if isempty(theseDepthsCorr{iP, :})
+        if isempty(theseDepthsCorr{iP,:})
             this_ccf = probe_ccf(iProbe);
             theseLocations = allenAt.acronym(this_ccf.trajectory_areas);
             theseLocationsInterest = contains(theseLocations, locations{1});
             theseDepths = this_ccf.probe_depths(theseLocationsInterest);
         else
-            theseDepths_op = strsplit(theseDepthsCorr{iP, :}, '-');
+            theseDepths_op = strsplit(theseDepthsCorr{iP,:},'-');
             clearvars theseDepths
-            theseDepths(1) = str2num(theseDepths_op{1, 1});
-            theseDepths(2) = str2num(theseDepths_op{1, 2});
+            theseDepths(1) = str2num(theseDepths_op{1,1});
+            theseDepths(2) = str2num(theseDepths_op{1,2});
         end
         if ~isempty(theseDepths)
             %save data in structure
             theseTemplates = find(template_depths >= min(theseDepths) & template_depths <= max(theseDepths)); %correct depth units
             %find closest depth and get closest location
-            if isempty(theseDepthsCorr{iP, :})
-                A = repmat(this_ccf.probe_depths, [1, length(template_depths)]);
-                [minValue, closestIndex] = min(abs(A-template_depths'));
-                closestLocation = this_ccf.trajectory_coords(closestIndex, :);
+            if isempty(theseDepthsCorr{iP,:})
+            A = repmat(this_ccf.probe_depths, [1, length(template_depths)]);
+            [minValue, closestIndex] = min(abs(A-template_depths'));
+            closestLocation = this_ccf.trajectory_coords(closestIndex, :);
             else
-                closestLocation = NaN;
+                closest
             end
             %raster general and for each trial condition
             theseSpikes = ismember(spike_templates, theseTemplates);

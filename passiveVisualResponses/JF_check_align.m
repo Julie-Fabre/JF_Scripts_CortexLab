@@ -1,7 +1,7 @@
 
 %% load simple, check aligning
 clear all;
-animal = 'JF019';
+animal = 'JF022';
 protString = 'mage';
 histoFile = AP_cortexlab_filenameJF(animal, [], [], 'histo', [], []);
 load(histoFile)

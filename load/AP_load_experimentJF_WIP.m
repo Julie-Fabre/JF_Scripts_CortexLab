@@ -1021,6 +1021,7 @@ if ephys_exists && load_parts.ephys
             flipper_expt_idx(find(experiment_idx)):flipper_expt_idx(find(experiment_idx)+1)-1);
         else
             dontAnalyze = 1;
+            return;
         end
 %         figure();
 %         scatter(flipper_flip_times_ephys(1:10), ones(10, 1))

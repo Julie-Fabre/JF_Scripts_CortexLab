@@ -1,5 +1,5 @@
 AP_preprocess_phase3_newOEJF_onlysync('JF022', '2020-12-14')
-animal = 'AP080';
+animal = 'JF020';
 im_type = 'o';
 
 %% get histology slices and copy locally
