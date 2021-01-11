@@ -188,18 +188,7 @@ if protocol_exists
         for q = 1:size(Protocol.seqnums, 1)
             stimIDs(Protocol.seqnums(q, :)) = q;
         end
-       
 
-        figure();
-        title('Photodiode channel');
-        hold on;
-        plot(photodiode_trace(1:20000));
-        hold on;
-        scatter(photodiode_flip(find(photodiode_flip <= 20000)), ones(size(find(photodiode_flip <= 20000), 1), 1))
-        hold on;
-        plot(Timeline.rawDAQData(1:20000,photodiode_idx))
-        hold on; 
-        plot(photodiode_onsets);
 
     end
 
@@ -269,6 +258,18 @@ if block_exists
 
     % SPECIFIC TO PROTOCOL
     [~, expDef] = fileparts(block.expDef);
+    figure();
+    title('Photodiode channel');
+    hold on;
+    plot(photodiode_trace(1:20000));
+    hold on;
+    ppp = photodiode_flip(find(photodiode_flip <= 20000));
+    scatter(ppp, ones(size(find(photodiode_flip <= 20000), 1), 1))
+    hold on;
+    plot(Timeline.rawDAQData(1:20000, photodiode_idx))
+    hold on;
+    scatter(ppp(2:2:end), ones(size(ppp(2:2:end), 1), 1));
+
     switch expDef
         case {'vanillaChoiceworld', 'vanillaChoiceworldBias', 'vanillaChoiceworldNoRepeats'}
             % Hit/miss recorded for last trial, circshift to align
@@ -511,7 +512,24 @@ if block_exists
             if any(signals_photodiode_iti_diff > 0.1)
                 error('mismatching signals/photodiode stim ITIs')
             end
+             surround_time = [-0.5, 2];
+            surround_sample_rate = 1 / Timeline.hw.samplingInterval; % (match this to framerate)
+            surround_time_points = surround_time(1):1 / surround_sample_rate:surround_time(2);
+            pull_times = bsxfun(@plus, stimOn_times, surround_time_points);
 
+            stim_aligned_wheel = interp1(Timeline.rawDAQTimestamps, ...
+                wheel_velocity, pull_times);
+            thresh_displacement = 0.025;
+            time_over_thresh = 0.05; % ms over velocity threshold to count
+            samples_over_thresh = time_over_thresh .* surround_sample_rate;
+            wheel_over_thresh_fullconv = convn( ...
+                abs(stim_aligned_wheel) > thresh_displacement, ...
+                ones(1, samples_over_thresh)) >= samples_over_thresh;
+            wheel_over_thresh = wheel_over_thresh_fullconv(:, end-size(stim_aligned_wheel, 2)+1:end);
+
+            [move_trial, wheel_move_sample] = max(wheel_over_thresh, [], 2);
+            wheel_move_time = arrayfun(@(x) pull_times(x, wheel_move_sample(x)), 1:size(pull_times, 1))';
+            wheel_move_time(~move_trial) = NaN;
             % Get stim ID and conditions
             conditions = unique(signals_events.stim_idValues)';
             n_conditions = size(conditions, 1);
@@ -997,27 +1015,34 @@ if ephys_exists && load_parts.ephys
             flip_diff_thresh) + 1; length(sync(flipper_sync_idx).timestamps) + 1];
         possibilities = diff(flipper_expt_idx);
         [val, idx] = min(abs(possibilities-length(flipper_flip_times_timeline)));
-        if length(flipper_expt_idx) < find(experiment_idx) + 1
-            experiment_idx = idx;
+        
+        if length(flipper_expt_idx) > find(experiment_idx)+1
             flipper_flip_times_ephys = sync(flipper_sync_idx).timestamps( ...
-                flipper_expt_idx(find(experiment_idx)):flipper_expt_idx(find(experiment_idx)+1)-1);
+            flipper_expt_idx(find(experiment_idx)):flipper_expt_idx(find(experiment_idx)+1)-1);
         else
-            flipper_flip_times_ephys = sync(flipper_sync_idx).timestamps( ...
-                flipper_expt_idx(find(experiment_idx)):flipper_expt_idx(find(experiment_idx)+1)-1);
+            dontAnalyze = 1;
         end
-        % Pick flipper times to use for alignment
+%         figure();
+%         scatter(flipper_flip_times_ephys(1:10), ones(10, 1))
+%         hold on;
+%         scatter(flipper_flip_times_timeline(1:10)+(flipper_flip_times_ephys(1) - flipper_flip_times_timeline(1)), 2*ones(10, 1))
+%         
+        
+        syncMessFile = AP_cortexlab_filenameJF(animal, day, experiment, 'syncMess', site, []);
+        syncF=fileread(syncMessFile);
+        startStr = strfind(syncF,'0 start time: ');
+        endStr = strfind(syncF,'@30000Hz');
+        syncMessVal = str2double(syncF(startStr+14:endStr-1)); 
+        if syncMessVal ~= 0
+            syncMessVal = syncMessVal / ephys_sample_rate; % if ephys started with alrerady soem seconds on the counter, remove those in timeline 
+        end
+        flipper_flip_times_timeline=flipper_flip_times_timeline+syncMessVal;
         if length(flipper_flip_times_ephys) == length(flipper_flip_times_timeline)
             % If same number of flips in ephys/timeline, use all
             sync_timeline = flipper_flip_times_timeline;
             sync_ephys = flipper_flip_times_ephys;
-        elseif length(flipper_flip_times_ephys) ~= length(flipper_flip_times_timeline) ...
-                && val == 0
-            experiment_idx = idx;
-            flipper_flip_times_ephys = sync(flipper_sync_idx).timestamps( ...
-                flipper_expt_idx(experiment_idx):flipper_expt_idx(experiment_idx+1)-1);
-            sync_timeline = flipper_flip_times_timeline;
-            sync_ephys = flipper_flip_times_ephys;
-        elseif length(flipper_flip_times_ephys) ~= length(flipper_flip_times_timeline)
+        elseif length(flipper_flip_times_ephys) < length(flipper_flip_times_timeline)
+            % check that correct recordig
             % If different number of flips in ephys/timeline, best
             % contiguous set via xcorr of diff
             warning([animal, ' ', day, ':Flipper flip times different in timeline/ephys'])
@@ -1028,49 +1053,33 @@ if ephys_exists && load_parts.ephys
             flipper_lag = flipper_lags(flipper_lag_idx);
             % (at the moment, assuming only dropped from ephys)
             sync_ephys = flipper_flip_times_ephys;
-            try
-                sync_timeline = flipper_flip_times_timeline(flipper_lag+1: ...
-                    flipper_lag+1:flipper_lag+length(flipper_flip_times_ephys));
-            catch
-                sync_timeline = flipper_flip_times_timeline;
+
+            sync_timeline = flipper_flip_times_timeline(flipper_lag+1: ...
+                flipper_lag+1:flipper_lag+length(flipper_flip_times_ephys));
+            if length(sync_timeline) < 2
+                bad_flipper = true;
             end
-            if length(diff(sync_ephys)) ~= length(diff(sync_timeline))
-                experiment_idx = idx;
-                flipper_flip_times_ephys = sync(flipper_sync_idx).timestamps( ...
-                    flipper_expt_idx(experiment_idx):flipper_expt_idx(experiment_idx+1)-1);
-                flipper_flip_times_ephys = sync(flipper_sync_idx).timestamps( ...
-                    flipper_expt_idx(idx):flipper_expt_idx(idx+1)-1);
-                % If different number of flips in ephys/timeline, best
-                % contiguous set via xcorr of diff
-                warning([animal, ' ', day, ':Flipper flip times different in timeline/ephys'])
-                warning(['The fix for this is probably not robust: always check'])
-                [flipper_xcorr, flipper_lags] = ...
-                    xcorr(diff(flipper_flip_times_timeline), diff(flipper_flip_times_ephys));
-                [~, flipper_lag_idx] = max(flipper_xcorr);
-                flipper_lag = flipper_lags(flipper_lag_idx);
-                % (at the moment, assuming only dropped from ephys)
-                sync_ephys = flipper_flip_times_ephys;
-                try
-                    sync_timeline = flipper_flip_times_timeline(flipper_lag+1: ...
-                        flipper_lag+1:flipper_lag+length(flipper_flip_times_ephys));
-                catch
-                    try
-                        sync_timeline = flipper_flip_times_timeline(1: ...
-                            1:-flipper_lag+length(flipper_flip_times_ephys));
-                    catch
-                        sync_timeline = flipper_flip_times_timeline;
-                    end
-                end
-                if length(diff(sync_ephys)) ~= length(diff(sync_timeline))
-                    bad_flipper = true;
-                end
-            end
+        elseif length(flipper_flip_times_ephys) > length(flipper_flip_times_timeline)
+            warning([animal, ' ', day, ':Flipper flip times different in timeline/ephys'])
+            warning(['The fix for this is probably not robust: always check'])
+            [flipper_xcorr, flipper_lags] = ...
+                xcorr( diff(flipper_flip_times_timeline),diff(flipper_flip_times_ephys));
+            [~, flipper_lag_idx] = max(flipper_xcorr);
+            flipper_lag = flipper_lags(flipper_lag_idx);
+            % (at the moment, assuming only dropped from ephys)
+            sync_ephys = flipper_flip_times_ephys(flipper_lag+1: ...
+                flipper_lag+1:flipper_lag+length(flipper_flip_times_timeline));
+
+            sync_timeline = flipper_flip_times_timeline;
+            
             bad_flipper = true;
         end
+
 
     else
         bad_flipper = true;
     end
+
 
     if bad_flipper
         % (if no flipper or flipper problem, use acqLive)
@@ -1080,7 +1089,9 @@ if ephys_exists && load_parts.ephys
         experiment_ephys_stops = sync(acqLive_sync_idx).timestamps(sync(acqLive_sync_idx).values == 0);
         acqlive_ephys_currexpt = [experiment_ephys_starts(idx), ...
             experiment_ephys_stops(idx)];
-
+        
+        % syncMessVal = 0;%52880321;
+        acqLive_timeline=acqLive_timeline+syncMessVal;
         sync_timeline = acqLive_timeline;
         sync_ephys = acqlive_ephys_currexpt;
 

@@ -85,6 +85,11 @@ switch file
         if file_exists
             filename = fileparts(filename{1});
         end
+    case 'syncMess'
+        filepattern = [animal filesep day filesep ...
+                'ephys' site_dir filesep 'experiment*' filesep 'recording*' ...
+                filesep 'sync_messages.txt'];
+            [filename,file_exists] = check_locations(filepattern,server_location);
     case 'histo'
         filepattern = [animal filesep 'Histology/processed/slices/probe_ccf.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);

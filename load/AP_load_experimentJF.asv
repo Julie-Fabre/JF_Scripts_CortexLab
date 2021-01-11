@@ -190,16 +190,7 @@ if protocol_exists
         end
        
 
-        figure();
-        title('Photodiode channel');
-        hold on;
-        plot(photodiode_trace(1:20000));
-        hold on;
-        scatter(photodiode_flip(find(photodiode_flip <= 20000)), ones(size(find(photodiode_flip <= 20000), 1), 1))
-        hold on;
-        plot(Timeline.rawDAQData(1:20000,photodiode_idx))
-        hold on; 
-        plot(photodiode_onsets);
+        
 
     end
 
@@ -269,6 +260,18 @@ if block_exists
 
     % SPECIFIC TO PROTOCOL
     [~, expDef] = fileparts(block.expDef);
+        figure();
+        title('Photodiode channel');
+        hold on;
+        plot(photodiode_trace(1:20000));
+        hold on;
+        ppp=photodiode_flip(find(photodiode_flip <= 20000));
+        scatter(ppp, ones(size(find(photodiode_flip <= 20000), 1), 1))
+        hold on;
+        plot(Timeline.rawDAQData(1:20000,photodiode_idx))
+        hold on; 
+        scatter(ppp(2:2:end),ones(size(ppp(2:2:end), 1), 1));
+        
     switch expDef
         case {'vanillaChoiceworld', 'vanillaChoiceworldBias', 'vanillaChoiceworldNoRepeats'}
             % Hit/miss recorded for last trial, circshift to align
@@ -997,6 +1000,12 @@ if ephys_exists && load_parts.ephys
             flip_diff_thresh) + 1; length(sync(flipper_sync_idx).timestamps) + 1];
         possibilities = diff(flipper_expt_idx);
         [val, idx] = min(abs(possibilities-length(flipper_flip_times_timeline)));
+        
+        figure(); 
+        scatter(flipper_flip_times_ephys(1:10), ones(10,1))
+        hold on; 
+        scatter(flipper_flip_times_timeline(1:10)+(flipper_flip_times_ephys(1)-flipper_flip_times_timeline(1)), 2*ones(10,1))
+        
         if length(flipper_expt_idx) < find(experiment_idx) + 1
             experiment_idx = idx;
             flipper_flip_times_ephys = sync(flipper_sync_idx).timestamps( ...
