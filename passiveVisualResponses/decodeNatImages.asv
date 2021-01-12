@@ -197,10 +197,17 @@ param.maxNumPeak = 4;
 param.maxRPV = 5;
 param.maxPercMissing = 30;
 unitCount = 0;
+       % FRunitsPSTHtrainStim = nan(1,30);
+       %         FRunitsPSTHtestStim=nan(1,30);
+                %FRunitsPSTHtrain=nan(1,15);
+                %FRunitsPSTHtest=nan(1,15);
+                
 for i = 1:thisCount - 1
     theseUnits = unique(ephysData(i).spike_templates);
     ephysData(i).goodUnit = zeros(length(theseUnits), 1);
     for ii = 1:length(theseUnits)
+
+                
         unitCount = unitCount + 1;
         theseSpikes = ephysData(i).spike_times_timeline(ephysData(i).spike_templates == theseUnits(ii));
         theseAmplis = ephysData(i).spike_amplitudes(ephysData(i).spike_templates == theseUnits(ii));
@@ -301,20 +308,63 @@ for i = 1:thisCount - 1
             psthBinSize = 0.01;
             if max(ephysData(i).stimIDs) > 29
                 BA=[];
-                stim =[];
-                PSTH=[];
+                stimtrain =[];
+                stimtest =[];
+                PSTHtrain=[];
+                PSTHtest=[];
+                trainData1=[];
+                trainData2=[];
+                trainData3=[];
+                trainData4=[];
+                trainData5=[];
+                trainData6=[];
+                trainData7=[];
+                trainData8=[];
+                trainData9=[];
+                trainData10=[];
+
                 for iStim = 1:30
                     theseTrials = find(ephysData(i).stimIDs == iStim);
 
-                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(1:2:end)), thisWindow, psthBinSize); %psth aligned
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray1] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(1:2:end)), thisWindow, psthBinSize); %psth aligned
                     FRunits(unitCount, iStim, 1) = nanmean(psth);
-                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(2:2:end)), thisWindow, psthBinSize); %psth aligned
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray2] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(2:2:end)), thisWindow, psthBinSize); %psth aligned
                     FRunits(unitCount, iStim, 2) = nanmean(psth);
                     [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials), thisWindow, psthBinSize); %psth aligned
                     
                     BA = [BA, nanmean(binnedArray,2)];
-                    stim = [stim, iStim*ones(size(binnedArray,1),1)];
-                    PSTH = [PSTH; nanmean(binnedArray,1)];
+                    stimtrain = [stimtrain; iStim];
+                    stimtest = [stimtest; iStim];
+                    PSTHtrain = [PSTHtrain; nanmean(binnedArray1,1)];
+                    PSTHtest = [PSTHtest; nanmean(binnedArray2,1)];
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray1] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(1:10:end)), thisWindow, psthBinSize); %psth aligned
+                    
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray2] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(2:10:end)), thisWindow, psthBinSize); %psth aligned
+                   
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray3] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(3:10:end)), thisWindow, psthBinSize); %psth aligned
+                   
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray4] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(4:10:end)), thisWindow, psthBinSize); %psth aligned
+                  
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray5] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(5:10:end)), thisWindow, psthBinSize); %psth aligned
+                    
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray6] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(6:10:end)), thisWindow, psthBinSize); %psth aligned
+                    
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray7] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(7:10:end)), thisWindow, psthBinSize); %psth aligned
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray8] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(8:10:end)), thisWindow, psthBinSize); %psth aligned
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray9] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(9:10:end)), thisWindow, psthBinSize); %psth aligned
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray10] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(10:10:end)), thisWindow, psthBinSize); %psth aligned
+                    trainData1= [trainData1; nanmean(nanmean(binnedArray1))]; 
+                    trainData2= [trainData2; nanmean(nanmean(binnedArray2))];
+                    trainData3= [trainData3; nanmean(nanmean(binnedArray3))];
+                    trainData4= [trainData4; nanmean(nanmean(binnedArray4))];
+                    trainData5= [trainData5; nanmean(nanmean(binnedArray5))];
+                    trainData6= [trainData6; nanmean(nanmean(binnedArray6))];
+                   trainData7= [trainData7; nanmean(nanmean(binnedArray7))];
+                    trainData8= [trainData8; nanmean(nanmean(binnedArray8))];
+                    trainData9= [trainData9; nanmean(nanmean(binnedArray9))];
+                    trainData10= [trainData10; nanmean(nanmean(binnedArray10))];
+                    %PSTHtest = [PSTHtest; nanmean(binnedArray2,1)];
+                    
 
                 end
                 FRunitsCorr(unitCount) = corr(squeeze(FRunits(unitCount, :, 1))', squeeze(FRunits(unitCount, :, 2))');
@@ -324,10 +374,21 @@ for i = 1:thisCount - 1
                 yv = bb(:);
                 %p =  vartestn(yv,repmat(1:30,1,size(BA,1)),'TestType','LeveneAbsolute');                                                                                                                                         ,Model_Year,'TestType','LeveneAbsolute')
                 FRunitsP(unitCount) = anova1(BA ,[],'off');
-                FRunitsPSTH(unitCount,:) = nanmean(PSTH,1);
+                FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,1) = trainData1;
+                FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,2) = trainData2;
+                FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,3) = trainData3;
+                FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,4) = trainData4;
+                FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,5) = trainData5;
+                FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,6) = trainData6;
+                FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,7) = trainData7;
+                FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,8) = trainData8;
+                FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,9) = trainData9;
+                FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,6) = trainData10;
+                %FRunitsPSTHtest((unitCount-1)*30+1:(unitCount)*30,:) = PSTHtest;
                 %FRunitsVAR(unitCount,:) = p;
                 FRunitsWA(unitCount) = welchanova([yv, repmat(1:30,1,size(BA,1))'],0.05);
-                
+                FRunitsPSTHtrainStim((unitCount-1)*30+1:(unitCount)*30) = stimtrain;
+                FRunitsPSTHtestStim((unitCount-1)*30+1:(unitCount)*30) = stimtest;
                 %[p,tbl,stats] = anova1(BA)
                 %         figure();
                 %         scatter(squeeze(FRunits(unitCount,:,1)), squeeze(FRunits(unitCount,:,2)))
@@ -335,21 +396,24 @@ for i = 1:thisCount - 1
                 FRunits(unitCount, 1:10, 2) = NaN;
                 FRunits(unitCount, 1:30, 1) = NaN;
                 FRunitsCorr(unitCount) = NaN;
-                FRunitsPSTH(unitCount,1:15) = NaN;
+%                 FRunitsPSTHtrain(unitCount,1:15) = NaN;
+%                 FRunitsPSTHtest(unitCount,1:15) = NaN;
                 FRunitsWA(unitCount)=NaN;
+               
                 
             end
         else
             FRunits(unitCount, 1:30, 2) = NaN;
             FRunits(unitCount, 1:30, 1) = NaN;
-            FRunitsCorr(unitCount) = NaN;
-            FRunitsPSTH(unitCount,1:15) = NaN;
+%             FRunitsCorr(unitCount) = NaN;
+%             FRunitsPSTHtrain(unitCount,1:15) = NaN;
             FRunitsWA(unitCount)=NaN;
         end
 
 
     end
-    keep FRunits ii theseUnits unitCount i ephysData thisCount param FRunitsCorr FRunitsP BA FRunitsWA FRunitsPSTH
+    keep FRunits ii theseUnits unitCount i ephysData thisCount param FRunitsCorr FRunitsP BA FRunitsWA FRunitsPSTHtrain ...
+        FRunitsPSTHtestStim FRunitsPSTHtrainStim
 end
 %summary
 figure();
@@ -396,10 +460,10 @@ ylabel('unit #')
 xlabel('welch''s ANOVA p-value')
 makepretty;
 
-%% 4. decoder
+%% 4. decoder - MAP
 %%Training Side
 % random three class data with target matrix -- [9X3] 9 observation with 3 features
-data = FRunitsPSTH(:,:,1)';
+data = FRunitsPSTHtrain(:,:,1)';
 target = 1:30;
 % create a naive bayes model
 % data must not have zero variance
@@ -415,23 +479,66 @@ load('nb.mat');
 testdata = [10 0 0]; % take 1 new unknown observation and give to trained model
 Group = predict(nb,testdata);
 
-%% Training Side
+%% 5. decoder - SVM
+%%Training Side
 % AND gate data with target matrix -- [4X2] 4 observation with 2 features
 data = [0 0;
         0 1;
         1 0;
         1 1];
 target = [1;1;1;2]; % [0 0 0 1] is representd as [1 1 1 2] 
+
+data = FRunitsPSTHtrain; 
+target = FRunitsPSTHtrainStim; 
+target(target==0)=NaN;
 %train an binary SVM model
 SVMstructc = fitcsvm(data,target,'Standardize',true); % SVMstructc is the trained model. save it at end for doing testing
 save('SVMstructc.mat','SVMstructc');
 % train performance
 Group = predict(SVMstructc,data) % give the data to model for checking its training level
 perf=sum(Group==target)/size(Group,1) % performance in the range of 0 to 1
-%% Testing Side
+%%Testing Side
 % for testing load the trained model
 load('SVMstructc.mat');
 testdata = [0 0]; % take 1 new unknown observation and give to trained model
 Group = predict(SVMstructc,testdata)
 
+
+%% 6. decoder - KNN
+for iStim = 1:30
+    data1(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),1);
+    data2(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),2);
+    data3(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),3);
+    data4(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),4);
+    data5(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),5);
+    data6(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),6);
+    
+end
+data = [data1; data2; data3];
+target = repmat(1:30,[1,3]); 
+kNNModel = fitcknn(data,target,'NumNeighbors',30); % kNNModel is the trained model. save it at end for doing testing
+save('kNNModel.mat','kNNModel');
+% train performance
+label = predict(kNNModel,data);
+perf=sum(label==target)/size(label,1); % performance in the range of 0 to 1
+%%Testing Side
+% for testing load the trained model
+load('kNNModel.mat');
+testdata = [data4; data5; data6]; % take 1 new unknown observation and give to trained model
+Group = predict(kNNModel,testdata);
+for opp=1:3
+    pCorr(opp) = numel(find(Group(1+(opp-1)*30:opp*30)'-1:30==0))/30*100;
+end
+numel(find(Group'-target==0))/90*100
+pCorr(1)=3/30*100;pCorr(2)=1/30*100;pCorr(3)=2/30*100;
+chanceLevel = (1/30)*100;
+
+figure();
+scatter([1,1,1],pCorr, 'filled')
+hold on;
+line([0 2], [chanceLevel, chanceLevel], 'Color','r');
+ylabel('CV-split classification accuracy')
+xlabel('KNN classifier');
+makepretty;
+%how many times isd the label right? 
 %% TO DO: EXAMPLE 
