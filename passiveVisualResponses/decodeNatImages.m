@@ -302,19 +302,21 @@ for i = 1:thisCount - 1
             if max(ephysData(i).stimIDs) > 29
                 BA=[];
                 stim =[];
-                PSTH=[];
+                PSTHtrain=[];
+                PSTHtest=[];
                 for iStim = 1:30
                     theseTrials = find(ephysData(i).stimIDs == iStim);
 
-                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(1:2:end)), thisWindow, psthBinSize); %psth aligned
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray1] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(1:2:end)), thisWindow, psthBinSize); %psth aligned
                     FRunits(unitCount, iStim, 1) = nanmean(psth);
-                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(2:2:end)), thisWindow, psthBinSize); %psth aligned
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray2] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(2:2:end)), thisWindow, psthBinSize); %psth aligned
                     FRunits(unitCount, iStim, 2) = nanmean(psth);
                     [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials), thisWindow, psthBinSize); %psth aligned
                     
                     BA = [BA, nanmean(binnedArray,2)];
                     stim = [stim, iStim*ones(size(binnedArray,1),1)];
-                    PSTH = [PSTH; nanmean(binnedArray,1)];
+                    PSTHtrain = [PSTHtrain; nanmean(binnedArray1,1)];
+                    PSTHtest = [PSTHtest; nanmean(binnedArray2,1)];
 
                 end
                 FRunitsCorr(unitCount) = corr(squeeze(FRunits(unitCount, :, 1))', squeeze(FRunits(unitCount, :, 2))');
@@ -323,10 +325,11 @@ for i = 1:thisCount - 1
                 bb=BA';
                 yv = bb(:);
                 %p =  vartestn(yv,repmat(1:30,1,size(BA,1)),'TestType','LeveneAbsolute');                                                                                                                                         ,Model_Year,'TestType','LeveneAbsolute')
-                FRunitsP(unitCount) = anova1(BA') ,[],'off');
-                FRunitsPSTH(unitCount,:) = nanmean(PSTH,1);
+                FRunitsP(unitCount) = anova1(BA ,[],'off');
+                FRunitsPSTHtrain(unitCount,:) = nanmean(PSTHtrain,1);
+                FRunitsPSTHtest(unitCount,:) = nanmean(PSTHtest,1);
                 %FRunitsVAR(unitCount,:) = p;
-                FRunitaWA(unitCount) = welchanova([yv, repmat(1:30,1,size(BA,1))'],0.05);
+                FRunitsWA(unitCount) = welchanova([yv, repmat(1:30,1,size(BA,1))'],0.05);
                 
                 %[p,tbl,stats] = anova1(BA)
                 %         figure();
@@ -335,19 +338,22 @@ for i = 1:thisCount - 1
                 FRunits(unitCount, 1:10, 2) = NaN;
                 FRunits(unitCount, 1:30, 1) = NaN;
                 FRunitsCorr(unitCount) = NaN;
-                FRunitsPSTH(unitCount,1:15) = NaN;
+                FRunitsPSTHtrain(unitCount,1:15) = NaN;
+                FRunitsPSTHtest(unitCount,1:15) = NaN;
+                FRunitsWA(unitCount)=NaN;
                 
             end
         else
             FRunits(unitCount, 1:30, 2) = NaN;
             FRunits(unitCount, 1:30, 1) = NaN;
             FRunitsCorr(unitCount) = NaN;
-            FRunitsPSTH(unitCount,1:15) = NaN;
+            FRunitsPSTHtrain(unitCount,1:15) = NaN;
+            FRunitsWA(unitCount)=NaN;
         end
 
 
     end
-    keep FRunits ii theseUnits unitCount i ephysData thisCount param FRunitsCorr FRunitsP BA
+    keep FRunits ii theseUnits unitCount i ephysData thisCount param FRunitsCorr FRunitsP BA FRunitsWA FRunitsPSTHtrain FRunitsPSTHtest
 end
 %summary
 figure();
@@ -380,14 +386,24 @@ figure();
 del=round(FRunitsP*10000)==0;
 aa=FRunitsP;
 aa(del)=[];
-hist(aa, 40)
+hist(aa, 20)
 ylabel('unit #')
 xlabel('one-way ANOVA p-value')
 makepretty;
+
+figure();
+del=round(FRunitsWA*10000)==0;
+aa=FRunitsWA;
+aa(del)=[];
+hist(aa,20)
+ylabel('unit #')
+xlabel('welch''s ANOVA p-value')
+makepretty;
+
 %% 4. decoder
 %%Training Side
 % random three class data with target matrix -- [9X3] 9 observation with 3 features
-data = FRunits(:,:,1)';
+data = FRunitsPSTHtrain(:,:,1)';
 target = 1:30;
 % create a naive bayes model
 % data must not have zero variance
@@ -402,5 +418,24 @@ perf=sum(label==target)/size(label,1); % performance in the range of 0 to 1
 load('nb.mat');
 testdata = [10 0 0]; % take 1 new unknown observation and give to trained model
 Group = predict(nb,testdata);
+
+%% Training Side
+% AND gate data with target matrix -- [4X2] 4 observation with 2 features
+data = [0 0;
+        0 1;
+        1 0;
+        1 1];
+target = [1;1;1;2]; % [0 0 0 1] is representd as [1 1 1 2] 
+%train an binary SVM model
+SVMstructc = fitcsvm(data,target,'Standardize',true); % SVMstructc is the trained model. save it at end for doing testing
+save('SVMstructc.mat','SVMstructc');
+% train performance
+Group = predict(SVMstructc,data) % give the data to model for checking its training level
+perf=sum(Group==target)/size(Group,1) % performance in the range of 0 to 1
+%% Testing Side
+% for testing load the trained model
+load('SVMstructc.mat');
+testdata = [0 0]; % take 1 new unknown observation and give to trained model
+Group = predict(SVMstructc,testdata)
 
 %% TO DO: EXAMPLE 
