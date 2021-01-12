@@ -196,10 +196,12 @@ param.tauC = 0.0002; %censored period time (s)
 param.maxNumPeak = 4;
 param.maxRPV = 5;
 param.maxPercMissing = 30;
-
+unitCount = 0;
 for i = 1:thisCount - 1
     theseUnits = unique(ephysData(i).spike_templates);
+    ephysData(i).goodUnit = zeros(length(theseUnits), 1);
     for ii = 1:length(theseUnits)
+        unitCount = unitCount + 1;
         theseSpikes = ephysData(i).spike_times_timeline(ephysData(i).spike_templates == theseUnits(ii));
         theseAmplis = ephysData(i).spike_amplitudes(ephysData(i).spike_templates == theseUnits(ii));
         thisWaveform = ephysData(i).template_wf(ii, :);
@@ -207,11 +209,11 @@ for i = 1:thisCount - 1
         [~, max_site] = max(max(abs(ephysData(i).template_wfs(ii, :, :)), [], 2), [], 3);
         if max_site < 5
             nearest_sites = [max_site:max_site + 7];
+        elseif max_site > size(ephysData(i).template_wfs(ii, :, :), 3) - 7
+            nearest_sites = [max_site - 7:max_site];
         else
             nearest_sites = [max_site - 4:max_site + 3];
         end
-
-
 
         %% quality metrics
         %check rfp
@@ -221,10 +223,10 @@ for i = 1:thisCount - 1
             ones(size(theseSpikes, 1), 1) * 2], 'binSize', 0.01, 'duration', 0.5, 'norm', 'rate'); %function
         %from the Zugaro lab mod. by Buzsaki lab-way faster than my own!
         thisACG = ccg(:, 1, 1);
-        figure(1);
-        clf;
-        plot(thisACG)
-        title(num2str(fractionRPVchunk))
+        %         figure(1);
+        %         clf;
+        %         plot(thisACG)
+        %         title(num2str(fractionRPVchunk))
         %check amplitudes
         try
             [percent_missing_ndtrAll, ~] = ampli_fit_prc_missJF(theseAmplis, 0);
@@ -271,34 +273,134 @@ for i = 1:thisCount - 1
         %check correlation/spatial decay
         [rho, pval] = corr(squeeze(theseWvs(:, :, nearest_sites)), squeeze(theseWvs(:, :, nearest_sites)));
         troughVals = min(squeeze(theseWvs(:, :, nearest_sites)));
-        figure(2);
-        clf;
-        subplot(2, 5, 1)
-        plot(thisWaveform)
-        for iSite = 1:length(nearest_sites)
-            subplot(2, 5, 2+iSite)
-            plot(squeeze(theseWvs(:, :, nearest_sites(iSite))))
+        %         figure(2);
+        %         clf;
+        %         subplot(2, 5, 1)
+        %         plot(thisWaveform)
+        %         for iSite = 1:length(nearest_sites)
+        %             subplot(2, 5, 2+iSite)
+        %             plot(squeeze(theseWvs(:, :, nearest_sites(iSite))))
+        %
+        %             subplot(2, 5, 2)
+        %             plot(squeeze(theseWvs(:, :, nearest_sites(iSite))))
+        %             hold on;
+        %         end
+        %         title([num2str(min(troughVals)) num2str(max(troughVals))])
 
-            subplot(2, 5, 2)
-            plot(squeeze(theseWvs(:, :, nearest_sites(iSite))))
-            hold on;
-        end
-        title([num2str(min(troughVals)) num2str(max(troughVals))])
-
-        if min(troughVals)<max(troughVals)*2 && numPeaksTroughsTemp < param.maxNumPeak && peakLoc > troughLoc && ...
+        if min(troughVals) < max(troughVals) * 2 && numPeaksTroughsTemp < param.maxNumPeak && peakLoc > troughLoc && ...
                 fractionRPVchunk <= param.maxRPV && numel(theseSpikes) > 300 %&& percent_missing_ndtrAll < param.maxPercMissing
-            disp('goodUnit')
+            %disp('goodUnit')
             ephysData(i).goodUnit(ii) = 1;
         else
             ephysData(i).goodUnit(ii) = 0;
         end
 
         %% FR 1/2 trials
-        %psth aligned 
+        if ephysData(i).goodUnit(ii) == 1
+            thisWindow = [0.05, 0.2];
+            psthBinSize = 0.01;
+            if max(ephysData(i).stimIDs) > 29
+                BA=[];
+                stim =[];
+                PSTH=[];
+                for iStim = 1:30
+                    theseTrials = find(ephysData(i).stimIDs == iStim);
+
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(1:2:end)), thisWindow, psthBinSize); %psth aligned
+                    FRunits(unitCount, iStim, 1) = nanmean(psth);
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(2:2:end)), thisWindow, psthBinSize); %psth aligned
+                    FRunits(unitCount, iStim, 2) = nanmean(psth);
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials), thisWindow, psthBinSize); %psth aligned
+                    
+                    BA = [BA, nanmean(binnedArray,2)];
+                    stim = [stim, iStim*ones(size(binnedArray,1),1)];
+                    PSTH = [PSTH; nanmean(binnedArray,1)];
+
+                end
+                FRunitsCorr(unitCount) = corr(squeeze(FRunits(unitCount, :, 1))', squeeze(FRunits(unitCount, :, 2))');
+                kk=kstest(BA(1,:));
+                load carsmall
+                bb=BA';
+                yv = bb(:);
+                %p =  vartestn(yv,repmat(1:30,1,size(BA,1)),'TestType','LeveneAbsolute');                                                                                                                                         ,Model_Year,'TestType','LeveneAbsolute')
+                FRunitsP(unitCount) = anova1(BA') ,[],'off');
+                FRunitsPSTH(unitCount,:) = nanmean(PSTH,1);
+                %FRunitsVAR(unitCount,:) = p;
+                FRunitaWA(unitCount) = welchanova([yv, repmat(1:30,1,size(BA,1))'],0.05);
+                
+                %[p,tbl,stats] = anova1(BA)
+                %         figure();
+                %         scatter(squeeze(FRunits(unitCount,:,1)), squeeze(FRunits(unitCount,:,2)))
+            else
+                FRunits(unitCount, 1:10, 2) = NaN;
+                FRunits(unitCount, 1:30, 1) = NaN;
+                FRunitsCorr(unitCount) = NaN;
+                FRunitsPSTH(unitCount,1:15) = NaN;
+                
+            end
+        else
+            FRunits(unitCount, 1:30, 2) = NaN;
+            FRunits(unitCount, 1:30, 1) = NaN;
+            FRunitsCorr(unitCount) = NaN;
+            FRunitsPSTH(unitCount,1:15) = NaN;
+        end
+
+
     end
-    keep FRunits ii theseUnits unitCount i ephysData thisCount param
+    keep FRunits ii theseUnits unitCount i ephysData thisCount param FRunitsCorr FRunitsP BA
 end
-
+%summary
+figure();
+hist(FRunitsCorr, 20)
+xlabel('r2 coeff.')
+ylabel('# of units')
+makepretty;
+prctile(FRunitsCorr,50)
+%example cells 
+ff=find(FRunitsCorr<-0.3&FRunitsCorr>-0.5);%>0.5; <0.1 > -0.1 ;
+for iW=ff
+    figure();
+    %subplot(221)
+    scatter(squeeze(FRunits(iW,:,1)), squeeze(FRunits(iW,:,2)))
+    xlabel('FR 1/2 trials')
+    ylabel('FR 1/2 trials')
+    makepretty;
+    %subplot(222) 
+    %subplot(223)
+    
+    %subplot(224)
+end
+FRunitsCorr(ff(21))
+FRunitsCorr(ff(35))
+FRunitsCorr(ff(28))
+FRunitsCorr(ff(37))
+FRunitsCorr(ff(35))
 %% 3. one-way ANOVA: -way anova for each cell: is there a main effect "stim" on firing rate  ? pvalue for each cell. can then plot the districbution of pvalues and see which ones are signif.
-
+figure();
+del=round(FRunitsP*10000)==0;
+aa=FRunitsP;
+aa(del)=[];
+hist(aa, 40)
+ylabel('unit #')
+xlabel('one-way ANOVA p-value')
+makepretty;
 %% 4. decoder
+%%Training Side
+% random three class data with target matrix -- [9X3] 9 observation with 3 features
+data = FRunits(:,:,1)';
+target = 1:30;
+% create a naive bayes model
+% data must not have zero variance
+% var(data(target==1,:)) for checking variance for class 1
+nb = fitcnb(data,target); % nb is the trained model. save it at end for doing testing
+save('nb.mat','nb');
+% train performance
+label = predict(nb,data);
+perf=sum(label==target)/size(label,1); % performance in the range of 0 to 1
+%%Testing Side
+% for testing load the trained model
+load('nb.mat');
+testdata = [10 0 0]; % take 1 new unknown observation and give to trained model
+Group = predict(nb,testdata);
+
+%% TO DO: EXAMPLE 
