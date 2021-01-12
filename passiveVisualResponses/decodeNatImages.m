@@ -201,10 +201,13 @@ unitCount = 0;
        %         FRunitsPSTHtestStim=nan(1,30);
                 %FRunitsPSTHtrain=nan(1,15);
                 %FRunitsPSTHtest=nan(1,15);
-                
+ unitIdx=[]; 
+ siteIdx=[];
 for i = 1:thisCount - 1
     theseUnits = unique(ephysData(i).spike_templates);
     ephysData(i).goodUnit = zeros(length(theseUnits), 1);
+    siteIdx = [siteIdx; i*ones(length(theseUnits),1)];
+    unitIdx = [unitIdx, [1:length(theseUnits)]];
     for ii = 1:length(theseUnits)
 
                 
@@ -374,6 +377,7 @@ for i = 1:thisCount - 1
                 yv = bb(:);
                 %p =  vartestn(yv,repmat(1:30,1,size(BA,1)),'TestType','LeveneAbsolute');                                                                                                                                         ,Model_Year,'TestType','LeveneAbsolute')
                 FRunitsP(unitCount) = anova1(BA ,[],'off');
+                FRunitsPKS(unitCount) = kruskalwallis(BA, [], 'off');
                 FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,1) = trainData1;
                 FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,2) = trainData2;
                 FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,3) = trainData3;
@@ -395,6 +399,7 @@ for i = 1:thisCount - 1
             else
                 FRunits(unitCount, 1:10, 2) = NaN;
                 FRunits(unitCount, 1:30, 1) = NaN;
+                FRunitsPKS(unitCount) = NaN;
                 FRunitsCorr(unitCount) = NaN;
 %                 FRunitsPSTHtrain(unitCount,1:15) = NaN;
 %                 FRunitsPSTHtest(unitCount,1:15) = NaN;
@@ -405,6 +410,7 @@ for i = 1:thisCount - 1
         else
             FRunits(unitCount, 1:30, 2) = NaN;
             FRunits(unitCount, 1:30, 1) = NaN;
+            FRunitsPKS(unitCount) = NaN;
 %             FRunitsCorr(unitCount) = NaN;
 %             FRunitsPSTHtrain(unitCount,1:15) = NaN;
             FRunitsWA(unitCount)=NaN;
@@ -412,8 +418,8 @@ for i = 1:thisCount - 1
 
 
     end
-    keep FRunits ii theseUnits unitCount i ephysData thisCount param FRunitsCorr FRunitsP BA FRunitsWA FRunitsPSTHtrain ...
-        FRunitsPSTHtestStim FRunitsPSTHtrainStim
+    keep FRunitsPKS FRunits ii theseUnits unitCount i ephysData thisCount param FRunitsCorr FRunitsP BA FRunitsWA FRunitsPSTHtrain ...
+        FRunitsPSTHtestStim FRunitsPSTHtrainStim siteIdx unitIdx
 end
 %summary
 figure();
@@ -460,6 +466,14 @@ ylabel('unit #')
 xlabel('welch''s ANOVA p-value')
 makepretty;
 
+figure();
+del=round(FRunitsPKS*10000)==0;
+aa=FRunitsPKS;
+aa(del)=[];
+hist(aa,20)
+ylabel('unit #')
+xlabel('Kruskal-Wallis p-value')
+makepretty;
 %% 4. decoder - MAP
 %%Training Side
 % random three class data with target matrix -- [9X3] 9 observation with 3 features
@@ -479,7 +493,7 @@ load('nb.mat');
 testdata = [10 0 0]; % take 1 new unknown observation and give to trained model
 Group = predict(nb,testdata);
 
-%% 5. decoder - SVM
+%% 5. decoder - SVM one vs all 
 %%Training Side
 % AND gate data with target matrix -- [4X2] 4 observation with 2 features
 data = [0 0;
@@ -505,6 +519,7 @@ Group = predict(SVMstructc,testdata)
 
 
 %% 6. decoder - KNN
+GreatUnits = find(FRunitsPKS<0.05  );
 for iStim = 1:30
     data1(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),1);
     data2(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),2);
@@ -512,10 +527,14 @@ for iStim = 1:30
     data4(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),4);
     data5(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),5);
     data6(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),6);
+    data7(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),7);
+    data8(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),8);
+    data9(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),9);
+    data10(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),10);
     
 end
-data = [data1; data2; data3];
-target = repmat(1:30,[1,3]); 
+data = [data1(:,GreatUnits ); data2; data3; data4; data5];
+target = repmat(1:30,[1,5]); 
 kNNModel = fitcknn(data,target,'NumNeighbors',30); % kNNModel is the trained model. save it at end for doing testing
 save('kNNModel.mat','kNNModel');
 % train performance
@@ -524,21 +543,68 @@ perf=sum(label==target)/size(label,1); % performance in the range of 0 to 1
 %%Testing Side
 % for testing load the trained model
 load('kNNModel.mat');
-testdata = [data4; data5; data6]; % take 1 new unknown observation and give to trained model
+testdata = [data6; data7; data8; data9;data10]; % take 1 new unknown observation and give to trained model
 Group = predict(kNNModel,testdata);
-for opp=1:3
-    pCorr(opp) = numel(find(Group(1+(opp-1)*30:opp*30)'-1:30==0))/30*100;
+for opp=1:5
+    pCorr(opp) = numel(find(Group(1+(opp-1)*30:opp*30)'-[1:30]==0))/30*100;
 end
-numel(find(Group'-target==0))/90*100
-pCorr(1)=3/30*100;pCorr(2)=1/30*100;pCorr(3)=2/30*100;
+
 chanceLevel = (1/30)*100;
 
 figure();
-scatter([1,1,1],pCorr, 'filled')
+%boxplot(pCorr)
+hold on;
+scatter(ones(size(pCorr)).*(1+(rand(size(pCorr))-0.5)/2),pCorr,'b','filled')
 hold on;
 line([0 2], [chanceLevel, chanceLevel], 'Color','r');
 ylabel('CV-split classification accuracy')
 xlabel('KNN classifier');
 makepretty;
 %how many times isd the label right? 
-%% TO DO: EXAMPLE 
+%% TO DO: EXAMPLES
+GreatUnits = find(FRunitsPKS<0.05  );
+
+colorsO = lines(30); 
+for iGreatUnit = 1:length(GreatUnits)
+    iGreatUnit = iGreatUnit + 1;
+    i=siteIdx(GreatUnits(iGreatUnit));
+    ii=unitIdx(GreatUnits(iGreatUnit));
+    theseUnits = unique(ephysData(i).spike_templates);
+    theseSpikes = ephysData(i).spike_times_timeline(ephysData(i).spike_templates == theseUnits(ii));
+    thisWindow = [-0.2, 0.5];
+    psthBinSize = 0.01;
+    binnFull = [];
+    stim=[];
+    for iStim = 1:30
+        theseTrials = find(ephysData(i).stimIDs == iStim);
+        [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials), thisWindow, psthBinSize); %psth aligned
+        binnFull = [binnFull; binnedArray];
+        meanP(iStim) = nanmean(psth(11:31)); 
+        stim =[stim; iStim*ones(size(binnedArray,1),1)];
+    end
+    [ss, sidx]=sort(meanP);
+    clf; 
+    binnFull(binnFull > 1) = 1;
+    sortedBA=[];
+    for iStim = sidx
+        sortedBA = [sortedBA; binnFull(stim==iStim,:)];
+    end
+    %h = imagesc(-0.1:0.01:0.3-0.01, [], 1-binnFull);
+    [yPoints,xPoints] = find(sortedBA==1);
+    %xPoints = 0.0xPoints  -0.1; 
+    tt=repmat(-0.2:0.01:0.5-0.1, [1,600]);
+    plot(tt(xPoints),yPoints,'.k');
+    xlim([-0.2, 0.5])
+    colormap(gray)
+    yy = ylim;
+    for iOr = 1:30
+        line([0, 0], [1 + round(yy(2)/30) * (iOr - 1), round(yy(2)/30) * (iOr)], 'Color', colorsO(iOr, :))
+        makepretty;
+    end
+    xlabel('time from stim onset (s)')
+    ylabel('trial # (sorted by image)')
+    makeprettyLite;
+    %site and unit # 
+    %get binned Array for each stim 
+    
+end
