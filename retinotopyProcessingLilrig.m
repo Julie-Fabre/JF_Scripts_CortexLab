@@ -1,8 +1,8 @@
 
 clear all;
 
-animal = 'JF022';
-day = '2020-12-12';
+animal = 'JF023';
+day = '2021-01-21';
 experiment = 2;
 lilrig_load_experimentJF;
 lilrig_retinotopyJF;

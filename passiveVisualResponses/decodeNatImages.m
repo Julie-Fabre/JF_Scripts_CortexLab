@@ -197,12 +197,14 @@ param.maxNumPeak = 4;
 param.maxRPV = 5;
 param.maxPercMissing = 30;
 unitCount = 0;
+thisCount=11;
        % FRunitsPSTHtrainStim = nan(1,30);
        %         FRunitsPSTHtestStim=nan(1,30);
                 %FRunitsPSTHtrain=nan(1,15);
                 %FRunitsPSTHtest=nan(1,15);
  unitIdx=[]; 
  siteIdx=[];
+ goodCount = 1;
 for i = 1:thisCount - 1
     theseUnits = unique(ephysData(i).spike_templates);
     ephysData(i).goodUnit = zeros(length(theseUnits), 1);
@@ -378,20 +380,24 @@ for i = 1:thisCount - 1
                 %p =  vartestn(yv,repmat(1:30,1,size(BA,1)),'TestType','LeveneAbsolute');                                                                                                                                         ,Model_Year,'TestType','LeveneAbsolute')
                 FRunitsP(unitCount) = anova1(BA ,[],'off');
                 FRunitsPKS(unitCount) = kruskalwallis(BA, [], 'off');
-                FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,1) = trainData1;
-                FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,2) = trainData2;
-                FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,3) = trainData3;
-                FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,4) = trainData4;
-                FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,5) = trainData5;
-                FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,6) = trainData6;
-                FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,7) = trainData7;
-                FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,8) = trainData8;
-                FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,9) = trainData9;
-                FRunitsPSTHtrain((unitCount-1)*30+1:(unitCount)*30,10) = trainData10;
+                if FRunitsPKS(unitCount)<0.05
+                FRunitsPSTHtrain((goodCount-1)*30+1:(goodCount)*30,1) = trainData1;
+                FRunitsPSTHtrain((goodCount-1)*30+1:(goodCount)*30,2) = trainData2;
+                FRunitsPSTHtrain((goodCount-1)*30+1:(goodCount)*30,3) = trainData3;
+                FRunitsPSTHtrain((goodCount-1)*30+1:(goodCount)*30,4) = trainData4;
+                FRunitsPSTHtrain((goodCount-1)*30+1:(goodCount)*30,5) = trainData5;
+                FRunitsPSTHtrain((goodCount-1)*30+1:(goodCount)*30,6) = trainData6;
+                FRunitsPSTHtrain((goodCount-1)*30+1:(goodCount)*30,7) = trainData7;
+                FRunitsPSTHtrain((goodCount-1)*30+1:(goodCount)*30,8) = trainData8;
+                FRunitsPSTHtrain((goodCount-1)*30+1:(goodCount)*30,9) = trainData9;
+                FRunitsPSTHtrain((goodCount-1)*30+1:(goodCount)*30,10) = trainData10;
+                FRunitsPSTHtrainStim((goodCount-1)*30+1:(goodCount)*30) = stimtrain;
+                goodCount = goodCount+1;
+                end
                 %FRunitsPSTHtest((unitCount-1)*30+1:(unitCount)*30,:) = PSTHtest;
                 %FRunitsVAR(unitCount,:) = p;
                 FRunitsWA(unitCount) = welchanova([yv, repmat(1:30,1,size(BA,1))'],0.05);
-                FRunitsPSTHtrainStim((unitCount-1)*30+1:(unitCount)*30) = stimtrain;
+                
                 FRunitsPSTHtestStim((unitCount-1)*30+1:(unitCount)*30) = stimtest;
                 %[p,tbl,stats] = anova1(BA)
                 %         figure();
@@ -419,7 +425,7 @@ for i = 1:thisCount - 1
 
     end
     keep FRunitsPKS FRunits ii theseUnits unitCount i ephysData thisCount param FRunitsCorr FRunitsP BA FRunitsWA FRunitsPSTHtrain ...
-        FRunitsPSTHtestStim FRunitsPSTHtrainStim siteIdx unitIdx
+        FRunitsPSTHtestStim FRunitsPSTHtrainStim siteIdx unitIdx goodCount
 end
 %summary
 figure();
@@ -470,7 +476,7 @@ figure();
 del=round(FRunitsPKS*10000)==0;
 aa=FRunitsPKS;
 aa(del)=[];
-hist(aa,20)
+hist(aa,30)
 ylabel('unit #')
 xlabel('Kruskal-Wallis p-value')
 makepretty;
@@ -521,21 +527,25 @@ Group = predict(SVMstructc,testdata)
 %% 6. decoder - KNN
 GreatUnits = find(FRunitsPKS<0.05  );
 for iStim = 1:30
-    data1(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),1);
-    data2(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),2);
-    data3(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),3);
-    data4(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),4);
-    data5(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),5);
-    data6(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),6);
-    data7(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),7);
-    data8(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),8);
-    data9(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),9);
-    data10(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim==iStim),10);
+    data1(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim(1:size(FRunitsPSTHtrain,1))==iStim),1);
+    data2(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim(1:size(FRunitsPSTHtrain,1))==iStim),2);
+    data3(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim(1:size(FRunitsPSTHtrain,1))==iStim),3);
+    data4(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim(1:size(FRunitsPSTHtrain,1))==iStim),4);
+    data5(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim(1:size(FRunitsPSTHtrain,1))==iStim),5);
+    data6(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim(1:size(FRunitsPSTHtrain,1))==iStim),6);
+    data7(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim(1:size(FRunitsPSTHtrain,1))==iStim),7);
+    data8(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim(1:size(FRunitsPSTHtrain,1))==iStim),8);
+    data9(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim(1:size(FRunitsPSTHtrain,1))==iStim),9);
+    data10(iStim, :)= FRunitsPSTHtrain(find( FRunitsPSTHtrainStim(1:size(FRunitsPSTHtrain,1))==iStim),10);
     
 end
-data = [data1(:,GreatUnits ); data2; data3; data4; data5];
-target = repmat(1:30,[1,5]); 
-kNNModel = fitcknn(data,target,'NumNeighbors',30); % kNNModel is the trained model. save it at end for doing testing
+kNNeigh = 7; %try 5, 7
+allData = [data1; data2; data3; data4; data5;data6; data7; data8; data9;data10];
+for iCV = 1:5
+    nums = [(iCV - 1)*30*2+1, iCV * 2*30]; 
+data =  allData([1:nums(1)-1, nums(2)+1:end],:); 
+target = repmat(1:30,[1,8]); 
+kNNModel = fitcknn(data,target,'NumNeighbors',kNNeigh); % kNNModel is the trained model. save it at end for doing testing
 save('kNNModel.mat','kNNModel');
 % train performance
 label = predict(kNNModel,data);
@@ -543,12 +553,12 @@ perf=sum(label==target)/size(label,1); % performance in the range of 0 to 1
 %%Testing Side
 % for testing load the trained model
 load('kNNModel.mat');
-testdata = [data6; data7; data8; data9;data10]; % take 1 new unknown observation and give to trained model
+testdata = allData(nums(1):nums(2),:); % take 1 new unknown observation and give to trained model
 Group = predict(kNNModel,testdata);
-for opp=1:5
-    pCorr(opp) = numel(find(Group(1+(opp-1)*30:opp*30)'-[1:30]==0))/30*100;
-end
 
+pCorr(iCV) = numel(find(Group'-repmat([1:30],[1,2]) ==0))/60*100;
+
+end
 chanceLevel = (1/30)*100;
 
 figure();
@@ -582,7 +592,8 @@ for iGreatUnit = 1:length(GreatUnits)
         meanP(iStim) = nanmean(psth(11:31)); 
         stim =[stim; iStim*ones(size(binnedArray,1),1)];
     end
-    [ss, sidx]=sort(meanP);
+    %[ss, sidx]=sort(meanP);
+    sidx=1:30;
     clf; 
     binnFull(binnFull > 1) = 1;
     sortedBA=[];
@@ -608,3 +619,20 @@ for iGreatUnit = 1:length(GreatUnits)
     %get binned Array for each stim 
     
 end
+%% luminosity of each natural image 
+load('\\zserver.cortexlab.net\Data\pregenerated_textures\JulieF\naturalImages\img11')
+sum(sum(img))
+% -> pretty comparable 
+
+%% cells are selective same images ?
+%%MUA time * stim matrix 
+
+%%cell * stim matrix (average)
+
+%%MSN vs TAN vs FSI 
+
+%%UMAP
+
+%% Shuffle test r2 
+
+%% Selectivity in space 
