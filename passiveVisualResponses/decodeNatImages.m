@@ -625,14 +625,607 @@ sum(sum(img))
 % -> pretty comparable 
 
 %% cells are selective same images ?
+%%get data aligned to stim 
+param.tauR = 0.0010; %refractory period time (s)
+param.tauC = 0.0002; %censored period time (s)
+param.maxNumPeak = 4;
+param.maxRPV = 5;
+param.maxPercMissing = 30;
+unitCount = 0;
+thisCount=11;
+       % FRunitsPSTHtrainStim = nan(1,30);
+       %         FRunitsPSTHtestStim=nan(1,30);
+                %FRunitsPSTHtrain=nan(1,15);
+                %FRunitsPSTHtest=nan(1,15);
+ unitIdx=[]; 
+ siteIdx=[];
+ goodCount = 1;
+ clearvars FRunitsTime
+for i = 1:thisCount - 1
+    theseUnits = unique(ephysData(i).spike_templates);
+    ephysData(i).goodUnit = zeros(length(theseUnits), 1);
+    siteIdx = [siteIdx; i*ones(length(theseUnits),1)];
+    unitIdx = [unitIdx, [1:length(theseUnits)]];
+    for ii = 1:length(theseUnits)
+
+                
+        unitCount = unitCount + 1;
+        theseSpikes = ephysData(i).spike_times_timeline(ephysData(i).spike_templates == theseUnits(ii));
+        theseAmplis = ephysData(i).spike_amplitudes(ephysData(i).spike_templates == theseUnits(ii));
+        thisWaveform = ephysData(i).template_wf(ii, :);
+        theseWvs = ephysData(i).template_wfs(ii, :, :);
+        [~, max_site] = max(max(abs(ephysData(i).template_wfs(ii, :, :)), [], 2), [], 3);
+        if max_site < 5
+            nearest_sites = [max_site:max_site + 7];
+        elseif max_site > size(ephysData(i).template_wfs(ii, :, :), 3) - 7
+            nearest_sites = [max_site - 7:max_site];
+        else
+            nearest_sites = [max_site - 4:max_site + 3];
+        end
+
+        %% quality metrics
+        %check rfp
+        [fractionRPVchunk, numRPVchunk] = fractionRPviolationsJF( ...
+            numel(theseSpikes), theseSpikes, param.tauR, param.tauC, theseSpikes(end)-theseSpikes(1)); %method from Hill et al., 2011
+        [ccg, t] = CCGBz([double(theseSpikes); double(theseSpikes)], [ones(size(theseSpikes, 1), 1); ...
+            ones(size(theseSpikes, 1), 1) * 2], 'binSize', 0.01, 'duration', 0.5, 'norm', 'rate'); %function
+        %from the Zugaro lab mod. by Buzsaki lab-way faster than my own!
+        thisACG = ccg(:, 1, 1);
+        %         figure(1);
+        %         clf;
+        %         plot(thisACG)
+        %         title(num2str(fractionRPVchunk))
+        %check amplitudes
+        try
+            [percent_missing_ndtrAll, ~] = ampli_fit_prc_missJF(theseAmplis, 0);
+        catch
+            percent_missing_ndtrAll = NaN;
+        end
+
+
+        %check number of peaks
+        minProminence = 0.2 * max(abs(squeeze(thisWaveform)));
+
+        %figure();plot(qMetric.waveform(iUnit, :))
+        [PKS, LOCS] = findpeaks(squeeze(thisWaveform), 'MinPeakProminence', minProminence);
+        [TRS, LOCST] = findpeaks(squeeze(thisWaveform)*-1, 'MinPeakProminence', minProminence);
+        if isempty(TRS)
+            TRS = min(squeeze(thisWaveform));
+            if numel(TRS) > 1
+                TRS = TRS(1);
+            end
+            LOCST = find(squeeze(thisWaveform) == TRS);
+        end
+        if isempty(PKS)
+            PKS = max(squeeze(thisWaveform));
+            if numel(PKS) > 1
+                PKS = PKS(1);
+            end
+            LOCS = find(squeeze(thisWaveform) == PKS);
+        end
+        numPeaksTroughsTemp = numel(PKS) + numel(TRS);
+
+
+        %is somatic?
+        peakLoc = LOCS;
+        if numel(peakLoc) > 1
+            peakLoc = peakLoc(end);
+
+        end
+        troughLoc = LOCST(TRS == max(TRS));
+        if numel(troughLoc) > 1
+            troughLoc = troughLoc(1);
+        end
+
+
+        %check correlation/spatial decay
+        [rho, pval] = corr(squeeze(theseWvs(:, :, nearest_sites)), squeeze(theseWvs(:, :, nearest_sites)));
+        troughVals = min(squeeze(theseWvs(:, :, nearest_sites)));
+        %         figure(2);
+        %         clf;
+        %         subplot(2, 5, 1)
+        %         plot(thisWaveform)
+        %         for iSite = 1:length(nearest_sites)
+        %             subplot(2, 5, 2+iSite)
+        %             plot(squeeze(theseWvs(:, :, nearest_sites(iSite))))
+        %
+        %             subplot(2, 5, 2)
+        %             plot(squeeze(theseWvs(:, :, nearest_sites(iSite))))
+        %             hold on;
+        %         end
+        %         title([num2str(min(troughVals)) num2str(max(troughVals))])
+
+        if min(troughVals) < max(troughVals) * 2 && numPeaksTroughsTemp < param.maxNumPeak && peakLoc > troughLoc && ...
+                fractionRPVchunk <= param.maxRPV && numel(theseSpikes) > 300 %&& percent_missing_ndtrAll < param.maxPercMissing
+            %disp('goodUnit')
+            ephysData(i).goodUnit(ii) = 1;
+        else
+            ephysData(i).goodUnit(ii) = 0;
+        end
+
+        %% FR 1/2 trials
+        if ephysData(i).goodUnit(ii) == 1
+            thisWindow = [0.05, 0.2];
+            psthBinSize = 0.01;
+            if max(ephysData(i).stimIDs) > 29
+                BA=[];
+                stimtrain =[];
+                stimtest =[];
+                PSTHtrain=[];
+                PSTHtest=[];
+                allTrialsdata=[];
+                allTrialsdata1=[];
+                allTrialsdata2=[];
+                allTrialTimedata=[];
+               
+
+                for iStim = 1:30
+                    theseTrials = find(ephysData(i).stimIDs == iStim);
+
+                    
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials), thisWindow, psthBinSize); %psth aligned
+                    
+                    BA = [BA, nanmean(binnedArray,2)];
+                    stimtrain = [stimtrain; iStim];
+                    stimtest = [stimtest; iStim];
+                    allTrialsdata= [allTrialsdata; nanmean(nanmean(binnedArray))];
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray1] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(1:2:end)), thisWindow, psthBinSize); %psth aligned
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray2] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(2:2:end)), thisWindow, psthBinSize); %psth aligned
+                    allTrialsdata1= [allTrialsdata1; nanmean(nanmean(binnedArray1))];
+                    allTrialsdata2= [allTrialsdata2; nanmean(nanmean(binnedArray2))];
+                   [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials), [-0.2,0.5], psthBinSize); %psth aligned
+                    
+                    allTrialTimedata = [allTrialTimedata; nanmean(binnedArray)];
+                    %PSTHtest = [PSTHtest; nanmean(binnedArray2,1)];
+                    
+
+                end
+                
+                FRunitsPSTHtrain(goodCount, :) = allTrialsdata;
+                FRunitsTime(goodCount,:,:)=allTrialTimedata; 
+                goodCount = goodCount+1;
+                
+                %FRunitsPSTHtest((unitCount-1)*30+1:(unitCount)*30,:) = PSTHtest;
+                %FRunitsVAR(unitCount,:) = p;
+               
+                %[p,tbl,stats] = anova1(BA)
+                %         figure();
+                %         scatter(squeeze(FRunits(unitCount,:,1)), squeeze(FRunits(unitCount,:,2)))
+            else
+               
+               
+                
+            end
+        else
+            
+        end
+
+
+    end
+    keep  ii theseUnits unitCount i ephysData thisCount param  BA FRunitsWA FRunitsPSTHtrain ...
+        siteIdx unitIdx goodCount FRunitsTime FRunitsPSTHtrain1 FRunitsPSTHtrain2
+end
 %%MUA time * stim matrix 
+figure(); 
+imagesc(-0.2:0.05:0.5-0.05,[],squeeze(nanmean(FRunitsTime)))
+colormap(brewermap([],'*RdBu'))
+xlabel('time from image onset (s)')
+ylabel('image #')
+makepretty; 
 
 %%cell * stim matrix (average)
+figure(); 
+%get max 
+
+%ops.nCall = [30,2];
+
+[val,ii]=max(zscore(FRunitsPSTHtrain,[],2),[],2);
+[sV, sI] =sort(ii);
+zz=zscore(FRunitsPSTHtrain,[],2);
+imagesc(zz(sI,:))
+colormap(brewermap([],'*RdBu'))
+ylabel('unit # (sorted by max response)')
+xlabel('image #')
+makepretty; 
+
+%%cell* stim matrix, sorted with rtaster map
+
+%get max 
+ops=struct;
+%ops.nCall = [30,2];
+[isort1, isort2, Sm] = mapTmap(zscore(FRunitsPSTHtrain,[],2), ops);
+
+zz=zscore(FRunitsPSTHtrain,[],2);
+figure();
+imagesc(zz(isort1,isort2))
+colormap(brewermap([],'*RdBu'))
+ylabel('unit # (sorted by max response)')
+xlabel('image #')
+makepretty; 
 
 %%MSN vs TAN vs FSI 
+param.tauR = 0.0010; %refractory period time (s)
+param.tauC = 0.0002; %censored period time (s)
+param.maxNumPeak = 4;
+param.maxRPV = 5;
+param.maxPercMissing = 30;
+unitCount = 0;
+thisCount=11;
+       % FRunitsPSTHtrainStim = nan(1,30);
+       %         FRunitsPSTHtestStim=nan(1,30);
+                %FRunitsPSTHtrain=nan(1,15);
+    acgA=[];
+    wvA=[];%FRunitsPSTHtest=nan(1,15);
+ unitIdx=[]; 
+ siteIdx=[];
+ cellT=[];
+ goodCount = 1;
+ clearvars FRunitsTime
+for i = 1:thisCount - 1
+    theseUnits = unique(ephysData(i).spike_templates);
+    ephysData(i).goodUnit = zeros(length(theseUnits), 1);
+    siteIdx = [siteIdx; i*ones(length(theseUnits),1)];
+    unitIdx = [unitIdx, [1:length(theseUnits)]];
+    for ii = 1:length(theseUnits)
 
-%%UMAP
+                
+        unitCount = unitCount + 1;
+        theseSpikes = ephysData(i).spike_times_timeline(ephysData(i).spike_templates == theseUnits(ii));
+        theseAmplis = ephysData(i).spike_amplitudes(ephysData(i).spike_templates == theseUnits(ii));
+        thisWaveform = ephysData(i).template_wf(ii, :);
+        theseWvs = ephysData(i).template_wfs(ii, :, :);
+        [~, max_site] = max(max(abs(ephysData(i).template_wfs(ii, :, :)), [], 2), [], 3);
+        if max_site < 5
+            nearest_sites = [max_site:max_site + 7];
+        elseif max_site > size(ephysData(i).template_wfs(ii, :, :), 3) - 7
+            nearest_sites = [max_site - 7:max_site];
+        else
+            nearest_sites = [max_site - 4:max_site + 3];
+        end
 
+        %% quality metrics
+        %check rfp
+        [fractionRPVchunk, numRPVchunk] = fractionRPviolationsJF( ...
+            numel(theseSpikes), theseSpikes, param.tauR, param.tauC, theseSpikes(end)-theseSpikes(1)); %method from Hill et al., 2011
+        [ccg, t] = CCGBz([double(theseSpikes); double(theseSpikes)], [ones(size(theseSpikes, 1), 1); ...
+            ones(size(theseSpikes, 1), 1) * 2], 'binSize', 0.001, 'duration', 1, 'norm', 'rate'); %function
+        %from the Zugaro lab mod. by Buzsaki lab-way faster than my own!
+        thisACG = ccg(:, 1, 1);
+        acgf = find(thisACG( 500:1000) >= ...
+    nanmean(thisACG( 600:900)));
+ephysData(i).acg(ii,:)=thisACG;
+if ~isempty(acgf)
+    acgf = acgf(1);
+else
+    acgf = NaN;
+end
+postSpikeSuppressionBf = acgf;
+        %         figure(1);
+        %         clf;
+        %         plot(thisACG)
+        %         title(num2str(fractionRPVchunk))
+        %check amplitudes
+        try
+            [percent_missing_ndtrAll, ~] = ampli_fit_prc_missJF(theseAmplis, 0);
+        catch
+            percent_missing_ndtrAll = NaN;
+        end
+
+
+        %check number of peaks
+        minProminence = 0.2 * max(abs(squeeze(thisWaveform)));
+
+        %figure();plot(qMetric.waveform(iUnit, :))
+        [PKS, LOCS] = findpeaks(squeeze(thisWaveform), 'MinPeakProminence', minProminence);
+        [TRS, LOCST] = findpeaks(squeeze(thisWaveform)*-1, 'MinPeakProminence', minProminence);
+        if isempty(TRS)
+            TRS = min(squeeze(thisWaveform));
+            if numel(TRS) > 1
+                TRS = TRS(1);
+            end
+            LOCST = find(squeeze(thisWaveform) == TRS);
+        end
+        if isempty(PKS)
+            PKS = max(squeeze(thisWaveform));
+            if numel(PKS) > 1
+                PKS = PKS(1);
+            end
+            LOCS = find(squeeze(thisWaveform) == PKS);
+        end
+        numPeaksTroughsTemp = numel(PKS) + numel(TRS);
+
+
+        %is somatic?
+        peakLoc = LOCS;
+        if numel(peakLoc) > 1
+            peakLoc = peakLoc(end);
+
+        end
+        troughLoc = LOCST(TRS == max(TRS));
+        if numel(troughLoc) > 1
+            troughLoc = troughLoc(1);
+        end
+
+
+        %check correlation/spatial decay
+        [rho, pval] = corr(squeeze(theseWvs(:, :, nearest_sites)), squeeze(theseWvs(:, :, nearest_sites)));
+        troughVals = min(squeeze(theseWvs(:, :, nearest_sites)));
+        %         figure(2);
+        %         clf;
+        %         subplot(2, 5, 1)
+        %         plot(thisWaveform)
+        %         for iSite = 1:length(nearest_sites)
+        %             subplot(2, 5, 2+iSite)
+        %             plot(squeeze(theseWvs(:, :, nearest_sites(iSite))))
+        %
+        %             subplot(2, 5, 2)
+        %             plot(squeeze(theseWvs(:, :, nearest_sites(iSite))))
+        %             hold on;
+        %         end
+        %         title([num2str(min(troughVals)) num2str(max(troughVals))])
+
+        if min(troughVals) < max(troughVals) * 2 && numPeaksTroughsTemp < param.maxNumPeak && peakLoc > troughLoc && ...
+                fractionRPVchunk <= param.maxRPV && numel(theseSpikes) > 300 %&& percent_missing_ndtrAll < param.maxPercMissing
+            %disp('goodUnit')
+            ephysData(i).goodUnit(ii) = 1;
+            if (-abs(troughLoc) + abs(peakLoc)) * 1e6 /30000 <= 400
+                ephysData(i).celltype(ii) = 2;%fsi
+            elseif postSpikeSuppressionBf < 50 && (-abs(troughLoc) + abs(peakLoc)) * 1e6 /30000 > 500
+                ephysData(i).celltype(ii) = 1;%msn
+            elseif postSpikeSuppressionBf>=50
+                ephysData(i).celltype(ii) = 3;%tan
+            end
+        else
+            ephysData(i).goodUnit(ii) = 0;
+        end
+
+        %% FR 1/2 trials
+        if ephysData(i).goodUnit(ii) == 1
+            thisWindow = [0.05, 0.2];
+            psthBinSize = 0.01;
+            if max(ephysData(i).stimIDs) > 29
+                BA=[];
+                stimtrain =[];
+                stimtest =[];
+                PSTHtrain=[];
+                PSTHtest=[];
+                allTrialsdata=[];
+                allTrialsdata1=[];
+                allTrialsdata2=[];
+                allTrialTimedata=[];
+               
+
+                for iStim = 1:30
+                    theseTrials = find(ephysData(i).stimIDs == iStim);
+
+                    
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials), thisWindow, psthBinSize); %psth aligned
+                    
+                    BA = [BA, nanmean(binnedArray,2)];
+                    stimtrain = [stimtrain; iStim];
+                    stimtest = [stimtest; iStim];
+                    allTrialsdata= [allTrialsdata; nanmean(nanmean(binnedArray))];
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray1] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(1:2:end)), thisWindow, psthBinSize); %psth aligned
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray2] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(2:2:end)), thisWindow, psthBinSize); %psth aligned
+                    allTrialsdata1= [allTrialsdata1; nanmean(nanmean(binnedArray1))];
+                    allTrialsdata2= [allTrialsdata2; nanmean(nanmean(binnedArray2))];
+                   [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials), [-0.2,0.5], psthBinSize); %psth aligned
+                    
+                    allTrialTimedata = [allTrialTimedata; nanmean(binnedArray)];
+                    %PSTHtest = [PSTHtest; nanmean(binnedArray2,1)];
+                    
+
+                end
+                cellT = [cellT;  ephysData(i).celltype(ii)];
+                acgA = [acgA, thisACG];
+                wvA = [wvA; thisWaveform];
+                FRunitsPSTHtrain(goodCount, :) = allTrialsdata;
+                FRunitsPSTHtrain1(goodCount, :) = allTrialsdata1;
+                FRunitsPSTHtrain2(goodCount, :) = allTrialsdata2;
+                FRunitsTime(goodCount,:,:)=allTrialTimedata; 
+                goodCount = goodCount+1;
+                
+                %FRunitsPSTHtest((unitCount-1)*30+1:(unitCount)*30,:) = PSTHtest;
+                %FRunitsVAR(unitCount,:) = p;
+               
+                %[p,tbl,stats] = anova1(BA)
+                %         figure();
+                %         scatter(squeeze(FRunits(unitCount,:,1)), squeeze(FRunits(unitCount,:,2)))
+            else
+               
+               
+                
+            end
+        else
+            
+        end
+
+
+    end
+    keep  ii theseUnits unitCount i ephysData thisCount param  BA FRunitsWA FRunitsPSTHtrain ...
+        siteIdx unitIdx goodCount FRunitsTime cellT acgA wvA FRunitsPSTHtrain1  FRunitsPSTHtrain2 FRunitsCorr
+end
+%%ACG and WV check 
+figure(); 
+subplot(231)
+plot(nanmean(acgA(:,cellT==1),2),'r')
+xlim([0 1001])
+ylabel('FR')
+makepretty;
+subplot(232)
+plot(nanmean(acgA(:,cellT==2),2),'b')
+xlim([0 1001])
+xlabel('time (ms)')
+makepretty;
+subplot(233)
+plot(nanmean(acgA(:,cellT==3),2),'g')
+xlim([0 1001])
+makepretty;
+subplot(234)
+t_wv=[1:size(wvA,2)] * 1e3/ 30000;
+plot(t_wv, nanmean(wvA(cellT==1,:)),'r')
+xlim([t_wv(1), t_wv(end)])
+makepretty;
+subplot(235)
+plot(t_wv,nanmean(wvA(cellT==2,:)),'b')
+xlim([t_wv(1), t_wv(end)])
+xlabel('time (ms)')
+makepretty;
+subplot(236)
+plot(t_wv,nanmean(wvA(cellT==3,:)),'g')
+xlim([t_wv(1), t_wv(end)])
+makepretty;
+%%matrix mua 
+figure(); 
+subplot(131)
+imagesc(-0.2:0.05:0.5-0.05,[],squeeze(nanmean(FRunitsTime(cellT==1,:,:))))
+colormap(brewermap([],'*RdBu'))
+title('MSN')
+%xlabel('time from image onset (s)')
+ylabel('image #') 
+makepretty;
+subplot(132)
+imagesc(-0.2:0.05:0.5-0.05,[],squeeze(nanmean(FRunitsTime(cellT==2,:,:))))
+colormap(brewermap([],'*RdBu'))
+title('FSI')
+xlabel('time from image onset (s)')
+%ylabel('image #')
+makepretty; 
+subplot(133)
+imagesc(-0.2:0.05:0.5-0.05,[],squeeze(nanmean(FRunitsTime(cellT==3,:,:))))
+colormap(brewermap([],'*RdBu'))
+title('TAN')
+%xlabel('time from image onset (s)')
+%ylabel('image #')
+makepretty; 
+%%
+figure();
+subplot(131)
+[val,ii]=max(zscore(FRunitsPSTHtrain(cellT==1,:),[],2),[],2);
+[sV, sI] =sort(ii);
+zz=zscore(FRunitsPSTHtrain(cellT==1,:),[],2);
+imagesc(zz(sI,:))
+colormap(brewermap([],'*RdBu'))
+ylabel('unit # (sorted by max response)')
+xlabel('image #')
+title('MSN')
+makepretty; 
+
+subplot(132)
+[val,ii]=max(zscore(FRunitsPSTHtrain(cellT==2,:),[],2),[],2);
+[sV, sI] =sort(ii);
+zz=zscore(FRunitsPSTHtrain(cellT==2,:),[],2);
+imagesc(zz(sI,:))
+colormap(brewermap([],'*RdBu'))
+ylabel('unit # (sorted by max response)')
+xlabel('image #')
+title('FSI')
+makepretty; 
+
+subplot(133)
+[val,ii]=max(zscore(FRunitsPSTHtrain(cellT==3,:),[],2),[],2);
+[sV, sI] =sort(ii);
+zz=zscore(FRunitsPSTHtrain(cellT==3,:),[],2);
+imagesc(zz(sI,:))
+colormap(brewermap([],'*RdBu'))
+ylabel('unit # (sorted by max response)')
+xlabel('image #')
+title('TAN')
+makepretty; 
+%% MAX, 1/2 trials 
+theseCells = FRunitsCorr >= 0.5; 
+% figure();
+% H=dendrogram(Z);
+figure();
+subplot(131)
+ops=struct;
+%ops.nCall = [30,2];
+[isort1, isort2, Sm] = mapTmap(zscore(FRunitsPSTHtrain1(theseCells & cellT==1,:),[],2), ops);
+[val,ii]=max(zscore(FRunitsPSTHtrain1(cellT==1,:),[],2),[],2);
+[sV, sI] =sort(ii);
+tree= linkage(FRunitsPSTHtrain(cellT==1,:));
+D = pdist(FRunitsPSTHtrain(cellT==1,:));
+leafOrder = optimalleaforder(tree,D)
+zz=zscore(FRunitsPSTHtrain2(theseCells &cellT==1,:),[],2);
+imagesc(zz(isort1,isort2))
+colormap(brewermap([],'*RdBu'))
+ylabel('unit # (sorted by max response)')
+xlabel('image #')
+title('MSN')
+makepretty; 
+
+subplot(132)
+[isort1, isort2, Sm] = mapTmap(zscore(FRunitsPSTHtrain1(theseCells &cellT==3,:),[],2), ops);
+[val,ii]=max(zscore(FRunitsPSTHtrain1(cellT==2,:),[],2),[],2);
+[sV, sI] =sort(ii);
+tree= linkage(FRunitsPSTHtrain(cellT==2,:));
+D = pdist(FRunitsPSTHtrain(cellT==2,:));
+leafOrder = optimalleaforder(tree,D)
+zz=zscore(FRunitsPSTHtrain2(theseCells &cellT==2,:),[],2);
+imagesc(zz(isort1,isort2))
+colormap(brewermap([],'*RdBu'))
+ylabel('unit # (sorted by max response)')
+xlabel('image #')
+title('FSI')
+makepretty; 
+
+subplot(133)
+[isort1, isort2, Sm] = mapTmap(zscore(FRunitsPSTHtrain1(theseCells &cellT==3,:),[],2), ops);
+[val,ii]=max(zscore(FRunitsPSTHtrain1(cellT==3,:),[],2),[],2);
+[sV, sI] =sort(ii);
+tree= linkage(FRunitsPSTHtrain(cellT==3,:));
+D = pdist(FRunitsPSTHtrain(cellT==3,:));
+leafOrder = optimalleaforder(tree,D)
+zz=zscore(FRunitsPSTHtrain2(theseCells &cellT==3,:),[],2);
+imagesc(zz(isort1,isort2))
+colormap(brewermap([],'*RdBu'))
+ylabel('unit # (sorted by max response)')
+xlabel('image #')
+title('TAN')
+makepretty; 
+%% tSNE 
+Y=tsne(zscore(FRunitsPSTHtrain(cellT==1,:),[],2));
+figure();
+subplot(131)
+scatter(Y(:, 1), Y(:, 2),7, 'r', 'filled'); hold on;
+[ss,ssi]=sort(Y(:,1));
+ylabel('dim 2')
+xlabel('dim 1')
+title('tSNE')
+makepretty;
+subplot(132)
+zz=zscore(FRunitsPSTHtrain(cellT==1,:),[],2);
+imagesc(zz(ssi,:))
+
+colormap(brewermap([],'*RdBu'))
+[ss,ssi]=sort(Y(:,2));
+ylabel('neuron (sorted by dim 1)')
+xlabel('stim #')
+makepretty;
+subplot(133)
+zz=zscore(FRunitsPSTHtrain(cellT==1,:),[],2);
+imagesc(zz(ssi,:))
+ylabel('neuron (sorted by dim 1)')
+xlabel('stim #')
+makepretty;
+colormap(brewermap([],'*RdBu'))
+
+
+Y=tsne(zscore(FRunitsPSTHtrain(:,:),[],2));
+figure();
+scatter(Y(cellT==1, 1), Y(cellT==1, 2),7, 'r', 'filled'); hold on;
+scatter(Y(cellT==2, 1), Y(cellT==2, 2), 7,'b','filled')
+scatter(Y(cellT==3, 1), Y(cellT==3, 2), 7,'g','filled')
+ylabel('Dim. 1')
+xlabel('Dim. 2')
+makepretty;
+
+Y=tsne(zscore(squeeze(nanmean(FRunitsTime(:,:,:))),[],2));
+figure();
+scatter(Y(:, 1), Y(:, 2),7, 'r', 'filled'); hold on;
+ylabel('Dim. 1')
+xlabel('Dim. 2')
+makepretty;
 %% Shuffle test r2 
 
 %% Selectivity in space 
