@@ -2,7 +2,7 @@
 %% Get and plot single mouse behavior (vanillaChoiceworld and choiceWorldJF)
 
 animalsAll = {'JF025', 'JF026', 'JF028', 'JF029'}; %chnage to the names of the animals you want here
-for iAnimal = size(animalsAll, 2)
+for iAnimal = 1:size(animalsAll, 2)
 
     animal = animalsAll{1, iAnimal}; %this animal
     protocol = 'choiceworld'; %protocol name contains this name
@@ -138,7 +138,7 @@ for iAnimal = size(animalsAll, 2)
                     bhv.go_left_trials45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues ==-45&block.events.responseValues == -1)); %&~repeatOnMisses
                 
                     bhv.n_trials_conditionNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues ==45 &~repeatOnMisses));
-                    bhv.go_left_trialsNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues ==45 &block.events.responseValues == 0)); %&~repeatOnMisses
+                    bhv.go_left_trialsNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues ==45 &block.events.responseValues == -1)); %&~repeatOnMisses
                     else
                         bhv.n_trials_condition(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond)& block.events.orientationValues(1:end-1) ==0 & ~repeatOnMisses));
                     bhv.go_left_trials(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues (1:end-1)==0 &block.events.responseValues == -1)); %&~repeatOnMisses
@@ -147,7 +147,7 @@ for iAnimal = size(animalsAll, 2)
                     bhv.go_left_trials45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(1:end-1) ==-45&block.events.responseValues == -1)); %&~repeatOnMisses
                 
                     bhv.n_trials_conditionNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues(1:end-1) ==45 &~repeatOnMisses));
-                    bhv.go_left_trialsNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(1:end-1) ==45 &block.events.responseValues == 0)); %&~repeatOnMisses
+                    bhv.go_left_trialsNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(1:end-1) ==45 &block.events.responseValues == -1)); %&~repeatOnMisses
                     
                     end
                 end
@@ -163,20 +163,12 @@ for iAnimal = size(animalsAll, 2)
                 bhv.rewardValue(curr_day) = sum(block.outputs.rewardValues) - (manualRew * rSize);
                 
                 if  numel(block.events.orientationValues) == numel(trial_stim)
-                stim_rxn_time = accumarray(trial_stim_idx(block.events.orientationValues(1:end) ==0 )', trial_move_t(block.events.orientationValues(1:end) ==0 )', [11, 1], @nanmedian, nan);
-                stim_rxn_time45 = accumarray(trial_stim_idx(block.events.orientationValues(1:end) ==-45 )', trial_move_t(block.events.orientationValues(1:end) ==-45 )', [11, 1], @nanmedian, nan);
-                stim_rxn_timeNoGo = accumarray(trial_stim_idx(block.events.orientationValues(1:end) ==45 )', trial_move_t(block.events.orientationValues(1:end) ==45 )', [11, 1], @nanmedian, nan);
-                
+                stim_rxn_time = accumarray(trial_stim_idx(block.events.orientationValues(1:end) ==0 )', trial_move_t', [11, 1], @nanmedian, nan);
                 else
-                    stim_rxn_time = accumarray(trial_stim_idx(block.events.orientationValues(1:end-1) ==0 )', trial_move_t(block.events.orientationValues(1:end-1) ==0 )', [11, 1], @nanmedian, nan);
-                stim_rxn_time45 = accumarray(trial_stim_idx(block.events.orientationValues(1:end-1) ==-45 )', trial_move_t(block.events.orientationValues(1:end-1) ==-45 )', [11, 1], @nanmedian, nan);
-                stim_rxn_timeNoGo = accumarray(trial_stim_idx(block.events.orientationValues(1:end-1) ==45 )', trial_move_t(block.events.orientationValues(1:end-1) ==45 )', [11, 1], @nanmedian, nan);
-                
-                    %trial_stim_idx(response_trials)
+                    stim_rxn_time = accumarray(trial_stim_idx(block.events.orientationValues(1:end-1) ==0 )', trial_move_t', [11, 1], @nanmedian, nan);
+                trial_stim_idx(response_trials)
                 end
                 bhv.stim_rxn_time(curr_day, :) = stim_rxn_time;
-                bhv.stim_rxn_time45(curr_day, :) = stim_rxn_time45;
-                bhv.stim_rxn_timeNoGo(curr_day, :) = stim_rxn_timeNoGo;
 
 
             else
@@ -404,27 +396,6 @@ for iAnimal = size(animalsAll, 2)
     end
     title('Go2')
     
-    subplot(426)
-    im = imagesc(bhv.conditions, 1:size(bhv.go_left_trials45), bhv.stim_rxn_time45);
-    set(im, 'AlphaData', ~isnan(get(im, 'CData')));
-    set(gca, 'color', [0.5, 0.5, 0.5]);
-    colormap(brewermap([], '*RdBu'));
-    % caxis([0.2,0.8])
-    c = colorbar;
-    ylabel(c, 'Reaction time');
-    xlabel('Condition');
-    ylabel('Session');
-    set(gca, 'YTick', 1:length(experiments));
-    set(gca, 'YTickLabel', day_labels);
-    axis square;
-    hold on;
-    if any([experiments.imaging])
-        plot(0, find([experiments.imaging]), '.k');
-    end
-    if any([experiments.ephys])
-        plot(0, find([experiments.ephys]), 'ok');
-    end
-    
      subplot(427)
           bhv.conditions(isnan(bhv.conditions)) = 0;
     im = imagesc(bhv.conditions, 1:size(bhv.go_left_trialsNoGo), bhv.go_left_trialsNoGo./bhv.n_trials_conditionNoGo);
@@ -432,7 +403,7 @@ for iAnimal = size(animalsAll, 2)
     set(gca, 'color', [0.5, 0.5, 0.5]);
     colormap(brewermap([], '*RdBu'));
     c = colorbar;
-    ylabel(c, 'No go (frac)');
+    ylabel(c, 'Go left (frac)');
     xlabel('Condition');
     ylabel('Session');
     set(gca, 'YTick', 1:length(experiments));
@@ -447,29 +418,6 @@ for iAnimal = size(animalsAll, 2)
         plot(0, find([experiments.ephys]), 'ok');
     end
     title('NoGo')
-    
-        subplot(428)
-    im = imagesc(bhv.conditions, 1:size(bhv.go_left_trialsNoGo), bhv.stim_rxn_timeNoGo);
-    set(im, 'AlphaData', ~isnan(get(im, 'CData')));
-    set(gca, 'color', [0.5, 0.5, 0.5]);
-    colormap(brewermap([], '*RdBu'));
-    % caxis([0.2,0.8])
-    c = colorbar;
-    ylabel(c, 'Reaction time');
-    xlabel('Condition');
-    ylabel('Session');
-    set(gca, 'YTick', 1:length(experiments));
-    set(gca, 'YTickLabel', day_labels);
-    axis square;
-    hold on;
-    if any([experiments.imaging])
-        plot(0, find([experiments.imaging]), '.k');
-    end
-    if any([experiments.ephys])
-        plot(0, find([experiments.ephys]), 'ok');
-    end
-    
-    
      else
         
     subplot(3, 2, 5);
