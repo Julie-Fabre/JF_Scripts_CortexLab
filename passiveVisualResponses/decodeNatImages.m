@@ -335,6 +335,7 @@ for i = 1:thisCount - 1
                     FRunits(unitCount, iStim, 1) = nanmean(psth);
                     [psth, bins, rasterX, rasterY, spikeCounts, binnedArray2] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(2:2:end)), thisWindow, psthBinSize); %psth aligned
                     FRunits(unitCount, iStim, 2) = nanmean(psth);
+                    FRunitsCorr(goodCount) = corr(squeeze(FRunits(unitCount, :, 1))', squeeze(FRunits(unitCount, :, 2))');
                     [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials), thisWindow, psthBinSize); %psth aligned
                     
                     BA = [BA, nanmean(binnedArray,2)];
@@ -372,8 +373,7 @@ for i = 1:thisCount - 1
                     
 
                 end
-                FRunitsCorr(unitCount) = corr(squeeze(FRunits(unitCount, :, 1))', squeeze(FRunits(unitCount, :, 2))');
-                kk=kstest(BA(1,:));
+                 kk=kstest(BA(1,:));
                 load carsmall
                 bb=BA';
                 yv = bb(:);
@@ -381,6 +381,8 @@ for i = 1:thisCount - 1
                 FRunitsP(unitCount) = anova1(BA ,[],'off');
                 FRunitsPKS(unitCount) = kruskalwallis(BA, [], 'off');
                 if FRunitsPKS(unitCount)<0.05
+                    FRunitsCorr(goodCount) = corr(squeeze(FRunits(unitCount, :, 1))', squeeze(FRunits(unitCount, :, 2))');
+               
                 FRunitsPSTHtrain((goodCount-1)*30+1:(goodCount)*30,1) = trainData1;
                 FRunitsPSTHtrain((goodCount-1)*30+1:(goodCount)*30,2) = trainData2;
                 FRunitsPSTHtrain((goodCount-1)*30+1:(goodCount)*30,3) = trainData3;
@@ -406,7 +408,7 @@ for i = 1:thisCount - 1
                 FRunits(unitCount, 1:10, 2) = NaN;
                 FRunits(unitCount, 1:30, 1) = NaN;
                 FRunitsPKS(unitCount) = NaN;
-                FRunitsCorr(unitCount) = NaN;
+                %FRunitsCorr(unitCount) = NaN;
 %                 FRunitsPSTHtrain(unitCount,1:15) = NaN;
 %                 FRunitsPSTHtest(unitCount,1:15) = NaN;
                 FRunitsWA(unitCount)=NaN;
@@ -427,6 +429,7 @@ for i = 1:thisCount - 1
     keep FRunitsPKS FRunits ii theseUnits unitCount i ephysData thisCount param FRunitsCorr FRunitsP BA FRunitsWA FRunitsPSTHtrain ...
         FRunitsPSTHtestStim FRunitsPSTHtrainStim siteIdx unitIdx goodCount
 end
+size(FRunitsCorr)%1031
 %summary
 figure();
 hist(FRunitsCorr, 20)
@@ -641,6 +644,7 @@ thisCount=11;
  siteIdx=[];
  goodCount = 1;
  clearvars FRunitsTime
+ warning off
 for i = 1:thisCount - 1
     theseUnits = unique(ephysData(i).spike_templates);
     ephysData(i).goodUnit = zeros(length(theseUnits), 1);
@@ -776,11 +780,16 @@ for i = 1:thisCount - 1
                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials), [-0.2,0.5], psthBinSize); %psth aligned
                     
                     allTrialTimedata = [allTrialTimedata; nanmean(binnedArray)];
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray1] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(1:2:end)), thisWindow, psthBinSize); %psth aligned
+                    FRunits(unitCount, iStim, 1) = nanmean(psth);
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray2] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(2:2:end)), thisWindow, psthBinSize); %psth aligned
+                    FRunits(unitCount, iStim, 2) = nanmean(psth);
+                   
                     %PSTHtest = [PSTHtest; nanmean(binnedArray2,1)];
                     
 
                 end
-                
+                 FRunitsCorr(goodCount) = corr(squeeze(FRunits(unitCount, :, 1))', squeeze(FRunits(unitCount, :, 2))');
                 FRunitsPSTHtrain(goodCount, :) = allTrialsdata;
                 FRunitsTime(goodCount,:,:)=allTrialTimedata; 
                 goodCount = goodCount+1;
@@ -805,6 +814,7 @@ for i = 1:thisCount - 1
     keep  ii theseUnits unitCount i ephysData thisCount param  BA FRunitsWA FRunitsPSTHtrain ...
         siteIdx unitIdx goodCount FRunitsTime FRunitsPSTHtrain1 FRunitsPSTHtrain2
 end
+size( FRunitsCorr)
 %%MUA time * stim matrix 
 figure(); 
 imagesc(-0.2:0.05:0.5-0.05,[],squeeze(nanmean(FRunitsTime)))
@@ -1012,6 +1022,11 @@ postSpikeSuppressionBf = acgf;
                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials), [-0.2,0.5], psthBinSize); %psth aligned
                     
                     allTrialTimedata = [allTrialTimedata; nanmean(binnedArray)];
+                     [psth, bins, rasterX, rasterY, spikeCounts, binnedArray1] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(1:2:end)), thisWindow, psthBinSize); %psth aligned
+                    FRunits( iStim, 1) = nanmean(psth);
+                    [psth, bins, rasterX, rasterY, spikeCounts, binnedArray2] = psthAndBA(theseSpikes, ephysData(i).stimOn_times(theseTrials(2:2:end)), thisWindow, psthBinSize); %psth aligned
+                    FRunits(iStim, 2) = nanmean(psth);
+                   
                     %PSTHtest = [PSTHtest; nanmean(binnedArray2,1)];
                     
 
@@ -1023,6 +1038,9 @@ postSpikeSuppressionBf = acgf;
                 FRunitsPSTHtrain1(goodCount, :) = allTrialsdata1;
                 FRunitsPSTHtrain2(goodCount, :) = allTrialsdata2;
                 FRunitsTime(goodCount,:,:)=allTrialTimedata; 
+                
+                FRunitsCorr(goodCount) = corr(squeeze(FRunits( :, 1)), squeeze(FRunits( :, 2)));
+               
                 goodCount = goodCount+1;
                 
                 %FRunitsPSTHtest((unitCount-1)*30+1:(unitCount)*30,:) = PSTHtest;
@@ -1045,7 +1063,8 @@ postSpikeSuppressionBf = acgf;
     keep  ii theseUnits unitCount i ephysData thisCount param  BA FRunitsWA FRunitsPSTHtrain ...
         siteIdx unitIdx goodCount FRunitsTime cellT acgA wvA FRunitsPSTHtrain1  FRunitsPSTHtrain2 FRunitsCorr
 end
-%%ACG and WV check 
+size(FRunitsCorr)
+%%ACG and WV check
 figure(); 
 subplot(231)
 plot(nanmean(acgA(:,cellT==1),2),'r')
@@ -1133,6 +1152,7 @@ xlabel('image #')
 title('TAN')
 makepretty; 
 %% MAX, 1/2 trials 
+frclean = FRunitsCorr(~isnan(FRunitsCorr))
 theseCells = FRunitsCorr >= 0.5; 
 % figure();
 % H=dendrogram(Z);
@@ -1140,13 +1160,13 @@ figure();
 subplot(131)
 ops=struct;
 %ops.nCall = [30,2];
-[isort1, isort2, Sm] = mapTmap(zscore(FRunitsPSTHtrain1(theseCells & cellT==1,:),[],2), ops);
+[isort1, isort2, Sm] = mapTmap(zscore(FRunitsPSTHtrain(theseCells' & cellT==1,:),[],2), ops);
 [val,ii]=max(zscore(FRunitsPSTHtrain1(cellT==1,:),[],2),[],2);
 [sV, sI] =sort(ii);
 tree= linkage(FRunitsPSTHtrain(cellT==1,:));
 D = pdist(FRunitsPSTHtrain(cellT==1,:));
 leafOrder = optimalleaforder(tree,D)
-zz=zscore(FRunitsPSTHtrain2(theseCells &cellT==1,:),[],2);
+zz=zscore(FRunitsPSTHtrain(theseCells' &cellT==1,:),[],2);
 imagesc(zz(isort1,isort2))
 colormap(brewermap([],'*RdBu'))
 ylabel('unit # (sorted by max response)')
@@ -1155,13 +1175,13 @@ title('MSN')
 makepretty; 
 
 subplot(132)
-[isort1, isort2, Sm] = mapTmap(zscore(FRunitsPSTHtrain1(theseCells &cellT==3,:),[],2), ops);
+[isort1, isort2, Sm] = mapTmap(zscore(FRunitsPSTHtrain(theseCells' &cellT==2,:),[],2), ops);
 [val,ii]=max(zscore(FRunitsPSTHtrain1(cellT==2,:),[],2),[],2);
 [sV, sI] =sort(ii);
 tree= linkage(FRunitsPSTHtrain(cellT==2,:));
 D = pdist(FRunitsPSTHtrain(cellT==2,:));
 leafOrder = optimalleaforder(tree,D)
-zz=zscore(FRunitsPSTHtrain2(theseCells &cellT==2,:),[],2);
+zz=zscore(FRunitsPSTHtrain(theseCells' &cellT==2,:),[],2);
 imagesc(zz(isort1,isort2))
 colormap(brewermap([],'*RdBu'))
 ylabel('unit # (sorted by max response)')
@@ -1170,21 +1190,69 @@ title('FSI')
 makepretty; 
 
 subplot(133)
-[isort1, isort2, Sm] = mapTmap(zscore(FRunitsPSTHtrain1(theseCells &cellT==3,:),[],2), ops);
+[isort1, isort2, Sm] = mapTmap(zscore(FRunitsPSTHtrain(theseCells' &cellT==3,:),[],2), ops);
 [val,ii]=max(zscore(FRunitsPSTHtrain1(cellT==3,:),[],2),[],2);
 [sV, sI] =sort(ii);
 tree= linkage(FRunitsPSTHtrain(cellT==3,:));
 D = pdist(FRunitsPSTHtrain(cellT==3,:));
 leafOrder = optimalleaforder(tree,D)
-zz=zscore(FRunitsPSTHtrain2(theseCells &cellT==3,:),[],2);
+zz=zscore(FRunitsPSTHtrain(theseCells' &cellT==3,:),[],2);
 imagesc(zz(isort1,isort2))
 colormap(brewermap([],'*RdBu'))
 ylabel('unit # (sorted by max response)')
 xlabel('image #')
 title('TAN')
 makepretty; 
+%% max 
+figure();
+subplot(131)
+ops=struct;
+%ops.nCall = [30,2];
+[isort1, isort2, Sm] = mapTmap(zscore(FRunitsPSTHtrain1(theseCells' & cellT==1,:),[],2), ops);
+[val,ii]=max(zscore(FRunitsPSTHtrain1(theseCells' &cellT==1,:),[],2),[],2);
+[sV, sI] =sort(ii);
+tree= linkage(FRunitsPSTHtrain(cellT==1,:));
+D = pdist(FRunitsPSTHtrain(cellT==1,:));
+leafOrder = optimalleaforder(tree,D)
+zz=zscore(FRunitsPSTHtrain2(theseCells' &cellT==1,:),[],2);
+imagesc(zz(sI,:))
+colormap(brewermap([],'*RdBu'))
+ylabel('unit # (sorted by max response)')
+xlabel('image #')
+title('MSN')
+makepretty; 
+
+subplot(132)
+[isort1, isort2, Sm] = mapTmap(zscore(FRunitsPSTHtrain1(theseCells' &cellT==2,:),[],2), ops);
+[val,ii]=max(zscore(FRunitsPSTHtrain1(theseCells' &cellT==2,:),[],2),[],2);
+[sV, sI] =sort(ii);
+tree= linkage(FRunitsPSTHtrain(cellT==2,:));
+D = pdist(FRunitsPSTHtrain(cellT==2,:));
+leafOrder = optimalleaforder(tree,D)
+zz=zscore(FRunitsPSTHtrain2(theseCells' &cellT==2,:),[],2);
+imagesc(zz(sI,:))
+colormap(brewermap([],'*RdBu'))
+ylabel('unit # (sorted by max response)')
+xlabel('image #')
+title('FSI')
+makepretty; 
+
+subplot(133)
+[isort1, isort2, Sm] = mapTmap(zscore(FRunitsPSTHtrain(theseCells' &cellT==3,:),[],2), ops);
+[val,ii]=max(zscore(FRunitsPSTHtrain1(theseCells' &cellT==3,:),[],2),[],2);
+[sV, sI] =sort(ii);
+tree= linkage(FRunitsPSTHtrain(cellT==3,:));
+D = pdist(FRunitsPSTHtrain(cellT==3,:));
+leafOrder = optimalleaforder(tree,D)
+zz=zscore(FRunitsPSTHtrain2(theseCells' &cellT==3,:),[],2);
+imagesc(zz(sI,:))
+colormap(brewermap([],'*RdBu'))
+ylabel('unit # (sorted by max response)')
+xlabel('image #')
+title('TAN')
+makepretty; 
 %% tSNE 
-Y=tsne(zscore(FRunitsPSTHtrain(cellT==1,:),[],2));
+Y=tsne(zscore(FRunitsPSTHtrain(theseCells' & cellT==1,:),[],2));
 figure();
 subplot(131)
 scatter(Y(:, 1), Y(:, 2),7, 'r', 'filled'); hold on;
@@ -1194,7 +1262,7 @@ xlabel('dim 1')
 title('tSNE')
 makepretty;
 subplot(132)
-zz=zscore(FRunitsPSTHtrain(cellT==1,:),[],2);
+zz=zscore(FRunitsPSTHtrain(theseCells' & cellT==1,:),[],2);
 imagesc(zz(ssi,:))
 
 colormap(brewermap([],'*RdBu'))
@@ -1203,19 +1271,19 @@ ylabel('neuron (sorted by dim 1)')
 xlabel('stim #')
 makepretty;
 subplot(133)
-zz=zscore(FRunitsPSTHtrain(cellT==1,:),[],2);
+zz=zscore(FRunitsPSTHtrain(theseCells' & cellT==1,:),[],2);
 imagesc(zz(ssi,:))
-ylabel('neuron (sorted by dim 1)')
+ylabel('neuron (sorted by dim 2)')
 xlabel('stim #')
 makepretty;
 colormap(brewermap([],'*RdBu'))
 
-
-Y=tsne(zscore(FRunitsPSTHtrain(:,:),[],2));
+ff=find(theseCells');
+Y=tsne(zscore(FRunitsPSTHtrain(theseCells',:),[],2));
 figure();
-scatter(Y(cellT==1, 1), Y(cellT==1, 2),7, 'r', 'filled'); hold on;
-scatter(Y(cellT==2, 1), Y(cellT==2, 2), 7,'b','filled')
-scatter(Y(cellT==3, 1), Y(cellT==3, 2), 7,'g','filled')
+scatter(Y(cellT(ff)==1, 1), Y(cellT(ff)==1, 2),7, 'r', 'filled'); hold on;
+scatter(Y(cellT(ff)==2, 1), Y(cellT(ff)==2, 2), 7,'b','filled')
+%scatter(Y(cellT==3, 1), Y(cellT==3, 2), 7,'g','filled')
 ylabel('Dim. 1')
 xlabel('Dim. 2')
 makepretty;

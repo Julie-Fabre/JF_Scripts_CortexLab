@@ -167,7 +167,7 @@ end
 close(h)
 
 % Get order of colors
-color_order_gun = { 'green'; 'blue'; 'red'};
+color_order_gun = {'red'; 'blue'; 'green'};
 [~, color_order_slide] = ismember(channel_color, color_order_gun);
 %color_order_slide(color_order_slide==0)=[];
 % Display montage of final balanced image, sort color channels by RGB
@@ -276,19 +276,12 @@ if slice_data.curr_slide > 0
 end
 
 % After the last slice, save the images and close out
-%if strcmp(im_type, 'tiffUnmergedNoDef')
-    if slice_data.curr_slide == floor(length(slice_data.im_rgb))
+%if strcmp(im_type, 'tiffUnmerged')
+    if slice_data.curr_slide == floor(length(slice_data.im_rgb)/3)
         save_slice_rgb(slice_fig);
         close(slice_fig);
         return
     end
-%else
-%      if slice_data.curr_slide == floor(length(slice_data.im_rgb)/3)
-%         save_slice_rgb(slice_fig);
-%         close(slice_fig);
-%         return
-%     end
-% end
 % else
 %     if slice_data.curr_slide == length(slice_data.im_rgb) %%QQ UNCOMMENYT IF
 %     NOT UNMERGED

@@ -1,6 +1,6 @@
-AP_preprocess_phase3_newOEJF_onlysync('JF022', '2020-12-14')
-animal = 'JF020';
-im_type = 'o';
+%AP_preprocess_phase3_newOEJF_onlysync('JF022', '2020-12-14')
+animal = 'JF024';
+im_type = 'tiffUnmergedNoDef';
 
 %% get histology slices and copy locally
 locationHisto = ['//znas.cortexlab.net/Subjects/', animal, '/Histology/']; % copy files over to local disk
@@ -31,6 +31,23 @@ elseif strcmp(im_type, 'tiffUnmerged') == 1
             copyfile([locationHisto, imageFolders(iFolder).name, filesep, 'Default', filesep, imageFolders2(i).name], im_path)
             theseImges = dir([im_path, '/img_*.tif']);
             movefile([im_path filesep theseImges.name],[im_path filesep 'img', num2str(iFolder), 'channel', num2str(i), '.tif'],'f');
+        end
+    end
+elseif strcmp(im_type, 'tiffUnmergedNoDef') == 1
+    imageFolders = dir(locationHisto);
+    imageFolders(1:2) = []; % remove current dir and one above
+
+    %rename correctly 
+    im_dir = 'D:\';
+    im_path = [im_dir, animal];
+    slice_path = [im_dir, filesep, animal, filesep, 'slices'];
+    mkdir(slice_path)
+    for iFolder = 1:size(imageFolders, 1)
+        imageFolders2 = dir([locationHisto, imageFolders(iFolder).name, filesep, '*.tif']);
+        for i = 1:size(imageFolders2,1)
+            copyfile([locationHisto, imageFolders(iFolder).name, filesep, imageFolders2(i).name], im_path)
+            %theseImges = dir([im_path, '/img_*.tif']);
+            %movefile([im_path filesep theseImges.name],[im_path filesep 'img', num2str(iFolder), 'channel', num2str(i), '.tif'],'f');
         end
     end
 end
@@ -74,29 +91,29 @@ probe2ephys.animal = animal;
 probe2ephys(1).day = 2;
 probe2ephys(1).site = 2;
 
-probe2ephys(2).day = 2;
+probe2ephys(2).day = 3;
 probe2ephys(2).site = 3;
 
 probe2ephys(3).day = 2;
 probe2ephys(3).site = 1;
 
-probe2ephys(4).day = 1;
+probe2ephys(4).day = 4;
 probe2ephys(4).site = 1;
 
-probe2ephys(5).day = 1;
+probe2ephys(5).day = 4;
 probe2ephys(5).site = 2;
 
-probe2ephys(6).day = 2;
+probe2ephys(6).day = 1;
 probe2ephys(6).site = 1;
 
-probe2ephys(7).day = 1;
+probe2ephys(7).day = 3;
 probe2ephys(7).site = 2;
 
 probe2ephys(8).day = 3;
-probe2ephys(8).site = 3;
+probe2ephys(8).site = 1;
 
- probe2ephys(9).day = 4;
- probe2ephys(9).site = 1;
+ probe2ephys(9).day = 2;
+ probe2ephys(9).site = 3;
 % 
 % probe2ephys(10).day = 4;
 % probe2ephys(10).site = 2;
