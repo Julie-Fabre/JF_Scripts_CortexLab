@@ -1,6 +1,6 @@
 %AP_preprocess_phase3_newOEJF_onlysync('JF022', '2020-12-14')
-animal = 'JF024';
-im_type = 'tiffUnmergedNoDef';
+animal = 'JF032';
+im_type = 'brainSaw';
 
 %% get histology slices and copy locally
 locationHisto = ['//znas.cortexlab.net/Subjects/', animal, '/Histology/']; % copy files over to local disk
@@ -16,6 +16,24 @@ if strcmp(im_type, 'o') == 1
     for iFolder = 1:size(imageFolders, 1)
         copyfile([locationHisto, imageFolders(iFolder).name], im_path)
     end
+elseif strcmp(im_type, 'brainSaw') == 1
+    imagetFolders = dir(locationHisto);
+    imagetFolders(1:2) = []; % remove current dir and one above
+    imageFolders = dir([imagetFolders.folder '\' imagetFolders.name '\025_micron']);
+    
+    im_dir = 'D:\';
+    im_path = [im_dir, animal];
+    slice_path = [im_dir, filesep, animal, filesep, 'slices'];
+    mkdir(slice_path)
+    %for iFolder = 1:size(imageFolders, 1)
+        imageFolders2 = dir([imageFolders(1).folder, '\', imageFolders(1).name, '\025_micron',filesep, filesep, '*.tif']);
+        for i = 1:size(imageFolders2,1)
+            copyfile([imageFolders(iFolder).folder, '\', imageFolders(1).name, '\025_micron\', imageFolders2(i).name], im_path)
+            theseImges = dir([im_path, '/img_*.tif']);
+            %movefile([im_path filesep theseImges.name],[im_path filesep 'img', num2str(1), 'channel', num2str(i), '.tif'],'f');
+        end
+   % end
+    
 elseif strcmp(im_type, 'tiffUnmerged') == 1
     imageFolders = dir(locationHisto);
     imageFolders(1:2) = []; % remove current dir and one above

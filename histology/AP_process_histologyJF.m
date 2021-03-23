@@ -18,6 +18,14 @@ if strcmp(im_type, 't')
     im_um = regexp(im_description, 'PhysicalSizeX="(\S*)".*PhysicalSizeY="(\S*)"', 'tokens');
     im_um_x = str2num(im_um{1}{1});
     im_um_y = str2num(im_um{1}{2});
+elseif strcmp(im_type, 'brainSaw') == 1
+    im_path_dir = dir([im_path, filesep, '*.tif*']);
+    im_fn = natsortfiles(cellfun(@(path, fn) [path, filesep, fn], ...
+        {im_path_dir.folder}, {im_path_dir.name}, 'uni', false));
+    im_info = imfinfo(im_fn{1});
+    im_um_x = im_info(1).XResolution; %/10000 for cm -> um
+    im_um_y = im_info(1).YResolution;
+    
 elseif strcmp(im_type, 'ot') == 1
     im_path_dir = dir([im_path, filesep, '*.tif*']);
     im_fn = natsortfiles(cellfun(@(path, fn) [path, filesep, fn], ...
@@ -80,7 +88,11 @@ if im_um_x ~= im_um_y
 end
 
 % Get number of imaged channels (ome.tiff has extra page with nothing?)
-n_channels = sum(any([im_info.Height; im_info.Width], 1));
+%if strcmp(im_type, 'brainSaw') == 1
+%    n_channels = length(im_fn);
+%else
+    n_channels = sum(any([im_info.Height; im_info.Width], 1));
+%end
 %n_channels =2; %QQ hard coded here, change
 % Set resize factor to match to Allen CCF
 allen_um2px = 10; % Allen CCF: 10 um/voxel
@@ -118,9 +130,20 @@ if strcmp(im_type, 'tiffUnmerged')
 else
     for curr_im = 1:n_im
         for curr_channel = 1:n_channels
-            im_resized{curr_im, curr_channel, 1} = imresize(imread(im_fn{curr_im}, 'tif', curr_channel), im_rescale_factor);
-            imwrite(im_resized{curr_im, curr_channel, 1}, [im_path, '/resized/', strcat(num2str(curr_im), '_', num2str(curr_channel), '.tiff')], 'tiff');
-            nameS{:, curr_channel} = [im_path, '/resized/', strcat(num2str(curr_im), '_', num2str(curr_channel), '.tiff')];
+            
+            
+            if strcmp(im_type, 'brainSaw') == 1
+                %if size(dir([im_path, '/resized/']),1) <= 2
+                im_resized{curr_channel, curr_im, 1} = imresize(imread(im_fn{curr_im}, 'tif', curr_channel), im_rescale_factor);
+                imwrite(im_resized{curr_channel, curr_im, 1}, [im_path, '/resized/', strcat(num2str(curr_channel), '_', num2str(curr_im), '.tiff')], 'tiff');
+                
+                %end
+                nameS{:, curr_channel} = [im_path, '/resized/', strcat(num2str(curr_channel), '_', num2str(curr_im), '.tiff')];
+            else
+                im_resized{curr_im, curr_channel, 1} = imresize(imread(im_fn{curr_im}, 'tif', curr_channel), im_rescale_factor);
+                imwrite(im_resized{curr_im, curr_channel, 1}, [im_path, '/resized/', strcat(num2str(curr_im), '_', num2str(curr_channel), '.tiff')], 'tiff');
+                nameS{:, curr_channel} = [im_path, '/resized/', strcat(num2str(curr_im), '_', num2str(curr_channel), '.tiff')];
+            end
 
         end
         %waitbar(curr_im/n_im,h,['Loading and resizing images (' num2str(curr_im) '/' num2str(n_im) ')...']);
@@ -132,13 +155,33 @@ end
 % Estimate white balance within each channel
 % (dirty: assume one peak for background, one for signal)
 h = figure;
+if ~strcmp(im_type, 'brainSaw') == 1
+   
+    
 im_montage = cell(n_channels, 1);
 channel_caxis = nan(n_channels, 2);
 channel_color = cell(n_channels, 1);
+end
 if n_channels == 2
     chC = {'blue', 'red'};
 elseif n_channels == 3
-    chC = {'blue', 'red', 'green'};
+    if strcmp(im_type, 'brainSaw') == 1
+        chC = {'red', 'green', 'blue'};
+        n_im = n_channels;
+        n_channels = 3;
+        
+    else
+        chC = {'blue', 'red', 'green'};
+    end
+end
+if strcmp(im_type, 'brainSaw') == 1
+        chC = {'red', 'green', 'blue'};
+        n_im = n_channels;
+        n_channels = 3;
+        im_montage = cell(n_channels, 1);
+channel_caxis = nan(n_channels, 2);
+channel_color = cell(n_channels, 1);
+else
 end
 for curr_channel = 1:n_channels
     %image(im_resized{1,curr_channel})

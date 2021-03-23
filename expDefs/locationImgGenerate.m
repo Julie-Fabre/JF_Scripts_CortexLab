@@ -32,3 +32,8 @@ img = stim;
 img(:,1125-375:end)=1;
 imagesc(img)
 save('\\zserver.cortexlab.net\Data\pregenerated_textures\JulieF\locations\img6.mat', 'img')
+
+img = stim;
+img(:,1125-375:end)=1;
+imagesc(img)
+save('\\zserver.cortexlab.net\Data\pregenerated_textures\JulieF\locations\img6.mat', 'img')

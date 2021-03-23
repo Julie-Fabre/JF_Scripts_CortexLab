@@ -1,7 +1,7 @@
 
 %% Get and plot single mouse behavior (vanillaChoiceworld and choiceWorldJF)
 
-animalsAll = {'JF025', 'JF026', 'JF028', 'JF029','JF032', 'JF033', 'JF034', 'JF035' };%{'JF032'};%{'JF025', 'JF026', 'JF028', 'JF029','JF032', 'JF033', 'JF034', 'JF035' };%chnage to the names of the animals you want here
+animalsAll = {  'JF029'};%JF029','JF032', 'JF033', 'JF034', 'JF035' };%{'JF032'};%{'JF025', 'JF026', 'JF028', 'JF029','JF032', 'JF033', 'JF034', 'JF035' };%chnage to the names of the animals you want here
 for iAnimal = 1:size(animalsAll, 2)
 
     animal = animalsAll{1, iAnimal}; %this animal
@@ -9,7 +9,7 @@ for iAnimal = 1:size(animalsAll, 2)
     protocol2 = 'JF';
     flexible_name = true; %protocol name can be slightly different
     experiments = AP_find_experimentsJF(animal, protocol, protocol2); %find the experiments with the choiceworld protocol
-
+    %experiments(end)=[];
     bhv = struct; %initialize structure
 
     for curr_day = 1:length(experiments)
@@ -52,28 +52,29 @@ for iAnimal = 1:size(animalsAll, 2)
 %             plot(wheel_values_resample(1:20000))
 %             figure();
 %             plot(wheel_velocity(1:20000))
-           % wheel_t_resample %during all stims, average wheel movement 
-           if isfield(block.events, 'stimOnTimes')
-               trial_wheel_movs_idx = arrayfun(@(x) ...
-                    find(wheel_t_resample > block.events.stimOnTimes(x), 1), ...
-                    response_trials);
-           else
-            trial_wheel_movs_idx = arrayfun(@(x) ...
-                    find(wheel_t_resample > block.events.stimulusOnTimes(x), 1), ...
-                    response_trials);
-           end
-           tt = nan(max(diff(trial_wheel_movs_idx)),size(trial_wheel_movs_idx,2)-1); 
-           trial_wheel_movs = nan(max(diff(trial_wheel_movs_idx)),size(trial_wheel_movs_idx,2)-1); 
-           for iW = 1:size(trial_wheel_movs_idx,2)-1
-               tt(1:size(trial_wheel_movs_idx(iW):trial_wheel_movs_idx(iW+1),2),iW) = trial_wheel_movs_idx(iW):trial_wheel_movs_idx(iW+1);
-               trial_wheel_movs(1:size(trial_wheel_movs_idx(iW):trial_wheel_movs_idx(iW+1),2),iW) = wheel_velocity(tt(1:size(trial_wheel_movs_idx(iW):trial_wheel_movs_idx(iW+1),2),iW));
-           end
-           figure();
-           plot(wheel_t_resample(1:max(diff(trial_wheel_movs_idx)+1))-wheel_t_resample(1),nanmean(trial_wheel_movs'))
-           
+%            % wheel_t_resample %during all stims, average wheel movement 
+%            if isfield(block.events, 'stimOnTimes')
+%                trial_wheel_movs_idx = arrayfun(@(x) ...
+%                     find(wheel_t_resample > block.events.stimOnTimes(x), 1), ...
+%                     response_trials);
+%            else
+%             trial_wheel_movs_idx = arrayfun(@(x) ...
+%                     find(wheel_t_resample > block.events.stimulusOnTimes(x), 1), ...
+%                     response_trials);
+%            end
+%            tt = nan(max(diff(trial_wheel_movs_idx)),size(trial_wheel_movs_idx,2)-1); 
+%            trial_wheel_movs = nan(max(diff(trial_wheel_movs_idx)),size(trial_wheel_movs_idx,2)-1); 
+%            for iW = 1:size(trial_wheel_movs_idx,2)-1
+%                tt(1:size(trial_wheel_movs_idx(iW):trial_wheel_movs_idx(iW+1),2),iW) = trial_wheel_movs_idx(iW):trial_wheel_movs_idx(iW+1);
+%                trial_wheel_movs(1:size(trial_wheel_movs_idx(iW):trial_wheel_movs_idx(iW+1),2),iW) = wheel_velocity(tt(1:size(trial_wheel_movs_idx(iW):trial_wheel_movs_idx(iW+1),2),iW));
+%            end
+%            figure();
+%            plot(wheel_t_resample(1:max(diff(trial_wheel_movs_idx)+1))-wheel_t_resample(1),nanmean(trial_wheel_movs'))
+%            
            
             % padded array
             if isfield(block.paramsValues, 'noGoWheelGain')
+                if ~isempty(find(block.events.orientationValues))
 %                 nGwg = block.paramsValues.noGoWheelGain;
 %                 gwg = block.paramsValues.wheelGain;
 %                 %cell2mat( arrayfun(@(c) block.paramsValues.noGoWheelGain(2,:), (1:length(block.paramsValues)).', 'Uniform', 0) )
@@ -82,6 +83,9 @@ for iAnimal = 1:size(animalsAll, 2)
 %                 wheel_thresh = 0.005 .*(nogo.* nGwg) +...
 %                     0.005 .* (go.* gwg) ;%QQ make dep on wheel gain
                 wheel_thresh = 0.025;
+                
+            
+                end
             else
                 if isfield(block.events, 'wheelGainValues')
                     wheel_thresh = 0.005 .* block.events.wheelGainValues(1);
@@ -93,6 +97,7 @@ for iAnimal = 1:size(animalsAll, 2)
 %             plot(wheel_velocity)
 %             hold on; 
 %             scatter(trial_wheel_starts, ones(size(trial_wheel_starts,2),1))
+wheel_thresh=0.025;
              wheel_starts = wheel_t_resample(abs(wheel_velocity(1:end-1)) < wheel_thresh & ...
                  abs(wheel_velocity(2:end)) > wheel_thresh);
 
@@ -126,10 +131,14 @@ for iAnimal = 1:size(animalsAll, 2)
                             wheel_starts(find(wheel_starts > block.events.stimulusOnTimes(x), 1)), ...
                         response_trials);
                             catch
+                                try
                                 response_trials = response_trials(1:end-1);
                         trial_wheel_starts = arrayfun(@(x) ...
                             wheel_starts(find(wheel_starts > block.events.stimulusOnTimes(x), 1)), ...
                         response_trials);
+                                catch
+                                    continue
+                                end
                             end
                         end
                     end
@@ -238,7 +247,8 @@ for iAnimal = 1:size(animalsAll, 2)
 %                     
 %                     elseif numel(trial_stim)+1 == numel(repeatOnMisses)
                         bhv.n_trials_condition(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues(response_trials) == 0 & ~repeatOnMisses));
-                        bhv.go_left_trials(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(response_trials) == 0 & block.events.responseValues(response_trials) == -1)); %&~repeatOnMisses
+                        bhv.go_left_trials(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & ...
+                            block.events.orientationValues(response_trials) == 0 & block.events.responseValues(response_trials) == -1)); %&~repeatOnMisses
 
                         bhv.n_trials_condition45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues(response_trials) == -45 & ~repeatOnMisses));
                         bhv.go_left_trials45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(response_trials) == -45 & block.events.responseValues(response_trials) == -1)); %&~repeatOnMisses
@@ -246,15 +256,16 @@ for iAnimal = 1:size(animalsAll, 2)
                         bhv.n_trials_conditionNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues(response_trials) == 45 & ~repeatOnMisses));
                         bhv.go_left_trialsNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(response_trials) == 45 & block.events.responseValues(response_trials) == -1)); %&~repeatOnMisses
                         %rt = trial_move_t(response_trials);
-                    
+                        %min(block.events.responseTimes-block.events.contrastLeftTimes(1:end-1))
+                        bb=block.paramsValues.noGoResponseWindow;
                         bhv.no_go_trials(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(response_trials) == 0 ...
-                            & (block.events.responseValues(response_trials) == 0) )); %&~repeatOnMisses
+                            & (block.events.responseValues(response_trials) == 0 | block.events.responseTimes(response_trials) - block.events.contrastLeftTimes(response_trials)-0.4 > bb))); %&~repeatOnMisses
 
                         bhv.no_go_trials45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(response_trials) == -45 ...
-                            & (block.events.responseValues(response_trials) == 0) )); %&~repeatOnMisses
+                            & (block.events.responseValues(response_trials) == 0| block.events.responseTimes(response_trials) - block.events.contrastLeftTimes(response_trials)-0.4 > bb) )); %&~repeatOnMisses
 
                         bhv.no_go_trialsNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(response_trials) == 45 ...
-                            & (block.events.responseValues(response_trials) == 0) ));%&~repeatOnMisses
+                            & (block.events.responseValues(response_trials) == 0 | block.events.responseTimes(response_trials) - block.events.contrastLeftTimes(response_trials) - 0.4 > bb) ));%&~repeatOnMisses
                        
                         
 %                     else
@@ -373,8 +384,8 @@ for iAnimal = 1:size(animalsAll, 2)
     inver = strcmp(bhv.protocol, 'oneSideChoiceWorldJF');
     % Plot summary
     day_num = cellfun(@(x) datenum(x), {experiments.day});
-    day_labels = cellfun(@(day, protocol) [protocol(end-4:end), ' ', day(6:end)], ...
-        {experiments.day}, bhv.protocol, 'uni', false);
+    day_labels = cellfun(@(day) [ ' ', day(6:end)], ...
+        {experiments.day}, 'uni', false);
     figure('Name', animal)
 
     % Trials and water
@@ -454,7 +465,8 @@ for iAnimal = 1:size(animalsAll, 2)
         subplot(323)
     end
 
-
+    bhv.go_left_trials(:,3:9) = 0;
+     bhv.n_trials_condition(:,3:9) = 0;
     bhv.conditions(isnan(bhv.conditions)) = 0;
     im = imagesc(bhv.conditions, 1:size(bhv.go_left_trials), abs(repmat(inver', 1,11) - bhv.go_left_trials./bhv.n_trials_condition));
     set(im, 'AlphaData', ~isnan(get(im, 'CData')));
@@ -484,12 +496,13 @@ for iAnimal = 1:size(animalsAll, 2)
         subplot(324)
     end
 
-
+bhv.stim_rxn_time(:,3:9) = NaN;
+    % bhv.n_trials_condition(:,4:9) = 0;
     im = imagesc(bhv.conditions, 1:size(bhv.go_left_trials), bhv.stim_rxn_time);
     set(im, 'AlphaData', ~isnan(get(im, 'CData')));
     set(gca, 'color', [0.5, 0.5, 0.5]);
     colormap(brewermap([], '*RdBu'));
-    caxis([0, 1])
+    %caxis([0, 1])
     c = colorbar;
     ylabel(c, 'Reaction time');
     xlabel('Condition');
@@ -505,7 +518,8 @@ for iAnimal = 1:size(animalsAll, 2)
         plot(0, find([experiments.ephys]), 'ok');
     end
 
-
+bhv.no_go_trials(:,3:9) = 0;
+bhv.n_trials_condition(:,3:9) = 0;
     if isfield(bhv, 'go_left_trials45')
         subplot(435)
         bhv.conditions(isnan(bhv.conditions)) = 0;
@@ -585,7 +599,7 @@ for iAnimal = 1:size(animalsAll, 2)
         set(im, 'AlphaData', ~isnan(get(im, 'CData')));
         set(gca, 'color', [0.5, 0.5, 0.5]);
         colormap(brewermap([], '*RdBu'));
-        caxis([0, 01])
+        %caxis([0, 01])
         c = colorbar;
         ylabel(c, 'Reaction time');
         xlabel('Condition');
@@ -615,7 +629,7 @@ for iAnimal = 1:size(animalsAll, 2)
         set(gca, 'YTick', 1:length(experiments));
         set(gca, 'YTickLabel', day_labels);
         axis square;
-        caxis([0, 1])
+        %caxis([0, 1])
         hold on;
         if any([experiments.imaging])
             plot(0, find([experiments.imaging]), '.k');
