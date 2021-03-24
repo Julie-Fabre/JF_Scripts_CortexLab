@@ -33,9 +33,17 @@ p.MaximumNumberOfIterations=400;
 p.NumberOfSpatialSamples=300;
 p.FixedImageDimension = 3;
 p.MovingImageDimension = 3;
-p.SP_alpha=0.3;
+p.SP_alpha=0.2;
 
 %% automatic registering using elastix 
 reg=elastix(squeeze(RGBimg(:,:,:,1)),VOL,[],'elastix_default.yml','paramstruct',p);
+%save as multipage tiff 
 
+saveastiff(reg, ['D:/JF025/reg',num2str(p.SP_alpha),'.tiff']); 
+
+figure();
+subplot(131)
+imagesc(squeeze(squeeze(RGBimg(:,:,200,1))))
+subplot(132)
+imagesc(squeeze(reg(:,:,200)))
 %% user refinement stage 
