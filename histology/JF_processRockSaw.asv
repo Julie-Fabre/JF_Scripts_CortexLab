@@ -17,7 +17,12 @@ tv = readNPY([allen_atlas_path, filesep, 'template_volume_10um.npy']);
 av = readNPY([allen_atlas_path, filesep, 'annotation_volume_10um_by_index.npy']);
 st = loadStructureTreeJF([allen_atlas_path, filesep, 'structure_tree_safe_2017.csv']);
 
-%% allen tlas 25umcoronal 
+%sagital -> coronal 
+tv_coronal = permute(tv, [2,3,1]);
+figure();imagesc(tv_coronal(:,:,600));colormap(gray)
+tv_coronal_20um = tv_coronal(:,:,1:10:end);
+
+%% allen tlas 25um sagital 
 % from http://help.brain-map.org/display/mousebrain/API
 % 25 micron volume size
 thisSize = [528 320 456];
@@ -27,23 +32,37 @@ VOL = fread( fid, prod(thisSize), 'uint8' );
 fclose( fid );
 VOL = reshape(VOL,thisSize);
 
+%sagital -> coronal 
+VOL_coronal = permute(VOL, [2,3,1]);
+figure();imagesc(VOL_coronal(:,:,200));colormap(gray)
+tv_coronal_20um = tv_coronal(:,1:2:end,1:10:end);%error if too much of a difference in size between data and reg
+
 %% elastix parameters 
 p.Transform='AffineTransform';
-p.MaximumNumberOfIterations=400;
-p.NumberOfSpatialSamples=300;
+p.MaximumNumberOfIterations=900;
+p.NumberOfSpatialSamples=600;
 p.FixedImageDimension = 3;
 p.MovingImageDimension = 3;
-p.SP_alpha=0.6;
+p.SP_alpha=0.1;
 
+
+% p.Transform='BSplineTransform';
+% p.MaximumNumberOfIterations=1E3;
+% p.NumberOfSpatialSamples=1E3;
+% p.SP_a=4000;
 %% automatic registering using elastix 
-reg=elastix(squeeze(RGBimg(:,:,:,1)),VOL,[],'elastix_default.yml','paramstruct',p);
+reg=elastix(squeeze(RGBimg(:,:,:,1)),tv_coronal_20um ,[],'elastix_default.yml','paramstruct',p);
 %save as multipage tiff 
 
-saveastiff(reg, ['D:/JF025/reg',num2str(p.SP_alpha),'.tiff']); 
+saveastiff(reg, ['D:/JF025/reg',p.Transform, '-',num2str(p.SP_alpha), '-',num2str(p.NumberOfSpatialSamples),'-',num2str(p.MaximumNumberOfIterations),'.tiff']); 
 
 figure();
 subplot(131)
 imagesc(squeeze(squeeze(RGBimg(:,:,200,1))))
 subplot(132)
 imagesc(squeeze(reg(:,:,200)))
+
+
+
+
 %% user refinement stage 
