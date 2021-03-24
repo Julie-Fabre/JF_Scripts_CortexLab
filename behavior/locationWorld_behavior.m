@@ -120,7 +120,7 @@ for iAnimal = 1:size(animalsAll, 2)
 %             plot(wheel_velocity)
             
             movingRN_times = unique(wheel_t_resample(movingRN)); 
-            win = [-20, 20];
+            win = [-5, 20];
             binSize=0.1;
             binBorders = win(1):binSize:win(2);
             binArray=[];

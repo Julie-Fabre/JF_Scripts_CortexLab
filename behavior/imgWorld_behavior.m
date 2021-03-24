@@ -1,7 +1,7 @@
 clear all;
 clc;
 
-animalsAll = {'JF026', 'JF028'}; %JF029','JF032', 'JF033', 'JF034', 'JF035' };%{'JF032'};%{'JF025', 'JF026', 'JF028', 'JF029','JF032', 'JF033', 'JF034', 'JF035' };%chnage to the names of the animals you want here
+animalsAll = {'JF026', 'JF028','JF029'}; %JF029','JF032', 'JF033', 'JF034', 'JF035' };%{'JF032'};%{'JF025', 'JF026', 'JF028', 'JF029','JF032', 'JF033', 'JF034', 'JF035' };%chnage to the names of the animals you want here
 for iAnimal = 1:size(animalsAll, 2)
 
     animal = animalsAll{1, iAnimal}; %this animal
@@ -160,12 +160,12 @@ for iAnimal = 1:size(animalsAll, 2)
     cc = textscan(ccc, '%s', 'Delimiter', ' ');
     cc = cc{1};
     cc(strcmp('', cc)) = [];
-    im = imagesc(1:length(con), 1:size(bhv.correctTrials(keep_day, :), 1), bhv.goLeft(keep_day, :)./bhv.nTrials(keep_day, :));
+    im = imagesc(1:length(con), 1:size(bhv.correctTrials(keep_day, :), 1), bhv.correctTrials(keep_day, :)./bhv.nTrials(keep_day, :));
     set(im, 'AlphaData', ~isnan(get(im, 'CData')));
     set(gca, 'color', [0.5, 0.5, 0.5]);
     colormap(brewermap([], '*RdBu'));
     c = colorbar;
-    ylabel(c, 'Go left (frac)');
+    ylabel(c, 'Correct (frac)');
     xlabel('Image #, < 0 = left, > 0 = right');
     ylabel('Session');
     set(gca, 'XTick', 1:length(con));
