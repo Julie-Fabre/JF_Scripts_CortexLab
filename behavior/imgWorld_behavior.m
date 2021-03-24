@@ -1,7 +1,7 @@
 clear all;
 clc;
 
-animalsAll = {'JF025', 'JF026', 'JF028'}; %JF029','JF032', 'JF033', 'JF034', 'JF035' };%{'JF032'};%{'JF025', 'JF026', 'JF028', 'JF029','JF032', 'JF033', 'JF034', 'JF035' };%chnage to the names of the animals you want here
+animalsAll = {'JF026', 'JF028'}; %JF029','JF032', 'JF033', 'JF034', 'JF035' };%{'JF032'};%{'JF025', 'JF026', 'JF028', 'JF029','JF032', 'JF033', 'JF034', 'JF035' };%chnage to the names of the animals you want here
 for iAnimal = 1:size(animalsAll, 2)
 
     animal = animalsAll{1, iAnimal}; %this animal
@@ -12,7 +12,7 @@ for iAnimal = 1:size(animalsAll, 2)
     %experiments(end)=[];
     bhv = struct; %initialize structure
     keep_day = [];
-    for curr_day = 1:length(experiments)
+    for curr_day = length(experiments)
 
         day = experiments(curr_day).day;
         experiment_num = experiments(curr_day).experiment;
@@ -91,7 +91,7 @@ for iAnimal = 1:size(animalsAll, 2)
                         hit(response_trials) == 1 & ...
                         block.events.stimNValues(response_trials) == imgs(iImg)]*2 - [~[repeatOnMisses(response_trials(2:end)), 0] & ...
                         block.events.trialSideValues(response_trials) == 1 & ...
-                        block.events.stimNValues(response_trials) == imgs(iImg)]
+                        block.events.stimNValues(response_trials) == imgs(iImg)];
 
                     conditi((iImg - 1)*2+1) = -imgs(iImg);
                     conditi((iImg - 1)*2+2) = imgs(iImg);
@@ -188,7 +188,7 @@ end
 figure();
 for iImg = 1:8
     subplot(2, 8, iImg)
-    thisIm = imread(['\\zserver.cortexlab.net\Data\pregenerated_textures\JulieF\choiceWorld_7Stims\img', num2str(iImg), '.jpeg']);
+    thisIm = imread(['\\zserver.cortexlab.net\Data\pregenerated_textures\JulieF\choiceWorld_7StimsNew\img', num2str(iImg), '.jpeg']);
     imagesc(thisIm)
     colormap(gray)
     axis square;
@@ -226,5 +226,5 @@ errorbar(1:8, nanmean(val),nanstd(val),'ro','MarkerSize',5,...
     end
 xlabel('image #')
 ylabel('percentage correct trials')
-    legend({'JF025', 'JF026', 'JF028','mean +/- std'})
+    legend({animalsAll{:},'mean +/- std'})
     makepretty;
