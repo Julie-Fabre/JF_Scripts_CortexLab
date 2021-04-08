@@ -424,11 +424,17 @@ if block_exists
             trial_outcome = signals_events.hitValues(1:n_trials)' - signals_events.missValues(1:n_trials)';
 
             % (trial conditions: [contrast,side,choice,timing])
+            %theseTrialsAnalyze = signals_events.stimNValues(1:n_trials)- stimOn_times; %for some reason, some of first aren't logged - drop them 
             imageN = unique(signals_events.stimNValues);
             sides = [-1, 1];
             choices = [-1, 1];
             timings = [1, 2];
-
+            %%hacky-need to chagnge in future and check - stimNMvalues probably end ones need to not be used =- because some first stimN values not logged 
+             stimOn_times = stimOn_times(1:n_trials);
+             wheel_move_time = wheel_move_time(1:n_trials);
+             signals_events.responseTimes = signals_events.responseTimes(1:n_trials);
+            trial_outcome = trial_outcome(1:n_trials); 
+            
             conditions = combvec(imageN, sides, choices, timings)';
             n_conditions = size(conditions, 1);
 
