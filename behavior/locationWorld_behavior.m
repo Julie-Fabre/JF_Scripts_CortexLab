@@ -69,7 +69,7 @@ for iAnimal = 1:size(animalsAll, 2)
             else
                 block.events.trialSideValues(response_trials) = 1;
                 hitTimesPossib = [block.events.feedbackTimes, block.events.noGoQuiescenceTimes];
-                hitValuesUnsorted = [ones(size(block.events.feedbackTimes,2),1)', zeros(size(block.events.noGoQuiescenceTimes,2),1)'];
+                hitValuesUnsorted = [block.events.feedbackValues, 3*ones(size(block.events.noGoQuiescenceTimes,2),1)'];
                 [sortedV, sortedIdx] = sort(hitTimesPossib);
                 block.events.hitValues(response_trials) = hitValuesUnsorted(sortedIdx);
             end
@@ -82,7 +82,11 @@ for iAnimal = 1:size(animalsAll, 2)
                 go2Trials = zeros(size(block.events.trialSideValues(response_trials),2),1)'; 
                 noGoTrials = zeros(size(block.events.trialSideValues(response_trials),2),1)'; 
             end 
-            
+            if isfield(block.events, 'repeatTrialValues')
+                repeatOnMisses = block.events.repeatTrialValues(response_trials) > 0;
+            else
+                repeatOnMisses = block.events.repeatNumValues(response_trials) > 1;
+            end
             correctTrials((iImg - 1)*3+1) =sum(block.events.trialSideValues(response_trials) == 1 & ...
                 block.events.hitValues(response_trials) == 1 & go1Trials...
                 );% go 1
@@ -94,7 +98,7 @@ for iAnimal = 1:size(animalsAll, 2)
                 );% no go 
 
             nTrials((iImg - 1)*3+1) = sum(~[repeatOnMisses(response_trials(2:end)), 0] & ...
-                block.events.trialSideValues(response_trials) == -1 & go1Trials...
+                block.events.trialSideValues(response_trials) == 1 & go1Trials...
                 );
             nTrials((iImg - 1)*3+2) = sum(~[repeatOnMisses(response_trials(2:end)), 0] & ...
                 block.events.trialSideValues(response_trials) == 1 & go2Trials...
@@ -121,17 +125,34 @@ for iAnimal = 1:size(animalsAll, 2)
             
             noGo((iImg - 1)*3+1) = sum(~[repeatOnMisses(response_trials(2:end)), 0] & ...
                 block.events.trialSideValues(response_trials) == 1 & ...
-                block.events.hitValues(response_trials) == 0 & go1Trials...
+                block.events.hitValues(response_trials) == 3 & go1Trials...
                 );
             noGo((iImg - 1)*3+2) = sum(~[repeatOnMisses(response_trials(2:end)), 0] & ...
                 block.events.trialSideValues(response_trials) == 1 & ...
-                block.events.hitValues(response_trials) == 0 & go2Trials...
+                block.events.hitValues(response_trials) == 3 & go2Trials...
                 );
             noGo((iImg - 1)*3+3) = sum(~[repeatOnMisses(response_trials(2:end)), 0] & ...
                 block.events.trialSideValues(response_trials) == 1 & ...
-                block.events.hitValues(response_trials) == 0 & noGoTrials...
+                block.events.hitValues(response_trials) == 3 & noGoTrials...
                 );
-            
+            if contains(block.expDef, 'goNoGo')
+                allOffs = sort([block.events.goStimOffTimes, block.events.noGoStimOffTimes]);
+                timeThis = allOffs(response_trials) - block.events.goStimOnTimes(response_trials) ;
+            else
+                timeThis = block.events.stimOffTimes(response_trials) - block.events.stimOnTimes(response_trials) ;
+            end
+            trialTime((iImg - 1)*3+1) = nanmean(timeThis(~[repeatOnMisses(response_trials(2:end)), 0] & ...
+                block.events.trialSideValues(response_trials) == 1 & ...
+               go1Trials...
+                ));
+            trialTime((iImg - 1)*3+2) = nanmean(timeThis(~[repeatOnMisses(response_trials(2:end)), 0] & ...
+                block.events.trialSideValues(response_trials) == 1 & ...
+               go2Trials...
+                ));
+            trialTime((iImg - 1)*3+3) = nanmean(timeThis(~[repeatOnMisses(response_trials(2:end)), 0] & ...
+                block.events.trialSideValues(response_trials) == 1 & ...
+               noGoTrials...
+                ));
             
             wheel_resample_rate = 1000;
             wheel_t_resample = block.inputs.wheelTimes(1):1 / wheel_resample_rate:block.inputs.wheelTimes(end);
@@ -155,17 +176,53 @@ for iAnimal = 1:size(animalsAll, 2)
 %             plot(wheel_velocity)
             
             movingRN_times = unique(wheel_t_resample(movingRN)); 
-            win = [-5, 20];
-            binSize=0.1;
-            binBorders = win(1):binSize:win(2);
-            binArray=[];
-            for r = 1:length(block.events.stimOnTimes)-1
-                  [n,binCenters] = histdiff(movingRN_times, block.events.stimOnTimes(r), binBorders);
-                    binArray(r,:) = n;
-                    %find(movingRN_times > block.events.stimOnTimes(r)-win(1) & movingRN_times < block.events.stimOnTimes(r+1))
-            end
-            cp=cumsum(binArray>1);
+            if isfield(block.events, 'stimOnTimes')
+                win = [-5, 20];
+                binSize=0.1;
+                binBorders = win(1):binSize:win(2);
+                binArray=[];
+                for r = 1:length(block.events.stimOnTimes)-1
+                      [n,binCenters] = histdiff(movingRN_times, block.events.stimOnTimes(r), binBorders);
+                        binArray(r,:) = n;
+                        %find(movingRN_times > block.events.stimOnTimes(r)-win(1) & movingRN_times < block.events.stimOnTimes(r+1))
+                end
+                cp=cumsum(binArray>1);
             movingFrac = cp(end, :) / size(binArray,1);
+            else
+                win = [-5, 20];
+                binSize=0.1;
+                binBorders = win(1):binSize:win(2);
+                binArrayGo1=[];
+                theseT = block.events.noGoStimOnTimes(go1Trials );
+                for r = 1:length(theseT)-1
+                      [n,binCenters] = histdiff(movingRN_times, theseT(r), binBorders);
+                        binArrayGo1(r,:) = n;
+                        %find(movingRN_times > block.events.stimOnTimes(r)-win(1) & movingRN_times < block.events.stimOnTimes(r+1))
+                end
+                cp=cumsum(binArrayGo1>1);
+                movingFracGo1 = cp(end, :) / size(binArrayGo1,1);
+                
+                binArrayGo2=[];
+                theseT = block.events.noGoStimOnTimes(go2Trials );
+                for r = 1:length(theseT)-1
+                      [n,binCenters] = histdiff(movingRN_times, theseT(r), binBorders);
+                        binArrayGo2(r,:) = n;
+                        %find(movingRN_times > block.events.stimOnTimes(r)-win(1) & movingRN_times < block.events.stimOnTimes(r+1))
+                end
+                cp=cumsum(binArrayGo2>1);
+                movingFracGo2 = cp(end, :) / size(binArrayGo2,1);
+                
+                binArrayNoGo=[];
+                theseT = block.events.noGoStimOnTimes(noGoTrials);
+                for r = 1:length(theseT)-1
+                      [n,binCenters] = histdiff(movingRN_times, theseT(r), binBorders);
+                        binArrayNoGo(r,:) = n;
+                        %find(movingRN_times > block.events.stimOnTimes(r)-win(1) & movingRN_times < block.events.stimOnTimes(r+1))
+                end
+                cp2=cumsum(binArrayNoGo>1);
+                movingFracNoGo = cp2(end, :) / size(binArrayNoGo,1);
+            end 
+            
 
            
             bhv.correctTrials(curr_day, :) = correctTrials;
@@ -175,8 +232,9 @@ for iAnimal = 1:size(animalsAll, 2)
             bhv.conditions(curr_day, :) = conditi;
             bhv.goLeft(curr_day, :) = goLeft;
             bhv.noGo(curr_day, :) = noGo; 
+            bhv.trialTime(curr_day, :) = trialTime;
             keep_day = [keep_day, curr_day];
-
+            
 
             %stims
         end
@@ -187,7 +245,7 @@ for iAnimal = 1:size(animalsAll, 2)
         {experiments(keep_day).day}, 'uni', false);
 
     figure('Name', animal);
-    subplot(311)
+    subplot(321)
     yyaxis left
 
     scatter(day_num, bhv.n_trials(keep_day, :));
@@ -209,7 +267,7 @@ for iAnimal = 1:size(animalsAll, 2)
     set(gca, 'XTickLabelRotation', 90);
     makepretty;
 
-    subplot(312)
+    subplot(323)
     con = bhv.conditions(keep_day(1), :);
     ccc = num2str(con(1, :));
     cc = textscan(ccc, '%s', 'Delimiter', ' ');
@@ -221,7 +279,7 @@ for iAnimal = 1:size(animalsAll, 2)
     colormap(brewermap([], '*RdBu'));
     c = colorbar;
     ylabel(c, 'Go left (frac)');
-    xlabel('< 0 = left, > 0 = right');
+    xlabel('image type');
     ylabel('Session');
     set(gca, 'XTick', 1:length(con));
     set(gca, 'XTickLabel', cc);
@@ -236,7 +294,7 @@ for iAnimal = 1:size(animalsAll, 2)
     caxis([0, 1])
     makepretty;
     
-    subplot(313)
+    subplot(324)
     con = bhv.conditions(keep_day(1), :);
     ccc = num2str(con(1, :));
     cc = textscan(ccc, '%s', 'Delimiter', ' ');
@@ -248,7 +306,7 @@ for iAnimal = 1:size(animalsAll, 2)
     colormap(brewermap([], '*RdBu'));
     c = colorbar;
     ylabel(c, 'No go (frac)');
-    xlabel('< 0 = left, > 0 = right');
+    xlabel('image type');
     ylabel('Session');
     set(gca, 'XTick', 1:length(con));
     set(gca, 'XTickLabel', cc);
@@ -256,30 +314,62 @@ for iAnimal = 1:size(animalsAll, 2)
     set(gca, 'YTickLabel', day_labels);
 
     for iDay = 1:size(keep_day, 2)
-        txt = num2str(bhv.correctTrials(keep_day(iDay), :)');
+        txt = num2str(bhv.noGo(keep_day(iDay), :)');
         text((1:length(con))-0.2, ones(1, length(con))*iDay, txt, 'BackgroundColor', 'w')
     end
     %axis square;
     caxis([0, 1])
     makepretty;
     
-    an(iAnimal).movingFrac = movingFrac; 
+    subplot(325)
+    im = imagesc(1:length(con), 1:size(bhv.trialTime(keep_day, :), 1), bhv.trialTime(keep_day, :));
+    set(im, 'AlphaData', ~isnan(get(im, 'CData')));
+    set(gca, 'color', [0.5, 0.5, 0.5]);
+    colormap(brewermap([], '*RdBu'));
+    c = colorbar;
+    ylabel(c, 'Trial time (dirty proxy for reaction time)');
+    xlabel('image type');
+    ylabel('Session');
+    set(gca, 'XTick', 1:length(con));
+    set(gca, 'XTickLabel', cc);
+    set(gca, 'YTick', 1:length(keep_day));
+    set(gca, 'YTickLabel', day_labels);
+     for iDay = 1:size(keep_day, 2)
+        txt = num2str(bhv.trialTime(keep_day(iDay), :)');
+        text((1:length(con))-0.2, ones(1, length(con))*iDay, txt, 'BackgroundColor', 'w')
+    end
+    makepretty;
+    
+    subplot(326)
+    plot(binBorders(1:end-1), movingFracGo1);
+    hold on;
+    plot(binBorders(1:end-1), movingFracGo2);
+    hold on;
+    makepretty;
+    plot(binBorders(1:end-1), movingFracNoGo);
+    hold on;
+    makepretty;
+    legend({'Go1', 'Go2', 'No go'})
+    xlabel('time from stim onset (s)')
+    ylabel('fraction moving')
+    %an(iAnimal).movingFracGo = movingFracGo; 
+   %an(iAnimal).movingFracGo = movingFracNoGo; 
 
 end
 
-figure();
-plot(binBorders(1:end-1), an(1).movingFrac);
-hold on; 
-makepretty;
-plot(binBorders(1:end-1), an(2).movingFrac);
-hold on; 
-makepretty;
-plot(binBorders(1:end-1), an(3).movingFrac);
-hold on; 
-makepretty;
-plot(binBorders(1:end-1), an(4).movingFrac);
-hold on; 
-legend(animalsAll)
-xlabel('time from stim onset (s)')
-ylabel('fraction moving')
-makepretty;
+% figure();
+% plot(binBorders(1:end-1), an(1).movingFrac);
+% hold on; 
+% makepretty;
+% plot(binBorders(1:end-1), an(2).movingFrac);
+% hold on; 
+% makepretty;
+% plot(binBorders(1:end-1), an(3).movingFrac);
+% hold on; 
+% makepretty;
+% plot(binBorders(1:end-1), an(4).movingFrac);
+% hold on; 
+% legend(animalsAll)
+% xlabel('time from stim onset (s)')
+% ylabel('fraction moving')
+% makepretty;
