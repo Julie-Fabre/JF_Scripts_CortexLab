@@ -129,7 +129,7 @@ if strcmp(im_type, 'tiffUnmerged')
     end
 else
     if strcmp(im_type, 'brainSaw')
-        n_im = 2;
+        n_im = 3;
     end
     %if isempty(dir([im_path, '/resized/*tiff']))
     for curr_im = 1:n_im
@@ -182,7 +182,7 @@ end
 if strcmp(im_type, 'brainSaw') == 1
         chC = {'red', 'green', 'blue'};
         n_im = n_channels;
-        n_channels = 2;
+        n_channels = 3;
         im_montage = cell(n_channels, 1);
 channel_caxis = nan(n_channels, 2);
 channel_color = cell(n_channels, 1);

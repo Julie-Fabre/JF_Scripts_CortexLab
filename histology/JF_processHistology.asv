@@ -29,15 +29,15 @@ elseif strcmp(im_type, 'brainSaw') == 1
     im_dir = 'D:\';
     im_path = [im_dir, animal];
     slice_path = [im_dir, filesep, animal, filesep, 'slices'];
-%     mkdir(slice_path)
-%     for iFolder = 1:size(imageFolders, 1)
-%         imageFolders2 = dir([imageFolders(1).folder,filesep, '*.tif']);
-%         for i = 1:size(imageFolders2,1)
-%             copyfile([imageFolders(iFolder).folder, '\', imageFolders2(i).name], im_path)
-%             theseImges = dir([im_path, '/img_*.tif']);
-%             %movefile([im_path filesep theseImges.name],[im_path filesep 'img', num2str(1), 'channel', num2str(i), '.tif'],'f');
-%         end
-%     end
+    mkdir(slice_path)
+    %for iFolder = 1:size(imageFolders, 1)
+        imageFolders2 = dir([imageFolders(1).folder, '\', imageFolders(1).name,filesep, filesep, '*.tif']);
+        for i = 1:size(imageFolders2,1)
+            copyfile([imageFolders(iFolder).folder, '\', imageFolders(1).name, imageFolders2(i).name], im_path)
+            theseImges = dir([im_path, '/img_*.tif']);
+            %movefile([im_path filesep theseImges.name],[im_path filesep 'img', num2str(1), 'channel', num2str(i), '.tif'],'f');
+        end
+   % end
     
 elseif strcmp(im_type, 'tiffUnmerged') == 1
     imageFolders = dir(locationHisto);
@@ -106,31 +106,30 @@ AP_view_aligned_histologyJF(st, slice_path);
 AP_view_aligned_histology_volumeJF(tv, av, st, slice_path, 2);
 
 % Get probe trajectory from histology, convert to CCF coordinates
-
 AP_get_probe_histologyJF(tv, av, st, slice_path);
 
 %% BLUE, ORANGE, YELLOW, PURPLE, GREEN , LIGHT BLUE, RED correspondance (manual):
 probe2ephys = struct;
 probe2ephys.animal = animal;
-probe2ephys(1).day = 3;
+probe2ephys(1).day = 4;
 probe2ephys(1).site = 1;
 
-probe2ephys(2).day = 3;
-probe2ephys(2).site = 2;
+probe2ephys(2).day =2;
+probe2ephys(2).site = 3;
 
 probe2ephys(3).day = 2;
 probe2ephys(3).site = 1;
 
-probe2ephys(4).day = 2;
+probe2ephys(4).day = 4;
 probe2ephys(4).site = 2;
 
 probe2ephys(5).day = 2;
-probe2ephys(5).site = 3;
+probe2ephys(5).site = 2;
 
-probe2ephys(6).day = 1;
-probe2ephys(6).site = 2;
+probe2ephys(6).day = 3;
+probe2ephys(6).site = 1;
 
-probe2ephys(7).day = 1;
+probe2ephys(7).day = 3;
 probe2ephys(7).site = 3;
 
 probe2ephys(8).day = 1;

@@ -15,7 +15,10 @@ gui_data.n_probes = str2num(cell2mat(inputdlg('How many probes?')));
 
 % Load in slice images
 gui_data.slice_im_path = slice_im_path;
-slice_im_dir = dir([slice_im_path filesep '*.tif']);
+slice_im_dir = dir([slice_im_path filesep '*.tif*']);
+if isempty(slice_im_dir)
+    slice_im_dir = dir([slice_im_path filesep '*.jp*g']);
+end
 slice_im_fn = natsortfiles(cellfun(@(path,fn) [path filesep fn], ...
     {slice_im_dir.folder},{slice_im_dir.name},'uni',false));
 gui_data.slice_im = cell(length(slice_im_fn),1);
@@ -35,7 +38,7 @@ gui_data.histology_ccf_alignment = atlas2histology_tform;
 
 % Warp area labels by histology alignment
 gui_data.histology_aligned_av_slices = cell(length(gui_data.slice_im),1);
-for curr_slice = 1:length(gui_data.slice_im)
+for curr_slice = 1:length(gui_data.histology_ccf)
     curr_av_slice = gui_data.histology_ccf(curr_slice).av_slices;
     curr_av_slice(isnan(curr_av_slice)) = 1;
     curr_slice_im = gui_data.slice_im{curr_slice};

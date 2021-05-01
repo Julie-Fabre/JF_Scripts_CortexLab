@@ -1243,7 +1243,9 @@ if ephys_exists && load_parts.ephys
 
     % Throw out all non-good spike data
     good_spike_idx = ismember(spike_templates_0idx, good_templates_idx);
+    spike_times_full = spike_times_timeline;
     spike_times = spike_times(good_spike_idx);
+    spike_templates_full = spike_templates_0idx+1;
     spike_templates_0idx = spike_templates_0idx(good_spike_idx);
     template_amplitudes = template_amplitudes(good_spike_idx);
     spike_depths = spike_depths(good_spike_idx);
