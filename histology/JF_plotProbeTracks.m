@@ -1,3 +1,7 @@
+% to do 
+% add probe depths, types, and mutli color if several regions of interest
+% plot only probe in the region of interest? 
+
 animalsType = {'Naive'};
 regionsNames = {'CP', 'STR', 'STN', 'GPe', 'SNr', 'GPi'};
 regions = {'DMS', 'PS', 'STN', 'GPe', 'SNr', 'GPi'};

@@ -1,4 +1,4 @@
-function AP_preprocess_phase3_newOEJF(animal,day, thisSite,t_range)
+function AP_preprocess_phase3_newOEJF(animal,day,t_range, thisSite)
 % AP_preprocess_phase3(animal,day,t_range)
 %
 % t_range = specify data time range to use
@@ -26,10 +26,8 @@ if ~isempty(data_path_dir)
     data_paths = cellfun(@(x) [data_paths{1} filesep x],{data_path_dir.name},'uni',false);
     save_paths = cellfun(@(x) [save_paths{1} filesep x],{data_path_dir.name},'uni',false);
 end
-if ~exist('thisSite','var')
-    thisSite = 1:length(data_paths);
-end
-for curr_site = thisSite 
+if 
+for curr_site = 1:length(data_paths)  
     
     % Get experiments (if turned off between)
     curr_data_path = data_paths{curr_site};   
