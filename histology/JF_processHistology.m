@@ -112,8 +112,8 @@ AP_get_probe_histologyJF(tv, av, st, slice_path);
 %% BLUE, ORANGE, YELLOW, PURPLE, GREEN , LIGHT BLUE, RED correspondance (manual):
 probe2ephys = struct;
 probe2ephys.animal = animal;
-probe2ephys(1).day = 3;
-probe2ephys(1).site = 1;
+probe2ephys(1).day = 2;
+probe2ephys(1).site = 2;
 
 probe2ephys(2).day = 3;
 probe2ephys(2).site = 2;
@@ -121,14 +121,14 @@ probe2ephys(2).site = 2;
 probe2ephys(3).day = 2;
 probe2ephys(3).site = 1;
 
-probe2ephys(4).day = 2;
-probe2ephys(4).site = 2;
+probe2ephys(4).day = 1;
+probe2ephys(4).site = 1;
 
-probe2ephys(5).day = 2;
-probe2ephys(5).site = 3;
+probe2ephys(5).day = 3;
+probe2ephys(5).site = 2;
 
-probe2ephys(6).day = 1;
-probe2ephys(6).site = 2;
+probe2ephys(6).day = 3;
+probe2ephys(6).site = 3;
 
 probe2ephys(7).day = 1;
 probe2ephys(7).site = 3;

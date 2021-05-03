@@ -3,14 +3,14 @@
 % plot only probe in the region of interest? 
 
 animalsType = {'Naive'};
-regionsNames = {'CP', 'STR', 'STN', 'GPe', 'SNr', 'GPi'};
+regionsNames = {'CP', 'STN', 'GPe', 'SNr', 'GPi'};
 regions = {'DMS', 'PS', 'STN', 'GPe', 'SNr', 'GPi'};
 recordingInfo = readtable('C:\Users\Julie\Dropbox\Analysis\Recordings - Sheet1.csv');
 
 %add probe types, depths
 for iType = 1:size(animalsType, 2)
     theseTypes = strcmp(recordingInfo.Type, animalsType{iType});
-    theseColors = {rgb('DeepSkyBlue'); rgb('DeepSkyBlue'); rgb('SeaGreen'); rgb('DarkOrange'); rgb('Crimson'); rgb('Hotpink'); rgb('Black');rgb('Brown')};
+    theseColors = {rgb('DeepSkyBlue');  rgb('SeaGreen'); rgb('DarkOrange'); rgb('Crimson'); rgb('Hotpink'); rgb('Black');rgb('Brown')};
 
     allen_atlas_path = 'C:\Users\Julie\Dropbox\Atlas\allenCCF';
     tv = readNPY([allen_atlas_path, filesep, 'template_volume_10um.npy']);
@@ -48,7 +48,7 @@ for iType = 1:size(animalsType, 2)
         theseAnimals = recordingInfo.Mouse(theseTypes);
 
         for iAnimal = 1:size(theseAnimals, 1)
-           % iAnimal = iAnimal + 1;
+            %iAnimal = iAnimal + 1;
             load(['D:\', theseAnimals{iAnimal}, '\slices\probe_ccf.mat'])
             thisAnimal = strcmp(recordingInfo.Mouse, theseAnimals{iAnimal});
             %thisProbe = recordingInfo.HistologyProbe(find(thisAnimal & theseProbes));

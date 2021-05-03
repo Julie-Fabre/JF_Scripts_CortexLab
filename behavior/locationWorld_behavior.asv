@@ -286,11 +286,8 @@ for iAnimal = 1:size(animalsAll, 2)
                     %find(movingRN_times > block.events.stimOnTimes(r)-win(1) & movingRN_times < block.events.stimOnTimes(r+1))
                 end
                 cp2 = cumsum(binArrayNoGo > 1);
-                if length(theseT) > 1
-                    movingFracNoGo = cp2(end, :) / size(binArrayNoGo, 1);
-                else
-                    movingFracNoGo = nan(1,250);
-                end
+                if l
+                movingFracNoGo = cp2(end, :) / size(binArrayNoGo, 1);
             end
             
             
