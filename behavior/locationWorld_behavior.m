@@ -2,7 +2,7 @@ clear all;
 clc;
 
 % 2021 04 08 added no go analysis
-animalsAll = {'JF036','JF037','JF038','JF039'}; %JF029','JF032', 'JF033', 'JF034', 'JF035' };%{'JF032'};%{'JF025', 'JF026', 'JF028', 'JF029','JF032', 'JF033', 'JF034', 'JF035' };%chnage to the names of the animals you want here
+animalsAll = {'JF036','JF037','JF038','JF039','JF042', 'JF043', 'JF044'}; %JF029','JF032', 'JF033', 'JF034', 'JF035' };%{'JF032'};%{'JF025', 'JF026', 'JF028', 'JF029','JF032', 'JF033', 'JF034', 'JF035' };%chnage to the names of the animals you want here
 for iAnimal = 1:size(animalsAll, 2)
     
     animal = animalsAll{1, iAnimal}; %this animal
