@@ -2,10 +2,11 @@ keep ephysData
 
 animalsType = {'Naive'};
 regions = {'CP', 'STN', 'GPe', 'SNr', 'GPi'};
+regionSpacing = [20, 5, 5, 5, 5];
 %regions = {'DMS', 'PS', 'STN', 'GPe', 'SNr', 'GPi'};
 recordingInfo = readtable('C:\Users\Julie\Dropbox\Analysis\Recordings - Sheet1.csv');
 bregma = [540, 0, 570];
-
+thisCmap = [-5, 30];
 %% X-Y, X-Z, Y-Z plots for each region. bin by 100 um (?) and plot in colormap increase in response ?
 
 for iType = 1:size(animalsType, 2)
@@ -49,44 +50,48 @@ for iType = 1:size(animalsType, 2)
         figure(1);
         % x-y
         subplot(3, size(regions, 2), iRegion)
-        bb = boundary(r, c);
+        bb = boundary(r, c,0);
         plot(r(bb), c(bb), 'Color', theseColors{iRegion});
-        xlabel('ML')
-        ylabel('AP')
+        %xlabel('ML')
+        %ylabel('AP')
         axis equal
         axis square
+        axis image
         xyXLim = xlim;
         xyYLim = ylim;
         makepretty;
 
         % x-z
         subplot(3, size(regions, 2), size(regions, 2)+iRegion)
-        bb = boundary(r, v);
-        plot(r(bb), v(bb), 'Color', theseColors{iRegion});
-        xlabel('ML')
-        ylabel('DV')
+        bb2 = boundary(r, v,0);
+        plot(r(bb2), v(bb2), 'Color', theseColors{iRegion});
+        %xlabel('ML')
+        %ylabel('DV')
         axis equal
         axis square
+        axis image
         makepretty;
-         xzXLim = xlim;
+        xzXLim = xlim;
         xzZLim = ylim;
 
         % y-z
         subplot(3, size(regions, 2), size(regions, 2)*2+(iRegion))
-        bb = boundary(c, v);
-        plot(c(bb) , v(bb), 'Color', theseColors{iRegion});
-        xlabel('AP')
-        ylabel('DV')
+        bb3 = boundary(c, v,0);
+        plot(c(bb3) , v(bb3), 'Color', theseColors{iRegion});
+        %xlabel('AP')
+        %ylabel('DV')
         axis equal
         axis square
+        axis image
         makepretty;
         yzYLim = xlim;
         yzZLim = ylim;
         % bin region in 200um bins
         xy = [r(bb), c(bb)];
-        xyCountBins = {xyXLim(1) * 10 :10:xyXLim(2) * 10 , xyYLim(1) * 10 :10:xyYLim(2) * 10 };
-        xzCountBins = {xzXLim(1) * 10 :10:xzXLim(2) * 10 , xzZLim(1) * 10 :10:xzZLim(2) * 10 };
-        yzCountBins = {yzYLim(1) * 10 :10:yzYLim(2) * 10 , yzZLim(1) * 10 :10:yzZLim(2) * 10 };
+        
+        xyCountBins = {xyXLim(1) * 10 :regionSpacing(iRegion):xyXLim(2) * 10 , xyYLim(1) * 10 :regionSpacing(iRegion):xyYLim(2) * 10 };
+        xzCountBins = {xzXLim(1) * 10 :regionSpacing(iRegion):xzXLim(2) * 10 , xzZLim(1) * 10 :regionSpacing(iRegion):xzZLim(2) * 10 };
+        yzCountBins = {yzYLim(1) * 10 :regionSpacing(iRegion):yzYLim(2) * 10 , yzZLim(1) * 10 :regionSpacing(iRegion):yzZLim(2) * 10 };
         % load all region data [-0.1 - 0.3]s after stim onset, with which bin belongs to
 
         CNew = cat(1, ephysData.location);
@@ -102,26 +107,27 @@ for iType = 1:size(animalsType, 2)
         
         subplot(3, size(regions, 2), iRegion)
         hold on;
-        scatter((bregma(3)-(bregma(3)-theseLocations(:,3)))/10, theseLocations(:,1)/10)
+        %scatter((bregma(3)/10) -abs(theseLocations(:,3)/10 - (bregma(3)/10)), theseLocations(:,1)/10)
         
-        figure();
-        hold on;
-        scatter(theseLocations(:,3)/10, theseLocations(:,1)/10)
-        scatter(bregma(1)/10, bregma(3)/10)
-        scatter(bregma(3)/10, bregma(1)/10)
-        hold on;
-        
+%         figure();
+%         hold on;
+%         scatter(theseLocations(:,3)/10, theseLocations(:,1)/10)
+%         scatter((bregma(3)/10) -abs(theseLocations(:,3)/10 - (bregma(3)/10)), theseLocations(:,1)/10)
+%         scatter(bregma(1)/10, bregma(3)/10)
+%         scatter(bregma(3)/10, bregma(1)/10)
+%         hold on;
+%         
         % x-z
         subplot(3, size(regions, 2), size(regions, 2)+iRegion)
         hold on;
-        scatter((bregma(3)-(bregma(3)-theseLocations(:,3)))/10, theseLocations(:,2)/10)
+        %scatter((bregma(3)/10) -abs(theseLocations(:,3)/10 - (bregma(3)/10)), theseLocations(:,2)/10)
 
         % y-z
         subplot(3, size(regions, 2), size(regions, 2)*2+(iRegion))
         hold on;
-        scatter(theseLocations(:,3)/10, theseLocations(:,2)/10)
+        %scatter(theseLocations(:,1)/10, theseLocations(:,2)/10)
          subplot(3, size(regions, 2), iRegion)
-        bb = boundary(r, c);
+        [bb,k] = boundary(r, c,0);
         plot(r(bb), c(bb), 'Color', theseColors{iRegion});
         xlabel('ML')
         ylabel('AP')
@@ -133,8 +139,8 @@ for iType = 1:size(animalsType, 2)
 
         % x-z
         subplot(3, size(regions, 2), size(regions, 2)+iRegion)
-        bb = boundary(r, v);
-        plot(r(bb), v(bb), 'Color', theseColors{iRegion});
+        bb2 = boundary(r, v,0);
+        plot(r(bb2), v(bb2), 'Color', theseColors{iRegion});
         xlabel('ML')
         ylabel('DV')
         axis equal
@@ -145,8 +151,8 @@ for iType = 1:size(animalsType, 2)
 
         % y-z
         subplot(3, size(regions, 2), size(regions, 2)*2+(iRegion))
-        bb = boundary(c, v);
-        plot(c(bb) , v(bb), 'Color', theseColors{iRegion});
+        bb3 = boundary(c, v,0);
+        plot(c(bb3) , v(bb3), 'Color', theseColors{iRegion});
         xlabel('AP')
         ylabel('DV')
         axis equal
@@ -160,130 +166,260 @@ for iType = 1:size(animalsType, 2)
 %        theseSpikeTemplates = cat(1, ephysData(ind).spike_templates);
 %        theseStimOnTimes = cat(ephysData(ind).stimOn_times, 1);
 %         hold on;
-% %        plot3(theseLocations(:, 1), theseLocations(:, 3), theseLocations(:, 2), '.b') %1,2,3;23,2,1;
-%         [N, Xedges, Yedges, binX, binY] = histcounts2(theseLocations(:, 3), theseLocations(:, 1), xyCountBins{1, 1}, xyCountBins{1, 2}); %par rapport a bregma!
-% 
-%         for iBinX = 1:size(Xedges, 2)
-%             for iBinY = 1:size(Yedges, 2)
-%                 theseNeurons = binX == iBinX & binY == iBinY;
-%                 theseNeuronsInd = find(theseNeurons);
-%                 binnedArrayTot = [];
-%                 if ~isempty(theseNeuronsInd)
-%                     [h, hh] = histc(theseNeuronsInd, theseLocationsInfo);
-%                     uniqueRecs = unique(hh) + 1;
-%                     for iUniqueRec = 1:size(uniqueRecs, 1) %get psth per rec
-%                         theseTheseNeurons = theseNeuronsInd(hh == uniqueRecs(iUniqueRec));
-%                         if ~isempty(ephysData(uniqueRecs(iUniqueRec)).spike_times_timeline) && ~isempty(ephysData(uniqueRecs(iUniqueRec)).stimOn_times)
-%                             theseTheseNeuronsTemplate = ismember(ephysData(uniqueRecs(iUniqueRec)).spike_templates, ...
-%                                 theseTheseNeurons-theseLocationsInfo(uniqueRecs(iUniqueRec)));
-%                             [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = ...
-%                                 psthAndBA(ephysData(uniqueRecs(iUniqueRec)).spike_times_timeline(theseTheseNeuronsTemplate), ...
-%                                 ephysData(uniqueRecs(iUniqueRec)).stimOn_times, [-0.2, 0.3], 0.01);
-%                             binnedArrayTot = [binnedArrayTot; binnedArray];
-% %figure();
-% %                    plot(-0.2:0.01:0.3-0.01,psth)
-%                         end
-%                     end
-% 
-%                 end
-%                 if ~isempty(binnedArrayTot)
-%                     binnedArrayTotBinned(iBinX, iBinY, :) = nanmean(binnedArrayTot, 1); %average
-%                     % figure(); 
-%                     % plot(-0.2:0.01:0.3-0.01,squeeze(binnedArrayTotBinned(iBinX, iBinY, :)))
-%                     binnedArrayPixel(iBinX, iBinY) = (nanmean(binnedArrayTotBinned(iBinX, iBinY, 26:41)) - ...
-%                         nanmean(binnedArrayTotBinned(iBinX, iBinY, 1:20))) ./nanmean(binnedArrayTotBinned(iBinX, iBinY, 1:20));
-%                 else
-%                     binnedArrayTotBinned(iBinX, iBinY, :) = nan(50, 1); %average
-%                 end
-%             end
-%         end
-%         figure(1+iRegion);
-%         subplot(131)
-%         imagesc(binnedArrayPixel*100)
-%         colorbar
-%         clearvars binnedArrayPixel 
-%         
-%         [N, Xedges, Zedges, binX, binZ] = histcounts2(theseLocations(:, 3), theseLocations(:, 2), xzCountBins{1, 1}, xzCountBins{1, 2}); %par rapport a bregma!
-% 
-%           for iBinX = 1:size(Xedges, 2)
-%             for iBinZ = 1:size(Zedges, 2)
-%                 theseNeurons = binX == iBinX & binZ == iBinZ;
-%                 theseNeuronsInd = find(theseNeurons);
-%                 binnedArrayTot = [];
-%                 if ~isempty(theseNeuronsInd)
-%                     [h, hh] = histc(theseNeuronsInd, theseLocationsInfo);
-%                     uniqueRecs = unique(hh) + 1;
-%                     for iUniqueRec = 1:size(uniqueRecs, 1) %get psth per rec
-%                         theseTheseNeurons = theseNeuronsInd(hh == uniqueRecs(iUniqueRec));
-%                         if ~isempty(ephysData(uniqueRecs(iUniqueRec)).spike_times_timeline) && ~isempty(ephysData(uniqueRecs(iUniqueRec)).stimOn_times)
-%                             theseTheseNeuronsTemplate = ismember(ephysData(uniqueRecs(iUniqueRec)).spike_templates, ...
-%                                 theseTheseNeurons-theseLocationsInfo(uniqueRecs(iUniqueRec)));
-%                             [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = ...
-%                                 psthAndBA(ephysData(uniqueRecs(iUniqueRec)).spike_times_timeline(theseTheseNeuronsTemplate), ...
-%                                 ephysData(uniqueRecs(iUniqueRec)).stimOn_times, [-0.2, 0.3], 0.01);
-%                             binnedArrayTot = [binnedArrayTot; binnedArray];
-% %figure();
-% %                    plot(-0.2:0.01:0.3-0.01,psth)
-%                         end
-%                     end
-% 
-%                 end
-%                 if ~isempty(binnedArrayTot)
-%                     binnedArrayTotBinned(iBinX, iBinZ, :) = nanmean(binnedArrayTot, 1); %average
-%                     % figure(); 
-%                     % plot(-0.2:0.01:0.3-0.01,squeeze(binnedArrayTotBinned(iBinX, iBinZ, :)))
-%                     binnedArrayPixel(iBinX, iBinZ) = (nanmean(binnedArrayTotBinned(iBinX, iBinZ, 26:41)) - ...
-%                         nanmean(binnedArrayTotBinned(iBinX, iBinZ, 1:20))) ./nanmean(binnedArrayTotBinned(iBinX, iBinZ, 1:20));
-%                 else
-%                     binnedArrayTotBinned(iBinX, iBinZ, :) = nan(50, 1); %average
-%                 end
-%             end
-%           end
-%           figure(1+iRegion);
-%         subplot(132)
-%         imagesc(binnedArrayPixel*100)
-%         colorbar
-%         clearvars binnedArrayPixel 
-%             [N, Yedges, Zedges, binY, binZ] = histcounts2(theseLocations(:, 1), theseLocations(:, 2), yzCountBins{1, 1}, yzCountBins{1, 2}); %par rapport a bregma!
-% 
-%           for iBinY = 1:size(Yedges, 2)
-%             for iBinZ = 1:size(Zedges, 2)
-%                 theseNeurons = binY == iBinY & binZ == iBinZ;
-%                 theseNeuronsInd = find(theseNeurons);
-%                 binnedArrayTot = [];
-%                 if ~isempty(theseNeuronsInd)
-%                     [h, hh] = histc(theseNeuronsInd, theseLocationsInfo);
-%                     uniqueRecs = unique(hh) + 1;
-%                     for iUniqueRec = 1:size(uniqueRecs, 1) %get psth per rec
-%                         theseTheseNeurons = theseNeuronsInd(hh == uniqueRecs(iUniqueRec));
-%                         if ~isempty(ephysData(uniqueRecs(iUniqueRec)).spike_times_timeline) && ~isempty(ephysData(uniqueRecs(iUniqueRec)).stimOn_times)
-%                             theseTheseNeuronsTemplate = ismember(ephysData(uniqueRecs(iUniqueRec)).spike_templates, ...
-%                                 theseTheseNeurons-theseLocationsInfo(uniqueRecs(iUniqueRec)));
-%                             [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = ...
-%                                 psthAndBA(ephysData(uniqueRecs(iUniqueRec)).spike_times_timeline(theseTheseNeuronsTemplate), ...
-%                                 ephysData(uniqueRecs(iUniqueRec)).stimOn_times, [-0.2, 0.3], 0.01);
-%                             binnedArrayTot = [binnedArrayTot; binnedArray];
-% %figure();
-% %                    plot(-0.2:0.01:0.3-0.01,psth)
-%                         end
-%                     end
-% 
-%                 end
-%                 if ~isempty(binnedArrayTot)
-%                     binnedArrayTotBinned(iBinY, iBinZ, :) = nanmean(binnedArrayTot, 1); %average
-%                     % figure(); 
-%                     % plot(-0.2:0.01:0.3-0.01,squeeze(binnedArrayTotBinned(iBinY, iBinZ, :)))
-%                     binnedArrayPixel(iBinY, iBinZ) = (nanmean(binnedArrayTotBinned(iBinY, iBinZ, 26:41)) - ...
-%                         nanmean(binnedArrayTotBinned(iBinY, iBinZ, 1:20))) ./nanmean(binnedArrayTotBinned(iBinY, iBinZ, 1:20));
-%                 else
-%                     binnedArrayTotBinned(iBinY, iBinZ, :) = nan(50, 1); %average
-%                 end
-%             end
-%           end
-%           figure(1+iRegion);
-%         subplot(133)
-%         imagesc(binnedArrayPixel*100)
-%         colorbar
-%         clearvars binnedArrayPixel 
+%        plot3(theseLocations(:, 1), theseLocations(:, 3), theseLocations(:, 2), '.b') %1,2,3;23,2,1;
+        [N, Xedges, Yedges, binX, binY] = histcounts2((bregma(3)) -abs(theseLocations(:,3) - (bregma(3))), theseLocations(:, 1), xyCountBins{1, 1}, xyCountBins{1, 2}); %par rapport a bregma!
+
+        for iBinX = 1:size(Xedges, 2)
+            for iBinY = 1:size(Yedges, 2)
+                theseNeurons = binX ==iBinX & binY == iBinY;
+                theseNeuronsInd = find(theseNeurons);
+                binnedArrayTot = [];
+                if ~isempty(theseNeuronsInd)
+                    [h, hh] = histc(theseNeuronsInd, theseLocationsInfo);
+                    uniqueRecs = unique(hh) + 1;
+                    for iUniqueRec = 1:size(uniqueRecs, 1) %get psth per rec
+                        theseTheseNeurons = theseNeuronsInd(hh == uniqueRecs(iUniqueRec));
+                        if ~isempty(ephysData(uniqueRecs(iUniqueRec)).spike_times_timeline) && ~isempty(ephysData(uniqueRecs(iUniqueRec)).stimOn_times)
+                          theseTheseNeuronsTemplate = ismember(ephysData(uniqueRecs(iUniqueRec)).spike_templates, ...
+                                theseTheseNeurons-theseLocationsInfo(uniqueRecs(iUniqueRec))-1);
+                            [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = ...
+                                psthAndBA(ephysData(uniqueRecs(iUniqueRec)).spike_times_timeline(theseTheseNeuronsTemplate), ...
+                                ephysData(uniqueRecs(iUniqueRec)).stimOn_times, [-0.2, 0.3], 0.01);
+                            binnedArrayTot = [binnedArrayTot; binnedArray];
+%figure();
+%                    plot(-0.2:0.01:0.3-0.01,psth)
+                        end
+                    end
+
+                end
+                if ~isempty(binnedArrayTot)
+                    binnedArrayTotBinned(iBinX, iBinY, :) = nanmean(binnedArrayTot, 1); %average
+                    % figure(); 
+                    % plot(-0.2:0.01:0.3-0.01,squeeze(binnedArrayTotBinned(iBinX, iBinY, :)))
+                     % if all(nanmean(binnedArrayTotBinned(iBinX, iBinY, :)))
+                    % figure(); 
+                    % plot(-0.2:0.01:0.3-0.01,squeeze(binnedArrayTotBinned(iBinX, iBinZ, :)))
+                    binnedArrayPixel(iBinX, iBinY) = (nanmean(binnedArrayTotBinned(iBinX, iBinY, 26:41)) - ...
+                        nanmean(binnedArrayTotBinned(iBinX, iBinY, 1:20))) ./nanmean(binnedArrayTotBinned(iBinX, iBinY, 1:20));
+                    %else
+                    %     binnedArrayTotBinned(iBinX, iBinY, :) = nan(50, 1); %average
+                    %binnedArrayPixel(iBinX, iBinY) = NaN;
+                    %end
+                else
+                    binnedArrayTotBinned(iBinX, iBinY, :) = nan(50, 1); %average
+                    binnedArrayPixel(iBinX, iBinY) = NaN;
+                end
+            end
+        end
+        %figure(1+iRegion);
+        binnedArrayPixel(binnedArrayPixel==Inf)=NaN;
+        binnedArrayPixelSmooth = smooth2a(binnedArrayPixel,4,4);
+%         binnedArrayPixelSmooth = conv2(binnedArrayPixel,ones(smooth_filt),'same')./ ...
+%             conv2(~isnan(binnedArrayPixel),ones(smooth_filt),'same');
+        subplot(3, size(regions, 2), iRegion)
+        %r(bb), c(bb)
+        %outOfRangeX = xyCountBins{1, 1}'./1 - r(bb) > 0
+        %get all matric points
+ %       [R, C] = ndgrid(1:size(binnedArrayPixelSmooth,1), 1:size(binnedArrayPixelSmooth,2));
+%        RR = reshape(xyCountBins{1, 2}(R),[],1);
+%        CC = reshape(xyCountBins{1, 1}(C),[],1);
+rbb = r(bb);
+cbb=c(bb);
+        for iPixelX = 1:size(binnedArrayPixelSmooth,1)
+            for iPixelY = 1:size(binnedArrayPixelSmooth,2)
+%                 thisPixelLocation = [xyCountBins{1, 1}(iPixelX)/10, xyCountBins{1, 2}(iPixelY)/10];
+%                 [minDistance, indexOfMin] = min(abs(rbb-thisPixelLocation));
+%                % for itt = 1:length(minDistance
+%                indexOfMin = unique(indexOfMin);
+%                thisV = rbb(indexOfMin);
+%                theseVfind(rbb==rbb(indexOfMin);
+%                for iV = 1:length(theseVfind)
+%                end
+%                [~, v2] = min(abs(rbb([1:indexOfMin-1,indexOfMin+1:end])-thisV));
+%                 XatThisY = cbb(rbb(indexOfMin));
+%                 
+%                  isINX = thisPixelLocation(2)
+%                  
+isIN(iPixelX, iPixelY)= inpolygon(xyCountBins{1, 1}(iPixelX)/10,...
+                     xyCountBins{1, 2}(iPixelY)/10,r(bb),c(bb));
+            end
+        end
+        
+        binnedArrayPixelSmooth(isIN==0) = mean(thisCmap);
+        im = imagesc(xyCountBins{1, 1}./10, xyCountBins{1, 2}./10,binnedArrayPixelSmooth'*100);
+        set(im, 'AlphaData', ~isnan(get(im, 'CData')));
+        
+    set(gca, 'color', [0.5, 0.5, 0.5]);
+    colormap(brewermap([], '*RdBu'));
+    caxis(thisCmap)
+        hold on; 
+        
+        colorbar
+        clearvars binnedArrayPixel 
+         hold on;
+        bb = boundary(r, c,0);
+        plot(r(bb), c(bb), 'Color', theseColors{iRegion});
+        xlabel('ML')
+        ylabel('AP')
+        axis equal
+        axis square
+        axis image 
+        clearvars isIN
+        caxis(thisCmap)
+       xlim([xyCountBins{1, 1}(1)./10, xyCountBins{1, 1}(end)./10])
+        ylim([xyCountBins{1, 2}(1)./10, xyCountBins{1, 2}(end)./10])
+ 
+        
+        [N, Xedges, Zedges, binX, binZ] = histcounts2((bregma(3)) -abs(theseLocations(:,3) - (bregma(3))), theseLocations(:, 2), xzCountBins{1, 1}, xzCountBins{1, 2}); %par rapport a bregma!
+
+          for iBinX = 1:size(Xedges, 2)
+            for iBinZ = 1:size(Zedges, 2)
+                theseNeurons = binX == iBinX & binZ == iBinZ;
+                theseNeuronsInd = find(theseNeurons);
+                binnedArrayTot = [];
+                if ~isempty(theseNeuronsInd)
+                    [h, hh] = histc(theseNeuronsInd, theseLocationsInfo);
+                    uniqueRecs = unique(hh) + 1;
+                    for iUniqueRec = 1:size(uniqueRecs, 1) %get psth per rec
+                        theseTheseNeurons = theseNeuronsInd(hh == uniqueRecs(iUniqueRec));
+                        if ~isempty(ephysData(uniqueRecs(iUniqueRec)).spike_times_timeline) && ~isempty(ephysData(uniqueRecs(iUniqueRec)).stimOn_times)
+                            theseTheseNeuronsTemplate = ismember(ephysData(uniqueRecs(iUniqueRec)).spike_templates, ...
+                                theseTheseNeurons-theseLocationsInfo(uniqueRecs(iUniqueRec))-1);
+                            [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = ...
+                                psthAndBA(ephysData(uniqueRecs(iUniqueRec)).spike_times_timeline(theseTheseNeuronsTemplate), ...
+                                ephysData(uniqueRecs(iUniqueRec)).stimOn_times, [-0.2, 0.3], 0.01);
+                            binnedArrayTot = [binnedArrayTot; binnedArray];
+%figure();
+%                    plot(-0.2:0.01:0.3-0.01,psth)
+                        end
+                    end
+
+                end
+                if ~isempty(binnedArrayTot)
+                    binnedArrayTotBinned(iBinX, iBinZ, :) = nanmean(binnedArrayTot, 1); %average
+                    if all(nanmean(binnedArrayTotBinned(iBinX, iBinZ, :)))
+                    % figure(); 
+                    % plot(-0.2:0.01:0.3-0.01,squeeze(binnedArrayTotBinned(iBinX, iBinZ, :)))
+                    binnedArrayPixel(iBinX, iBinZ) = (nanmean(binnedArrayTotBinned(iBinX, iBinZ, 26:41)) - ...
+                        nanmean(binnedArrayTotBinned(iBinX, iBinZ, 1:20))) ./nanmean(binnedArrayTotBinned(iBinX, iBinZ, 1:20));
+                    else
+                         binnedArrayTotBinned(iBinX, iBinZ, :) = nan(50, 1); %average
+                    binnedArrayPixel(iBinX, iBinZ) = NaN;
+                    end
+                    
+                else
+                    binnedArrayTotBinned(iBinX, iBinZ, :) = nan(50, 1); %average
+                    binnedArrayPixel(iBinX, iBinZ) = NaN;
+                end
+            end
+          end
+           binnedArrayPixelSmooth = smooth2a(binnedArrayPixel,4,4);
+        subplot(3, size(regions, 2), size(regions, 2)+iRegion)
+         for iPixelX = 1:size(binnedArrayPixelSmooth,1)
+            for iPixelY = 1:size(binnedArrayPixelSmooth,2)
+                 isIN(iPixelX, iPixelY) = inpolygon(xzCountBins{1, 1}(iPixelX)/10,...
+                     xzCountBins{1, 2}(iPixelY)/10,r(bb2),v(bb2));
+            end
+        end
+        
+        binnedArrayPixelSmooth(isIN==0) = mean(thisCmap);
+        im = imagesc(xzCountBins{1, 1}./10, xzCountBins{1, 2}./10,binnedArrayPixelSmooth'*100);
+        set(im, 'AlphaData', ~isnan(get(im, 'CData')));
+    set(gca, 'color', [0.5, 0.5, 0.5]);
+    colormap(brewermap([], '*RdBu'));
+        colorbar
+        clearvars binnedArrayPixel 
+         bb2 = boundary(r, v,0);
+        plot(r(bb2), v(bb2), 'Color', theseColors{iRegion});
+        xlabel('ML')
+        ylabel('DV')
+        axis equal
+        axis square
+        makepretty;
+         clearvars isIN
+         caxis(thisCmap)
+               xlim([xzCountBins{1, 1}(1)./10, xzCountBins{1, 1}(end)./10])
+        ylim([xzCountBins{1, 2}(1)./10, xzCountBins{1, 2}(end)./10])
+ 
+
+            [N, Yedges, Zedges, binY, binZ] = histcounts2(theseLocations(:, 1), theseLocations(:, 2), yzCountBins{1, 1}, yzCountBins{1, 2}); %par rapport a bregma!
+
+          for iBinY = 1:size(Yedges, 2)
+            for iBinZ = 1:size(Zedges, 2)
+                theseNeurons = binY == iBinY & binZ == iBinZ;
+                theseNeuronsInd = find(theseNeurons);
+                binnedArrayTot = [];
+                if ~isempty(theseNeuronsInd)
+                    [h, hh] = histc(theseNeuronsInd, theseLocationsInfo);
+                    uniqueRecs = unique(hh) + 1;
+                    for iUniqueRec = 1:size(uniqueRecs, 1) %get psth per rec
+                        theseTheseNeurons = theseNeuronsInd(hh == uniqueRecs(iUniqueRec));
+                        if ~isempty(ephysData(uniqueRecs(iUniqueRec)).spike_times_timeline) && ~isempty(ephysData(uniqueRecs(iUniqueRec)).stimOn_times)
+                            theseTheseNeuronsTemplate = ismember(ephysData(uniqueRecs(iUniqueRec)).spike_templates, ...
+                                theseTheseNeurons-theseLocationsInfo(uniqueRecs(iUniqueRec))-1);
+                            [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = ...
+                                psthAndBA(ephysData(uniqueRecs(iUniqueRec)).spike_times_timeline(theseTheseNeuronsTemplate), ...
+                                ephysData(uniqueRecs(iUniqueRec)).stimOn_times, [-0.2, 0.3], 0.01);
+                            binnedArrayTot = [binnedArrayTot; binnedArray];
+%figure();
+%                    plot(-0.2:0.01:0.3-0.01,psth)
+                        end
+                    end
+
+                end
+                if ~isempty(binnedArrayTot)
+                    binnedArrayTotBinned(iBinY, iBinZ, :) = nanmean(binnedArrayTot, 1); %average
+                    % figure(); 
+                    % plot(-0.2:0.01:0.3-0.01,squeeze(binnedArrayTotBinned(iBinY, iBinZ, :)))
+                       if all(nanmean(binnedArrayTotBinned(iBinY, iBinZ, :)))
+                    % figure(); 
+                    % plot(-0.2:0.01:0.3-0.01,squeeze(binnedArrayTotBinned(iBinX, iBinZ, :)))
+                    binnedArrayPixel(iBinY, iBinZ) = (nanmean(binnedArrayTotBinned(iBinY, iBinZ, 26:41)) - ...
+                        nanmean(binnedArrayTotBinned(iBinY, iBinZ, 1:20))) ./nanmean(binnedArrayTotBinned(iBinY, iBinZ, 1:20));
+                    else
+                         binnedArrayTotBinned(iBinY, iBinZ, :) = nan(50, 1); %average
+                    binnedArrayPixel(iBinY, iBinZ) = NaN;
+                    end
+                else
+                    binnedArrayTotBinned(iBinY, iBinZ, :) = nan(50, 1); %average
+                     binnedArrayPixel(iBinY, iBinZ) = NaN;
+                end
+                
+            end
+          end
+            binnedArrayPixelSmooth = smooth2a(binnedArrayPixel,4,4);
+         for iPixelX = 1:size(binnedArrayPixelSmooth,1)
+            for iPixelY = 1:size(binnedArrayPixelSmooth,2)
+                 isIN(iPixelX, iPixelY) = inpolygon(yzCountBins{1, 1}(iPixelX)/10,...
+                     yzCountBins{1, 2}(iPixelY)/10,c(bb3),v(bb3));
+            end
+        end
+        
+        binnedArrayPixelSmooth(isIN==0) = mean(thisCmap);
+        subplot(3, size(regions, 2), size(regions, 2)*2+iRegion)
+        im = imagesc( yzCountBins{1, 1}./10, yzCountBins{1, 2}./10,binnedArrayPixelSmooth'*100);
+       set(im, 'AlphaData', ~isnan(get(im, 'CData')));
+       clearvars isIN
+        
+    set(gca, 'color', [0.5, 0.5, 0.5]);
+    colormap(brewermap([], '*RdBu'));
+
+
+        colorbar
+        clearvars binnedArrayPixel 
+        subplot(3, size(regions, 2), size(regions, 2)*2+(iRegion))
+        bb3 = boundary(c, v,0);
+        plot(c(bb3) , v(bb3), 'Color', theseColors{iRegion});
+        
+        xlabel('AP')
+        ylabel('DV')
+        axis equal
+        axis square
+        makepretty;
+        caxis(thisCmap)
+               xlim([yzCountBins{1, 1}(1)./10, yzCountBins{1, 1}(end)./10])
+        ylim([yzCountBins{1, 2}(1)./10, yzCountBins{1, 2}(end)./10])
+ 
+        
     end
 end
