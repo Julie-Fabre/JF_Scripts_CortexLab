@@ -1,7 +1,7 @@
 %AP_preprocess_phase3_newOEJF_onlysync('JF022', '2020-12-14')
 
 clear all;
-animal = 'JF030';
+animal = 'JF024';
 im_type = 'brainSaw';
 
 %% get histology slices and copy locally
@@ -168,6 +168,7 @@ for iProbe = 1:size(probe2ephys, 2)
     site = probe2ephys(iProbe).site;
     
     lfp_channel = 'all';
+    loadClusters = 0;
     AP_load_experimentJF;
 
     if dontAnalyze == 0

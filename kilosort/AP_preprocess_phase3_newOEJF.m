@@ -1,4 +1,4 @@
-function AP_preprocess_phase3_newOEJF(animal,day, thisSite,t_range)
+function AP_preprocess_phase3_newOEJF(animal,day, thisSite,t_range,chanMap)
 % AP_preprocess_phase3(animal,day,t_range)
 %
 % t_range = specify data time range to use
@@ -34,6 +34,12 @@ for curr_site = thisSite
     % Get experiments (if turned off between)
     curr_data_path = data_paths{curr_site};   
     ephys_exp_paths = dir([curr_data_path filesep 'experiment*']);
+    if isempty(ephys_exp_paths)
+        ephysType = 2;
+        ephys_exp_paths = dir([curr_data_path filesep '*g0']);
+    else
+        ephysType=1;
+    end
        
     for curr_exp = 1:length(ephys_exp_paths)
         
@@ -50,6 +56,17 @@ for curr_site = thisSite
         end
               
         % Get OE filenames (check for multiple experiments, do separately)
+        if ephysType == 2
+                exp_rec_dir = [ ephys_exp_paths(curr_exp).name];
+        ap_data_filename = dir([curr_data_path filesep exp_rec_dir filesep '*.bin']);
+        lfp_data_filename =  dir([curr_data_path filesep exp_rec_dir filesep '*.bin']);
+       % sync_filename = [curr_data_path filesep filesep exp_rec_dir filesep 'events' filesep 'Neuropix-3a-100.0' filesep 'TTL_1' filesep 'channel_states.npy' ];
+       % sync_timestamps_filename = [curr_data_path filesep exp_rec_dir filesep 'events' filesep 'Neuropix-3a-100.0' filesep 'TTL_1' filesep 'timestamps.npy' ];
+       % messages_filename = [curr_data_path filesep exp_rec_dir filesep 'sync_messages.txt'];
+        settings_filename = dir([curr_data_path filesep exp_rec_dir filesep '*.meta']);
+        
+        else
+            
         exp_rec_dir = [ ephys_exp_paths(curr_exp).name filesep 'recording1'];
         ap_data_filename = [curr_data_path filesep exp_rec_dir filesep 'continuous' filesep 'Neuropix-3a-100.0' filesep 'continuous.dat'];
         lfp_data_filename = [curr_data_path filesep exp_rec_dir filesep 'continuous' filesep 'Neuropix-3a-100.1' filesep 'continuous.dat'];
@@ -57,10 +74,10 @@ for curr_site = thisSite
         sync_timestamps_filename = [curr_data_path filesep exp_rec_dir filesep 'events' filesep 'Neuropix-3a-100.0' filesep 'TTL_1' filesep 'timestamps.npy' ];
         messages_filename = [curr_data_path filesep exp_rec_dir filesep 'sync_messages.txt'];
         settings_filename = [curr_data_path filesep exp_rec_dir filesep 'structure.oebin'];
-        
+        end
         
         %% Get and save recording parameters
-        
+        if ephysType==1
         % The gains and filter cuts aren't recorded anymore?!
         ap_gain = {500};
         lfp_gain = {125};
@@ -120,7 +137,7 @@ for curr_site = thisSite
         
         sync_save_filename = [curr_save_path filesep 'sync.mat'];
         save(sync_save_filename,'sync');
-        
+        end
         %% Run kilosort
         
         % Set up local directory and clear out
@@ -134,18 +151,31 @@ for curr_site = thisSite
         
         % Copy AP data locally
         disp('Copying AP data to local drive...')
+        if ephysType==1
         ap_temp_filename = [ssd_kilosort_path filesep animal '_' day  '_' 'ephys_apband.dat'];
+      
+        else
+              ap_temp_filename = [ssd_kilosort_path filesep animal '_' day  '_' 'ephys_apband.bin'];
+                ap_data_filename = [curr_data_path filesep exp_rec_dir filesep ap_data_filename.name];
+        end
         copyfile(ap_data_filename,ap_temp_filename);
         disp('Done');
         
         % Clean AP data of artifacts
         disp('Cleaning AP data...')
+        if ephysType==1
         ap_clean_filename = [ssd_kilosort_path filesep animal '_' day '_' 'ephys_apband_clean.dat'];
-        ttl_path = fileparts(sync_filename);
-        AP_clean_datJF(ap_temp_filename,n_channels,ttl_path,ap_clean_filename);
+        else
+            ap_clean_filename = [ssd_kilosort_path filesep animal '_' day '_' 'ephys_apband_clean.bin'];
+        end
         
-        % Delete local raw data
+        if ephysType==1
+            ttl_path = fileparts(sync_filename);
+        AP_clean_datJF(ap_temp_filename,n_channels,ttl_path,ap_clean_filename);
         delete(ap_temp_filename);
+        end
+        % Delete local raw data
+        
         
         % Kilosort 1 (old)
         %     AP_run_kilosort(ap_temp_car_filename,ap_sample_rate);
@@ -155,8 +185,12 @@ for curr_site = thisSite
         if ~exist('t_range','var')
             t_range = [0,inf];
         end
-        AP_run_kilosort2JF(ap_clean_filename,ap_sample_rate,ssd_kilosort_path,t_range);
-        
+        if ephysType==1
+        AP_run_kilosort2JF(ap_clean_filename,ap_sample_rate,ssd_kilosort_path,t_range,[],chanMap);
+        else
+            ap_sample_rate = 30000;
+             AP_run_kilosort2JF(ap_temp_filename,ap_sample_rate,ssd_kilosort_path,t_range,[],chanMap);
+        end
         %% Copy kilosort results to server
         
         disp('Copying sorted data to server...');

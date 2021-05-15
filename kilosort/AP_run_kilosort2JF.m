@@ -1,4 +1,4 @@
-function AP_run_kilosort2JF(data_filename,sample_rate,save_path,t_range)
+function AP_run_kilosort2JF(data_filename,sample_rate,save_path,t_range,ephysType,chanMap)
 % AP_run_kilosort2(data_filename,sample_rate,save_path,t_range)
 %
 % data_filename = .dat flat binary file of all channels together
