@@ -1,9 +1,10 @@
 clear all;
 clc;
-
+% to add first half, second half
+% add weight %
 % 2021 04 08 added no go analysis
-animalsAll = {'JF036','JF037','JF038','JF039','JF042', 'JF043', 'JF044'}; %JF029','JF032', 'JF033', 'JF034', 'JF035' };%{'JF032'};%{'JF025', 'JF026', 'JF028', 'JF029','JF032', 'JF033', 'JF034', 'JF035' };%chnage to the names of the animals you want here
-for iAnimal = 5:6%1:size(animalsAll, 2)
+animalsAll = {'JF036','JF037','JF038','JF039','JF042', 'JF043', 'JF044'}; 
+for iAnimal = 5:size(animalsAll, 2)
     
     animal = animalsAll{1, iAnimal}; %this animal
     protocol = 'location'; %protocol name contains this name
@@ -433,13 +434,14 @@ for iAnimal = 5:6%1:size(animalsAll, 2)
         makepretty;
         hold on;
         end
+        ylim([0 1])
     else
          for iDay = 1:length(noGoDay)
         p1 = plot(binBorders(1:end-1), bhv.movingFracGo1(noGoDay(iDay), :), 'b');
         p1.Color(4) = transparencyValues(iDay+1);
         makepretty;
         hold on;
-        
+        ylim([0 1])
         
          end
          if isfield(bhv, 'movingFracGo2')
@@ -449,6 +451,7 @@ for iAnimal = 5:6%1:size(animalsAll, 2)
         hold on;
          legend([p1, p2], {'Go1', 'Go2'})
          end
+         ylim([0 1])
     end
     xlim([binBorders(1), binBorders(end)])
    
@@ -466,7 +469,7 @@ for iAnimal = 5:6%1:size(animalsAll, 2)
         p3.Color(4) = transparencyValues(iDay+1);
         makepretty;
         hold on;
-        
+        ylim([0 1])
     end
     ylim([0 1])
     xlim([binBorders(1), binBorders(end)])
@@ -505,35 +508,32 @@ end
 %% summary: % no go per stim per mouse on last day only 
 
 figure();
-subplot(211)
-transparencyValues = 0:1 / length(an(5).noGoDay):1;
-for iDay = 1:size(an(5).noGoDay,2)
-scatter([1,2,3],an(5).goLeft(noGoDay(iDay), :)./an(5).nTrials(noGoDay(iDay), :),'b','filled')
-hold on;
-makepretty;
-scatter([1,2,3],an(5).noGo(noGoDay(iDay), :)./an(5).nTrials(noGoDay(iDay), :),'r','filled',...
-    'MarkerFaceAlpha',.5,'MarkerEdgeAlpha',.5)
-makepretty;
+
+for iMouse =[5:6]
+subplot(2,1,iMouse-4)
+transparencyValues = 0:1 / length(an(iMouse).noGoDay):1;
+for iDay = 1:size(an(iMouse).noGoDay,2)
+    
+    scatter([1,2,3],an(iMouse).goLeft(an(iMouse).noGoDay(iDay), [1,3,2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1,3,2]),'b','filled',...
+        'MarkerFaceAlpha',transparencyValues(iDay+1),'MarkerEdgeAlpha',transparencyValues(iDay+1))
+    p=plot([1,2,3],an(iMouse).goLeft(an(iMouse).noGoDay(iDay), [1,3,2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1,3,2]),'Color', 'b');
+    p.Color(4)=transparencyValues(iDay+1);
+    hold on;
+    makepretty;
+    scatter([1,2,3],an(iMouse).noGo(an(iMouse).noGoDay(iDay), [1,3,2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1,3,2]),'r','filled',...
+        'MarkerFaceAlpha',transparencyValues(iDay+1),'MarkerEdgeAlpha',transparencyValues(iDay+1))
+     p=plot([1,2,3],an(iMouse).noGo(an(iMouse).noGoDay(iDay), [1,3,2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1,3,2]),'Color', 'r');
+    p.Color(4)=transparencyValues(iDay+1);
+    makepretty;
 end
 
 xlabel('image type')
 ylabel('frac go left(blue)/nogo (red)')
 xticks([1 2 3])
-xticklabels({'Go1','Go2','NoGo'})
+xticklabels({'Go1','NoGo','Go2'})
+ylim([0 1])
 makepretty;
 grid on;
-
-subplot(212)
-scatter([1,2,3],an(6).goLeft(end, :)./an(6).nTrials(end, :),'filled')
-makepretty;
-hold on;
-scatter([1,2,3],an(6).noGo(end, :)./an(6).nTrials(end, :),'filled')
-makepretty;
-xlabel('image type')
-ylabel('frac go left(blue)/nogo (red)')
-xticks([1 2 3])
-xticklabels({'Go1','Go2','NoGo'})
-makepretty;
-grid on;
+end
 
 

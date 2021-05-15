@@ -513,15 +513,23 @@ for iMouse =[5:6]
 subplot(2,1,iMouse-4)
 transparencyValues = 0:1 / length(an(iMouse).noGoDay):1;
 for iDay = 1:size(an(iMouse).noGoDay,2)
-    scatter([1,2,3],an(iMouse).goLeft(an(iMouse).noGoDay(iDay), [1,3,2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1,3,2]),'b','filled',...
+    if iDay == size(an(iMouse).noGoDay,2)
+        col1 = rgb('DarkBlue');
+        col2 = rgb('DarkRed');
+        
+    else
+        col1 = 'b';
+        col2='r';
+    end
+    scatter([1,2,3],an(iMouse).goLeft(an(iMouse).noGoDay(iDay), [1,3,2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1,3,2]),[],col1,'filled',...
         'MarkerFaceAlpha',transparencyValues(iDay+1),'MarkerEdgeAlpha',transparencyValues(iDay+1))
-    p=plot([1,2,3],an(iMouse).goLeft(an(iMouse).noGoDay(iDay), [1,3,2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1,3,2]),'Color', 'b');
+    p=plot([1,2,3],an(iMouse).goLeft(an(iMouse).noGoDay(iDay), [1,3,2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1,3,2]),'Color', col1);
     p.Color(4)=transparencyValues(iDay+1);
     hold on;
     makepretty;
-    scatter([1,2,3],an(iMouse).noGo(an(iMouse).noGoDay(iDay), [1,3,2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1,3,2]),'r','filled',...
+    scatter([1,2,3],an(iMouse).noGo(an(iMouse).noGoDay(iDay), [1,3,2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1,3,2]),[],col2,'filled',...
         'MarkerFaceAlpha',transparencyValues(iDay+1),'MarkerEdgeAlpha',transparencyValues(iDay+1))
-     p=plot([1,2,3],an(iMouse).noGo(an(iMouse).noGoDay(iDay), [1,3,2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1,3,2]),'Color', 'r');
+     p=plot([1,2,3],an(iMouse).noGo(an(iMouse).noGoDay(iDay), [1,3,2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1,3,2]),'Color', col2);
     p.Color(4)=transparencyValues(iDay+1);
     makepretty;
 end
