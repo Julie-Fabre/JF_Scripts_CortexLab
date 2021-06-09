@@ -21,15 +21,15 @@ gui_data.n_probes = str2num(cell2mat(inputdlg('How many probes?')));
 
 % Load in slice images
 
-
+gui_data.slice_im_path = slice_im_path;
 if strcmp(type, 'rocksaw')
     
-    for curr_slice = 1:size(slice_im_path)
+    for curr_slice = 1:size(fullImg,3)
         gui_data.slice_im{curr_slice} = fullImg(:,:,curr_slice);
     end
     
 else
-    gui_data.slice_im_path = slice_im_path;
+    
 
     slice_im_dir = dir([slice_im_path filesep '*.tif*']);
     if isempty(slice_im_dir)

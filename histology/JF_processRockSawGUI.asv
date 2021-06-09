@@ -52,8 +52,8 @@ for iSlice = 1:size(reg,3)
     atlas2histology_tform{iSlice} = [1 0 0; 0 1 0; 0 0 1]; % no scaling 
 end
 
-save(['D:/' animal 'histology_ccf.mat'], 'histology_ccf','-v7.3')
-save(['D:/' animal 'atlas2histology.mat'], 'atlas2histology')
+save(['D:/' animal '/slices/histology_ccf.mat'], 'histology_ccf','-v7.3')
+save(['D:/' animal '/slices/atlas2histology_tform.mat'], 'atlas2histology_tform')
 
 %% draw probes 
 AP_get_probe_histologyJF(tv, av, st, ['D:/',animal,'/slices'],'rocksaw',regRed);

@@ -36,15 +36,15 @@ saveastiff(regRed, ['D:/' animal '/regRedChan.tiff']);
 % plane_ap, plane_ml, plane_dv 
 allen_atlas_path = 'C:\Users\Julie\Dropbox\Atlas\allenCCF';
 tv = readNPY([allen_atlas_path, filesep, 'template_volume_10um.npy']);
-tv = permute(tv, [2,1,3]);
+%tv = permute(tv, [2,1,3]);
 av = readNPY([allen_atlas_path, filesep, 'annotation_volume_10um_by_index.npy']);
-av = permute(av, [2,1,3]);
+%av = permute(av, [2,1,3]);
 st = loadStructureTreeJF([allen_atlas_path, filesep, 'structure_tree_safe_2017.csv']);
 
 histology_ccf=struct;
 atlas2histology_tform = cell(size(reg,3),1);
 for iSlice = 1:size(reg,3)
-    histology_ccf(iSlice).plane_ap = repmat(iSlice + cropAllenLimits(1), [size(reg,1), size(reg,2)]);
+    histology_ccf(iSlice).plane_ap = 1320 - repmat(iSlice + cropAllenLimits(1), [size(reg,1), size(reg,2)]);%other way? 
     histology_ccf(iSlice).plane_ml = repmat(1:2:1140, [size(reg,1),1]);
     histology_ccf(iSlice).plane_dv = repmat(1:2:800, [ size(reg,2),1])';
     histology_ccf(iSlice).tv_slices = squeeze(tv(iSlice + cropAllenLimits(1),:,:));
