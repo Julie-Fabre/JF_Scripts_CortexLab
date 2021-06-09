@@ -9,11 +9,7 @@ bregma = [540, 0, 570];
 thisCmap = [-20, 20];
 
 %% X-Y, X-Z, Y-Z plots for each region. bin by 100 um (?) and plot in colormap increase in response ?
-<<<<<<< HEAD
-smoothF=1;
-=======
 
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
 for iType = 1:size(animalsType, 2)
     theseTypes = strcmp(recordingInfo.Type, animalsType{iType});
     theseColors = {rgb('DeepSkyBlue'); rgb('SeaGreen'); rgb('DarkOrange'); rgb('Crimson'); rgb('Hotpink'); rgb('Black'); rgb('Brown')};
@@ -28,11 +24,7 @@ for iType = 1:size(animalsType, 2)
     %overlay regions
     for iRegion = 1:size(regions, 2)
         if iRegion ==1
-<<<<<<< HEAD
-            thisData = ephysData;%.ephysData;
-=======
             thisData = ephysDataOld;%.ephysData;
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
         elseif iRegion ==4
             thisData = ephysDataSnr;
         else
@@ -114,20 +106,11 @@ for iType = 1:size(animalsType, 2)
         CNew = cat(1, thisData.location);
 
         ind = find(ismember(CNew, regions{iRegion}));
-<<<<<<< HEAD
-clearvars theseLocationsInfo
-        for iLocation = 1:size(ind, 1)
-            theseLocationsInfo(iLocation) = size(thisData(ind(iLocation)).template_location, 1)+1;
-        end
-        theseLocationsInfo = cumsum(theseLocationsInfo);
-        theseLocationsInfo = [0, theseLocationsInfo];
-=======
 
         for iLocation = 1:size(ind, 1)
             theseLocationsInfo(iLocation) = size(thisData(ind(iLocation)).template_location, 1);
         end
         theseLocationsInfo = cumsum(theseLocationsInfo);
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
         theseLocations = cat(1, thisData(ind).template_location);
         theseLocationsBregmaAbs = [abs(theseLocations(:, 3)-bregma(3)), abs(theseLocations(:, 1)-bregma(1)), theseLocations(:, 2)];
 
@@ -140,31 +123,14 @@ clearvars theseLocationsInfo
                 theseNeuronsInd = find(theseNeurons);
                 binnedArrayTot = [];
                 if ~isempty(theseNeuronsInd)
-<<<<<<< HEAD
-                
-                    [h, hh] = histc(theseNeuronsInd,theseLocationsInfo);
-=======
                     [h, hh] = histc(theseNeuronsInd, theseLocationsInfo);
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
                     uniqueRecs = unique(hh) ;
                     uniqueRecs(uniqueRecs==0)=[];
                     for iUniqueRec = 1:size(uniqueRecs, 1) %get psth per rec
                         theseTheseNeurons = theseNeuronsInd(hh == uniqueRecs(iUniqueRec));
-<<<<<<< HEAD
-                        for iNeuron =1:length(theseTheseNeurons)
-                            keepN(iNeuron) = length(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline(thisData(uniqueRecs(iUniqueRec)).spike_templates==theseTheseNeurons(iNeuron)...
-                                -theseLocationsInfo(uniqueRecs(iUniqueRec)))) > 500;
-                        end
-                        theseTheseNeurons = theseTheseNeurons(keepN);
-                        clearvars keepN
-                        if ~isempty(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline) && ~isempty(thisData(uniqueRecs(iUniqueRec)).stimOn_times)
-                            theseTheseNeuronsTemplate = ismember(thisData(uniqueRecs(iUniqueRec)).spike_templates, ...
-                                theseTheseNeurons-theseLocationsInfo(uniqueRecs(iUniqueRec)));
-=======
                         if ~isempty(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline) && ~isempty(thisData(uniqueRecs(iUniqueRec)).stimOn_times)
                             theseTheseNeuronsTemplate = ismember(thisData(uniqueRecs(iUniqueRec)).spike_templates, ...
                                 theseTheseNeurons-theseLocationsInfo(uniqueRecs(iUniqueRec))-1);
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
                             [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = ...
                                 psthAndBA(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline(theseTheseNeuronsTemplate), ...
                                 thisData(uniqueRecs(iUniqueRec)).stimOn_times, [-0.2, 0.3], 0.01);
@@ -233,11 +199,7 @@ clearvars theseLocationsInfo
         figure(1)
 
         binnedArrayPixel(binnedArrayPixel == Inf) = NaN;
-<<<<<<< HEAD
-        binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, smoothF, smoothF);
-=======
         binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, 4, 4);
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
 
         subplot(3, size(regions, 2), iRegion)
 
@@ -315,23 +277,6 @@ clearvars theseLocationsInfo
                 theseNeuronsInd = find(theseNeurons);
                 binnedArrayTot = [];
                 if ~isempty(theseNeuronsInd)
-<<<<<<< HEAD
-                    %theseLocationsInfo = [0, theseLocationsInfo];                     
-                    [h, hh] = histc(theseNeuronsInd, theseLocationsInfo);
-                    uniqueRecs = unique(hh) ;
-                    %uniqueRecs(uniqueRecs==0)=[];
-                    for iUniqueRec = 1:size(uniqueRecs, 1) %get psth per rec
-                        theseTheseNeurons = theseNeuronsInd(hh == uniqueRecs(iUniqueRec));
-                        for iNeuron =1:length(theseTheseNeurons)
-                            keepN(iNeuron) = length(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline(thisData(uniqueRecs(iUniqueRec)).spike_templates==theseTheseNeurons(iNeuron)...
-                                -theseLocationsInfo(uniqueRecs(iUniqueRec)))) > 500;
-                        end
-                        theseTheseNeurons = theseTheseNeurons(keepN);
-                        clearvars keepN 
-                        if ~isempty(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline) && ~isempty(thisData(uniqueRecs(iUniqueRec)).stimOn_times)
-                            theseTheseNeuronsTemplate = ismember(thisData(uniqueRecs(iUniqueRec)).spike_templates, ...
-                                theseTheseNeurons-theseLocationsInfo(uniqueRecs(iUniqueRec)));
-=======
                     [h, hh] = histc(theseNeuronsInd, theseLocationsInfo);
                     uniqueRecs = unique(hh) ;
                     uniqueRecs(uniqueRecs==0)=[];
@@ -340,7 +285,6 @@ clearvars theseLocationsInfo
                         if ~isempty(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline) && ~isempty(thisData(uniqueRecs(iUniqueRec)).stimOn_times)
                             theseTheseNeuronsTemplate = ismember(thisData(uniqueRecs(iUniqueRec)).spike_templates, ...
                                 theseTheseNeurons-theseLocationsInfo(uniqueRecs(iUniqueRec))-1);
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
                             [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = ...
                                 psthAndBA(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline(theseTheseNeuronsTemplate), ...
                                 thisData(uniqueRecs(iUniqueRec)).stimOn_times, [-0.2, 0.3], 0.01);
@@ -375,11 +319,7 @@ clearvars theseLocationsInfo
 %                      binnedArrayPixel(ff,gg)=nanmean(nanmean(binnedArrayPixel));
 %                  end
          
-<<<<<<< HEAD
-        binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, smoothF, smoothF);
-=======
         binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, 4, 4);
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
         subplot(3, size(regions, 2), size(regions, 2)+iRegion)
         for iPixelX = 1:size(binnedArrayPixelSmooth, 1)
             for iPixelY = 1:size(binnedArrayPixelSmooth, 2)
@@ -454,23 +394,6 @@ clearvars theseLocationsInfo
                 theseNeuronsInd = find(theseNeurons);
                 binnedArrayTot = [];
                 if ~isempty(theseNeuronsInd)
-<<<<<<< HEAD
-                   % theseLocationsInfo = [0, theseLocationsInfo];                     [
-                        [h, hh] = histc(theseNeuronsInd, theseLocationsInfo);
-                    uniqueRecs = unique(hh);
-                    %uniqueRecs(uniqueRecs==0)=[];
-                    for iUniqueRec = 1:size(uniqueRecs, 1) %get psth per rec
-                        theseTheseNeurons = theseNeuronsInd(hh == uniqueRecs(iUniqueRec));
-                        for iNeuron =1:length(theseTheseNeurons)
-                            keepN(iNeuron) = length(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline(thisData(uniqueRecs(iUniqueRec)).spike_templates==theseTheseNeurons(iNeuron)...
-                                -theseLocationsInfo(uniqueRecs(iUniqueRec)))) > 500;
-                        end
-                        theseTheseNeurons = theseTheseNeurons(keepN);
-                        clearvars keepN
-                        if ~isempty(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline) && ~isempty(thisData(uniqueRecs(iUniqueRec)).stimOn_times)
-                            theseTheseNeuronsTemplate = ismember(thisData(uniqueRecs(iUniqueRec)).spike_templates, ...
-                                theseTheseNeurons-theseLocationsInfo(uniqueRecs(iUniqueRec)));
-=======
                     [h, hh] = histc(theseNeuronsInd, theseLocationsInfo);
                     uniqueRecs = unique(hh);
                     uniqueRecs(uniqueRecs==0)=[];
@@ -479,7 +402,6 @@ clearvars theseLocationsInfo
                         if ~isempty(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline) && ~isempty(thisData(uniqueRecs(iUniqueRec)).stimOn_times)
                             theseTheseNeuronsTemplate = ismember(thisData(uniqueRecs(iUniqueRec)).spike_templates, ...
                                 theseTheseNeurons-theseLocationsInfo(uniqueRecs(iUniqueRec))-1);
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
                             [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = ...
                                 psthAndBA(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline(theseTheseNeuronsTemplate), ...
                                 thisData(uniqueRecs(iUniqueRec)).stimOn_times, [-0.2, 0.3], 0.01);
@@ -516,11 +438,7 @@ clearvars theseLocationsInfo
 %                      binnedArrayPixel(ff,gg)=nanmean(nanmean(binnedArrayPixel));
 %                  end
                  
-<<<<<<< HEAD
-        binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, smoothF, smoothF);
-=======
         binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, 4, 4);
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
         binnedArrayPixelSmooth = fliplr(binnedArrayPixelSmooth);
         for iPixelX = 1:size(binnedArrayPixelSmooth, 1)
             for iPixelY = 1:size(binnedArrayPixelSmooth, 2)

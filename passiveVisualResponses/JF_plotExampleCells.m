@@ -1,8 +1,14 @@
 figure(8);
 clf;
+<<<<<<< HEAD
 iRegion = 1;
 regions = {'CP', 'STN', 'GPe', 'SNr', 'GPi'};
 thisData = ephysData;
+=======
+iRegion = 4;
+regions = {'CP', 'STN', 'GPe', 'SNr', 'GPi'};
+thisData = ephysDataSnr;
+>>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
 %iUnit = 1;
 %all Units
 CNew = cat(1, thisData.location);
@@ -14,7 +20,11 @@ load('C:\Users\Julie\Dropbox\Presentations\UpgradeDataAndPlots\conditionsOriGrat
 ind = find(ismember(CNew, regions{iRegion}) & contains(newStr(2:end), 'ratingPassive'));
 
 %thisRec = 0;
+<<<<<<< HEAD
 thisRec = thisRec - 1;
+=======
+thisRec = thisRec + 1;
+>>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
 iUnit = 0;
 theseTemplates = unique(thisData(ind(thisRec)).spike_templates);
 

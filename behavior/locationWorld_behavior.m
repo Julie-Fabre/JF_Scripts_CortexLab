@@ -1,5 +1,6 @@
 clear all;
 clc;
+<<<<<<< HEAD
 plotMore=false;
 % to add first half, second half
 % add weight %
@@ -12,6 +13,14 @@ animalsPhase4 = {[6:12], [7:14], [11:13]};
 animalsPhase5 = {[13, 14, 16], [16], []};
 for iAnimal = 5:size(animalsAll, 2)
 
+=======
+% to add first half, second half
+% add weight %
+% 2021 04 08 added no go analysis
+animalsAll = {'JF036','JF037','JF038','JF039','JF042', 'JF043', 'JF044'}; 
+for iAnimal = 5:size(animalsAll, 2)
+    
+>>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
     animal = animalsAll{1, iAnimal}; %this animal
     protocol = 'location'; %protocol name contains this name
     protocol2 = 'goNoGo';
@@ -342,6 +351,7 @@ for iAnimal = 5:size(animalsAll, 2)
                 end
                 cp = cumsum(binArrayGo1 > 1);
                 movingFracGo1 = cp(end, :) / size(binArrayGo1, 1);
+<<<<<<< HEAD
 
                 if sum(go2Trials) >= 1
                     binArrayGo2 = [];
@@ -355,6 +365,21 @@ for iAnimal = 5:size(animalsAll, 2)
                     cp = cumsum(binArrayGo2 > 1);
                     movingFracGo2 = cp(end, :) / size(binArrayGo2, 1);
                 end
+=======
+                
+                if sum(go2Trials)>=1
+                binArrayGo2 = [];
+                theseT = block.events.stimulusOnTimes(go2Trials);
+                for r = 1:length(theseT) - 1
+                    [n, binCenters] = histdiff(movingRN_times, theseT(r), binBorders);
+                    binArrayGo2(r, :) = n;
+                    %find(movingRN_times > block.events.stimOnTimes(r)-win(1) & movingRN_times < block.events.stimOnTimes(r+1))
+                end
+                
+                cp = cumsum(binArrayGo2 > 1);
+                movingFracGo2 = cp(end, :) / size(binArrayGo2, 1);
+                end
+>>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
                 binArrayNoGo = [];
                 theseT = block.events.stimulusOnTimes(noGoTrials);
                 for r = 1:length(theseT) - 1
@@ -386,6 +411,7 @@ for iAnimal = 5:size(animalsAll, 2)
             if contains(block.expDef, 'NoGo')
                 noGoDay = [noGoDay, curr_day];
                 if sum(go2Trials) >= 1
+<<<<<<< HEAD
                     bhv.movingFracGo2(curr_day, :) = movingFracGo2;
                 end
                 bhv.movingFracGo1(curr_day, :) = movingFracGo1;
@@ -398,6 +424,14 @@ for iAnimal = 5:size(animalsAll, 2)
                 bhv.trialMoveGo2Incorrect{curr_day,:,:} = trial_wheel_move(go2Trials(1:end) & (block.events.hitValues(response_trials(1:end)) == 0),:);
             else
                 bhv.movingFrac(curr_day, :) = movingFrac;
+=======
+                bhv.movingFracGo2(curr_day, :) = movingFracGo2;
+                end
+                bhv.movingFracGo1(curr_day, :) = movingFracGo1;
+                bhv.movingFracNoGo(curr_day, :) = movingFracNoGo;
+            else
+                bhv.movingFrac(curr_day,:) = movingFrac;
+>>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
             end
             bhv.stim_rxn_time(curr_day) = stim_rxn_time;
             bhv.stim_rxn_timeSEM(curr_day) = stim_rxn_timeSEM;
@@ -513,6 +547,7 @@ for iAnimal = 5:size(animalsAll, 2)
     subplot(335)
 
     transparencyValues = 0:1 / length(noGoDay):1;
+<<<<<<< HEAD
 
 
     if length(noGoDay) == 0
@@ -602,6 +637,63 @@ for iAnimal = 5:size(animalsAll, 2)
     plotshaded(0:1.6/1600:1.6-1.6/1600, [- nanstd( meanGo1Incorrect) + ...
         nanmean( meanGo1Incorrect); nanstd( meanGo1Incorrect) + nanmean( meanGo1Incorrect)],'b')
     makepretty; 
+=======
+   
+    
+    if length(noGoDay)==0
+        transparencyValues = 0:1 / length(keep_day):1;
+        for iDay = 1:length(keep_day)
+        p1 = plot(binBorders(1:end-1), bhv.movingFrac(keep_day(iDay), :), 'b');
+        p1.Color(4) = transparencyValues(iDay+1);
+        makepretty;
+        hold on;
+        end
+        ylim([0 1])
+    else
+         for iDay = 1:length(noGoDay)
+        p1 = plot(binBorders(1:end-1), bhv.movingFracGo1(noGoDay(iDay), :), 'b');
+        p1.Color(4) = transparencyValues(iDay+1);
+        makepretty;
+        hold on;
+        ylim([0 1])
+        
+         end
+         if isfield(bhv, 'movingFracGo2')
+    p2 = plot(binBorders(1:end-1), bhv.movingFracGo2(noGoDay(iDay), :), 'r');
+        p2.Color(4) = transparencyValues(iDay+1);
+        makepretty;
+        hold on;
+         legend([p1, p2], {'Go1', 'Go2'})
+         end
+         ylim([0 1])
+    end
+    xlim([binBorders(1), binBorders(end)])
+   
+    xlabel('time from stim onset (s)')
+    ylabel('fraction moving')
+    makepretty;
+    
+    subplot(326)
+    if length(noGoDay)==0
+        else
+    transparencyValues = 0:1 / length(noGoDay):1;
+    for iDay = 1:length(noGoDay)
+        
+        p3 = plot(binBorders(1:end-1), bhv.movingFracNoGo(noGoDay(iDay), :), 'k');
+        p3.Color(4) = transparencyValues(iDay+1);
+        makepretty;
+        hold on;
+        ylim([0 1])
+    end
+    ylim([0 1])
+    xlim([binBorders(1), binBorders(end)])
+    legend([p3], {'NoGo'})
+    xlabel('time from stim onset (s)')
+    ylabel('fraction moving')
+    makepretty;
+    ylim([0 1])
+    end
+>>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
     
     plot(0:1.6/1600:1.6-1.6/1600,nanmean( meanGo2Incorrect),'Color', 'r'); hold on;
     plotshaded(0:1.6/1600:1.6-1.6/1600, [- nanstd( meanGo2Incorrect) + ...
@@ -625,10 +717,13 @@ for iAnimal = 5:size(animalsAll, 2)
     an(iAnimal).nTrials = bhv.nTrials;
     an(iAnimal).goLeft = bhv.goLeft;
     an(iAnimal).noGoDay = noGoDay;
+<<<<<<< HEAD
     an(iAnimal).stim_rxn_time = bhv.stim_rxn_time;
     an(iAnimal).movingFrac = bhv.movingFrac;
     an(iAnimal).n_trials_all = bhv.n_trials;
     clearvars bhv
+=======
+>>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
 end
 
 % figure();
@@ -900,6 +995,7 @@ makeprettyLarge;
 
 %% Fraction moving phase 1 vs 2
 figure();
+<<<<<<< HEAD
 for iAnimal = 5:7
     meanMovingFrac(iAnimal, :) = nanmean(an(iAnimal).movingFrac(animalsPhase1{iAnimal-4}, :));
     %     plot( meanMovingFrac(iAnimal,:), 'Color',rgb('DeepSkyBlue'))
@@ -1257,3 +1353,41 @@ ylabel('# trials')
 legend([p(5), p(6), p(7)], {'JF042', 'JF043', 'JF044'})
 makeprettyLarge;
 end
+=======
+
+for iMouse =[5:6]
+subplot(2,1,iMouse-4)
+transparencyValues = 0:1 / length(an(iMouse).noGoDay):1;
+for iDay = 1:size(an(iMouse).noGoDay,2)
+    if iDay == size(an(iMouse).noGoDay,2)
+        col1 = rgb('DarkBlue');
+        col2 = rgb('DarkRed');
+        
+    else
+        col1 = 'b';
+        col2='r';
+    end
+    scatter([1,2,3],an(iMouse).goLeft(an(iMouse).noGoDay(iDay), [1,3,2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1,3,2]),[],col1,'filled',...
+        'MarkerFaceAlpha',transparencyValues(iDay+1),'MarkerEdgeAlpha',transparencyValues(iDay+1))
+    p=plot([1,2,3],an(iMouse).goLeft(an(iMouse).noGoDay(iDay), [1,3,2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1,3,2]),'Color', col1);
+    p.Color(4)=transparencyValues(iDay+1);
+    hold on;
+    makepretty;
+    scatter([1,2,3],an(iMouse).noGo(an(iMouse).noGoDay(iDay), [1,3,2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1,3,2]),[],col2,'filled',...
+        'MarkerFaceAlpha',transparencyValues(iDay+1),'MarkerEdgeAlpha',transparencyValues(iDay+1))
+     p=plot([1,2,3],an(iMouse).noGo(an(iMouse).noGoDay(iDay), [1,3,2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1,3,2]),'Color', col2);
+    p.Color(4)=transparencyValues(iDay+1);
+    makepretty;
+end
+
+xlabel('image type')
+ylabel('frac go left(blue)/nogo (red)')
+xticks([1 2 3])
+xticklabels({'Go1','NoGo','Go2'})
+ylim([0 1])
+makepretty;
+grid on;
+end
+
+
+>>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3

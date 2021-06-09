@@ -15,6 +15,7 @@
 % AP_preprocess_phase3_newOEJF('JF026', '2021-04-07',1);
 % AP_preprocess_phase3_newOEJF('JF026', '2021-04-08',1);
 % AP_preprocess_phase3_newOEJF('JF026', '2021-04-09',1);
+<<<<<<< HEAD
 % 
 %  AP_preprocess_phase3_newOEJF('JF026', '2021-04-08', 2,[],'C:\Users\Julie\Dropbox\spikeSorting\chanMap_NP2_4shank_bottomRow.mat')
 %  AP_preprocess_phase3_newOEJF('JF026', '2021-04-09', 2,[],'C:\Users\Julie\Dropbox\spikeSorting\chanMap_NP2_4shank_bottomRow.mat')
@@ -66,3 +67,12 @@ simple_runKS2('\\znas.cortexlab.net\Subjects\JF028\2021-03-27\ephys\site3\experi
     'F:/JF028/2021-03-27/', ...
     'C:\Users\Julie\Dropbox\MATLAB\Kilosort2\configFiles\configFile384.m',...
     'C:\Users\Julie\Dropbox\spikeSorting\chanMapNP2_1Shank_flipper.mat',385)
+=======
+
+ AP_preprocess_phase3_newOEJF('JF026', '2021-04-08', 2,[],'C:\Users\Julie\Dropbox\spikeSorting\chanMap_NP2_4shank_bottomRow.mat')
+ AP_preprocess_phase3_newOEJF('JF026', '2021-04-09', 2,[],'C:\Users\Julie\Dropbox\spikeSorting\chanMap_NP2_4shank_bottomRow.mat')
+ AP_preprocess_phase3_newOEJF('JF026', '2021-04-11', 1,[],'C:\Users\Julie\Dropbox\spikeSorting\chanMap_NP2_4shank_bottomRow.mat')
+
+AP_preprocess_phase3_newOEJF('JF028', '2021-03-25', 2,[],'C:\Users\Julie\Dropbox\spikeSorting\NP2_kilosortChanMap.mat')
+AP_preprocess_phase3_newOEJF('JF028', '2021-03-27', 2,[],'C:\Users\Julie\Dropbox\spikeSorting\NP2_kilosortChanMap.mat')
+>>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3

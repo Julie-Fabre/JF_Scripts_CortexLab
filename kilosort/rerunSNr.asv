@@ -1,0 +1,24 @@
+%% Snr re-run 
+% AP_preprocess_phase3_newOEJF('JF024', '2021-01-27',1);
+% AP_preprocess_phase3_newOEJF('JF024', '2021-01-29',2);
+% AP_preprocess_phase3_newOEJF('JF023', '2021-01-24',1);
+% AP_preprocess_phase3_newOEJF('JF022', '2020-12-13',1);
+% AP_preprocess_phase3_newOEJF('JF022', '2020-12-13',2);
+% AP_preprocess_phase3_newOEJF('AP080', '2020-09-15',2);
+% AP_preprocess_phase3_newOEJF('AP080', '2020-09-16',2);
+
+%% finish KS 
+% AP_preprocess_phase3_newOEJF('JF025', '2021-03-18');
+% AP_preprocess_phase3_newOEJF('JF028', '2021-03-27',1);
+% AP_preprocess_phase3_newOEJF('JF028', '2021-03-26');
+% AP_preprocess_phase3_newOEJF('JF028', '2021-03-25',1);
+% AP_preprocess_phase3_newOEJF('JF026', '2021-04-07',1);
+% AP_preprocess_phase3_newOEJF('JF026', '2021-04-08',1);
+% AP_preprocess_phase3_newOEJF('JF026', '2021-04-09',1);
+
+ AP_preprocess_phase3_newOEJF('JF026', '2021-04-08', 2,[],'C:\Users\Julie\Dropbox\spikeSorting\chanMap_NP2_4shank_bottomRow.mat')
+ AP_preprocess_phase3_newOEJF('JF026', '2021-04-09', 2,[],'C:\Users\Julie\Dropbox\spikeSorting\chanMap_NP2_4shank_bottomRow.mat')
+ AP_preprocess_phase3_newOEJF('JF026', '2021-04-11', 1,[],'C:\Users\Julie\Dropbox\spikeSorting\chanMap_NP2_4shank_bottomRow.mat')
+
+AP_preprocess_phase3_newOEJF('JF028', '2021-03-25', 2,[],'C:\Users\Julie\Dropbox\spikeSorting\NP2_kilosortChanMap.mat')
+AP_preprocess_phase3_newOEJF('JF028', '2021-03-27', 2,[],'C:\Users\Julie\Dropbox\spikeSorting\NP2_kilosortChanMap.mat')

@@ -89,7 +89,10 @@ for iMouse = 1:size(mice, 2)
                             for iExperiment = 1:size(experimentThese, 2)
                                 experiment = experimentThese(iExperiment);
                                 loadClusters = 0;
+<<<<<<< HEAD
                                 isSpikeGlx = 0;
+=======
+>>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
                                 AP_load_experimentJF;
                                 %                                 try
                                 %                                     AP_cellrasterJF({stimOn_times}, ...
