@@ -175,12 +175,10 @@ for iProbe = 1:size(probe2ephys, 2)
     
     lfp_channel = 'all';
     loadClusters = 0;
-<<<<<<< HEAD
+
     isSpikeGlx=0;
     recording = 2;
-    
-=======
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
+
     AP_load_experimentJF;
 
     if dontAnalyze == 0
