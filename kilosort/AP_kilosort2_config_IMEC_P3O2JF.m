@@ -1,12 +1,16 @@
 %% Current kilosort2 settings
 
 ops.fproc       = [save_path filesep 'temp_wh.dat'];
-ops.trange = t_range; % time range to sort
+if exist('t_range','var') && ~isempty(t_range)
+   ops.trange = t_range;
+else 
+    ops.trange = [0,inf];
+end
 ops.NchanTOT    = 384; % total number of channels in your recording
 ops.fbinary             = data_filename;
 
-
-ops.chanMap             = 'C:\Users\Julie\Dropbox\MATLAB\JF_scripts_CortexLab\kilosort\forPRBimecP3opt3.mat';
+%if 
+ops.chanMap             =  chanMap;%'C:\Users\Julie\Dropbox\MATLAB\JF_scripts_CortexLab\kilosort\forPRBimecP3opt3.mat';
 
 % sample rate
 ops.fs = 30000;  
@@ -18,7 +22,7 @@ ops.fshigh = 150;
 ops.minfr_goodchannels = 0.1; 
 
 % threshold on projections (like in Kilosort1, can be different for last pass like [10 4])
-ops.Th = [10 4];  
+ops.Th = [10 3];  
 
 % how important is the amplitude penalty (like in Kilosort1, 0 means not used, 10 is average, 50 is a lot) 
 ops.lam = 10;  
@@ -197,11 +201,7 @@ ops.useRAM              = 0; % not yet available
 % % NOTE! loads in ceil(total samp/buffer) so make sure truncated amount
 % % is larger than the nearest buffer (65856 samples = 2.195 seconds)
 % 
-% if exist('t_range','var') && ~isempty(t_range)
-%    ops.trange = t_range;
-% else 
-%     ops.trange = [0,inf];
-% end
+
 
 
 

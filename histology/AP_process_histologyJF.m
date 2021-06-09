@@ -22,6 +22,7 @@ elseif strcmp(im_type, 'brainSaw') == 1
     im_path_dir = dir([im_path, filesep, '*Composite-Substack.tif*']);
     im_fn = natsortfiles(cellfun(@(path, fn) [path, filesep, fn], ...
         {im_path_dir.folder}, {im_path_dir.name}, 'uni', false));
+    im_fn = im_fn(end:-1:1);
     im_info = imfinfo(im_fn{1});
     im_um_x = 25; %/10000 for cm -> um
     im_um_y = 25;
@@ -130,6 +131,7 @@ if strcmp(im_type, 'tiffUnmerged')
 else
     if strcmp(im_type, 'brainSaw')
         n_im = 2;
+        %n_channels=2;
     end
     %if isempty(dir([im_path, '/resized/*tiff']))
     for curr_im = 1:n_im

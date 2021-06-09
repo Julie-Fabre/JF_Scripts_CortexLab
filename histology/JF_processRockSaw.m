@@ -1,12 +1,18 @@
 %% rocksaw histology process 
-animal = 'JF030'; 
+clear all;
+
+animal = 'JF028'; 
 %% load images 
-imPath = ['\\znas.cortexlab.net\Brainsaw\', animal, '\downsampled_stacks\025_micron\']; 
+imPath = ['\\znas.cortexlab.net\Brainsaw\', '*',animal,'*', '\downsampled_stacks\025_micron\']; 
 imgs = dir([imPath, '/*.tif']);
+if isempty(imgs)
+    imPath = ['\\znas.cortexlab.net\Brainsaw\', '*',animal,'*\', animal,'\downsampled_stacks\025_micron\']; 
+    imgs = dir([imPath, '/*.tif']);
+end
 for iColor = 1:size(imgs,1)
-    numimgs = size(imfinfo([imPath, imgs(iColor).name]),1);
+    numimgs = size(imfinfo([imgs(1).folder, '\',imgs(iColor).name]),1);
     for iImage = 1:numimgs
-        RGBimg(:, :, iImage, iColor) = imread([imPath, imgs(iColor).name],iImage); 
+        RGBimg(:, :, iImage, iColor) = imread([imgs(1).folder, '\',imgs(iColor).name],iImage); 
     end
 end
 %rgb to grayscale 
@@ -23,21 +29,28 @@ figure();imagesc(tv_coronal(:,:,end-10));colormap(gray)
 tv_coronal_20um = tv_coronal(1:2:end,1:2:end,1:2:end);
 
 %% fiji step: crop images: remove cerebellum form template and image, and olf. bulbs from image 
-
+% C:\Users\Julie\Dropbox\MATLAB\allenCCF\template.mhd
 %% automatic registering using elastix 
-dd=dir('D:\JF030\Substack*');
-thisTiff = loadtiff(['D:\JF030\' dd.name]);
+dd=dir(['D:\' animal '\Substack*']);
+cd('C:\Users\Julie\Dropbox\MATLAB\JF_scripts_CortexLab\histology')
+thisTiff = loadtiff(['D:\' animal '\' dd.name]);
 params = {'01_ARA_affine.txt',...
     '02_ARA_bspline.txt'};
-[reg,elastixLog] = elastix(squeeze(RGBimg(:,:,:,1)),thisTiff ,[],params);%green channel - don't use of teto mouse 
+
+[reg,elastixLog] = elastix(squeeze(RGBimg(:,:,:,2)),thisTiff ,[],params);%green channel - don't use of teto mouse 
+saveastiff(reg, ['D:/' animal '/regGreenChan.tiff']); 
 
 %get red channel 
 [regRed,elastixLog] = transformix(squeeze(RGBimg(:,:,:,1)),elastixLog);%red channel 
-saveastiff(reg, ['D:/' animal '/regRedChan.tiff']); 
+saveastiff(regRed, ['D:/' animal '/regRedChan.tiff']); 
 
 %% fiji step: save template + image overlaid, keep only relevant bits and downsample in z 
 
 %% histology 
+substack_template = [70, 443];%manual enter fiji values here 
+substack_reg = [93-156, 246-313];%manual enter fiji values here 
+
+
 
 AP_get_probe_histologyJF(tv, av, st, slice_path);
 

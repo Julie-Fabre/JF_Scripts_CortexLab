@@ -1,12 +1,12 @@
 %AP_preprocess_phase3_newOEJF_onlysync('JF022', '2020-12-14')
 
 clear all;
-animal = 'JF030';
+animal = 'JF026';
 im_type = 'brainSaw';
 
 %% get histology slices and copy locally
 if strcmp(im_type, 'brainSaw') == 1
-     locationHisto = ['//znas.cortexlab.net/Brainsaw/', animal]; % copy files over to local disk
+     locationHisto = ['//znas.cortexlab.net/Brainsaw/JF026_JF029/', animal]; % copy files over to local disk
 else
     locationHisto = ['//znas.cortexlab.net/Subjects/', animal, '/Histology/']; % copy files over to local disk
 end
@@ -93,7 +93,7 @@ AP_grab_histology_ccfJF(tv, av, st, slice_path);
 
 % Align CCF slices and histology slices
 % (first: automatically, by outline)
-AP_auto_align_histology_ccfJF(slice_path);
+AP_auto_align_histology_ccfJF(slice_path,im_type);
 % (second: curate manually)
 AP_manual_align_histology_ccfJF(tv, av, st, slice_path);
 
@@ -107,15 +107,15 @@ AP_view_aligned_histology_volumeJF(tv, av, st, slice_path, 2);
 
 % Get probe trajectory from histology, convert to CCF coordinates
 
-AP_get_probe_histologyJF(tv, av, st, slice_path);
+AP_get_probe_histologyJF(tv, av, st, slice_path,'');
 
 %% BLUE, ORANGE, YELLOW, PURPLE, GREEN , LIGHT BLUE, RED correspondance (manual):
 probe2ephys = struct;
 probe2ephys.animal = animal;
-probe2ephys(1).day = 2;
+probe2ephys(1).day = 3;
 probe2ephys(1).site = 2;
 
-probe2ephys(2).day = 3;
+probe2ephys(2).day = 4;
 probe2ephys(2).site = 2;
 
 probe2ephys(3).day = 2;
@@ -124,17 +124,17 @@ probe2ephys(3).site = 1;
 probe2ephys(4).day = 1;
 probe2ephys(4).site = 1;
 
-probe2ephys(5).day = 3;
-probe2ephys(5).site = 2;
+probe2ephys(5).day = 4;
+probe2ephys(5).site = 1;
 
 probe2ephys(6).day = 3;
-probe2ephys(6).site = 3;
+probe2ephys(6).site = 1;
 
-probe2ephys(7).day = 1;
-probe2ephys(7).site = 3;
+probe2ephys(7).day = 5;
+probe2ephys(7).site = 1;
 
-probe2ephys(8).day = 1;
-probe2ephys(8).site = 1;
+probe2ephys(8).day = 5;
+probe2ephys(8).site = 2;
 
  probe2ephys(9).day = 3;
  probe2ephys(9).site = 2;
@@ -152,15 +152,17 @@ dontAnalyze = 0;
 for iProbe = 1:size(probe2ephys, 2)
     use_probe = iProbe;
     corona = 0;
-    protocol = 'JF_GratingPassive'; %protocol common to all sites and days
+    protocol = 'vanilla'; %protocol common to all sites and days
     experiments = AP_find_experimentsJF(animal, protocol, protocol);
     experiments = experiments([experiments.ephys]);
     curr_day = probe2ephys(iProbe).day;
     if ~isempty(curr_day)
     day = experiments(curr_day).day;
     experiment = experiments(curr_day).experiment; % experiment number
-
-    experiment = experiment(probe2ephys(iProbe).site)+1;
+    if length(experiment)>1
+        experiment = experiment(2);
+    end
+    %experiment = experiment(probe2ephys(iProbe).site);
     verbose = false; % display load progress and some info figures
     load_parts.cam = false;
     load_parts.imaging = false;
@@ -168,10 +170,17 @@ for iProbe = 1:size(probe2ephys, 2)
     site = probe2ephys(iProbe).site;
     
     lfp_channel = 'all';
+    loadClusters = 0;
+    isSpikeGlx=0;
+    recording = 2;
+    
     AP_load_experimentJF;
 
     if dontAnalyze == 0
         AP_cellrasterJF({stimOn_times}, {stimIDs})
+        AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))'}, ...
+    {trial_conditions(:,1).*trial_conditions(:,2), ...
+    trial_conditions(:,3),trial_outcome});
         AP_align_probe_histologyJF(st, slice_path, ...
             spike_times, spike_templates, template_depths, ...
             lfp, channel_positions(:, 2), ...
@@ -215,5 +224,5 @@ for iProbe = 1:size(probe2ephys, 2)
 end
 
 %% save on server
-mkdir([locationHisto, 'processed/']);
-copyfile(im_path, [locationHisto, 'processed/']);
+mkdir([locationHisto, '/processed/']);
+copyfile(im_path, [locationHisto, '/processed/']);

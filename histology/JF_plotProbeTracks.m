@@ -2,9 +2,9 @@
 % add probe depths, types, and mutli color if several regions of interest
 % plot only probe in the region of interest? 
 
-animalsType = {'Naive'};
+animalsType = {'MultiImgWorld'};
 regionsNames = {'CP', 'STN', 'GPe', 'SNr', 'GPi'};
-regions = {'DMS', 'PS', 'STN', 'GPe', 'SNr', 'GPi'};
+regions = {'DMS', 'STN', 'GPe', 'SNr', 'GPi'};
 recordingInfo = readtable('C:\Users\Julie\Dropbox\Analysis\Recordings - Sheet1.csv');
 
 %add probe types, depths
@@ -23,8 +23,7 @@ for iType = 1:size(animalsType, 2)
     [~, brain_outline] = plotBrainGrid([], []);
 
     %overlay regions
-    for iRegion = 1:size(regions, 2)
-
+    for iRegion = 1:5
         curr_plot_structure = find(strcmp(st.acronym, regionsNames{iRegion}));
         structure_3d = isosurface(permute(av(1:slice_spacing:end, ...
             1:slice_spacing:end, 1:slice_spacing:end) == curr_plot_structure, [3, 1, 2]), 0);
@@ -47,15 +46,17 @@ for iType = 1:size(animalsType, 2)
         %get animal and probe, load track
         theseAnimals = recordingInfo.Mouse(theseTypes);
 
-        for iAnimal = 1:size(theseAnimals, 1)
+        for iAnimal = [1,2,4]%1:size(theseAnimals, 1)
             %iAnimal = iAnimal + 1;
             load(['D:\', theseAnimals{iAnimal}, '\slices\probe_ccf.mat'])
-            thisAnimal = strcmp(recordingInfo.Mouse, theseAnimals{iAnimal});
+            qqqq=unique(theseAnimals);
+            thisAnimal = strcmp(recordingInfo.Mouse, qqqq{iAnimal});
+            ttP = (recordingInfo.HistologyProbe( thisAnimal & theseProbes));
             %thisProbe = recordingInfo.HistologyProbe(find(thisAnimal & theseProbes));
             for iProbe = 1:size(probe_ccf,1)
                 %iProbe = iProbe +1 
                 thisthisProbe = iProbe;
-                if any(probe_ccf(iProbe).trajectory_areas == curr_plot_structure) & isnan(recordingInfo.Exclude(thisAnimal))
+                if (any(probe_ccf(iProbe).trajectory_areas == curr_plot_structure) ) || (iAnimal == 2 && ismember(iProbe,ttP))
                 r0 = mean(probe_ccf(thisthisProbe).points, 1);
                 xyz = bsxfun(@minus, probe_ccf(thisthisProbe).points, r0);
                 [~, ~, V] = svd(xyz, 0);

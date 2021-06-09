@@ -1,4 +1,4 @@
-keep ephysData ephysDataSnr
+keep ephysData ephysDataOld ephysDataSnr
 
 animalsType = {'Naive'};
 regions = {'CP', 'STN', 'GPe', 'SNr', 'GPi'};
@@ -9,8 +9,8 @@ bregma = [540, 0, 570];
 thisCmap = [-20, 20];
 
 %% X-Y, X-Z, Y-Z plots for each region. bin by 100 um (?) and plot in colormap increase in response ?
-
-for iType = 1%:size(animalsType, 2)
+smoothF=1;
+for iType = 1:size(animalsType, 2)
     theseTypes = strcmp(recordingInfo.Type, animalsType{iType});
     theseColors = {rgb('DeepSkyBlue'); rgb('SeaGreen'); rgb('DarkOrange'); rgb('Crimson'); rgb('Hotpink'); rgb('Black'); rgb('Brown')};
 
@@ -22,7 +22,6 @@ for iType = 1%:size(animalsType, 2)
     structure_alpha = 0.2;
     %figure();
     %overlay regions
-    smoothF = 3;
     for iRegion = 1:size(regions, 2)
         if iRegion ==1
             thisData = ephysData;%.ephysData;
@@ -107,21 +106,16 @@ for iType = 1%:size(animalsType, 2)
         CNew = cat(1, thisData.location);
 
         ind = find(ismember(CNew, regions{iRegion}));
-       % clearvars theseLocationsInfo
-        if iRegion == 4
+clearvars theseLocationsInfo
         for iLocation = 1:size(ind, 1)
             theseLocationsInfo(iLocation) = size(thisData(ind(iLocation)).template_location, 1)+1;
         end
-        else
-        for iLocation = 1:size(ind, 1)
-            theseLocationsInfo(iLocation) = size(thisData(ind(iLocation)).template_location, 1);
-        end
-        end
         theseLocationsInfo = cumsum(theseLocationsInfo);
+        theseLocationsInfo = [0, theseLocationsInfo];
         theseLocations = cat(1, thisData(ind).template_location);
         theseLocationsBregmaAbs = [abs(theseLocations(:, 3)-bregma(3)), abs(theseLocations(:, 1)-bregma(1)), theseLocations(:, 2)];
 
-
+%% 1
         [N, Xedges, Yedges, binX, binY] = histcounts2(((bregma(3))-abs(theseLocations(:, 3)-(bregma(3)))-bregma(3))./100, (theseLocations(:, 1)-bregma(1))./100, xyCountBins{1, 1}./10, xyCountBins{1, 2}./10); %par rapport a bregma!
         thisSpacer = 0;
         for iBinX = 1:size(Xedges, 2)
@@ -130,13 +124,21 @@ for iType = 1%:size(animalsType, 2)
                 theseNeuronsInd = find(theseNeurons);
                 binnedArrayTot = [];
                 if ~isempty(theseNeuronsInd)
-                    [h, hh] = histc(theseNeuronsInd, theseLocationsInfo);
-                    uniqueRecs = unique(hh) + 1;
+                
+                    [h, hh] = histc(theseNeuronsInd,theseLocationsInfo);
+                    uniqueRecs = unique(hh) ;
+                    uniqueRecs(uniqueRecs==0)=[];
                     for iUniqueRec = 1:size(uniqueRecs, 1) %get psth per rec
                         theseTheseNeurons = theseNeuronsInd(hh == uniqueRecs(iUniqueRec));
+                        for iNeuron =1:length(theseTheseNeurons)
+                            keepN(iNeuron) = length(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline(thisData(uniqueRecs(iUniqueRec)).spike_templates==theseTheseNeurons(iNeuron)...
+                                -theseLocationsInfo(uniqueRecs(iUniqueRec)))) > 500;
+                        end
+                        theseTheseNeurons = theseTheseNeurons(keepN);
+                        clearvars keepN
                         if ~isempty(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline) && ~isempty(thisData(uniqueRecs(iUniqueRec)).stimOn_times)
                             theseTheseNeuronsTemplate = ismember(thisData(uniqueRecs(iUniqueRec)).spike_templates, ...
-                                theseTheseNeurons-theseLocationsInfo(uniqueRecs(iUniqueRec))-1);
+                                theseTheseNeurons-theseLocationsInfo(uniqueRecs(iUniqueRec)));
                             [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = ...
                                 psthAndBA(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline(theseTheseNeuronsTemplate), ...
                                 thisData(uniqueRecs(iUniqueRec)).stimOn_times, [-0.2, 0.3], 0.01);
@@ -155,8 +157,8 @@ for iType = 1%:size(animalsType, 2)
                     if isnan(thisSpacer)
                         thisSpacer = 0;
                     end
-                    plot(-0.2:0.01:0.3-0.01, nanmean(binnedArrayTot, 1)+thisSpacer )
-                    thisSpacer = thisSpacer + nanmax(nanmean(binnedArrayTot, 1));
+                    %plot(-0.2:0.01:0.3-0.01, nanmean(binnedArrayTot, 1)+thisSpacer )
+                    %thisSpacer = thisSpacer + nanmax(nanmean(binnedArrayTot, 1));
                             
                     % figure();
                     % plot(-0.2:0.01:0.3-0.01,squeeze(binnedArrayTotBinned(iBinX, iBinY, :)))
@@ -177,16 +179,31 @@ for iType = 1%:size(animalsType, 2)
             end
 
         end
-%         figure(iRegion+1)
-%         subplot(311)
-%         %plot(squeeze(binnedArrayTotBinned(iBinX, iBinY,:)))
-%         rrr = reshape(binnedArrayTotBinned(:, :,:), size(binnedArrayTotBinned,1).*size(binnedArrayTotBinned,2),size(binnedArrayTotBinned,3));
-%         rrrr = (rrr(any(rrr,2),:)-nanmean(rrr(any(rrr,2),26:41),2))./nanmean(rrr(any(rrr,2),26:41),2);
-%         imagesc(-0.2:0.01:0.3-0.01,[],rrrr)    
-%         colormap(brewermap([], '*RdBu'));
-%         caxis([-max(max(abs(rrrr))) max(max(abs(rrrr)))])
+       
+       
+       
+        figure(iRegion+1)
+        subplot(311)
+        %plot(squeeze(binnedArrayTotBinned(iBinX, iBinY,:)))
+        
+        rrr = reshape(binnedArrayTotBinned(:, :,:), size(binnedArrayTotBinned,1).*size(binnedArrayTotBinned,2),size(binnedArrayTotBinned,3));
+        rrrr = (rrr(any(rrr,2),:)-nanmean(rrr(any(rrr,2),26:41),2))./nanmean(rrr(any(rrr,2),26:41),2);
+        imagesc(-0.2:0.01:0.3-0.01,[],rrrr)    
+        colormap(brewermap([], '*RdBu'));
+        caxis([-2.5, 2.5])
+        colorbar;
         %subplot(212)
         %plot(-0.2:0.01:0.3-0.01, nanmean(squeeze(nanmean(binnedArrayTotBinned(:, :, :)))), 'k', 'LineWidth', 2)
+%         figure(7);
+%        plot(-0.2:0.01:0.3-0.01,nanmean(rrr),'Color',theseColors{iRegion})
+%        makepretty;
+%        hold on;
+%        plotshaded(-0.2:0.01:0.3-0.01,[-nanstd(rrr) + nanmean(rrr); ...
+%         nanstd(rrr) + nanmean(rrr)],theseColors{iRegion});
+%     makepretty;
+
+       
+       
         figure(1)
 
         binnedArrayPixel(binnedArrayPixel == Inf) = NaN;
@@ -220,8 +237,6 @@ for iType = 1%:size(animalsType, 2)
                 ax = gca;
         ax.YColor = 'w'; % Red
         ax.XColor = 'w'; % Red
-        box off
-      %  set(
         im = imagesc(xyCountBins{1, 1}./10, xyCountBins{1, 2}./10, binnedArrayPixelSmooth'*100);
         set(im, 'AlphaData', ~isnan(get(im, 'CData')));
 
@@ -240,27 +255,27 @@ for iType = 1%:size(animalsType, 2)
         axis equal
         axis square
         axis image
+        ax.XLabel.Color = [0, 0, 0];
+        ax.YLabel.Color = [0, 0, 0];
+        nColors = numel(ax.YTickLabel);
+        cm = [0, 0, 0];
+        for i = 1:nColors
+            ax.YTickLabel{i} = ['\color[rgb]', sprintf('{%f,%f,%f}%s', cm, ax.YTickLabel{i})];
+        end
 
-%         nColors = numel(ax.YTickLabel);
-%         cm = [0, 0, 0];
-%         for i = 1:nColors
-%             ax.YTickLabel{i} = ['\color[rgb]', sprintf('{%f,%f,%f}%s', cm, ax.YTickLabel{i})];
-%         end
+        nColors = numel(ax.XTickLabel);
+        cm = [0, 0, 0];
+        for i = 1:nColors
+            ax.XTickLabel{i} = ['\color[rgb]', sprintf('{%f,%f,%f}%s', cm, ax.XTickLabel{i})];
+        end
 
-%         nColors = numel(ax.XTickLabel);
-%         cm = [0, 0, 0];
-%         for i = 1:nColors
-%             ax.XTickLabel{i} = ['\color[rgb]', sprintf('{%f,%f,%f}%s', cm, ax.XTickLabel{i})];
-%         end
-%         ax.XLabel.Color = [0, 0, 0];
-%         ax.YLabel.Color = [0, 0, 0];
         makepretty;
         clearvars isIN
         caxis(thisCmap)
         set(gca, 'color', [0.5, 0.5, 0.5]);
         xlim([xyCountBins{1, 1}(1) ./ 10, xyCountBins{1, 1}(end) ./ 10])
         ylim([xyCountBins{1, 2}(1) ./ 10, xyCountBins{1, 2}(end) ./ 10])
-
+%% 2
 
         [N, Xedges, Zedges, binX, binZ] = histcounts2(((bregma(3))-abs(theseLocations(:, 3)-(bregma(3)))-bregma(3))./100, -theseLocations(:, 2)./100, xzCountBins{1, 1}./10, xzCountBins{1, 2}./10); %par rapport a bregma!
 
@@ -270,13 +285,21 @@ for iType = 1%:size(animalsType, 2)
                 theseNeuronsInd = find(theseNeurons);
                 binnedArrayTot = [];
                 if ~isempty(theseNeuronsInd)
+                    %theseLocationsInfo = [0, theseLocationsInfo];                     
                     [h, hh] = histc(theseNeuronsInd, theseLocationsInfo);
-                    uniqueRecs = unique(hh) + 1;
+                    uniqueRecs = unique(hh) ;
+                    %uniqueRecs(uniqueRecs==0)=[];
                     for iUniqueRec = 1:size(uniqueRecs, 1) %get psth per rec
                         theseTheseNeurons = theseNeuronsInd(hh == uniqueRecs(iUniqueRec));
+                        for iNeuron =1:length(theseTheseNeurons)
+                            keepN(iNeuron) = length(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline(thisData(uniqueRecs(iUniqueRec)).spike_templates==theseTheseNeurons(iNeuron)...
+                                -theseLocationsInfo(uniqueRecs(iUniqueRec)))) > 500;
+                        end
+                        theseTheseNeurons = theseTheseNeurons(keepN);
+                        clearvars keepN 
                         if ~isempty(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline) && ~isempty(thisData(uniqueRecs(iUniqueRec)).stimOn_times)
                             theseTheseNeuronsTemplate = ismember(thisData(uniqueRecs(iUniqueRec)).spike_templates, ...
-                                theseTheseNeurons-theseLocationsInfo(uniqueRecs(iUniqueRec))-1);
+                                theseTheseNeurons-theseLocationsInfo(uniqueRecs(iUniqueRec)));
                             [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = ...
                                 psthAndBA(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline(theseTheseNeuronsTemplate), ...
                                 thisData(uniqueRecs(iUniqueRec)).stimOn_times, [-0.2, 0.3], 0.01);
@@ -305,6 +328,12 @@ for iType = 1%:size(animalsType, 2)
                 end
             end
         end
+        binnedArrayPixel(isinf(binnedArrayPixel))=NaN;
+%                  if iRegion == 2 %exclude artefact
+%                      [ff,gg]= find(binnedArrayPixel==nanmax(nanmax(binnedArrayPixel)));
+%                      binnedArrayPixel(ff,gg)=nanmean(nanmean(binnedArrayPixel));
+%                  end
+         
         binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, smoothF, smoothF);
         subplot(3, size(regions, 2), size(regions, 2)+iRegion)
         for iPixelX = 1:size(binnedArrayPixelSmooth, 1)
@@ -313,15 +342,23 @@ for iType = 1%:size(animalsType, 2)
                     xzCountBins{1, 2}(iPixelY), r(bb2)-(bregma(3) / 10), -v(bb2));
             end
         end
+
+        
          figure(iRegion+1)
         subplot(312)
         %plot(squeeze(binnedArrayTotBinned(iBinX, iBinY,:)))
         rrr = reshape(binnedArrayTotBinned(:, :,:), size(binnedArrayTotBinned,1).*size(binnedArrayTotBinned,2),size(binnedArrayTotBinned,3));
+%         if iRegion==2
+%             fg=find(any(rrr,2));
+%             rrr=rrr(fg(1:end-1),:);
+%    
+%             
+%         end
         rrrr = (rrr(any(rrr,2),:)-nanmean(rrr(any(rrr,2),26:41),2))./nanmean(rrr(any(rrr,2),26:41),2);
         imagesc(-0.2:0.01:0.3-0.01,[],rrrr)    
         colormap(brewermap([], '*RdBu'));
-        caxis([-max(max(abs(rrrr))) max(max(abs(rrrr)))])
-        
+        caxis([-2.5, 2.5])
+        colorbar;
         figure(1);
         subplot(3, size(regions, 2), size(regions, 2)+(iRegion))
         binnedArrayPixelSmooth(isIN == 0) = mean(thisCmap);
@@ -343,27 +380,27 @@ for iType = 1%:size(animalsType, 2)
         axis equal
         axis square
         axis image
-        
-%         nColors = numel(ax.YTickLabel);
-%         cm = [0, 0, 0];
-%         for i = 1:nColors
-%             ax.YTickLabel{i} = ['\color[rgb]', sprintf('{%f,%f,%f}%s', cm, ax.YTickLabel{i})];
-%         end
-% 
-%         nColors = numel(ax.XTickLabel);
-%         cm = [0, 0, 0];
-%         for i = 1:nColors
-%             ax.XTickLabel{i} = ['\color[rgb]', sprintf('{%f,%f,%f}%s', cm, ax.XTickLabel{i})];
-%         end
-%         ax.XLabel.Color = [0, 0, 0];
-%         ax.YLabel.Color = [0, 0, 0];
+                ax.XLabel.Color = [0, 0, 0];
+        ax.YLabel.Color = [0, 0, 0];
+        nColors = numel(ax.YTickLabel);
+        cm = [0, 0, 0];
+        for i = 1:nColors
+            ax.YTickLabel{i} = ['\color[rgb]', sprintf('{%f,%f,%f}%s', cm, ax.YTickLabel{i})];
+        end
+
+        nColors = numel(ax.XTickLabel);
+        cm = [0, 0, 0];
+        for i = 1:nColors
+            ax.XTickLabel{i} = ['\color[rgb]', sprintf('{%f,%f,%f}%s', cm, ax.XTickLabel{i})];
+        end
+
         makepretty;
         clearvars isIN
         set(gca, 'color', [0.5, 0.5, 0.5])
         caxis(thisCmap)
         xlim([xzCountBins{1, 1}(1) ./ 10, xzCountBins{1, 1}(end) ./ 10])
         ylim([xzCountBins{1, 2}(1) ./ 10, xzCountBins{1, 2}(end) ./ 10])
-
+%% 3
         [N, Yedges, Zedges, binY, binZ] = histcounts2((theseLocations(:, 1)-bregma(1))./100, (-theseLocations(:, 2))./100, yzCountBins{1, 1}./10, yzCountBins{1, 2}./10); %par rapport a bregma!
 
         for iBinY = 1:size(Yedges, 2)
@@ -372,13 +409,21 @@ for iType = 1%:size(animalsType, 2)
                 theseNeuronsInd = find(theseNeurons);
                 binnedArrayTot = [];
                 if ~isempty(theseNeuronsInd)
-                    [h, hh] = histc(theseNeuronsInd, theseLocationsInfo);
-                    uniqueRecs = unique(hh) + 1;
+                   % theseLocationsInfo = [0, theseLocationsInfo];                     [
+                        [h, hh] = histc(theseNeuronsInd, theseLocationsInfo);
+                    uniqueRecs = unique(hh);
+                    %uniqueRecs(uniqueRecs==0)=[];
                     for iUniqueRec = 1:size(uniqueRecs, 1) %get psth per rec
                         theseTheseNeurons = theseNeuronsInd(hh == uniqueRecs(iUniqueRec));
+                        for iNeuron =1:length(theseTheseNeurons)
+                            keepN(iNeuron) = length(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline(thisData(uniqueRecs(iUniqueRec)).spike_templates==theseTheseNeurons(iNeuron)...
+                                -theseLocationsInfo(uniqueRecs(iUniqueRec)))) > 500;
+                        end
+                        theseTheseNeurons = theseTheseNeurons(keepN);
+                        clearvars keepN
                         if ~isempty(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline) && ~isempty(thisData(uniqueRecs(iUniqueRec)).stimOn_times)
                             theseTheseNeuronsTemplate = ismember(thisData(uniqueRecs(iUniqueRec)).spike_templates, ...
-                                theseTheseNeurons-theseLocationsInfo(uniqueRecs(iUniqueRec))-1);
+                                theseTheseNeurons-theseLocationsInfo(uniqueRecs(iUniqueRec)));
                             [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = ...
                                 psthAndBA(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline(theseTheseNeuronsTemplate), ...
                                 thisData(uniqueRecs(iUniqueRec)).stimOn_times, [-0.2, 0.3], 0.01);
@@ -409,8 +454,14 @@ for iType = 1%:size(animalsType, 2)
 
             end
         end
+         binnedArrayPixel(isinf(binnedArrayPixel))=NaN;
+%                  if iRegion == 2 %exclude artefact
+%                      [ff,gg]= find(binnedArrayPixel==nanmax(nanmax(binnedArrayPixel)));
+%                      binnedArrayPixel(ff,gg)=nanmean(nanmean(binnedArrayPixel));
+%                  end
+                 
         binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, smoothF, smoothF);
-       % binnedArrayPixelSmooth = fliplr(binnedArrayPixelSmooth);
+        binnedArrayPixelSmooth = fliplr(binnedArrayPixelSmooth);
         for iPixelX = 1:size(binnedArrayPixelSmooth, 1)
             for iPixelY = 1:size(binnedArrayPixelSmooth, 2)
                 isIN(iPixelX, iPixelY) = inpolygon(yzCountBins{1, 1}(iPixelX), ...
@@ -421,12 +472,19 @@ for iType = 1%:size(animalsType, 2)
         figure(iRegion+1)
         subplot(313)
         %plot(squeeze(binnedArrayTotBinned(iBinX, iBinY,:)))
+        
         rrr = reshape(binnedArrayTotBinned(:, :,:), size(binnedArrayTotBinned,1).*size(binnedArrayTotBinned,2),size(binnedArrayTotBinned,3));
+%         if iRegion==2
+%             fg=find(any(rrr,2));
+%             rrr=rrr(fg(1:end-1),:);
+%    
+%             
+%         end
         rrrr = (rrr(any(rrr,2),:)-nanmean(rrr(any(rrr,2),26:41),2))./nanmean(rrr(any(rrr,2),26:41),2);
         imagesc(-0.2:0.01:0.3-0.01,[],rrrr)    
         colormap(brewermap([], '*RdBu'));
-        caxis([-max(max(abs(rrrr))) max(max(abs(rrrr)))])
-        
+        caxis([-2.5, 2.5])
+        colorbar;
         figure(1)
         
         binnedArrayPixelSmooth(isIN == 0) = mean(thisCmap);
@@ -464,20 +522,20 @@ for iType = 1%:size(animalsType, 2)
         caxis(thisCmap)
         xlim([yzCountBins{1, 1}(1) ./ 10, yzCountBins{1, 1}(end) ./ 10])
         ylim([yzCountBins{1, 2}(1) ./ 10, yzCountBins{1, 2}(end) ./ 10])
+        ax.XLabel.Color = [0, 0, 0];
+        ax.YLabel.Color = [0, 0, 0];
+        nColors = numel(ax.YTickLabel);
+        cm = [0, 0, 0];
+        for i = 1:nColors
+            ax.YTickLabel{i} = ['\color[rgb]', sprintf('{%f,%f,%f}%s', cm, ax.YTickLabel{i})];
+        end
 
-%         nColors = numel(ax.YTickLabel);
-%         cm = [0, 0, 0];
-%         for i = 1:nColors
-%             ax.YTickLabel{i} = ['\color[rgb]', sprintf('{%f,%f,%f}%s', cm, ax.YTickLabel{i})];
-%         end
-%         ax.XLabel.Color = [0, 0, 0];
-%         ax.YLabel.Color = [0, 0, 0];
-%         nColors = numel(ax.XTickLabel);
-%         cm = [0, 0, 0];
-%         for i = 1:nColors
-%             ax.XTickLabel{i} = ['\color[rgb]', sprintf('{%f,%f,%f}%s', cm, ax.XTickLabel{i})];
-%         end
-set(gca, 'color', [0.5, 0.5, 0.5]);
+        nColors = numel(ax.XTickLabel);
+        cm = [0, 0, 0];
+        for i = 1:nColors
+            ax.XTickLabel{i} = ['\color[rgb]', sprintf('{%f,%f,%f}%s', cm, ax.XTickLabel{i})];
+        end
+%set(gca, 'color', [0.5, 0.5, 0.5]);
     end
 end
 

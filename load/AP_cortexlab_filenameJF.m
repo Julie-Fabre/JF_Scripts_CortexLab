@@ -175,6 +175,12 @@ switch file
                 filesep 'continuous'  filesep 'Neuropix-3a-100.0' filesep 'continuous.dat'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
+        %spike glx
+        if ~file_exists
+            filepattern = [animal filesep day filesep ...
+                'ephys' site_dir filesep recording_dir filesep '*.bin'];
+            [filename,file_exists] = check_locations(filepattern,server_location);
+        end
         
     case 'ephys'
         % (folder with kilosort/phy outputs)
@@ -189,6 +195,7 @@ switch file
         if file_exists
             filename = fileparts(filename{1});
         end
+       
         
     case 'ephys_ks1'
         % folder with kilosort/phy outputs

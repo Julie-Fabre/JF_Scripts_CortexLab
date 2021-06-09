@@ -1,4 +1,4 @@
-function AP_auto_align_histology_ccfJF(slice_im_path)
+function AP_auto_align_histology_ccfJF(slice_im_path,im_type)
 % AP_auto_align_histology_ccf(slice_im_path)
 %
 % Auto aligns histology slices and matched CCF slices by outline registration
@@ -43,7 +43,13 @@ for curr_slice = 1:length(slice_im)
     curr_histology_thresh = +(curr_im_bw > slice_threshold);
     
     % Resize atlas outline to approximately match histology, affine-align
-    resize_factor = min(size(curr_histology_thresh)./size(curr_av_thresh));
+    if strcmp(im_type,'brainSaw')
+        resize_factor = min(size(curr_histology_thresh)./size(curr_av_thresh));
+    else
+        resize_factor = min(size(curr_histology_thresh)./size(curr_av_thresh));
+        
+    end
+    
     curr_av_thresh_resize = imresize(curr_av_thresh,resize_factor,'nearest');
     
     [optimizer, metric] = imregconfig('monomodal');
@@ -74,7 +80,7 @@ for curr_slice = 1:length(slice_im)
     end
     figure(fig_last_aligned);
     imshow(curr_histology,'Parent',ax_last_aligned); hold on
-    imagesc(av_aligned_boundaries,'Parent',ax_last_aligned,'AlphaData',av_aligned_boundaries*0.3);
+    imagesc(av_aligned_boundaries.*2,'Parent',ax_last_aligned,'AlphaData',av_aligned_boundaries*0.3);
     colormap(gray);
     title(['Aligning slices ' num2str(curr_slice) '/' num2str(length(slice_im)) '...']);
     hold off;

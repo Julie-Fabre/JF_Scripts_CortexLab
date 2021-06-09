@@ -1,9 +1,15 @@
-function AP_get_probe_histologyJF(tv,av,st,slice_im_path)
+function AP_get_probe_histologyJF(tv,av,st,slice_im_path,type,fullImg)
 % AP_get_probe_histology(tv,av,st,slice_im_path)
 %
 % Get probe trajectory in histology and convert to ccf
 % Andy Peters (peters.andrew.j@gmail.com)
 
+if ~exist('im_type', 'var')
+    im_type = '';
+end
+if ~exist('fullImg', 'var')
+    fullImg = [];
+end
 % Initialize guidata
 gui_data = struct;
 gui_data.tv = tv;
@@ -14,18 +20,29 @@ gui_data.st = st;
 gui_data.n_probes = str2num(cell2mat(inputdlg('How many probes?')));
 
 % Load in slice images
-gui_data.slice_im_path = slice_im_path;
-slice_im_dir = dir([slice_im_path filesep '*.tif*']);
-if isempty(slice_im_dir)
-    slice_im_dir = dir([slice_im_path filesep '*.jp*g']);
-end
-slice_im_fn = natsortfiles(cellfun(@(path,fn) [path filesep fn], ...
-    {slice_im_dir.folder},{slice_im_dir.name},'uni',false));
-gui_data.slice_im = cell(length(slice_im_fn),1);
-for curr_slice = 1:length(slice_im_fn)
-    gui_data.slice_im{curr_slice} = imread(slice_im_fn{curr_slice});
-end
 
+
+if strcmp(type, 'rocksaw')
+    
+    for curr_slice = 1:size(slice_im_path)
+        gui_data.slice_im{curr_slice} = fullImg(:,:,curr_slice);
+    end
+    
+else
+    gui_data.slice_im_path = slice_im_path;
+
+    slice_im_dir = dir([slice_im_path filesep '*.tif*']);
+    if isempty(slice_im_dir)
+        slice_im_dir = dir([slice_im_path filesep '*.jp*g']);
+    end
+
+    slice_im_fn = natsortfiles(cellfun(@(path,fn) [path filesep fn], ...
+    {slice_im_dir.folder},{slice_im_dir.name},'uni',false));
+    gui_data.slice_im = cell(length(slice_im_fn),1);
+    for curr_slice = 1:length(slice_im_fn)
+        gui_data.slice_im{curr_slice} = imread(slice_im_fn{curr_slice});
+    end
+end
 % Load corresponding CCF slices
 ccf_slice_fn = [slice_im_path filesep 'histology_ccf.mat'];
 load(ccf_slice_fn);

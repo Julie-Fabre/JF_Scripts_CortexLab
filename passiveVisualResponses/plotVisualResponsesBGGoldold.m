@@ -186,8 +186,10 @@ for iType = 1:size(animalsType, 2)
                                 psthAndBA(ephysData(uniqueRecs(iUniqueRec)).spike_times_timeline(theseTheseNeuronsTemplate), ...
                                 ephysData(uniqueRecs(iUniqueRec)).stimOn_times, [-0.2, 0.3], 0.01);
                             binnedArrayTot = [binnedArrayTot; binnedArray];
-%figure();
-%                    plot(-0.2:0.01:0.3-0.01,psth)
+                    figure(1+iRegion);
+                    subplot(211)
+                    plot(-0.2:0.01:0.3-0.01,psth)
+                    hold on;
                         end
                     end
 
@@ -210,7 +212,11 @@ for iType = 1:size(animalsType, 2)
                     binnedArrayPixel(iBinX, iBinY) = NaN;
                 end
             end
+           
         end
+         subplot(212)
+            plot(-0.2:0.01:0.3-0.01,nanmean(squeeze(nanmean(binnedArrayTotBinned(:, :, :)))), 'k', 'LineWidth',2)
+        figure(1)
         %figure(1+iRegion);
         binnedArrayPixel(binnedArrayPixel==Inf)=NaN;
         binnedArrayPixelSmooth = smooth2a(binnedArrayPixel,4,4);
