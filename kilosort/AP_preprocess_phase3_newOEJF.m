@@ -12,7 +12,9 @@ function AP_preprocess_phase3_newOEJF(animal,day, thisSite,t_range,chanMap)
 %% Get paths and filenames
 
 [ephys_path,ephys_exists] = AP_cortexlab_filenameJF(animal,day,[],'ephys_dir');
-
+if ~exist('chanMap','var')%default to 3A probes of no channel map provided. 
+    chanMap = 'C:\Users\Julie\Dropbox\MATLAB\JF_scripts_CortexLab\kilosort\forPRBimecP3opt3.mat';
+end
 if ~ephys_exists
     error([animal ' ' day ': No ephys data found']);
 end

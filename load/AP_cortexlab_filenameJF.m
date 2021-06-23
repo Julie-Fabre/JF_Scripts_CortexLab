@@ -181,6 +181,16 @@ switch file
                 'ephys' site_dir filesep recording_dir filesep '*.bin'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
+        if ~file_exists
+            filepattern = [animal filesep day filesep ...
+                'ephys' site_dir filesep 'experiment*' filesep '*.bin'];
+            [filename,file_exists] = check_locations(filepattern,server_location);
+        end
+        if ~file_exists
+            filepattern = [animal filesep day filesep ...
+                'ephys' site_dir filesep 'experiment*' filesep 'recording*' filesep '*.bin'];
+            [filename,file_exists] = check_locations(filepattern,server_location);
+        end
         
     case 'ephys'
         % (folder with kilosort/phy outputs)

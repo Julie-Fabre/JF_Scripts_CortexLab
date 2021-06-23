@@ -74,8 +74,13 @@ gui_data.curr_slice = 1;
 % Set up axis for histology image
 gui_data.histology_ax = axes('YDir','reverse');
 hold on; colormap(gray); axis image off;
-gui_data.histology_im_h = imagesc(gui_data.slice_im{1}, ...
+gui_data.slice_im{1}(gui_data.slice_im{1}>1200) = 0;
+img = imadjust(gui_data.slice_im{1}, [0.1, 0.8]);
+img(img == 1) = 0;
+gui_data.histology_im_h = imagesc(img, ...
     'Parent',gui_data.histology_ax);
+
+%caxis([min(min(gui_data.histology_im_h.CData )), max(max(gui_data.histology_im_h.CData ))])
 colormap(gray)
 % Create title to write area in
 gui_data.histology_ax_title = title(gui_data.histology_ax,'','FontSize',14);
