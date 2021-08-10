@@ -107,8 +107,14 @@ ylim([-50, max(channel_positions(:,2))+50]);
 ylabel('Depth (\mum)')
 xlabel('Normalized log rate')
 
+% (plot ACG)
+acg_axes = subplot(5,5,[7:5:20],'visible','off','YDir','reverse');
+hold on;
+ylim([-50, max(channel_positions(:,2))+50]);
+acg_lines = arrayfun(@(x) plot(acg_axes,0,0,'k','linewidth',1),1:500);
+
 % (plot of waveform across the probe)
-waveform_axes = subplot(5,5,[2:5:20],'visible','off','YDir','reverse');
+waveform_axes = subplot(5,5,[7:5:20],'visible','off','YDir','reverse');
 hold on;
 ylim([-50, max(channel_positions(:,2))+50]);
 waveform_lines = arrayfun(@(x) plot(waveform_axes,0,0,'k','linewidth',1),1:size(templates,3));

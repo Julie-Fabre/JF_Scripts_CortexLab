@@ -776,7 +776,10 @@ end
 
 
 
-figure();
+
+
+if plotMore == true
+    figure();
 
 for iAnimal = 5:6
     subplot(2, 1, iAnimal-4)
@@ -846,7 +849,6 @@ ylim([0, 1])
 makepretty;
 grid on;
 
-if plotMore == true
 figure();
 
 for iAnimal = [5:7]

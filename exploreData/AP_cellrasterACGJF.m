@@ -1,4 +1,4 @@
-function AP_cellrasterJF(align_times,align_groups,unit_sort)
+function AP_cellrasterACGJF(align_times,align_groups,unit_sort)
 % AP_cellraster(align_times,align_groups,unit_sort)
 %
 % Raster viewer for Neuropixels
@@ -107,8 +107,16 @@ ylim([-50, max(channel_positions(:,2))+50]);
 ylabel('Depth (\mum)')
 xlabel('Normalized log rate')
 
+% (plot ACG)
+acg_axes = subplot(5,5,[7:5:20],'visible','off','YDir','reverse');
+hold on;
+acg_dots = scatter(NaN,NaN,5,'k','filled');
+%acg_lines = arrayfun(@(x) plot(acg_axes,0,0,'k','linewidth',1),1:500);
+xlabel('time')
+ylabel('FR')
+
 % (plot of waveform across the probe)
-waveform_axes = subplot(5,5,[2:5:20],'visible','off','YDir','reverse');
+waveform_axes = subplot(5,5,[7:5:20],'visible','off','YDir','reverse');
 hold on;
 ylim([-50, max(channel_positions(:,2))+50]);
 waveform_lines = arrayfun(@(x) plot(waveform_axes,0,0,'k','linewidth',1),1:size(templates,3));
@@ -159,6 +167,7 @@ gui_data.unit_dots = unit_dots;
 gui_data.curr_unit_dots = curr_unit_dots;
 gui_data.multiunit_lines = multiunit_lines;
 gui_data.waveform_lines = waveform_lines;
+gui_data.acg_dots = acg_dots;
 gui_data.psth_lines = psth_lines;
 gui_data.raster_dots = raster_dots;
 gui_data.raster_image = raster_image;
@@ -202,10 +211,12 @@ gui_data = guidata(cellraster_gui);
 % Turn on/off the appropriate graphics
 if length(gui_data.curr_unit) == 1
     set(gui_data.raster_dots,'visible','on');
+    set(gui_data.acg_dots,'visible','on');
     set(gui_data.multiunit_lines,'visible','off');
     set(gui_data.raster_image,'visible','off');
 elseif length(gui_data.curr_unit) > 1
     set(gui_data.raster_dots,'visible','off');
+    set(gui_data.acg_dots,'visible','off');
     set(gui_data.multiunit_lines,'visible','on');
     set(gui_data.raster_image,'visible','on');
 end
@@ -259,7 +270,12 @@ else
         histcounts(curr_raster_spike_times,gui_data.t_peri_event(x,:)), ...
         [1:size(gui_data.t_peri_event,1)]','uni',false));
 end
-
+% Calculate ACG 
+curr_spikes_acg  = CCGBz([double(curr_raster_spike_times); double(curr_raster_spike_times)], [ones(size(curr_spikes_idx, 1), 1); ...
+        ones(size(curr_spikes_idx, 1), 1) * 2], 'binSize', 0.01, 'duration', 100, 'norm', 'rate'); %function
+    %from the Zugaro lab mod. by Buzsaki lab-way faster than my own!
+thisACG = curr_spikes_acg (:, 1, 1);
+thisACG = thisACG(5001:end); 
 % Set color scheme
 curr_group = gui_data.align_groups{gui_data.curr_align}(:,gui_data.curr_group);
 if length(unique(curr_group)) == 1
@@ -316,7 +332,7 @@ end
 
 % Plot raster
 if length(gui_data.curr_unit) == 1
-    % (single unit mode)
+    % (single unit mode)m
     
     % (sort raster by group)
     [~,trial_sort] = sort(curr_group);
@@ -351,7 +367,11 @@ elseif length(gui_data.curr_unit) > 1
     caxis(get(gui_data.raster_image,'Parent'),prctile(raster_heatmap(:),[0.05,99.5]));
     
 end
-
+if length(gui_data.curr_unit) == 1
+    set(gui_data.acg_dots,'XData', ...
+        1:5001, ...
+        'YData',thisACG);
+end
 % Plot template amplitude over whole experiment
 if length(gui_data.curr_unit) == 1
     set(gui_data.amplitude_plot,'XData', ...

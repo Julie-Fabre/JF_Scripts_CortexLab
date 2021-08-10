@@ -1,0 +1,16 @@
+%% KS 3A 
+%AP_preprocess_phase3_newOEJF('JF043','2021-06-25', 1)
+%AP_preprocess_phase3_newOEJF('JF044','2021-06-25', 1)
+%AP_preprocess_phase3_newOEJF('JF043','2021-06-27', 1)
+%AP_preprocess_phase3_newOEJF('JF044','2021-06-27', 1)
+
+
+%% extract 2.0 
+[ephysAPfile,aa] = AP_cortexlab_filenameJF('JF043','2021-06-27',2,'ephys_ap',2,[]);
+[ephysKSfile,~] = AP_cortexlab_filenameJF('JF043','2021-06-27',2,'ephys_ap',2,[]);
+syncFT(ephysAPfile, 385, ephysKSfile)
+       
+[ephysAPfile,aa] = AP_cortexlab_filenameJF('JF044','2021-06-27',2,'ephys_ap',2,[]);
+[ephysKSfile,~] = AP_cortexlab_filenameJF('JF044','2021-06-27',2,'ephys_ap',2,[]);
+syncFT(ephysAPfile, 385, ephysKSfile)
+
