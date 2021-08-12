@@ -119,7 +119,7 @@ switch eventdata.Key
         update_slice(gui_fig);
         
     % Number: add coordinates for the numbered probe
-    case [cellfun(@num2str,num2cell(1:9),'uni',false),cellfun(@(x) ['numpad' num2str(x)],num2cell(1:9),'uni',false)]
+    case [cellfun(@num2str,num2cell(0:9),'uni',false),cellfun(@(x) ['numpad' num2str(x)],num2cell(0:9),'uni',false)]
         keyData = eventdata;
         if isempty(keyData.Modifier)
             curr_probe = str2num(eventdata.Key(end));
@@ -137,7 +137,7 @@ switch eventdata.Key
            return
         end
         
-        set(gui_data.histology_ax_title,'String',['Draw probe ' eventdata.Key]);
+        set(gui_data.histology_ax_title,'String',['Draw probe ' num2str(curr_probe)]);
         curr_line = imline;
         % If the line is just a click, don't include
         curr_line_length = sqrt(sum(abs(diff(curr_line.getPosition,[],1)).^2));

@@ -70,7 +70,7 @@ save([extraHDPath filesep animal '/slices/atlas2histology_tform.mat'], 'atlas2hi
 
 %% draw probes 
 slice_path = [extraHDPath,animal,'/slices'];
-AP_get_probe_histologyJF(tv, av, st, slice_path,'rocksaw',regRed); % shift+1 = 11, alt+1 = 21, altGr+1=31, .. 
+AP_get_probe_histologyJF(tv, av, st, slice_path,'rocksaw',regRed); % shift+1 = 11, alt+1 = 21, ctrl+1=31, .. 
 im_path = [extraHDPath,animal];
 %% align ephys depth
 %% BLUE, ORANGE, YELLOW, PURPLE, GREEN , LIGHT BLUE, RED correspondance (manual):
