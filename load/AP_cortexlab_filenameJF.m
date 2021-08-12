@@ -53,9 +53,9 @@ else
 end
 
 % List servers
-server1 = '\\zserver.cortexlab.net';
-server2 = '\\zubjects.cortexlab.net';
-server3 = '\\znas.cortexlab.net';
+server1 = zserverPath;
+server2 = tempServerPath;
+server3 = znasServerPath;
 
 % Check that servers are accessible (login needed on restart)
 if ~exist([server1 filesep 'Data'])

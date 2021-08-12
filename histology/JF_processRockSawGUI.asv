@@ -8,7 +8,7 @@
 % all colors 
 myPaths; 
 
-animal = 'JF042';
+animal = 'JF043';
 %% Open dialog box, select images to register + template and load 
 [filename,filepath]=uigetfile([brainsawPath '*.tif'],'Select autofluorescence channel imaged brain'); %select green channel
 [filenameref,filepathref]=uigetfile({[allenAtlasPath '*.tif']},'Select reference'); %template.tif 
@@ -20,12 +20,13 @@ allenAtlas10um = flipud(rot90(permute(allenAtlas10um, [3,2,1])));
 %% crop template to fit image to register 
 StackSlider(greenChannel);
 StackSlider(allenAtlas10um);
-cropAllenLimits = [18, 1199]; 
-
+cropAllenLimits = [271, 1287]; 
+cropImgLimits = [1, 397]; 
 allenAtlas10um = allenAtlas10um(:,:,cropAllenLimits(1):cropAllenLimits(2));
-
+greenChannel = greenChannel(:,:,cropImgLimits(1):cropImgLimits(2));
+redChannel = redChannel(:,:,cropImgLimits(1):cropImgLimits(2));
 %% register, get transform, apply
-dd=dir([extraHDPath filsep animal '\Substack*']);
+dd=dir([extraHDPath filesep animal '\Substack*']);
 cd(regParamsPath)
 params = {'01_ARA_affine.txt',...
     '02_ARA_bspline.txt'};
@@ -70,42 +71,99 @@ save([extraHDPath filesep animal '/slices/atlas2histology_tform.mat'], 'atlas2hi
 
 %% draw probes 
 slice_path = [extraHDPath,animal,'/slices'];
-AP_get_probe_histologyJF(tv, av, st, slice_path,'rocksaw',regRed);
-im_path = [extraHDPath,animal];
+AP_get_probe_histologyJF(tv, av, st, slice_path,'rocksaw',regRed); % shift+1 = 11, alt+1 = 21, ctrl+1=31, .. 
+im_path = [extraHDPath filesep animal];
 %% align ephys depth
 %% BLUE, ORANGE, YELLOW, PURPLE, GREEN , LIGHT BLUE, RED correspondance (manual):
 probe2ephys = struct;
 probe2ephys.animal = animal;
-probe2ephys(1).day = 1;
+probe2ephys(1).day = 4;
 probe2ephys(1).site = 1;
+probe2ephys(1).shank = NaN;
 
-probe2ephys(2).day = 1;
-probe2ephys(2).site = 2;
+probe2ephys(2).day = 3;
+probe2ephys(2).site = 1;
+probe2ephys(2).shank = NaN;
 
-probe2ephys(3).day = 2;
+probe2ephys(3).day = 7;
 probe2ephys(3).site = 1;
+probe2ephys(3).shank = NaN;
 
-probe2ephys(4).day = 3;
+probe2ephys(4).day = 6;
 probe2ephys(4).site = 1;
+probe2ephys(4).shank = NaN;
 
 probe2ephys(5).day = 2;
-probe2ephys(5).site = 2;
+probe2ephys(5).site = 1;
+probe2ephys(5).shank = NaN;
 
-probe2ephys(6).day = 3;
+probe2ephys(6).day = 6;
 probe2ephys(6).site = 2;
+probe2ephys(6).shank = 1;
 
-probe2ephys(7).day = 5;
-probe2ephys(7).site = 1;
+probe2ephys(7).day = 6;
+probe2ephys(7).site = 2;
+probe2ephys(7).shank = 2;
 
-probe2ephys(8).day = 5;
+probe2ephys(8).day = 6;
 probe2ephys(8).site = 2;
+probe2ephys(8).shank = 3;
 
-probe2ephys(9).day = 3;
+probe2ephys(9).day = 6;
 probe2ephys(9).site = 2;
- 
-probe2ephys(10).day = 4;
-probe2ephys(10).site = 2;
+probe2ephys(9).shank = 4;
 
+probe2ephys(10).day = 5;
+probe2ephys(10).site = 1;
+probe2ephys(10).shank = 1;
+
+probe2ephys(11).day = 5;
+probe2ephys(11).site = 1;
+probe2ephys(11).shank = 2;
+
+probe2ephys(12).day = 5;
+probe2ephys(12).site = 1;
+probe2ephys(12).shank = 3;
+
+probe2ephys(13).day = 5;
+probe2ephys(13).site = 1;
+probe2ephys(13).shank = 4;
+
+probe2ephys(14).day = 2;
+probe2ephys(14).site = 2;
+probe2ephys(14).shank = 1;
+
+probe2ephys(15).day = 2;
+probe2ephys(15).site = 2;
+probe2ephys(15).shank = 2;
+
+probe2ephys(16).day = 2;
+probe2ephys(16).site = 2;
+probe2ephys(16).shank = 3;
+
+probe2ephys(17).day = 2;
+probe2ephys(17).site = 2;
+probe2ephys(17).shank = 4;
+
+probe2ephys(18).day = 3;
+probe2ephys(18).site = 2;
+probe2ephys(18).shank = 1;
+
+probe2ephys(18).day = 3;
+probe2ephys(18).site = 2;
+probe2ephys(18).shank = 1;
+
+probe2ephys(18).day = 3;
+probe2ephys(18).site = 2;
+probe2ephys(18).shank = 1;
+
+probe2ephys(18).day = 3;
+probe2ephys(18).site = 2;
+probe2ephys(18).shank = 1;
+
+probe2ephys(18).day = 3;
+probe2ephys(18).site = 2;
+probe2ephys(18).shank = 1;
 save([im_path, '/probe2ephys.mat'], 'probe2ephys')
 
 %% align ephys
