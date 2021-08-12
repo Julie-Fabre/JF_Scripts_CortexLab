@@ -123,12 +123,9 @@ switch eventdata.Key
         keyData = eventdata;
         if isempty(keyData.Modifier)
             curr_probe = str2num(eventdata.Key(end));
-        elseif strcmp(keyData.Modifier{:}, 'shift') == 1
-             curr_probe = str2num(eventdata.Key(end)) + 10;
-        elseif strcmp(keyData.Modifier{:}, 'alt') == 1
-            curr_probe = str2num(eventdata.Key(end)) + 20;
-        elseif strcmp(keyData.Modifier{:}, 'control') == 1
-            curr_probe = str2num(eventdata.Key(end)) + 30;
+        elseif strcmp(keyData.Modifier{:}, 'shift')
+        elseif 
+        else
         end
             
         
