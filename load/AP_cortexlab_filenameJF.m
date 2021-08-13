@@ -100,6 +100,9 @@ switch file
     case 'probe2ephys'
         filepattern = [animal filesep 'Histology/processed/probe2ephys.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
+    case 'mainfolder'
+        filepattern = [animal filesep day];
+        [filename,file_exists] = check_locations(filepattern,server_location);
     case 'timeline'
         filepattern = [animal filesep day filesep experiment ...
             filesep day '_' experiment '_' animal '_Timeline.mat'];

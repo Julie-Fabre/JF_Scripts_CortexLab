@@ -271,7 +271,8 @@ if block_exists
     end
 
     % SPECIFIC TO PROTOCOL
-    [~, expDef] = fileparts(block.expDef);
+    expDef = strrep(block.expDef, '\','/'); % for windows to UNIX paths 
+    [~, expDef] = fileparts(expDef);
     switch expDef
         case {'vanillaChoiceworld', 'vanillaChoiceworldBias', 'vanillaChoiceworldNoRepeats'}
             % Hit/miss recorded for last trial, circshift to align
@@ -791,7 +792,7 @@ if exist('Timeline', 'var') && load_parts.cam
     [eyecam_dir, eyecam_exists] = AP_cortexlab_filenameJF(animal, day, experiment, 'eyecam');
 
     if eyecam_exists
-        if verbose;
+        if verbose
             disp('Loading eyecam...');
         end
 
@@ -1139,9 +1140,10 @@ if ephys_exists && load_parts.ephys
         end
     else
         header.n_channels = 385;
-        header.lfp_sample_rate
-        header.filter_cutoff 
         ephys_sample_rate = 30000;
+        header.lfp_sample_rate = 30000; 
+        header.filter_cutoff = 300;%Hz, defined in JF_computeLFP
+        
     end
     spike_times = double(readNPY([ephys_path, filesep, 'spike_times.npy'])) ./ ephys_sample_rate;
     spike_templates_0idx = readNPY([ephys_path, filesep, 'spike_templates.npy']);
@@ -1153,8 +1155,15 @@ if ephys_exists && load_parts.ephys
 
     % Default channel map/positions are from end: make from surface
     % (hardcode this: kilosort2 drops channels)
-    max_depth = 3840;
-    channel_positions(:, 2) = max_depth - channel_positions(:, 2);
+    if isSpikeGlx
+        max_depth = 0;%already ordered 
+        channel_positions(:, 2) = channel_positions(:, 2);
+    else
+        max_depth = 3840;
+        channel_positions(:, 2) = max_depth - channel_positions(:, 2);
+    end
+    
+    
 
     % Unwhiten templates
     templates = zeros(size(templates_whitened));
@@ -1416,37 +1425,52 @@ end
 if ephys_exists && load_parts.ephys && exist('lfp_channel', 'var')
 
     % Get LFP file info
-    n_channels = str2num(header.n_channels);
+    
+    if ~isSpikeGlx
+        n_channels = str2num(header.n_channels);
     [data_path, data_path_exists] = AP_cortexlab_filenameJF(animal, day, experiment, 'ephys_dir', site);
+    
+    
+        % (get all recordings within site - assume concat at this point)
+        lfp_recordings = dir([data_path, filesep, 'experiment*']);
+        lfp_filenames = cellfun(@(x) ...
+            [data_path, filesep, x, filesep, 'recording1/continuous/Neuropix-3a-100.1/continuous.dat'], ...
+            {lfp_recordings.name}, 'uni', false);
 
-    % (get all recordings within site - assume concat at this point)
-    lfp_recordings = dir([data_path, filesep, 'experiment*']);
-    lfp_filenames = cellfun(@(x) ...
-        [data_path, filesep, x, filesep, 'recording1/continuous/Neuropix-3a-100.1/continuous.dat'], ...
-        {lfp_recordings.name}, 'uni', false);
+        % Get LFP properties
+        % (NOTE: LFP channel map is different from kilosort channel map because
+        % kilosort2 drops channels without spikes)
+        channel_map_fn = [dropboxPath filesep 'MATLAB/JF_scripts_CortexLab/kilosort/forPRBimecP3opt3.mat'];
+        channel_map_full = load(channel_map_fn);
+        max_depth = 3840;
+        lfp_channel_positions = max_depth - channel_map_full.ycoords;
+        lfp_sample_rate = str2num(header.lfp_sample_rate);
+        lfp_cutoff = str2num(header.filter_cutoff);
 
-    % Get LFP properties
-    % (NOTE: LFP channel map is different from kilosort channel map because
-    % kilosort2 drops channels without spikes)
-    channel_map_fn = [dropboxPath filesep 'MATLAB/JF_scripts_CortexLab/kilosort/forPRBimecP3opt3.mat'];
-    channel_map_full = load(channel_map_fn);
-    max_depth = 3840;
-    lfp_channel_positions = max_depth - channel_map_full.ycoords;
-    lfp_sample_rate = str2num(header.lfp_sample_rate);
-    lfp_cutoff = str2num(header.filter_cutoff);
-
-    % Memory map LFP
-    n_bytes = 2; % LFP = int16 = 2 bytes
-    n_lfp_samples = nan(size(lfp_filenames));
-    lfp_memmap = cell(size(lfp_filenames));
-    for curr_lfp_filename = 1:length(lfp_filenames)
-        lfp_fileinfo = dir(lfp_filenames{curr_lfp_filename});
-        n_lfp_samples(curr_lfp_filename) = lfp_fileinfo.bytes / n_bytes / n_channels;
-        lfp_memmap{curr_lfp_filename} = ...
-            memmapfile(lfp_filenames{curr_lfp_filename}, ...
-            'Format', {'int16', [n_channels, n_lfp_samples(curr_lfp_filename)], 'lfp'});
+        % Memory map LFP
+        n_bytes = 2; % LFP = int16 = 2 bytes
+        n_lfp_samples = nan(size(lfp_filenames));
+        lfp_memmap = cell(size(lfp_filenames));
+        for curr_lfp_filename = 1:length(lfp_filenames)
+            lfp_fileinfo = dir(lfp_filenames{curr_lfp_filename});
+            n_lfp_samples(curr_lfp_filename) = lfp_fileinfo.bytes / n_bytes / n_channels;
+            lfp_memmap{curr_lfp_filename} = ...
+                memmapfile(lfp_filenames{curr_lfp_filename}, ...
+                'Format', {'int16', [n_channels, n_lfp_samples(curr_lfp_filename)], 'lfp'});
+        end
+    else
+        [filename,file_exists] = AP_cortexlab_filenameJF(animal,day,experiment,'mainfolder',site,recording);
+        mainFolder = filename{1}(1:end-1);
+        lfpDir = dir([mainFolder filesep 'lfp' filesep 'lfp.mat']);
+        if isempty(lfpDir) %only compute LFP if not already saved on disk
+            n_channels = header.n_channels;
+            lfp = JF_get_NPX2_LFP(ephys_path); 
+            mkdir([mainFolder filesep 'lfp'])
+            save([mainFolder filesep 'lfp' filesep 'lfp.mat'], 'lfp', '-v7.3')%save lfp 
+        else
+            load([mainFolder filesep 'lfp' filesep 'lfp.mat'])
+        end 
     end
-
     if isnumeric(lfp_channel)
 
         % Load LFP of whole current experiment from one channel
@@ -1545,45 +1569,75 @@ if ephys_exists && load_parts.ephys && exist('lfp_channel', 'var')
     elseif strcmp(lfp_channel, 'all')
 
         % Load short LFP segment (from start = no light) from all channels
-        if verbose;
+        if verbose
             disp('Loading LFP (all channels snippet)...');
-        end;
-
-        % Choose snippet of recording time before first experiment (no light)
-        t_load = 10; % time to load (in seconds)
-        t_load_pre_exp = 1; % time before first experiment to load up to
-        experiment_ephys_starts = sync(acqLive_sync_idx).timestamps(sync(acqLive_sync_idx).values == 1);
-        lfp_load_start = round((lfp_sample_rate * (experiment_ephys_starts(1) - t_load_pre_exp - t_load)));
-        lfp_load_stop = round((lfp_sample_rate * (experiment_ephys_starts(1) - t_load_pre_exp)));
-
-        % Load all LFP channels in snippet (before recording = first file)
-        if lfp_load_stop > size(lfp_memmap, 2)
-            lfp = lfp_memmap{1}.Data.lfp(:, 1:lfp_load_stop-lfp_load_start);
-        else
-            lfp = lfp_memmap{1}.Data.lfp(:, lfp_load_start:lfp_load_stop);
         end
-        % Sort LFP so it goes from surface to depth
-        [~, lfp_sort_idx] = sort(lfp_channel_positions);
-        lfp_channel_positions = lfp_channel_positions(lfp_sort_idx);
-        lfp = lfp(lfp_sort_idx, :);
+        if ~isSpikeGlx
+            % Choose snippet of recording time before first experiment (no light)
+            t_load = 10; % time to load (in seconds)
+            t_load_pre_exp = 1; % time before first experiment to load up to
 
-        % Get LFP times and convert to timeline time
-        lfp_load_start_t = lfp_load_start / lfp_sample_rate;
-        lfp_t = [0:size(lfp, 2) - 1] / lfp_sample_rate + lfp_load_start_t;
+            experiment_ephys_starts = sync(acqLive_sync_idx).timestamps(sync(acqLive_sync_idx).values == 1);
+            lfp_load_start = round((lfp_sample_rate * (experiment_ephys_starts(1) - t_load_pre_exp - t_load)));
+            lfp_load_stop = round((lfp_sample_rate * (experiment_ephys_starts(1) - t_load_pre_exp)));
 
-        % Get power spectrum of LFP
-        window_length = 2; % in seconds
-        window_overlap = 1; % in seconds
-        window_length_samples = round(window_length/(1 / lfp_sample_rate));
-        window_overlap_samples = round(window_overlap/(1 / lfp_sample_rate));
-        [lfp_power, lfp_power_freq] = pwelch(zscore(double(lfp), [], 2)', ...
-            window_length_samples, window_overlap_samples, [], lfp_sample_rate);
+            % Load all LFP channels in snippet (before recording = first file)
+            if lfp_load_stop > size(lfp_memmap, 2)
+                lfp = lfp_memmap{1}.Data.lfp(:, 1:lfp_load_stop-lfp_load_start);
+            else
+                lfp = lfp_memmap{1}.Data.lfp(:, lfp_load_start:lfp_load_stop);
+            end
+            % Sort LFP so it goes from surface to depth
+            [~, lfp_sort_idx] = sort(lfp_channel_positions);
+            lfp_channel_positions = lfp_channel_positions(lfp_sort_idx);
+            lfp = lfp(lfp_sort_idx, :);
 
+            % Get LFP times and convert to timeline time
+            lfp_load_start_t = lfp_load_start / lfp_sample_rate;
+            lfp_t = [0:size(lfp, 2) - 1] / lfp_sample_rate + lfp_load_start_t;
+            window_length = 2; % in seconds
+            window_overlap = 1; % in seconds
+            window_length_samples = round(window_length/(1 / lfp_sample_rate));
+            window_overlap_samples = round(window_overlap/(1 / lfp_sample_rate));
+            [lfp_power, lfp_power_freq] = pwelch(zscore(double(lfp), [], 2)', ...
+                window_length_samples, window_overlap_samples, [], lfp_sample_rate);
+        else
+            lfp_t= [0:size(lfp, 1) - 1] / (30000)*100;
+            lfp_sample_rate = 30000 / 1000; 
+            binFile = dir([ephys_path(1:end-15) ephys_path(end-4:end)  filesep '*.meta']);
+            meta = ReadMeta_GLX(binFile.name, binFile.folder);
+            ephysAPfile = [ephys_path(1:end-15) ephys_path(end-4:end)];
+            %max_depth = 0;%already ordered
+            if contains(meta.imRoFile, 'NPtype24_hStripe_botRow0_ref0.imro') %2.0 4 shank, bottom stripe
+                chanMapData = load([dropboxPath, filesep, 'MATLAB/JF_scripts_CortexLab/kilosort/chanMapNP2_4Shank_bottRow_flipper.mat']);
+               lfp_channel_positions = chanMapData.ycoords;
+            else %1.0 bottom row
+                chanMapData = load([dropboxPath, filesep, 'MATLAB/JF_scripts_CortexLab/kilosort/chanMapNP2_1Shank_flipper.mat']);
+                lfp_channel_positions = chanMapData.ycoords;
+            end
+            lfp = permute(lfp, [2,1]);
+             [~, lfp_sort_idx] = sort(lfp_channel_positions);
+            lfp_channel_positions = lfp_channel_positions(lfp_sort_idx);
+            maxIdx = lfp_sort_idx == max(lfp_sort_idx);
+            lfp_sort_idx(maxIdx) = [];
+            lfp = lfp(lfp_sort_idx, :);
+            
+            window_length = 2; % in seconds
+            window_overlap = 1; % in seconds
+            window_length_samples = round(window_length/(1 / lfp_sample_rate));
+            window_overlap_samples = round(window_overlap/(1 / lfp_sample_rate));
+            [lfp_power, lfp_power_freq] = pwelch(zscore(double(lfp), [], 2)', ...
+                window_length_samples, window_overlap_samples, [], lfp_sample_rate);
+            
+        end
+       
+            
+            
         if verbose
             figure;
 
             p1 = subplot(1, 2, 1);
-            imagesc(lfp_power_freq, lfp_channel_positions, log10(lfp_power'));
+            imagesc(lfp_power_freq, lfp_channel_positions(1:end-1), log10(lfp_power'));
             xlabel('Frequency');
             ylabel('Depth (\mum)');
             c = colorbar;

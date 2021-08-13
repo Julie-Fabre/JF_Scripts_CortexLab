@@ -222,6 +222,7 @@ keep st probe2ephys tv av animal iProbe slice_path
     
     lfp_channel = 'all'; % load lfp 
     loadClusters = 0;
+    recording = [];
     [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,day,experiment,'ephys_ap',site,recording);
     isSpikeGlx = contains(ephysAPfile, 'g0');%spike glx (2.0 probes) or open ephys (3A probes)? 
     if isSpikeGlx
@@ -230,7 +231,7 @@ keep st probe2ephys tv av animal iProbe slice_path
             syncFT(ephysAPfile, 385, ephysKSfile)
         end
     end
-    recording = [];
+    
 
     AP_load_experimentJF;
 
@@ -247,8 +248,8 @@ keep st probe2ephys tv av animal iProbe slice_path
 
         AP_align_probe_histologyJF(st, slice_path, ...
             spike_times, spike_templates, template_depths, ...
-            lfp, channel_positions(:, 2), ...
-            use_probe);
+            lfp, lfp_channel_positions, channel_positions(:, 2), ...
+            use_probe,isSpikeGlx);
     else
         experiment = experiments(curr_day).experiment; % experiment number
         experiment = experiment(probe2ephys(iProbe).site) + 1;
