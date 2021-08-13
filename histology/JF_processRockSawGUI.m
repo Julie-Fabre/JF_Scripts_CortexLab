@@ -6,9 +6,21 @@
 %% to dos
 % - btter auto brightness contrast scaling
 % all colors 
-myPaths; 
 
+%% params / loading 
+myPaths; 
 animal = 'JF043';
+% get in 'AP' format: histology_ccf.mat with tv_slices, av_slices,
+% plane_ap, plane_ml, plane_dv 
+allen_atlas_path = [allenAtlasPath 'allenCCF'];
+tv = readNPY([allen_atlas_path, filesep, 'template_volume_10um.npy']);
+%tv = permute(tv, [2,1,3]);
+av = readNPY([allen_atlas_path, filesep, 'annotation_volume_10um_by_index.npy']);
+%av = permute(av, [2,1,3]);
+st = loadStructureTreeJF([allen_atlas_path, filesep, 'structure_tree_safe_2017.csv']);
+bregma = [540,0,570];
+slice_path = [extraHDPath,animal,'/slices'];
+
 %% Open dialog box, select images to register + template and load 
 [filename,filepath]=uigetfile([brainsawPath '*.tif'],'Select autofluorescence channel imaged brain'); %select green channel
 [filenameref,filepathref]=uigetfile({[allenAtlasPath '*.tif']},'Select reference'); %template.tif 
@@ -17,6 +29,7 @@ redChannel = loadtiff([filepath, filename(1:end-11), '1_red.tif']);
 allenAtlas = loadtiff([filepathref, filenameref]);
 allenAtlas10um = readNPY([allenAtlasPath 'allenCCF' filesep 'template_volume_10um.npy']);
 allenAtlas10um = flipud(rot90(permute(allenAtlas10um, [3,2,1])));
+
 %% crop template to fit image to register 
 StackSlider(greenChannel);
 StackSlider(allenAtlas10um);
@@ -25,6 +38,7 @@ cropImgLimits = [1, 397];
 allenAtlas10um = allenAtlas10um(:,:,cropAllenLimits(1):cropAllenLimits(2));
 greenChannel = greenChannel(:,:,cropImgLimits(1):cropImgLimits(2));
 redChannel = redChannel(:,:,cropImgLimits(1):cropImgLimits(2));
+
 %% register, get transform, apply
 dd=dir([extraHDPath filesep animal '\Substack*']);
 cd(regParamsPath)
@@ -37,23 +51,6 @@ saveastiff(reg, [extraHDPath filesep animal '/regGreenChan.tiff']);
 %get red channel 
 [regRed,elastixLog2] = transformix(redChannel,elastixLog);%red channel 
 saveastiff(regRed, [extraHDPath filesep animal '/regRedChan.tiff']); 
-
-% allChannel = loadtiff([extraHDPath filesep animal, '/Composite.tif']);
-% % allchans 
-% [reg1,elastixLog2] = transformix(allChannel(:,:, 1:3:end),elastixLog);%red channel 
-% [reg2,elastixLog2] = transformix(allChannel(:,:, 2:3:end),elastixLog);%red channel 
-% [reg3,elastixLog2] = transformix(allChannel(:,:, 3:3:end),elastixLog);%red channel 
-% saveastiff(regRed, [extraHDPath filesep animal '/regRedChan.tiff']); 
-
-% get in 'AP' format: histology_ccf.mat with tv_slices, av_slices,
-% plane_ap, plane_ml, plane_dv 
-allen_atlas_path = [allenAtlasPath 'allenCCF'];
-tv = readNPY([allen_atlas_path, filesep, 'template_volume_10um.npy']);
-%tv = permute(tv, [2,1,3]);
-av = readNPY([allen_atlas_path, filesep, 'annotation_volume_10um_by_index.npy']);
-%av = permute(av, [2,1,3]);
-st = loadStructureTreeJF([allen_atlas_path, filesep, 'structure_tree_safe_2017.csv']);
-bregma = [540,0,570];
 
 histology_ccf=struct;
 atlas2histology_tform = cell(size(reg,3),1);
@@ -70,9 +67,10 @@ save([extraHDPath filesep animal '/slices/histology_ccf.mat'], 'histology_ccf','
 save([extraHDPath filesep animal '/slices/atlas2histology_tform.mat'], 'atlas2histology_tform')
 
 %% draw probes 
-slice_path = [extraHDPath,animal,'/slices'];
+
 AP_get_probe_histologyJF(tv, av, st, slice_path,'rocksaw',regRed); % shift+1 = 11, alt+1 = 21, ctrl+1=31, .. 
 im_path = [extraHDPath filesep animal];
+
 %% align ephys depth
 %% BLUE, ORANGE, YELLOW, PURPLE, GREEN , LIGHT BLUE, RED correspondance (manual):
 probe2ephys = struct;
@@ -200,14 +198,16 @@ save([im_path, '/probe2ephys.mat'], 'probe2ephys')
 % ONE RN (NOT IN LOOP) FOR THINGS TO SAVE PROPERLY
 load([im_path, '/probe2ephys.mat'])
 dontAnalyze = 0;
-for iProbe = 1:size(probe2ephys, 2)
+iProbe = 6
+%for iProbe = 1:size(probe2ephys, 2)
+keep st probe2ephys tv av animal iProbe slice_path
     use_probe = iProbe;
     corona = 0;
-    protocol = 'vanilla'; %protocol common to all sites and days
+    protocol = 'NoGo'; %protocol common to all sites and days
     experiments = AP_find_experimentsJF(animal, protocol, protocol);
     experiments = experiments([experiments.ephys]);
     curr_day = probe2ephys(iProbe).day;
-    if ~isempty(curr_day)
+    %if ~isempty(curr_day)
     day = experiments(curr_day).day;
     experiment = experiments(curr_day).experiment; % experiment number
     if length(experiment)>1
@@ -220,19 +220,31 @@ for iProbe = 1:size(probe2ephys, 2)
     load_parts.ephys = true;
     site = probe2ephys(iProbe).site;
     
-    lfp_channel = 'all';
+    lfp_channel = 'all'; % load lfp 
     loadClusters = 0;
-
-    isSpikeGlx=0;
-    recording = 2;
+    [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,day,experiment,'ephys_ap',site,recording);
+    isSpikeGlx = contains(ephysAPfile, 'g0');%spike glx (2.0 probes) or open ephys (3A probes)? 
+    if isSpikeGlx
+         [ephysKSfile,~] = AP_cortexlab_filenameJF(animal,day,experiment,'ephys',site,recording);
+        if isempty(dir([ephysKSfile filesep 'sync.mat']))
+            syncFT(ephysAPfile, 385, ephysKSfile)
+        end
+    end
+    recording = [];
 
     AP_load_experimentJF;
 
     if dontAnalyze == 0
         AP_cellrasterJF({stimOn_times}, {stimIDs})
+        
+        AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes'}, ...
+            {trial_conditions(:,1).*trial_conditions(:,2), ...
+            trial_conditions(:,3),trial_outcome'});
+
         AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))'}, ...
-    {trial_conditions(:,1).*trial_conditions(:,2), ...
-    trial_conditions(:,3),trial_outcome});
+            {trial_conditions(:,1).*trial_conditions(:,2), ...
+            trial_conditions(:,3)});
+
         AP_align_probe_histologyJF(st, slice_path, ...
             spike_times, spike_templates, template_depths, ...
             lfp, channel_positions(:, 2), ...
@@ -268,12 +280,12 @@ for iProbe = 1:size(probe2ephys, 2)
                 use_probe);
         end
     end
-    end
+    %end
 
     %     indexes = probe_ccf .* 10;
     %     av(indexes)
     %     av(round(probe_ccf(:, 1)), probe_ccf(:, 2), probe_ccf(:, 3))
-end
+%end
 
 %% save on server
 mkdir([locationHisto, '/processed/']);

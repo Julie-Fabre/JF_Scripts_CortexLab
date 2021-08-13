@@ -1,4 +1,5 @@
 function experiments = AP_find_experimentsJF(animal,protocol,flexible_name)
+myPaths;
 % experiments = AP_find_experiments(animal,protocol,flexible_name)
 %
 % flexible_name - if true, uses strfind(lower)
@@ -23,7 +24,7 @@ days_combined = {};
 days_pathnames_combined = {};
 
 % (look in server 1 expInfo - old)
-expInfo_path = [zseverPath filesep animal];
+expInfo_path = [zserverPath filesep animal];
 expInfo_dir = dir(expInfo_path);
 day_paths = cellfun(@(x) ~isempty(regexp(x,'\d\d\d\d-\d\d-\d\d')),{expInfo_dir.name}) &...
     [expInfo_dir.isdir];
@@ -34,7 +35,7 @@ days_combined = [days_combined,curr_days];
 days_pathnames_combined = [days_pathnames_combined,curr_days_pathname];
 
 % (look in server 1 subjects - new)
-expInfo_path = [zseverPath filesep 'Subjects\' animal];
+expInfo_path = [zserverPath filesep 'Subjects\' animal];
 expInfo_dir = dir(expInfo_path);
 day_paths = cellfun(@(x) ~isempty(regexp(x,'\d\d\d\d-\d\d-\d\d')),{expInfo_dir.name}) &...
     [expInfo_dir.isdir];

@@ -134,7 +134,8 @@ switch str_align
         
     case 'kernel'
         %%% Align by cortex-striatum kernel template
-        ephys_kernel_align_path = '\\zserver.cortexlab.net\Lab\Share\ajpeters\for_Julie\ephys_processing\';
+        myPaths;
+        ephys_kernel_align_path =[zserverLabPath 'Share/ajpeters/for_Julie/ephys_processing/'];
         ephys_kernel_align_fn = ['ephys_kernel_align_' num2str(n_aligned_depths) '_depths.mat'];        
         if exist([ephys_kernel_align_path filesep ephys_kernel_align_fn],'file')
             load([ephys_kernel_align_path filesep ephys_kernel_align_fn]);

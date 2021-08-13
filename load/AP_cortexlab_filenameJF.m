@@ -1,4 +1,5 @@
 function [filename,file_exists] = AP_cortexlab_filenameJF(animal,day,experiment,file,site,recording)
+myPaths;
 % [filename,file_exists] = AP_cortexlab_filename(animal,day,experiment,file,site,recording)
 %
 % This is an absolute mess because of lab-wide inconsistency
@@ -55,27 +56,27 @@ end
 % List servers
 server1 = zserverPath;
 server2 = tempServerPath;
-server3 = znasServerPath;
+server3 = znasPath;
 
 % Check that servers are accessible (login needed on restart)
-if ~exist([server1 filesep 'Data'])
+if ~exist([server1])
     error('Zserver not available');
 end
-if ~exist([server2 filesep 'Subjects'])
+if ~exist([server2])
     error('Zubjects not available');
 end
-if ~exist([server3 filesep 'Subjects'])
+if ~exist([server3])
     error('Znas not available');
 end
 
 % List all folders to check
 server_location = cell(0);
-server_location{end+1} = [server3 filesep 'Subjects'];
-server_location{end+1} = [server2 filesep 'Subjects'];
-server_location{end+1} = [server1 filesep 'Data' filesep 'Subjects'];
-server_location{end+1} = [server1 filesep 'Data' filesep 'expInfo'];
-server_location{end+1} = [server1 filesep 'Data' filesep 'trodes'];
-server_location{end+1} = [server1 filesep 'Data' filesep 'EyeCamera'];
+server_location{end+1} = [server3 ];
+server_location{end+1} = [server2 ];
+server_location{end+1} = [server1  filesep 'Subjects'];
+server_location{end+1} = [server1  filesep 'expInfo'];
+server_location{end+1} = [server1  filesep 'trodes'];
+server_location{end+1} = [server1  filesep 'EyeCamera'];
 
 switch file
     

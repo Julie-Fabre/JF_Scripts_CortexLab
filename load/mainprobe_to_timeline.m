@@ -53,7 +53,7 @@ if contains(recording_software,'OpenEphys')
 elseif contains(recording_software,'SpikeGLX')
     root=ops.ephys_folder;
     try 
-        nidaqfile=[ops.ephys_folder '\' sprintf('%s_t0.nidq.bin',ops.ephys_name)];
+        nidaqfile=[ops.ephys_folder '/' sprintf('%s_t0.nidq.bin',ops.ephys_name)];
         meta = ReadMeta_GLX(nidaqfile, root); % read metadata for bin file you are trying to manipulate.
         acqlivesyncidx=2; fippersyncidx=3;
         d=dir(nidaqfile);
@@ -67,7 +67,7 @@ elseif contains(recording_software,'SpikeGLX')
         % flipper at PXIE
         flipper=mmf.Data.x(fippersyncidx,:)*dat_to_voltage_converter;
     catch 
-        load(sprintf('%s\\sync.mat',KS_folder));
+        load(sprintf('%s//sync.mat',KS_folder));
         flipper=sync*(5/64); %  this is hardcoded because the ranges are not what we expect
         %samplerate=str2double(recdat.meta.imSampRate); % might want to rewrite
         samplerate=30000; % that is the IMEC sample rate. 

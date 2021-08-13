@@ -1,7 +1,7 @@
 
 %% Get and plot single mouse behavior (vanillaChoiceworld and choiceWorldJF)
 
-animalsAll = {  'JF029'};%JF029','JF032', 'JF033', 'JF034', 'JF035' };%{'JF032'};%{'JF025', 'JF026', 'JF028', 'JF029','JF032', 'JF033', 'JF034', 'JF035' };%chnage to the names of the animals you want here
+animalsAll = {'JF029'}; %JF029','JF032', 'JF033', 'JF034', 'JF035' };%{'JF032'};%{'JF025', 'JF026', 'JF028', 'JF029','JF032', 'JF033', 'JF034', 'JF035' };%chnage to the names of the animals you want here
 for iAnimal = 1:size(animalsAll, 2)
 
     animal = animalsAll{1, iAnimal}; %this animal
@@ -48,43 +48,43 @@ for iAnimal = 1:size(animalsAll, 2)
             wheel_smooth_samples = round(wheel_smooth_t*wheel_resample_rate);
             wheel_velocity = interp1(conv(wheel_t_resample, [1, 1]/2, 'valid'), ...
                 diff(smooth(wheel_values_resample, wheel_smooth_samples)), wheel_t_resample)';
-%             figure();
-%             plot(wheel_values_resample(1:20000))
-%             figure();
-%             plot(wheel_velocity(1:20000))
-%            % wheel_t_resample %during all stims, average wheel movement 
-%            if isfield(block.events, 'stimOnTimes')
-%                trial_wheel_movs_idx = arrayfun(@(x) ...
-%                     find(wheel_t_resample > block.events.stimOnTimes(x), 1), ...
-%                     response_trials);
-%            else
-%             trial_wheel_movs_idx = arrayfun(@(x) ...
-%                     find(wheel_t_resample > block.events.stimulusOnTimes(x), 1), ...
-%                     response_trials);
-%            end
-%            tt = nan(max(diff(trial_wheel_movs_idx)),size(trial_wheel_movs_idx,2)-1); 
-%            trial_wheel_movs = nan(max(diff(trial_wheel_movs_idx)),size(trial_wheel_movs_idx,2)-1); 
-%            for iW = 1:size(trial_wheel_movs_idx,2)-1
-%                tt(1:size(trial_wheel_movs_idx(iW):trial_wheel_movs_idx(iW+1),2),iW) = trial_wheel_movs_idx(iW):trial_wheel_movs_idx(iW+1);
-%                trial_wheel_movs(1:size(trial_wheel_movs_idx(iW):trial_wheel_movs_idx(iW+1),2),iW) = wheel_velocity(tt(1:size(trial_wheel_movs_idx(iW):trial_wheel_movs_idx(iW+1),2),iW));
-%            end
-%            figure();
-%            plot(wheel_t_resample(1:max(diff(trial_wheel_movs_idx)+1))-wheel_t_resample(1),nanmean(trial_wheel_movs'))
-%            
-           
+            %             figure();
+            %             plot(wheel_values_resample(1:20000))
+            %             figure();
+            %             plot(wheel_velocity(1:20000))
+            %            % wheel_t_resample %during all stims, average wheel movement
+            %            if isfield(block.events, 'stimOnTimes')
+            %                trial_wheel_movs_idx = arrayfun(@(x) ...
+            %                     find(wheel_t_resample > block.events.stimOnTimes(x), 1), ...
+            %                     response_trials);
+            %            else
+            %             trial_wheel_movs_idx = arrayfun(@(x) ...
+            %                     find(wheel_t_resample > block.events.stimulusOnTimes(x), 1), ...
+            %                     response_trials);
+            %            end
+            %            tt = nan(max(diff(trial_wheel_movs_idx)),size(trial_wheel_movs_idx,2)-1);
+            %            trial_wheel_movs = nan(max(diff(trial_wheel_movs_idx)),size(trial_wheel_movs_idx,2)-1);
+            %            for iW = 1:size(trial_wheel_movs_idx,2)-1
+            %                tt(1:size(trial_wheel_movs_idx(iW):trial_wheel_movs_idx(iW+1),2),iW) = trial_wheel_movs_idx(iW):trial_wheel_movs_idx(iW+1);
+            %                trial_wheel_movs(1:size(trial_wheel_movs_idx(iW):trial_wheel_movs_idx(iW+1),2),iW) = wheel_velocity(tt(1:size(trial_wheel_movs_idx(iW):trial_wheel_movs_idx(iW+1),2),iW));
+            %            end
+            %            figure();
+            %            plot(wheel_t_resample(1:max(diff(trial_wheel_movs_idx)+1))-wheel_t_resample(1),nanmean(trial_wheel_movs'))
+            %
+
             % padded array
             if isfield(block.paramsValues, 'noGoWheelGain')
                 if ~isempty(find(block.events.orientationValues))
-%                 nGwg = block.paramsValues.noGoWheelGain;
-%                 gwg = block.paramsValues.wheelGain;
-%                 %cell2mat( arrayfun(@(c) block.paramsValues.noGoWheelGain(2,:), (1:length(block.paramsValues)).', 'Uniform', 0) )
-%                 go = block.events.orientationValues == -45 | block.events.orientationValues == 0;
-%                 nogo =  block.events.orientationValues == 45 ;
-%                 wheel_thresh = 0.005 .*(nogo.* nGwg) +...
-%                     0.005 .* (go.* gwg) ;%QQ make dep on wheel gain
-                wheel_thresh = 0.025;
-                
-            
+                    %                 nGwg = block.paramsValues.noGoWheelGain;
+                    %                 gwg = block.paramsValues.wheelGain;
+                    %                 %cell2mat( arrayfun(@(c) block.paramsValues.noGoWheelGain(2,:), (1:length(block.paramsValues)).', 'Uniform', 0) )
+                    %                 go = block.events.orientationValues == -45 | block.events.orientationValues == 0;
+                    %                 nogo =  block.events.orientationValues == 45 ;
+                    %                 wheel_thresh = 0.005 .*(nogo.* nGwg) +...
+                    %                     0.005 .* (go.* gwg) ;%QQ make dep on wheel gain
+                    wheel_thresh = 0.025;
+
+
                 end
             else
                 if isfield(block.events, 'wheelGainValues')
@@ -93,13 +93,13 @@ for iAnimal = 1:size(animalsAll, 2)
                     wheel_thresh = 0.025;
                 end
             end
-%             figure();
-%             plot(wheel_velocity)
-%             hold on; 
-%             scatter(trial_wheel_starts, ones(size(trial_wheel_starts,2),1))
-wheel_thresh=0.025;
-             wheel_starts = wheel_t_resample(abs(wheel_velocity(1:end-1)) < wheel_thresh & ...
-                 abs(wheel_velocity(2:end)) > wheel_thresh);
+            %             figure();
+            %             plot(wheel_velocity)
+            %             hold on;
+            %             scatter(trial_wheel_starts, ones(size(trial_wheel_starts,2),1))
+            wheel_thresh = 0.025;
+            wheel_starts = wheel_t_resample(abs(wheel_velocity(1:end-1)) < wheel_thresh & ...
+                abs(wheel_velocity(2:end)) > wheel_thresh);
 
             response_trials = 1:length(block.events.responseValues);
             if isfield(block.events, 'stimOnTimes')
@@ -114,28 +114,28 @@ wheel_thresh=0.025;
                         response_trials);
                 catch
                     try
-                    response_trials = response_trials(1:end-1);
-                     trial_wheel_starts = arrayfun(@(x) ...
-                        wheel_starts(find(wheel_starts > block.events.stimulusOnTimes(x), 1)), ...
-                        response_trials);
-                    catch
-                        try
-                         response_trials = response_trials(1:end-1);
+                        response_trials = response_trials(1:end-1);
                         trial_wheel_starts = arrayfun(@(x) ...
                             wheel_starts(find(wheel_starts > block.events.stimulusOnTimes(x), 1)), ...
-                        response_trials);
+                            response_trials);
+                    catch
+                        try
+                            response_trials = response_trials(1:end-1);
+                            trial_wheel_starts = arrayfun(@(x) ...
+                                wheel_starts(find(wheel_starts > block.events.stimulusOnTimes(x), 1)), ...
+                                response_trials);
                         catch
                             try
                                 response_trials = response_trials(1:end-1);
-                        trial_wheel_starts = arrayfun(@(x) ...
-                            wheel_starts(find(wheel_starts > block.events.stimulusOnTimes(x), 1)), ...
-                        response_trials);
+                                trial_wheel_starts = arrayfun(@(x) ...
+                                    wheel_starts(find(wheel_starts > block.events.stimulusOnTimes(x), 1)), ...
+                                    response_trials);
                             catch
                                 try
-                                response_trials = response_trials(1:end-1);
-                        trial_wheel_starts = arrayfun(@(x) ...
-                            wheel_starts(find(wheel_starts > block.events.stimulusOnTimes(x), 1)), ...
-                        response_trials);
+                                    response_trials = response_trials(1:end-1);
+                                    trial_wheel_starts = arrayfun(@(x) ...
+                                        wheel_starts(find(wheel_starts > block.events.stimulusOnTimes(x), 1)), ...
+                                        response_trials);
                                 catch
                                     continue
                                 end
@@ -145,7 +145,7 @@ wheel_thresh=0.025;
                 end
                 trial_move_t = trial_wheel_starts - block.events.stimulusOnTimes(response_trials);
             else
-                
+
                 trial_wheel_starts = arrayfun(@(x) ...
                     wheel_starts(find(wheel_starts > block.events.stimulusOnTimes(x), 1)), ...
                     response_trials);
@@ -166,18 +166,18 @@ wheel_thresh=0.025;
                 stim_list = unique(reshape(unique([block.events.contrastSetValues, -block.events.contrastSetValues]).*[-1; 1], [], 1));
 
 
-            elseif isfield(block.events, 'contrastRightValues') && (contains(block.expDef, 'one') || sum(block.events.contrastRightValues)==0 || sum(block.events.contrastLeftValues)==0)
+            elseif isfield(block.events, 'contrastRightValues') && (contains(block.expDef, 'one') || sum(block.events.contrastRightValues) == 0 || sum(block.events.contrastLeftValues) == 0)
                 trial_stim = block.events.contrastLeftValues(response_trials) - block.events.contrastRightValues(response_trials);
                 stim_list = nan(11, 1);
-                if sum(block.events.contrastRightValues)==0
+                if sum(block.events.contrastRightValues) == 0
                     s1 = unique(reshape(unique([block.events.contrastLeftValues]), [], 1));
-                
+
                 else
                     s1 = -unique(reshape(unique([block.events.contrastRightValues]), [], 1));
-                
+
                 end
-                stim_list(1:size(s1,1)) = s1(1:end);
-                
+                stim_list(1:size(s1, 1)) = s1(1:end);
+
             else
                 trial_stim = block.events.contrastLeftValues(response_trials) - block.events.contrastRightValues(response_trials);
                 stim_list = nan(11, 1);
@@ -217,73 +217,73 @@ wheel_thresh=0.025;
                     bhv.conditions = stim_list;
                 end
                 %if numel(block.events.repeatNumValues) == numel(block.events.feedbackValues)
-                    %repeatOnMisses = zeros(size(block.events.feedbackValues,2),1);
-                    %repeatOnMisses = [block.events.repeatNumValues(2:end) > 1 & block.events.feedbackValues(1:end-1)==-1, 0];%zeros(size(block.events.feedbackValues,1),1);%
-                    %repeatOnMisses = zeros(size(block.events.feedbackValues));
-                    %repeatOnMisses = block.events.repeatNumValues((1:size(response_trials,2))) > 1; %& block.events.feedbackValues(1:end)==-1, 0];%zeros(size(block.events.feedbackValues,1),1);%
+                %repeatOnMisses = zeros(size(block.events.feedbackValues,2),1);
+                %repeatOnMisses = [block.events.repeatNumValues(2:end) > 1 & block.events.feedbackValues(1:end-1)==-1, 0];%zeros(size(block.events.feedbackValues,1),1);%
+                %repeatOnMisses = zeros(size(block.events.feedbackValues));
+                %repeatOnMisses = block.events.repeatNumValues((1:size(response_trials,2))) > 1; %& block.events.feedbackValues(1:end)==-1, 0];%zeros(size(block.events.feedbackValues,1),1);%
 
                 %else
-                    %repeatOnMisses = zeros(size(block.events.feedbackValues));
-                    repeatOnMisses = block.events.repeatNumValues(response_trials) > 1; %& block.events.feedbackValues(1:end)==-1, 0];%zeros(size(block.events.feedbackValues,1),1);%
+                %repeatOnMisses = zeros(size(block.events.feedbackValues));
+                repeatOnMisses = block.events.repeatNumValues(response_trials) > 1; %& block.events.feedbackValues(1:end)==-1, 0];%zeros(size(block.events.feedbackValues,1),1);%
                 %end
 
                 for iCond = 1:size(bhv.conditions, 1)
                     bhv.n_trials_condition(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond)));
-%                     if numel(block.events.orientationValues) == numel(trial_stim)
-%                         bhv.n_trials_condition(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues == 0 & ~repeatOnMisses));
-%                         bhv.go_left_trials(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues == 0 & block.events.responseValues == -1)); %&~repeatOnMisses
-% 
-%                         bhv.n_trials_condition45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues == -45 & ~repeatOnMisses));
-%                         bhv.go_left_trials45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues == -45 & block.events.responseValues == -1)); %&~repeatOnMisses
-% 
-%                         bhv.n_trials_conditionNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues == 45 & ~repeatOnMisses));
-%                         bhv.go_left_trialsNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues == 45 & block.events.responseValues == -1)); %&~repeatOnMisses
-%                         
-%                         bhv.no_go_trials(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues == 0 & block.events.responseValues == 0)); %&~repeatOnMisses
-% 
-%                         bhv.no_go_trials45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues == -45 & block.events.responseValues == 0)); %&~repeatOnMisses
-% 
-%                         bhv.no_go_trialsNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues == 45 & block.events.responseValues == 0)); %&~repeatOnMisses
-%                     
-%                     elseif numel(trial_stim)+1 == numel(repeatOnMisses)
-                        bhv.n_trials_condition(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues(response_trials) == 0 & ~repeatOnMisses));
-                        bhv.go_left_trials(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & ...
-                            block.events.orientationValues(response_trials) == 0 & block.events.responseValues(response_trials) == -1)); %&~repeatOnMisses
+                    %                     if numel(block.events.orientationValues) == numel(trial_stim)
+                    %                         bhv.n_trials_condition(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues == 0 & ~repeatOnMisses));
+                    %                         bhv.go_left_trials(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues == 0 & block.events.responseValues == -1)); %&~repeatOnMisses
+                    %
+                    %                         bhv.n_trials_condition45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues == -45 & ~repeatOnMisses));
+                    %                         bhv.go_left_trials45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues == -45 & block.events.responseValues == -1)); %&~repeatOnMisses
+                    %
+                    %                         bhv.n_trials_conditionNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues == 45 & ~repeatOnMisses));
+                    %                         bhv.go_left_trialsNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues == 45 & block.events.responseValues == -1)); %&~repeatOnMisses
+                    %
+                    %                         bhv.no_go_trials(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues == 0 & block.events.responseValues == 0)); %&~repeatOnMisses
+                    %
+                    %                         bhv.no_go_trials45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues == -45 & block.events.responseValues == 0)); %&~repeatOnMisses
+                    %
+                    %                         bhv.no_go_trialsNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues == 45 & block.events.responseValues == 0)); %&~repeatOnMisses
+                    %
+                    %                     elseif numel(trial_stim)+1 == numel(repeatOnMisses)
+                    bhv.n_trials_condition(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues(response_trials) == 0 & ~repeatOnMisses));
+                    bhv.go_left_trials(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & ...
+                        block.events.orientationValues(response_trials) == 0 & block.events.responseValues(response_trials) == -1)); %&~repeatOnMisses
 
-                        bhv.n_trials_condition45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues(response_trials) == -45 & ~repeatOnMisses));
-                        bhv.go_left_trials45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(response_trials) == -45 & block.events.responseValues(response_trials) == -1)); %&~repeatOnMisses
+                    bhv.n_trials_condition45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues(response_trials) == -45 & ~repeatOnMisses));
+                    bhv.go_left_trials45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(response_trials) == -45 & block.events.responseValues(response_trials) == -1)); %&~repeatOnMisses
 
-                        bhv.n_trials_conditionNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues(response_trials) == 45 & ~repeatOnMisses));
-                        bhv.go_left_trialsNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(response_trials) == 45 & block.events.responseValues(response_trials) == -1)); %&~repeatOnMisses
-                        %rt = trial_move_t(response_trials);
-                        %min(block.events.responseTimes-block.events.contrastLeftTimes(1:end-1))
-                        bb=block.paramsValues.noGoResponseWindow;
-                        bhv.no_go_trials(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(response_trials) == 0 ...
-                            & (block.events.responseValues(response_trials) == 0 | block.events.responseTimes(response_trials) - block.events.contrastLeftTimes(response_trials)-0.4 > bb))); %&~repeatOnMisses
+                    bhv.n_trials_conditionNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues(response_trials) == 45 & ~repeatOnMisses));
+                    bhv.go_left_trialsNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(response_trials) == 45 & block.events.responseValues(response_trials) == -1)); %&~repeatOnMisses
+                    %rt = trial_move_t(response_trials);
+                    %min(block.events.responseTimes-block.events.contrastLeftTimes(1:end-1))
+                    bb = block.paramsValues.noGoResponseWindow;
+                    bhv.no_go_trials(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(response_trials) == 0 ...
+                        & (block.events.responseValues(response_trials) == 0 | block.events.responseTimes(response_trials) - block.events.contrastLeftTimes(response_trials) - 0.4 > bb))); %&~repeatOnMisses
 
-                        bhv.no_go_trials45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(response_trials) == -45 ...
-                            & (block.events.responseValues(response_trials) == 0| block.events.responseTimes(response_trials) - block.events.contrastLeftTimes(response_trials)-0.4 > bb) )); %&~repeatOnMisses
+                    bhv.no_go_trials45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(response_trials) == -45 ...
+                        & (block.events.responseValues(response_trials) == 0 | block.events.responseTimes(response_trials) - block.events.contrastLeftTimes(response_trials) - 0.4 > bb))); %&~repeatOnMisses
 
-                        bhv.no_go_trialsNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(response_trials) == 45 ...
-                            & (block.events.responseValues(response_trials) == 0 | block.events.responseTimes(response_trials) - block.events.contrastLeftTimes(response_trials) - 0.4 > bb) ));%&~repeatOnMisses
-                       
-                        
-%                     else
-%                         bhv.n_trials_condition(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues(1:end-1) == 0 & ~repeatOnMisses));
-%                         bhv.go_left_trials(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(1:end-1) == 0 & block.events.responseValues(1:size(response_trials,2)) == -1)); %&~repeatOnMisses
-% 
-%                         bhv.n_trials_condition45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues(1:end-1) == -45 & ~repeatOnMisses));
-%                         bhv.go_left_trials45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(1:end-1) == -45 & block.events.responseValues(1:size(response_trials,2)) == -1)); %&~repeatOnMisses
-% 
-%                         bhv.n_trials_conditionNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues(1:end-1) == 45 & ~repeatOnMisses));
-%                         bhv.go_left_trialsNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(1:end-1) == 45 & block.events.responseValues(1:size(response_trials,2)) == -1)); %&~repeatOnMisses
-%                         
-%                         bhv.no_go_trials(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(1:end-1) == 0 & block.events.responseValues(1:size(response_trials,2)) == 0)); %&~repeatOnMisses
-% 
-%                         bhv.no_go_trials45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(1:end-1) == -45 & block.events.responseValues(1:size(response_trials,2)) == 0)); %&~repeatOnMisses
-% 
-%                         bhv.no_go_trialsNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(1:end-1) == 45 & block.events.responseValues(1:size(response_trials,2)) == 0)); %&~repeatOnMisses
-%                        
+                    bhv.no_go_trialsNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(response_trials) == 45 ...
+                        & (block.events.responseValues(response_trials) == 0 | block.events.responseTimes(response_trials) - block.events.contrastLeftTimes(response_trials) - 0.4 > bb))); %&~repeatOnMisses
+
+
+                    %                     else
+                    %                         bhv.n_trials_condition(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues(1:end-1) == 0 & ~repeatOnMisses));
+                    %                         bhv.go_left_trials(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(1:end-1) == 0 & block.events.responseValues(1:size(response_trials,2)) == -1)); %&~repeatOnMisses
+                    %
+                    %                         bhv.n_trials_condition45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues(1:end-1) == -45 & ~repeatOnMisses));
+                    %                         bhv.go_left_trials45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(1:end-1) == -45 & block.events.responseValues(1:size(response_trials,2)) == -1)); %&~repeatOnMisses
+                    %
+                    %                         bhv.n_trials_conditionNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & block.events.orientationValues(1:end-1) == 45 & ~repeatOnMisses));
+                    %                         bhv.go_left_trialsNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(1:end-1) == 45 & block.events.responseValues(1:size(response_trials,2)) == -1)); %&~repeatOnMisses
+                    %
+                    %                         bhv.no_go_trials(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(1:end-1) == 0 & block.events.responseValues(1:size(response_trials,2)) == 0)); %&~repeatOnMisses
+                    %
+                    %                         bhv.no_go_trials45(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(1:end-1) == -45 & block.events.responseValues(1:size(response_trials,2)) == 0)); %&~repeatOnMisses
+                    %
+                    %                         bhv.no_go_trialsNoGo(curr_day, iCond) = numel(find(trial_stim == bhv.conditions(iCond) & ~repeatOnMisses & block.events.orientationValues(1:end-1) == 45 & block.events.responseValues(1:size(response_trials,2)) == 0)); %&~repeatOnMisses
+                    %
                     %end
                 end
                 performance = bhv.go_left_trials ./ bhv.n_trials_condition; %removing repeat on miss trials
@@ -297,24 +297,24 @@ wheel_thresh=0.025;
                 rSize = block.paramsValues.rewardSize;
                 bhv.rewardValue(curr_day) = sum(block.outputs.rewardValues) - (manualRew * rSize);
 
-%                 if numel(block.events.orientationValues) == numel(trial_stim)
-%                     stim_rxn_time = accumarray(trial_stim_idx(block.events.orientationValues(1:end) == 0 & ~repeatOnMisses)',...
-%                         trial_move_t(block.events.orientationValues(1:end) == 0 & ~repeatOnMisses)', [11, 1], @nanmedian, nan);
-%                     stim_rxn_time45 = accumarray(trial_stim_idx(block.events.orientationValues(1:end) == -45 & ~repeatOnMisses)',...
-%                         trial_move_t(block.events.orientationValues(1:end) == -45 & ~repeatOnMisses)', [11, 1], @nanmedian, nan);
-%                     stim_rxn_timeNoGo = accumarray(trial_stim_idx(block.events.orientationValues(1:end) == 45 & ~repeatOnMisses)',...
-%                         trial_move_t(block.events.orientationValues(1:end) == 45 & ~repeatOnMisses)', [11, 1], @nanmedian, nan);
-% 
-%                 else
-                    stim_rxn_time = accumarray(trial_stim_idx(block.events.orientationValues(response_trials) == 0 & ~repeatOnMisses)',...
-                        trial_move_t(block.events.orientationValues(response_trials) == 0 & ~repeatOnMisses)', [11, 1], @nanmedian, nan);
-                    stim_rxn_time45 = accumarray(trial_stim_idx(block.events.orientationValues(response_trials) == -45 & ~repeatOnMisses)',...
-                        trial_move_t(block.events.orientationValues(response_trials) == -45 & ~repeatOnMisses)', [11, 1], @nanmedian, nan);
-                    stim_rxn_timeNoGo = accumarray(trial_stim_idx(block.events.orientationValues(response_trials) == 45 & ~repeatOnMisses)',...
-                        trial_move_t(block.events.orientationValues(response_trials) == 45 & ~repeatOnMisses)', [11, 1], @nanmedian, nan);
+                %                 if numel(block.events.orientationValues) == numel(trial_stim)
+                %                     stim_rxn_time = accumarray(trial_stim_idx(block.events.orientationValues(1:end) == 0 & ~repeatOnMisses)',...
+                %                         trial_move_t(block.events.orientationValues(1:end) == 0 & ~repeatOnMisses)', [11, 1], @nanmedian, nan);
+                %                     stim_rxn_time45 = accumarray(trial_stim_idx(block.events.orientationValues(1:end) == -45 & ~repeatOnMisses)',...
+                %                         trial_move_t(block.events.orientationValues(1:end) == -45 & ~repeatOnMisses)', [11, 1], @nanmedian, nan);
+                %                     stim_rxn_timeNoGo = accumarray(trial_stim_idx(block.events.orientationValues(1:end) == 45 & ~repeatOnMisses)',...
+                %                         trial_move_t(block.events.orientationValues(1:end) == 45 & ~repeatOnMisses)', [11, 1], @nanmedian, nan);
+                %
+                %                 else
+                stim_rxn_time = accumarray(trial_stim_idx(block.events.orientationValues(response_trials) == 0 & ~repeatOnMisses)', ...
+                    trial_move_t(block.events.orientationValues(response_trials) == 0 & ~repeatOnMisses)', [11, 1], @nanmedian, nan);
+                stim_rxn_time45 = accumarray(trial_stim_idx(block.events.orientationValues(response_trials) == -45 & ~repeatOnMisses)', ...
+                    trial_move_t(block.events.orientationValues(response_trials) == -45 & ~repeatOnMisses)', [11, 1], @nanmedian, nan);
+                stim_rxn_timeNoGo = accumarray(trial_stim_idx(block.events.orientationValues(response_trials) == 45 & ~repeatOnMisses)', ...
+                    trial_move_t(block.events.orientationValues(response_trials) == 45 & ~repeatOnMisses)', [11, 1], @nanmedian, nan);
 
-                    %trial_stim_idx(response_trials)
-%                 end
+                %trial_stim_idx(response_trials)
+                %                 end
                 bhv.stim_rxn_time(curr_day, :) = stim_rxn_time;
                 bhv.stim_rxn_time45(curr_day, :) = stim_rxn_time45;
                 bhv.stim_rxn_timeNoGo(curr_day, :) = stim_rxn_timeNoGo;
@@ -380,11 +380,11 @@ wheel_thresh=0.025;
         end
 
     end
-    
+
     inver = strcmp(bhv.protocol, 'oneSideChoiceWorldJF');
     % Plot summary
     day_num = cellfun(@(x) datenum(x), {experiments.day});
-    day_labels = cellfun(@(day) [ ' ', day(6:end)], ...
+    day_labels = cellfun(@(day) [' ', day(6:end)], ...
         {experiments.day}, 'uni', false);
     figure('Name', animal)
 
@@ -465,10 +465,10 @@ wheel_thresh=0.025;
         subplot(323)
     end
 
-    bhv.go_left_trials(:,3:9) = 0;
-     bhv.n_trials_condition(:,3:9) = 0;
+    bhv.go_left_trials(:, 3:9) = 0;
+    bhv.n_trials_condition(:, 3:9) = 0;
     bhv.conditions(isnan(bhv.conditions)) = 0;
-    im = imagesc(bhv.conditions, 1:size(bhv.go_left_trials), abs(repmat(inver', 1,11) - bhv.go_left_trials./bhv.n_trials_condition));
+    im = imagesc(bhv.conditions, 1:size(bhv.go_left_trials), abs(repmat(inver', 1, 11)-bhv.go_left_trials./bhv.n_trials_condition));
     set(im, 'AlphaData', ~isnan(get(im, 'CData')));
     set(gca, 'color', [0.5, 0.5, 0.5]);
     colormap(brewermap([], '*RdBu'));
@@ -496,7 +496,7 @@ wheel_thresh=0.025;
         subplot(324)
     end
 
-bhv.stim_rxn_time(:,3:9) = NaN;
+    bhv.stim_rxn_time(:, 3:9) = NaN;
     % bhv.n_trials_condition(:,4:9) = 0;
     im = imagesc(bhv.conditions, 1:size(bhv.go_left_trials), bhv.stim_rxn_time);
     set(im, 'AlphaData', ~isnan(get(im, 'CData')));
@@ -518,32 +518,32 @@ bhv.stim_rxn_time(:,3:9) = NaN;
         plot(0, find([experiments.ephys]), 'ok');
     end
 
-bhv.no_go_trials(:,3:9) = 0;
-bhv.n_trials_condition(:,3:9) = 0;
+    bhv.no_go_trials(:, 3:9) = 0;
+    bhv.n_trials_condition(:, 3:9) = 0;
     if isfield(bhv, 'go_left_trials45')
         subplot(435)
         bhv.conditions(isnan(bhv.conditions)) = 0;
-    im = imagesc(bhv.conditions, 1:size(bhv.no_go_trials), bhv.no_go_trials./bhv.n_trials_condition);
-    set(im, 'AlphaData', ~isnan(get(im, 'CData')));
-    set(gca, 'color', [0.5, 0.5, 0.5]);
-    colormap(brewermap([], '*RdBu'));
-    c = colorbar;
-    ylabel(c, 'No go (frac)');
-    xlabel('Condition');
-    ylabel('Session');
-    set(gca, 'YTick', 1:length(experiments));
-    set(gca, 'YTickLabel', day_labels);
-    axis square;
-    caxis([0, 1])
-    hold on;
-    if any([experiments.imaging])
-        plot(0, find([experiments.imaging]), '.k');
-    end
-    if any([experiments.ephys])
-        plot(0, find([experiments.ephys]), 'ok');
-    end
-    
-    
+        im = imagesc(bhv.conditions, 1:size(bhv.no_go_trials), bhv.no_go_trials./bhv.n_trials_condition);
+        set(im, 'AlphaData', ~isnan(get(im, 'CData')));
+        set(gca, 'color', [0.5, 0.5, 0.5]);
+        colormap(brewermap([], '*RdBu'));
+        c = colorbar;
+        ylabel(c, 'No go (frac)');
+        xlabel('Condition');
+        ylabel('Session');
+        set(gca, 'YTick', 1:length(experiments));
+        set(gca, 'YTickLabel', day_labels);
+        axis square;
+        caxis([0, 1])
+        hold on;
+        if any([experiments.imaging])
+            plot(0, find([experiments.imaging]), '.k');
+        end
+        if any([experiments.ephys])
+            plot(0, find([experiments.ephys]), 'ok');
+        end
+
+
         subplot(434)
         title('Go1')
 
@@ -569,7 +569,7 @@ bhv.n_trials_condition(:,3:9) = 0;
             plot(0, find([experiments.ephys]), 'ok');
         end
         title('Go2')
-        
+
         subplot(438)
         bhv.conditions(isnan(bhv.conditions)) = 0;
         im = imagesc(bhv.conditions, 1:size(bhv.no_go_trials45), bhv.no_go_trials45./bhv.n_trials_condition45);
@@ -591,7 +591,7 @@ bhv.n_trials_condition(:,3:9) = 0;
         if any([experiments.ephys])
             plot(0, find([experiments.ephys]), 'ok');
         end
-        
+
 
         subplot(439)
         bhv.stim_rxn_time45(~any(bhv.stim_rxn_time45, 2), :) = NaN;
@@ -614,9 +614,9 @@ bhv.n_trials_condition(:,3:9) = 0;
         if any([experiments.ephys])
             plot(0, find([experiments.ephys]), 'ok');
         end
-        
-        
-        subplot(4,3,10)
+
+
+        subplot(4, 3, 10)
         bhv.conditions(isnan(bhv.conditions)) = 0;
         im = imagesc(bhv.conditions, 1:size(bhv.go_left_trialsNoGo), bhv.go_left_trialsNoGo./bhv.n_trials_conditionNoGo);
         set(im, 'AlphaData', ~isnan(get(im, 'CData')));
@@ -638,8 +638,8 @@ bhv.n_trials_condition(:,3:9) = 0;
             plot(0, find([experiments.ephys]), 'ok');
         end
         title('NoGo')
-        
-        subplot(4,3,11)
+
+        subplot(4, 3, 11)
         bhv.conditions(isnan(bhv.conditions)) = 0;
         im = imagesc(bhv.conditions, 1:size(bhv.no_go_trialsNoGo), bhv.no_go_trialsNoGo./bhv.n_trials_conditionNoGo);
         set(im, 'AlphaData', ~isnan(get(im, 'CData')));
@@ -661,7 +661,7 @@ bhv.n_trials_condition(:,3:9) = 0;
             plot(0, find([experiments.ephys]), 'ok');
         end
 
-        subplot(4,3,12)
+        subplot(4, 3, 12)
         bhv.stim_rxn_timeNoGo(~any(bhv.stim_rxn_timeNoGo, 2), :) = NaN;
         im = imagesc(bhv.conditions, 1:size(bhv.go_left_trialsNoGo), bhv.stim_rxn_timeNoGo);
         set(im, 'AlphaData', ~isnan(get(im, 'CData')));

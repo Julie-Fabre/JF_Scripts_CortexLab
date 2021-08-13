@@ -1,11 +1,7 @@
-function [meta] = ReadMeta_GLX(binName, path)
-
-    % Create the matching metafile name
-    [dumPath,name,dumExt] = fileparts(binName);
-    metaName = strcat(name, '.meta');
+function meta = ReadMeta_GLX(binName, path)
 
     % Parse ini file into cell entries C{1}{i} = C{2}{i}
-    fid = fopen(fullfile(path, metaName), 'r');
+    fid = fopen(fullfile(path, binName), 'r');
 % -------------------------------------------------------------
 %    Need 'BufSize' adjustment for MATLAB earlier than 2014
 %    C = textscan(fid, '%[^=] = %[^\r\n]', 'BufSize', 32768);
