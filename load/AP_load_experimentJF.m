@@ -1188,9 +1188,11 @@ if ephys_exists && load_parts.ephys
     template_chan_amp_overthresh = template_chan_amp .* (template_chan_amp >= template_chan_amp_thresh);
     % (get center-of-mass on thresholded channel amplitudes)
     template_depths = sum(template_chan_amp_overthresh.*channel_positions(:, 2)', 2) ./ sum(template_chan_amp_overthresh, 2);
+    template_xdepths = sum(template_chan_amp_overthresh.*channel_positions(:, 1)', 2) ./ sum(template_chan_amp_overthresh, 2);
 
     % Get the depth of each spike (templates are zero-indexed)
     spike_depths = template_depths(spike_templates_0idx+1);
+    spike_dxepths = template_xdepths(spike_templates_0idx+1);
 
     % Get trough-to-peak time for each template
     templates_max_signfix = bsxfun(@times, templates_max, ...
@@ -1397,6 +1399,7 @@ end
     % Throw out all non-good template data
     templates = templates(good_templates, :, :);
     template_depths = template_depths(good_templates);
+    template_xdepths = template_xdepths(good_templates);
     waveforms = waveforms(good_templates, :);
     templateDuration = templateDuration(good_templates);
     templateDuration_us = templateDuration_us(good_templates);
@@ -1409,6 +1412,7 @@ end
     spike_templates_0idx = spike_templates_0idx(good_spike_idx);
     template_amplitudes = template_amplitudes(good_spike_idx);
     spike_depths = spike_depths(good_spike_idx);
+    spike_xdepths = spike_depths(good_spike_idx);
     spike_times_timeline = spike_times_timeline(good_spike_idx);
 
     % Rename the spike templates according to the remaining templates

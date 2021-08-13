@@ -1,6 +1,6 @@
 function AP_align_probe_histologyJF(st,slice_path, ...
     spike_times,spike_templates,template_depths, ...
-    lfp,lfp_channel_positions,channel_positions,use_probe,isSpikeGlx)
+    lfp,lfp_channel_positions,channel_positions,use_probe,isSpikeGlx, shank)
 % AP_align_probe_histology(st,slice_path,spike_times,spike_templates,template_depths,lfp,lfp_channel_positions,use_probe)
 
 % If no probe specified, use probe 1
@@ -12,6 +12,11 @@ end
 probe_ccf_fn = [slice_path filesep 'probe_ccf.mat'];
 load(probe_ccf_fn);
 
+if ~isnan(shank)
+    theseChannels = channel_positions(:,1) == (shank-1)*250 | channel_positions(:,1) == (shank-1)*250 + 32;
+else
+    theseChannels = ones(size(channel_positions(:,1)),1);
+end
 % Get normalized log spike n
 [~,~,spike_templates_reidx] = unique(spike_templates);
 norm_template_spike_n = mat2gray(log10(accumarray(spike_templates_reidx,1)+1));
