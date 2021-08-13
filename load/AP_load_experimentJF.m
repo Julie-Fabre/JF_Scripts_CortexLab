@@ -1188,11 +1188,11 @@ if ephys_exists && load_parts.ephys
     template_chan_amp_overthresh = template_chan_amp .* (template_chan_amp >= template_chan_amp_thresh);
     % (get center-of-mass on thresholded channel amplitudes)
     template_depths = sum(template_chan_amp_overthresh.*channel_positions(:, 2)', 2) ./ sum(template_chan_amp_overthresh, 2);
-    template_xdepths = sum(template_chan_amp_overthresh.*channel_positions(:, 1)', 2) ./ sum(template_chan_amp_overthresh, 2);
+    template_xdepths = channel_positions(max_site, 1);
 
     % Get the depth of each spike (templates are zero-indexed)
     spike_depths = template_depths(spike_templates_0idx+1);
-    spike_dxepths = template_xdepths(spike_templates_0idx+1);
+    spike_xdepths = template_xdepths(spike_templates_0idx+1);
 
     % Get trough-to-peak time for each template
     templates_max_signfix = bsxfun(@times, templates_max, ...
@@ -1412,7 +1412,7 @@ end
     spike_templates_0idx = spike_templates_0idx(good_spike_idx);
     template_amplitudes = template_amplitudes(good_spike_idx);
     spike_depths = spike_depths(good_spike_idx);
-    spike_xdepths = spike_depths(good_spike_idx);
+    spike_xdepths = spike_xdepths(good_spike_idx);
     spike_times_timeline = spike_times_timeline(good_spike_idx);
 
     % Rename the spike templates according to the remaining templates
@@ -1448,6 +1448,7 @@ if ephys_exists && load_parts.ephys && exist('lfp_channel', 'var')
         channel_map_full = load(channel_map_fn);
         max_depth = 3840;
         lfp_channel_positions = max_depth - channel_map_full.ycoords;
+        lfp_channel_xpositions = channel_map_full.xcoords;
         lfp_sample_rate = str2num(header.lfp_sample_rate);
         lfp_cutoff = str2num(header.filter_cutoff);
 
@@ -1615,9 +1616,11 @@ if ephys_exists && load_parts.ephys && exist('lfp_channel', 'var')
             if contains(meta.imRoFile, 'NPtype24_hStripe_botRow0_ref0.imro') %2.0 4 shank, bottom stripe
                 chanMapData = load([dropboxPath, filesep, 'MATLAB/JF_scripts_CortexLab/kilosort/chanMapNP2_4Shank_bottRow_flipper.mat']);
                lfp_channel_positions = chanMapData.ycoords;
+               lfp_channel_xpositions = chanMapData.xcoords;
             else %1.0 bottom row
                 chanMapData = load([dropboxPath, filesep, 'MATLAB/JF_scripts_CortexLab/kilosort/chanMapNP2_1Shank_flipper.mat']);
                 lfp_channel_positions = chanMapData.ycoords;
+                lfp_channel_xpositions = chanMapData.xcoords;
             end
             lfp = permute(lfp, [2,1]);
              [~, lfp_sort_idx] = sort(lfp_channel_positions);
