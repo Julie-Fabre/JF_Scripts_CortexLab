@@ -85,7 +85,7 @@ lfp_moving_median = 10; % channels to take sliding median
 lfp_ax = subplot('Position',[0.5,0.1,0.3,0.8]);
 imagesc([min_depths,max_depths],[min_depths,max_depths], ...
     corrcoef((movmedian(zscore(double(lfp(theseChannels,:)),[],2),lfp_moving_median,1) - ...
-    nanmedian(zscore(double(lfp),[],2),1))'));
+    nanmedian(zscore(double(lfp(theseChannels,:)),[],2),1))'));
 xlim([min_depths,max_depths]);
 ylim([min_depths,max_depths]);
 set(lfp_ax,'YTick',[]);

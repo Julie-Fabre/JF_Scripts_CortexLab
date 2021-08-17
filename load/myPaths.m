@@ -18,3 +18,4 @@ cortexLabBackup3 = '/media/julie/CortexLabBU3/';
 brainsawPath = '/media/julie/CortexLabBU2/brainsaw/';
 allenAtlasPath = '/home/julie/Dropbox/Atlas/'; 
 regParamsPath = '/home/julie/Dropbox/MATLAB/JF_scripts_CortexLab/histology/'; 
+tempPath = '/home/julie/temp/';

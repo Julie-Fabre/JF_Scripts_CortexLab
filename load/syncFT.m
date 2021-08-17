@@ -5,5 +5,5 @@ mmf = memmapfile(AP_filename,'Format',{'int16', [nChansTotal nSamps],'x'});
 
 disp('extracting sync...'); 
 sync=mmf.Data.x(385,:);    % save sync data---    
-save(sprintf('%s\\sync.mat', outputDir),'sync');
+save(sprintf('%s//sync.mat', outputDir),'sync');
 end 

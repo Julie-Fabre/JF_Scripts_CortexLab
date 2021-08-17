@@ -11,7 +11,7 @@ function allen_ccf_npx_4shank(tv,av,st)
 %
 % (optional inputs - if CCF path written in Line 22, loaded automatically)
 % tv, av, st = CCF template volume, annotated volume, structure tree
-
+myPaths;
 % Initialize gui_data structure
 gui_data = struct;
 
@@ -21,7 +21,7 @@ bregma = [540,0,570];
 
 % If not already loaded in, load in atlas
 if nargin < 3
-    allen_atlas_path = 'C:\Users\Julie\Dropbox\Atlas\allenCCF';
+    allen_atlas_path = [allenAtlasPath filesep 'allenCCF'];
     if isempty(allen_atlas_path)
         error('Enter path where Allen CCF is stored at Line 23');
     end

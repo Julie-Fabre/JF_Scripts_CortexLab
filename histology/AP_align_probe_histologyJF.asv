@@ -1,6 +1,6 @@
 function AP_align_probe_histologyJF(st,slice_path, ...
     spike_times,spike_templates,template_depths, spike_xdepths, template_xdepths,...
-    lfp,lfp_channel_positions,channel_positions,use_probe,isSpikeGlx, shank)
+    lfp,lfp_channel_positions,lfp_channel_xpositions,use_probe,isSpikeGlx, shank)
 % AP_align_probe_histology(st,slice_path,spike_times,spike_templates,template_depths,lfp,lfp_channel_positions,use_probe)
 
 % If no probe specified, use probe 1
@@ -13,11 +13,11 @@ probe_ccf_fn = [slice_path filesep 'probe_ccf.mat'];
 load(probe_ccf_fn);
 
 if ~isnan(shank)
-    theseChannels = lfp_channel_positions(:,1) == (shank-1)*250 | lfp_channel_positions(:,1)  == (shank-1)*250 + 32;
+    theseChannels = lfp_channel_xpositions== (shank-1)*250 | lfp_channel_xpositions  == (shank-1)*250 + 32;
     theseTemplates = template_xdepths == (shank-1)*250 | template_xdepths == (shank-1)*250 + 32;
     theseSpikes = spike_xdepths == (shank-1)*250 | spike_xdepths == (shank-1)*250 + 32;
 else
-    theseChannels = ones(size(lfp_channel_positions(:,1)),1);
+    theseChannels = ones(size(lfp_channel_xpositions),1);
     theseTemplates = ones(size(template_xdepths,1),1);
     theseSpikes = ones(size(spike_xdepths,1),1);
 end
@@ -85,7 +85,7 @@ lfp_moving_median = 10; % channels to take sliding median
 lfp_ax = subplot('Position',[0.5,0.1,0.3,0.8]);
 imagesc([min_depths,max_depths],[min_depths,max_depths], ...
     corrcoef((movmedian(zscore(double(lfp(theseChannels,:)),[],2),lfp_moving_median,1) - ...
-    nanmedian(zscore(double(lfp),[],2),1))'));
+    nanmedian(zscore(double(lfp(theseChannels,:)),[],2),1))'));
 xlim([min_depths,max_depths]);
 ylim([min_depths,max_depths]);
 set(lfp_ax,'YTick',[]);

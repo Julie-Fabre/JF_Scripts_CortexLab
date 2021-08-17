@@ -7,7 +7,10 @@ function JF_preprocess_NPX2(animal, date, chanMapFile, experiment, site, recordi
     rootH = tempPath ;
     pathToYourConfigFile = [dropboxPath filesep 'MATLAB/Kilosort2/configFiles'];
     chanMapFilePath = [dropboxPath filesep 'JF_scripts_CortexLab/kilosort/' chanMapFile];
-    %saveFile = 
+    if contains()
+        saveFile = [rootZ '/../../kilosort2/site' num2str(site)];
+    else
+    end
     %% extract sync channel 
     [ephysAPfile,~] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys_ap',site,recording);
     isSpikeGlx = contains(ephysAPfile, 'g0');%spike glx (2.0 probes) or open ephys (3A probes)? 
