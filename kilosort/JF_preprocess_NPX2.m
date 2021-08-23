@@ -16,7 +16,7 @@ else
 end
 mkdir(saveFile)
 
-master_kilosort_NPX2;
+%master_kilosort_NPX2;
 
 %% extract sync channel
 [ephysAPfile, ~] = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_ap', site, recording);
@@ -34,7 +34,7 @@ mainFolder = filename{1}(1:end - 1);
 lfpDir = dir([mainFolder, filesep, 'lfp', filesep, 'lfp.mat']);
 if isempty(lfpDir) %only compute LFP if not already saved on disk
     %n_channels = header.n_channels;
-    lfp = JF_get_NPX2_LFP(ephys_path);
+    lfp = JF_get_NPX2_LFP(lfpDir);
     mkdir([mainFolder, filesep, 'lfp'])
     save([mainFolder, filesep, 'lfp', filesep, 'lfp.mat'], 'lfp', '-v7.3') %save lfp
 end

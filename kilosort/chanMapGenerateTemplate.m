@@ -53,8 +53,8 @@ kcoords(385) = NaN;
 % would be good to also save the sampling frequency here
 fs = 30000; 
 
-<<<<<<< HEAD
+
 save(fullfile('C:\Users\Julie\Dropbox\spikeSorting', 'chanMapNP2_1Shank_bottRow_flipper.mat'), 'chanMap', 'connected', 'xcoords', 'ycoords', 'kcoords', 'fs')
-=======
+
 save(fullfile('C:\Users\Julie\Dropbox\spikeSorting', 'chanMapNP2_4Shank_bottRow_flipper.mat'), 'chanMap', 'connected', 'xcoords', 'ycoords', 'kcoords', 'fs')
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
+

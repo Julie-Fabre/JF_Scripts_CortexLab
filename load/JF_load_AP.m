@@ -3,7 +3,7 @@
 % (these are the animals trained in the task)
 %animals = {'AP024','AP025','AP026','AP027','AP028','AP029', 'AL019'};
 close all;
-animals={'JF047'};
+animals={'JF049'};
 curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};
@@ -31,7 +31,7 @@ load_parts.ephys=true;
 
 %AP_load_experiment; % loads data from experiment
 %close all;
-site = 2;%1,1; 2,4; 3,7
+site = 1;%1,1; 2,4; 3,7
 recording = []; 
 experiment = 1;
 loadClusters = 0;
@@ -40,7 +40,7 @@ isSpikeGlx = contains(ephysAPfile, 'g0');%spike glx (2.0 probes) or open ephys (
 if isSpikeGlx
      [ephysKSfile,~] = AP_cortexlab_filenameJF(animal,day,experiment,'ephys',site,recording);
     if isempty(dir([ephysKSfile filesep 'sync.mat']))
-        syncFT(ephysAPfile, 385, ephysKSfile)
+        sync = syncFT(ephysAPfile, 385, ephysKSfile);
     end
 end
 
