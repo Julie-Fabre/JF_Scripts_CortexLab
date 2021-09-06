@@ -1,3 +1,6 @@
+
+% a lot of compbinations don't work. max 150um = 20 channels difference
+% between the shanks :( 
 function nptype24_imro
 
 % Build imro tables for some useful four shank combinations;
@@ -12,8 +15,8 @@ function nptype24_imro
 
 patternType = 2;
 shankChoice = 2;   % 0-3, needed for patternType 0
-botRow =  384- 176;   
-botRow2 = 384 - 
+botRow =  384- 122;   
+botRow2 = 384 - 142;
 refElec = 0;     % 0 for external, 1-4 for tip reference on shank 0-3
 
 
@@ -81,7 +84,7 @@ end
 %warn if there are duplicate channels
 for i = 1:384
     if sum( chans(1:i-1)==chans(i) ) > 0
-        fprintf( "duplicate channels => impossible map\n" );
+        disp([ "duplicate channels => impossible map\n"  i ]);
         bMapOK = 0;
     end
 end

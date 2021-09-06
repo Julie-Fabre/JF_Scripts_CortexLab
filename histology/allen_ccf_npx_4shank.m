@@ -63,13 +63,13 @@ for i=1:shank_no
     set(axes_probe_areas(i),'FontSize',11);
     yyaxis(axes_probe_areas(i),'left');
     probe_areas_plot(i) = image(0);
-    set(axes_probe_areas(i),'XTick','','YLim',[0,2880],'YColor','k','YDir','reverse');
+    set(axes_probe_areas(i),'XTick','','YLim',[960,3840],'YColor','k','YDir','reverse');
     ylabel(axes_probe_areas(i),'');
     
     colormap(axes_probe_areas(i),cmap);
     caxis([1,size(cmap,1)])
     yyaxis(axes_probe_areas(i),'right');
-    set(axes_probe_areas(i),'XTick','','YLim',[0,2880],'YColor','k','YDir','reverse');
+    set(axes_probe_areas(i),'XTick','','YLim',[960,3840],'YColor','k','YDir','reverse');
     set(axes_probe_areas(i),'YTicklabels',[])
     title(axes_probe_areas(i),sprintf('shank %d',i));
 end

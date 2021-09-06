@@ -3,12 +3,12 @@
 % (these are the animals trained in the task)
 %animals = {'AP024','AP025','AP026','AP027','AP028','AP029', 'AL019'};
 close all;
-animals={'JF049'};
+animals={'JF051'};
 curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};
 
-protocol = 'rating'; % (this is the name of the Signals protocol)
+protocol = 'location'; % (this is the name of the Signals protocol)
 %protocol = 'JF_GratingPassive'; % (this is the name of the Signals protocol)
 %protocol = 'JF_natural_images';
 experiments = AP_find_experimentsJF(animal, protocol, true);%experiments = experiments([experiments.imaging] & [experiments.ephys]); % (use only experiments with both widefield + ephys)
@@ -17,7 +17,7 @@ experiments = experiments([experiments.ephys]);
 %experiments.experiment(1)=[];
 %% Load data from experiment 
 
-curr_day = 1; % (set which day to use)
+curr_day =3; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
@@ -36,7 +36,7 @@ recording = [];
 experiment = 1;
 loadClusters = 0;
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,day,experiment,'ephys_ap',site,recording);
-isSpikeGlx = contains(ephysAPfile, 'g0');%spike glx (2.0 probes) or open ephys (3A probes)? 
+isSpikeGlx = contains(ephysAPfile, 'g0') | contains(ephysAPfile, 'g1')  | contains(ephysAPfile, 'g2')  | contains(ephysAPfile, 'g3') ;%spike glx (2.0 probes) or open ephys (3A probes)? 
 if isSpikeGlx
      [ephysKSfile,~] = AP_cortexlab_filenameJF(animal,day,experiment,'ephys',site,recording);
     if isempty(dir([ephysKSfile filesep 'sync.mat']))
@@ -46,6 +46,7 @@ end
 
 AP_load_experimentJF;
 
+close all;
 
 AP_cellrasterJF({stimOn_times(:)}, {stimIDs});
 

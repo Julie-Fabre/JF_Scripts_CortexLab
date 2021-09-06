@@ -458,6 +458,10 @@ if block_exists
                 trial_choice, trial_timing];
             [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
             
+     
+ 
+            
+            
         case {'vanillaChoiceworldImgs'}
             % Hit/miss recorded for last trial, circshift to align
             signals_events.hitValues = circshift(signals_events.hitValues, [0, -1]);
@@ -550,6 +554,99 @@ if block_exists
                 [signals_events.stimNValues', signals_events.trialSideValues(n_trials(1):n_trials(end))', ...
                 trial_choice, trial_timing];
             [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
+            
+            case {'locationWorld'}
+            % Hit/miss recorded for last trial, circshift to align
+            signals_events.hitValues = circshift(signals_events.hitValues, [0, -1]);
+            signals_events.missValues = circshift(signals_events.missValues, [0, -1]);
+
+            % Get number of completed trials (if uncompleted last trial)
+            %keep pones with logged stimN (= not first and repeat on
+            %incorrect)
+            
+            n_trials = [length(signals_events.stimOnTimes) - ...
+                length(find(signals_events.stimOnTimes > signals_events.trialNumTimes(1))), length(signals_events.responseTimes)];
+        n_trials(1) = n_trials(1)+1;
+            % Get stim on times by closest photodiode flip
+            [~, closest_stimOn_photodiode] = ...
+                arrayfun(@(x) min(abs(signals_events.stimOnTimes(x)- ...
+                photodiode_flip_times)), ...
+                n_trials(1):n_trials(end));
+            stimOn_times = photodiode_flip_times(closest_stimOn_photodiode);
+            %stimOn
+            % Check that the stim times aren't off by a certain threshold
+            % (skip the first one - that's usually delayed a little)
+            stim_time_offset_thresh = 0.1;
+            if any(abs(stimOn_times(2:end)-signals_events.stimOnTimes(n_trials(1)+1:n_trials(2))') >= ...
+                    stim_time_offset_thresh)
+                figure;
+                plot(stimOn_times(2:end)-signals_events.stimOnTimes(n_trials(1)+1:n_trials(2))', '.k')
+                line(xlim, repmat(stim_time_offset_thresh, 2, 1), 'color', 'r');
+                line(xlim, repmat(-stim_time_offset_thresh, 2, 1), 'color', 'r');
+                warning('Stim signals/photodiode offset over threshold');
+                xlabel('Stim number');
+                ylabel('Photodiode - signals stim time');
+                title([animal, ' ', day, ' ', num2str(experiment)]);
+            end
+
+            % Get first movement time after stim onset
+            surround_time = [-0.5, 2];
+            surround_sample_rate = 1 / Timeline.hw.samplingInterval; % (match this to framerate)
+            surround_time_points = surround_time(1):1 / surround_sample_rate:surround_time(2);
+            pull_times = bsxfun(@plus, stimOn_times, surround_time_points);
+
+            stim_aligned_wheel = interp1(Timeline.rawDAQTimestamps, ...
+                wheel_velocity, pull_times);
+
+            % (set a threshold in speed and time for wheel movement)
+            thresh_displacement = 0.025;
+            time_over_thresh = 0.05; % ms over velocity threshold to count
+            samples_over_thresh = time_over_thresh .* surround_sample_rate;
+            wheel_over_thresh_fullconv = convn( ...
+                abs(stim_aligned_wheel) > thresh_displacement, ...
+                ones(1, samples_over_thresh)) >= samples_over_thresh;
+            wheel_over_thresh = wheel_over_thresh_fullconv(:, end-size(stim_aligned_wheel, 2)+1:end);
+
+            [move_trial, wheel_move_sample] = max(wheel_over_thresh, [], 2);
+            wheel_move_time = arrayfun(@(x) pull_times(x, wheel_move_sample(x)), 1:size(pull_times, 1))';
+            wheel_move_time(~move_trial) = NaN;
+
+            % Get conditions for all trials
+
+            % (trial_timing)
+            stim_to_move = padarray(wheel_move_time-stimOn_times, [length(stimOn_times) - length(stimOn_times), 0], NaN, 'post');
+            stim_to_feedback = signals_events.responseTimes(n_trials(1):n_trials(end))' - stimOn_times;
+
+            % (early vs late move)
+            trial_timing = 1 + (stim_to_move > 0.5);
+
+            % (choice and outcome)
+            go_left = (signals_events.trialSideValues == 1 & signals_events.hitValues == 1) | ...
+                (signals_events.trialSideValues == -1 & signals_events.missValues == 1);
+            go_right = (signals_events.trialSideValues == -1 & signals_events.hitValues == 1) | ...
+                (signals_events.trialSideValues == 1 & signals_events.missValues == 1);
+            trial_choice = go_right(n_trials(1):n_trials(end))' - go_left(n_trials(1):n_trials(end))';
+            trial_outcome = signals_events.hitValues(n_trials(1):n_trials(end))' - signals_events.missValues(n_trials(1):n_trials(end))';
+
+            % (trial conditions: [contrast,side,choice,timing])
+            %theseTrialsAnalyze = signals_events.stimNValues(1:n_trials)- stimOn_times; %for some reason, some of first aren't logged - drop them 
+             sides = [-1, 1];
+            choices = [-1, 1];
+            timings = [1, 2];
+            %%hacky-need to chagnge in future and check - stimNMvalues probably end ones need to not be used =- because some first stimN values not logged 
+             %stimOn_times = stimOn_times(n_trials);
+             %wheel_move_time = wheel_move_time(n_trials);
+            % signals_events.responseTimes = signals_events.responseTimes(n_trials(1):n_trials(end));
+           % trial_outcome = trial_outcome(n_trials(1):n_trials(end)); 
+            
+            conditions = combvec( sides, choices, timings)';
+            n_conditions = size(conditions, 1);
+
+            trial_conditions = ...
+                [signals_events.trialSideValues(n_trials(1):n_trials(end))', ...
+                trial_choice, trial_timing];
+            [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
+            
             
         case {'AP_sparseNoise'}
             % Don't do anything: stim info is pulled out in

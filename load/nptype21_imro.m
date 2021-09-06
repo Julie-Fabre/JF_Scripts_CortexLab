@@ -15,7 +15,7 @@ function nptype21_imro
 
 patternType = 2;
 bankChoice = 1; % bank for patternType 0
-botRow = 256;   % bottom row for patternType 1; must be a multiple of 32
+botRow = 288;   % bottom row for patternType 1; must be a multiple of 32
 botBank = 0;   % bottom bank for patternType 2; needs to be bank 0 or 1
 refElec = 0;   % 0 for external, 1 for tip, 2 for site 127
 
