@@ -1313,9 +1313,14 @@ if isSpikeGlx
     ops.recording_software='SpikeGLX' ;
     ops.ephys_folder=[ephysAPfile '/..'];
     [expInfo,~] = AP_cortexlab_filenameJF(animal,day,experiment,'expInfo',site);
+    try
     [co]=mainprobe_to_timeline(ephys_path,...
     Timeline,ops,expInfo);
     spike_times_timeline =  spike_times*co(2) + co(1); 
+    catch
+        warning('mainprobe probe aligning gone wrong')
+        spike_times_timeline =  spike_times;
+    end
 else
     if exist('flipper_flip_times_timeline', 'var') && length(sync) >= flipper_sync_idx
         % (if flipper, use that)

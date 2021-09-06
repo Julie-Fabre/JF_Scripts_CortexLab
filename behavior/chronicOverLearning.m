@@ -57,13 +57,42 @@ for iAnimal = 1:size(animalsAll, 2)
             plotDriftmap(spikeTimes, amplitudes, spikeDepths);
             makeprettyLarge;
             xlim([0, max(spikeTimes)])
+            ylim([0, 2880])
+
+            xticks([0, max(spikeTimes)])
+            xticklabels({'0', num2str(max(spikeTimes)/60)})
             if curr_day == 1
-                xticks([0, max(spikeTimes)])
-                xticklabels({'0', num2str(max(spikeTimes)/60)})
                 ylabel('Depth from tip (\mum)');
                 xlabel('time (min)')
                 makeprettyLarge;
+            else
+                set(gca, 'ytick', [])
+                set(gca, 'yticklabel', [])
             end
+
+            figure(3)
+            subplot(1, size(experiments, 1), curr_day)
+            day = experiments(curr_day).day;
+            experiment = experiments(curr_day).experiment(end); 
+            site = 1;%1,1; 2,4; 3,7
+            recording = []; 
+            [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,day,experiment,'ephys_ap',site,recording);
+            isSpikeGlx = contains(ephysAPfile, 'g0') | contains(ephysAPfile, 'g1')  | contains(ephysAPfile, 'g2')  | contains(ephysAPfile, 'g3') ;%spike glx (2.0 probes) or open ephys (3A probes)? 
+
+            AP_load_experimentJF;
+            
+            norm_spike_n = mat2gray(log10(accumarray(spike_templates, 1)+1));
+            unit_dots = plot(norm_spike_n, template_depths, '.k', 'MarkerSize', 20);
+            xlim([-0.1, 1]);
+            ylim([-50, 2880 + 50]);
+            if curr_day == 1
+                ylabel('Depth (\mum)')
+                xlabel('Normalized log rate')
+            else
+                set(gca, 'ytick', [])
+                set(gca, 'yticklabel', [])
+            end
+            makeprettyLarge;
 
         else
             unitCount(curr_day) = NaN;
@@ -71,6 +100,7 @@ for iAnimal = 1:size(animalsAll, 2)
         end
     end
     figure(2);
+    clf;
     plot(alldaysNum, unitCount, 'Color', 'k')
     hold on;
     ylabel('# of units')
