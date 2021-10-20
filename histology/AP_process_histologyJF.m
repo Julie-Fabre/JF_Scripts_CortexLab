@@ -19,7 +19,7 @@ if strcmp(im_type, 't')
     im_um_x = str2num(im_um{1}{1});
     im_um_y = str2num(im_um{1}{2});
 elseif strcmp(im_type, 'brainSaw') == 1
-    im_path_dir = dir([im_path, filesep, '*Composite-Substack.tif*']);
+    im_path_dir = dir([im_path, filesep, '*Composite-*.tif*']);
     im_fn = natsortfiles(cellfun(@(path, fn) [path, filesep, fn], ...
         {im_path_dir.folder}, {im_path_dir.name}, 'uni', false));
     im_fn = im_fn(end:-1:1);
@@ -189,6 +189,7 @@ if strcmp(im_type, 'brainSaw') == 1
 channel_caxis = nan(n_channels, 2);
 channel_color = cell(n_channels, 1);
 else
+    chC = {'red', 'green', 'blue'};
 end
 for curr_channel = 1:n_channels
     %image(im_resized{1,curr_channel})

@@ -1,23 +1,33 @@
-%% Find experiments with the task + cortical widefield + striatal ephys
 
-% (these are the animals trained in the task)
-%animals = {'AP024','AP025','AP026','AP027','AP028','AP029', 'AL019'};
+%% Find experiments with the task + cortical widefield + striatal ephys
 close all;
-animals={'JF051'};
+myPaths;
+
+animals={'JF049'};
 curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};
 
-protocol = 'location'; % (this is the name of the Signals protocol)
+protocol = 'rating'; % (this is the name of the Signals protocol)
 %protocol = 'JF_GratingPassive'; % (this is the name of the Signals protocol)
 %protocol = 'JF_natural_images';
-experiments = AP_find_experimentsJF(animal, protocol, true);%experiments = experiments([experiments.imaging] & [experiments.ephys]); % (use only experiments with both widefield + ephys)
-%experiments = experiments([experiments.imaging] & [experiments.ephys]);
+experiments = AP_find_experimentsJF(animal, protocol, true);
 experiments = experiments([experiments.ephys]);
-%experiments.experiment(1)=[];
+
+allen_atlas_path = [allenAtlasPath, filesep, 'allenCCF/'];
+st = loadStructureTreeJF([allen_atlas_path, filesep, 'structure_tree_safe_2017.csv']);
+
+curr_plot_structure = find(strcmp(st.acronym, 'GPe'));
+% histoFile = AP_cortexlab_filenameJF(animal, [], [], 'histo', [], []);
+% load(histoFile)
+% probe2ephysFile = AP_cortexlab_filenameJF(animal, [], [], 'probe2ephys', [], []);
+% load(probe2ephysFile)
+% min(probe_ccf(9).probe_depths(probe_ccf(9).trajectory_areas ==curr_plot_structure))
+% max(probe_ccf(9).probe_depths(probe_ccf(9).trajectory_areas ==curr_plot_structure))
+
 %% Load data from experiment 
 
-curr_day =3; % (set which day to use)
+curr_day = 1; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
@@ -29,14 +39,13 @@ load_parts.cam=false;
 load_parts.imaging=false;
 load_parts.ephys=true;
 
-%AP_load_experiment; % loads data from experiment
-%close all;
+
 site = 1;%1,1; 2,4; 3,7
 recording = []; 
-experiment = 1;
+experiment = 1  ;
 loadClusters = 0;
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,day,experiment,'ephys_ap',site,recording);
-isSpikeGlx = contains(ephysAPfile, 'g0') | contains(ephysAPfile, 'g1')  | contains(ephysAPfile, 'g2')  | contains(ephysAPfile, 'g3') ;%spike glx (2.0 probes) or open ephys (3A probes)? 
+isSpikeGlx = contains(ephysAPfile, '_g');
 if isSpikeGlx
      [ephysKSfile,~] = AP_cortexlab_filenameJF(animal,day,experiment,'ephys',site,recording);
     if isempty(dir([ephysKSfile filesep 'sync.mat']))
@@ -46,8 +55,8 @@ end
 
 AP_load_experimentJF;
 
-close all;
-
+ 
+curr_shank=NaN;
 AP_cellrasterJF({stimOn_times(:)}, {stimIDs});
 
 AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))',signals_events.responseTimes(n_trials(1):n_trials(end))'}, ...
@@ -59,32 +68,7 @@ AP_cellrasterACGJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_
     trial_conditions(:,3),trial_outcome});
 
 
-%% Open cell viewer
 
-% This is a raster/PSTH viewer to explore cells, for a given unit it'll
-% plot all spikes aligned to different times (first input) and can split
-% those into different conditions (second input). The lefthand plot shows
-% one dot for each unit (depth by rate) which are clickable, the center
-% plot shows the template waveform , the righthand plot shows the spikes,
-% the bottom plot shows the template amplitude over time (to see if it
-% drifts, etc)
-%
-% controls are in the documentation, but as it's called here: 
-% * left/right arrows switch between stim, move, and outcome aligned
-% * pageup/pagedown combines all trials or splits stim, move directions,
-% and reward/punish, respectively
-% * you can press 'm' and define borders by clicking on the lefthand plot 
-% to group cells into multiunit
-
-AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes'}, ...
-    {trial_conditions(1:n_trials,1).*trial_conditions(1:n_trials,2), ...
-    trial_choice(1:n_trials),trial_outcome(1:n_trials)});
-
-AP_cellrasterJF({stimOn_times}, ...
-    {trial_conditions(:,1)+trial_conditions(:,2)+trial_conditions(:,3), ...
-    });
-
-AP_cellrasterJF({stimOn_times}, {stimIDs});
 %% Open widefield viewer
 
 % This is to get a feel for the widefield data, it shows the mouse cameras

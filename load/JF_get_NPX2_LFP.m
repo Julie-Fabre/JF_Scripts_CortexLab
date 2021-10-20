@@ -3,6 +3,9 @@
 function lfp = JF_get_NPX2_LFP(ephys_path, start_time, stop_time)
     myPaths;
     binFile = dir([ephys_path(1:end-15) ephys_path(end-4:end)  filesep '*.meta']);
+    if isempty(binFile)
+                binFile = dir([ephys_path(1:end-15) ephys_path(end-4:end)  filesep 'experiment1/*.meta']);
+            end
     meta = ReadMeta_GLX(binFile.name, binFile.folder);
     ephysAPfile = [ephys_path(1:end-15) ephys_path(end-4:end)];
     if contains(meta.imRoFile, 'NPtype24_hStripe_botRow0_ref0.imro') %2.0 4 shank, bottom stripe

@@ -134,13 +134,13 @@ for iType = 1%:size(animalsType, 2)
                     uniqueRecs = unique(hh) + 1;
                     for iUniqueRec = 1:size(uniqueRecs, 1) %get psth per rec
                         theseTheseNeurons = theseNeuronsInd(hh == uniqueRecs(iUniqueRec));
-<<<<<<< HEAD
+
                         if ~isempty(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline) && ~isempty(thisData(uniqueRecs(iUniqueRec)).stimOn_times)
                             theseTheseNeuronsTemplate = ismember(thisData(uniqueRecs(iUniqueRec)).spike_templates, ...
-=======
+
                         if ~isempty(ephysData(uniqueRecs(iUniqueRec)).spike_times_timeline) && ~isempty(ephysData(uniqueRecs(iUniqueRec)).stimOn_times)
                             theseTheseNeuronsTemplate = ismember(ephysData(uniqueRecs(iUniqueRec)).spike_templates, ...
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
+
                                 theseTheseNeurons-theseLocationsInfo(uniqueRecs(iUniqueRec))-1);
                             [psth, bins, rasterX, rasterY, spikeCounts, binnedArray] = ...
                                 psthAndBA(thisData(uniqueRecs(iUniqueRec)).spike_times_timeline(theseTheseNeuronsTemplate), ...
@@ -195,11 +195,11 @@ for iType = 1%:size(animalsType, 2)
         figure(1)
 
         binnedArrayPixel(binnedArrayPixel == Inf) = NaN;
-<<<<<<< HEAD
+
         binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, smoothF, smoothF);
-=======
+
         binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, 4, 4);
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
+
 
         subplot(3, size(regions, 2), iRegion)
 
@@ -229,11 +229,10 @@ for iType = 1%:size(animalsType, 2)
                 ax = gca;
         ax.YColor = 'w'; % Red
         ax.XColor = 'w'; % Red
-<<<<<<< HEAD
+
         box off
       %  set(
-=======
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
+
         im = imagesc(xyCountBins{1, 1}./10, xyCountBins{1, 2}./10, binnedArrayPixelSmooth'*100);
         set(im, 'AlphaData', ~isnan(get(im, 'CData')));
 
@@ -253,7 +252,7 @@ for iType = 1%:size(animalsType, 2)
         axis square
         axis image
 
-<<<<<<< HEAD
+
 %         nColors = numel(ax.YTickLabel);
 %         cm = [0, 0, 0];
 %         for i = 1:nColors
@@ -267,7 +266,7 @@ for iType = 1%:size(animalsType, 2)
 %         end
 %         ax.XLabel.Color = [0, 0, 0];
 %         ax.YLabel.Color = [0, 0, 0];
-=======
+
         nColors = numel(ax.YTickLabel);
         cm = [0, 0, 0];
         for i = 1:nColors
@@ -281,7 +280,7 @@ for iType = 1%:size(animalsType, 2)
         end
         ax.XLabel.Color = [0, 0, 0];
         ax.YLabel.Color = [0, 0, 0];
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
+
         makepretty;
         clearvars isIN
         caxis(thisCmap)
@@ -333,11 +332,11 @@ for iType = 1%:size(animalsType, 2)
                 end
             end
         end
-<<<<<<< HEAD
+
         binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, smoothF, smoothF);
-=======
+
         binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, 4, 4);
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
+
         subplot(3, size(regions, 2), size(regions, 2)+iRegion)
         for iPixelX = 1:size(binnedArrayPixelSmooth, 1)
             for iPixelY = 1:size(binnedArrayPixelSmooth, 2)
@@ -376,7 +375,7 @@ for iType = 1%:size(animalsType, 2)
         axis square
         axis image
         
-<<<<<<< HEAD
+
 %         nColors = numel(ax.YTickLabel);
 %         cm = [0, 0, 0];
 %         for i = 1:nColors
@@ -390,7 +389,7 @@ for iType = 1%:size(animalsType, 2)
 %         end
 %         ax.XLabel.Color = [0, 0, 0];
 %         ax.YLabel.Color = [0, 0, 0];
-=======
+
         nColors = numel(ax.YTickLabel);
         cm = [0, 0, 0];
         for i = 1:nColors
@@ -404,7 +403,7 @@ for iType = 1%:size(animalsType, 2)
         end
         ax.XLabel.Color = [0, 0, 0];
         ax.YLabel.Color = [0, 0, 0];
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
+
         makepretty;
         clearvars isIN
         set(gca, 'color', [0.5, 0.5, 0.5])
@@ -457,13 +456,13 @@ for iType = 1%:size(animalsType, 2)
 
             end
         end
-<<<<<<< HEAD
+
         binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, smoothF, smoothF);
        % binnedArrayPixelSmooth = fliplr(binnedArrayPixelSmooth);
-=======
+
         binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, 4, 4);
         binnedArrayPixelSmooth = fliplr(binnedArrayPixelSmooth);
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
+
         for iPixelX = 1:size(binnedArrayPixelSmooth, 1)
             for iPixelY = 1:size(binnedArrayPixelSmooth, 2)
                 isIN(iPixelX, iPixelY) = inpolygon(yzCountBins{1, 1}(iPixelX), ...
@@ -491,20 +490,16 @@ for iType = 1%:size(animalsType, 2)
         im = imagesc(yzCountBins{1, 1}./10, yzCountBins{1, 2}./10, binnedArrayPixelSmooth'*100);
         set(im, 'AlphaData', ~isnan(get(im, 'CData')));
         clearvars isIN
-<<<<<<< HEAD
 
-        set(gca, 'color', [0.5, 0.5, 0.5]);
-        colormap(brewermap([], '*RdBu'));
-=======
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
 
         set(gca, 'color', [0.5, 0.5, 0.5]);
         colormap(brewermap([], '*RdBu'));
 
-<<<<<<< HEAD
-=======
 
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
+        set(gca, 'color', [0.5, 0.5, 0.5]);
+        colormap(brewermap([], '*RdBu'));
+
+
         %colorbar
         clearvars binnedArrayPixel
         subplot(3, size(regions, 2), size(regions, 2)*2+(iRegion))
@@ -527,7 +522,7 @@ for iType = 1%:size(animalsType, 2)
         xlim([yzCountBins{1, 1}(1) ./ 10, yzCountBins{1, 1}(end) ./ 10])
         ylim([yzCountBins{1, 2}(1) ./ 10, yzCountBins{1, 2}(end) ./ 10])
 
-<<<<<<< HEAD
+
 %         nColors = numel(ax.YTickLabel);
 %         cm = [0, 0, 0];
 %         for i = 1:nColors
@@ -540,7 +535,7 @@ for iType = 1%:size(animalsType, 2)
 %         for i = 1:nColors
 %             ax.XTickLabel{i} = ['\color[rgb]', sprintf('{%f,%f,%f}%s', cm, ax.XTickLabel{i})];
 %         end
-=======
+
         nColors = numel(ax.YTickLabel);
         cm = [0, 0, 0];
         for i = 1:nColors
@@ -553,7 +548,7 @@ for iType = 1%:size(animalsType, 2)
         for i = 1:nColors
             ax.XTickLabel{i} = ['\color[rgb]', sprintf('{%f,%f,%f}%s', cm, ax.XTickLabel{i})];
         end
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
+
 set(gca, 'color', [0.5, 0.5, 0.5]);
     end
 end

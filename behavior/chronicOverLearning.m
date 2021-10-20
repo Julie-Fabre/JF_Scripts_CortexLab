@@ -51,35 +51,37 @@ for iAnimal = 1:size(animalsAll, 2)
 
             unitCount(curr_day) = length(unique(spike_templates));
             deadChannels(curr_day) = length(unique(channel_map));
-            figure(1);
-            subplot(1, size(experiments, 1), curr_day)
-            [spikeTimes, spikeAmps, spikeDepths, spikeSites] = ksDriftmap([ephys_filename, '/site1/']);
-            plotDriftmap(spikeTimes, amplitudes, spikeDepths);
-            makeprettyLarge;
-            xlim([0, max(spikeTimes)])
-            ylim([0, 2880])
+%             figure(1);
+%             subplot(1, size(experiments, 1), curr_day)
+%             [spikeTimes, spikeAmps, spikeDepths, spikeSites] = ksDriftmap([ephys_filename, '/site1/']);
+%             plotDriftmap(spikeTimes, amplitudes, spikeDepths);
+%             makeprettyLarge;
+%             xlim([0, max(spikeTimes)])
+%             ylim([0, 2880])
+% 
+%             xticks([0, max(spikeTimes)])
+%             xticklabels({'0', num2str(max(spikeTimes)/60)})
+%             if curr_day == 1
+%                 ylabel('Depth from tip (\mum)');
+%                 xlabel('time (min)')
+%                 makeprettyLarge;
+%             else
+%                 set(gca, 'ytick', [])
+%                 set(gca, 'yticklabel', [])
+%             end
 
-            xticks([0, max(spikeTimes)])
-            xticklabels({'0', num2str(max(spikeTimes)/60)})
-            if curr_day == 1
-                ylabel('Depth from tip (\mum)');
-                xlabel('time (min)')
-                makeprettyLarge;
-            else
-                set(gca, 'ytick', [])
-                set(gca, 'yticklabel', [])
-            end
-
-            figure(3)
-            subplot(1, size(experiments, 1), curr_day)
+            
             day = experiments(curr_day).day;
             experiment = experiments(curr_day).experiment(end); 
             site = 1;%1,1; 2,4; 3,7
             recording = []; 
             [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,day,experiment,'ephys_ap',site,recording);
             isSpikeGlx = contains(ephysAPfile, 'g0') | contains(ephysAPfile, 'g1')  | contains(ephysAPfile, 'g2')  | contains(ephysAPfile, 'g3') ;%spike glx (2.0 probes) or open ephys (3A probes)? 
-
+            loadClusters=0;
             AP_load_experimentJF;
+            
+            figure(3)
+            subplot(1, size(experiments, 1), curr_day)
             
             norm_spike_n = mat2gray(log10(accumarray(spike_templates, 1)+1));
             unit_dots = plot(norm_spike_n, template_depths, '.k', 'MarkerSize', 20);

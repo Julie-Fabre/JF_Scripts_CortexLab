@@ -1,6 +1,6 @@
 %docs: https://allensdk.readthedocs.io/en/latest/unionizes.html
 %% info
-allen_atlas_path = 'C:\Users\Julie\Dropbox\Atlas\allenCCF';
+allen_atlas_path = [allenAtlasPath 'allenCCF'];
 tv = readNPY([allen_atlas_path, filesep, 'template_volume_10um.npy']); % grey-scale "background signal intensity"
 av = readNPY([allen_atlas_path, filesep, 'annotation_volume_10um_by_index.npy']); % the number at each pixel labels the area, see note below
 st = loadStructureTree([allen_atlas_path, filesep, 'structure_tree_safe_2017.csv']); % a table of what all the labels mean
@@ -66,7 +66,7 @@ save('C:\Users\Julie\Dropbox\MATLAB\JF_scripts_CortexLab\queryAllenAtlas\VIS_Str
 figure();
 for iInjection = 1:size(injectionAreas, 2)
 
-    load('C:\Users\Julie\Dropbox\MATLAB\JF_scripts_CortexLab\queryAllenAtlas\VIS_Str.mat')
+    load([JF_Scripts_CortexLabPath 'queryAllenAtlas/VIS_Str.mat'])
 
     for iView = 1:3
         h1 = subplot(1, 4, iView);
@@ -109,7 +109,7 @@ for iInjection = 1:size(injectionAreas, 2)
         %[~, brain_outline] = plotBrainGrid([],[]);
         structure_patch = patch('Vertices', structure_3d.vertices*slice_spacing, ...
             'Faces', structure_3d.faces, ...
-            'FaceColor', 'k', 'EdgeColor', 'none', 'FaceAlpha', structure_alpha);
+            'FaceColor', 'w', 'EdgeColor', 'None', 'FaceAlpha', 1);
         %         minV = min(min(structure_patch.Vertices(:,:)));
         %         maxV = max(max(structure_patch.Vertices(:,:)));
         %         xlim([])
@@ -130,11 +130,12 @@ for iInjection = 1:size(injectionAreas, 2)
 set(h1, 'box','off','XTickLabel',[],'XTick',[],'YTickLabel',[],'YTick',[])
 xlim([300 800])
 set(gca,'Visible','off')
-makeprettyLite;
+makepretty;
 title(injectionAreas{iInjection})
     end
 end
 subplot(144)
 colormap(cmapData)
-colorbar(cMapData)
+
 makepretty;
+set(gcf, 'Color', 'white')

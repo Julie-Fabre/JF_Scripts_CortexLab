@@ -84,7 +84,7 @@ gui_data.histology_im_h = imagesc(img, ...
 %caxis([min(min(gui_data.histology_im_h.CData )), max(max(gui_data.histology_im_h.CData ))])
 colormap(gray)
 % Create title to write area in
-gui_data.histology_ax_title = title(gui_data.histology_ax,'','FontSize',14);
+gui_data.histology_ax_title = title(gui_data.histology_ax,'','FontSize',14,'Color','white');
 
 % Initialize probe points
 gui_data.probe_color = lines(gui_data.n_probes);
@@ -122,7 +122,7 @@ switch eventdata.Key
     case [cellfun(@num2str,num2cell(0:9),'uni',false),cellfun(@(x) ['numpad' num2str(x)],num2cell(0:9),'uni',false)]
         keyData = eventdata;
         if isempty(keyData.Modifier)
-            curr_probe = str2num(eventdata.Key(end));
+             curr_probe = str2num(eventdata.Key(end));
         elseif strcmp(keyData.Modifier{:}, 'shift') == 1
              curr_probe = str2num(eventdata.Key(end)) + 10;
         elseif strcmp(keyData.Modifier{:}, 'alt') == 1

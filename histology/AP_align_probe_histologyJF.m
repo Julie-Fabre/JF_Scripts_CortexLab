@@ -1,6 +1,6 @@
 function AP_align_probe_histologyJF(st,slice_path, ...
     spike_times,spike_templates,template_depths, spike_xdepths, template_xdepths,...
-    lfp,lfp_channel_positions,lfp_channel_xpositions,use_probe,isSpikeGlx, shank)
+    lfp,lfp_channel_positions,lfp_channel_xpositions,use_probe,isSpikeGlx, curr_shank)
 % AP_align_probe_histology(st,slice_path,spike_times,spike_templates,template_depths,lfp,lfp_channel_positions,use_probe)
 
 % If no probe specified, use probe 1
@@ -12,18 +12,32 @@ end
 probe_ccf_fn = [slice_path filesep 'probe_ccf.mat'];
 load(probe_ccf_fn);
 
-if ~isnan(shank)
-    theseChannels = lfp_channel_xpositions== (shank-1)*250 | lfp_channel_xpositions  == (shank-1)*250 + 32;
-    theseTemplates = template_xdepths == (shank-1)*250 | template_xdepths == (shank-1)*250 + 32;
-    theseSpikes = spike_xdepths == (shank-1)*250 | spike_xdepths == (shank-1)*250 + 32;
+if ~isnan(curr_shank)
+    theseChannelPositions = [(curr_shank-1) * 250, (curr_shank-1)*250 + 32];
+    theseChannels = ismember(lfp_channel_positions(:,1), theseChannelPositions);
+    theseTemplates = ismember(template_xdepths, theseChannelPositions);
+    theseSpikes = ismember(spike_xdepths, theseChannelPositions);
+    spike_times = spike_times(theseSpikes);
+    spike_templates = spike_templates(theseSpikes);
+    %rename 
+    good_templates_idx = unique(spike_templates);
+    new_spike_idx = nan(max(spike_templates), 1);
+    new_spike_idx(good_templates_idx) = 1:length(good_templates_idx);
+    spike_templates = new_spike_idx(spike_templates);
+    
+     template_depths = template_depths(theseTemplates);
+    [~,~,spike_templates_reidx] = unique(spike_templates);
+    norm_template_spike_n = mat2gray(log10(accumarray(spike_templates_reidx,1)+1));
+
 else
-    theseChannels = ones(size(lfp_channel_xpositions),1);
+    theseChannels = ones(size(lfp_channel_xpositions,1),1);
     theseTemplates = ones(size(template_xdepths,1),1);
     theseSpikes = ones(size(spike_xdepths,1),1);
+    [~,~,spike_templates_reidx] = unique(spike_templates);
+    norm_template_spike_n = mat2gray(log10(accumarray(spike_templates_reidx,1)+1));
 end
 % Get normalized log spike n
-[~,~,spike_templates_reidx] = unique(spike_templates(theseSpikes));
-norm_template_spike_n = mat2gray(log10(accumarray(spike_templates_reidx,1)+1));
+
 
 % Get multiunit correlation
 if isSpikeGlx
@@ -31,28 +45,29 @@ if isSpikeGlx
 else
     n_corr_groups = 40;
 end
-if isSpikeGlx 
+if isSpikeGlx %2.0 probes, shorter shank
     max_depths = 384*7.5;
-    min_depths = min(lfp_channel_positions);
+    min_depths = 0;
     depth_group_edges = linspace(min_depths,max_depths,n_corr_groups+1);
+    addThis = 3840-min(lfp_channel_positions);
 else
     min_depths = 0;
     max_depths = 3840; % (hardcode, sometimes kilosort2 drops channels)
     depth_group_edges = linspace(0,max_depths,n_corr_groups+1);
 end
 
-depth_group = discretize(template_depths(theseTemplates),depth_group_edges);
+depth_group = discretize(template_depths,depth_group_edges);
 depth_group_centers = depth_group_edges(1:end-1)+(diff(depth_group_edges)/2);
 unique_depths = 1:length(depth_group_edges)-1;
 
 spike_binning = 0.01; % seconds
-corr_edges = nanmin(spike_times(theseSpikes)):spike_binning:nanmax(spike_times(theseSpikes));
+corr_edges = nanmin(spike_times):spike_binning:nanmax(spike_times);
 corr_centers = corr_edges(1:end-1) + diff(corr_edges);
 
 binned_spikes_depth = zeros(length(unique_depths),length(corr_edges)-1);
 for curr_depth = 1:length(unique_depths)
     binned_spikes_depth(curr_depth,:) = histcounts(spike_times( ...
-        ismember(spike_templates(theseSpikes),find(depth_group == unique_depths(curr_depth)))), ...
+        ismember(spike_templates,find(depth_group == unique_depths(curr_depth)))), ...
         corr_edges);
 end
 
@@ -62,7 +77,7 @@ gui_fig = figure('color','w','KeyPressFcn',@keypress);
 
 % Plot spike depth vs rate
 unit_ax = subplot('Position',[0.1,0.1,0.1,0.8]);
-scatter(norm_template_spike_n,template_depths(theseTemplates),15,'k','filled');
+scatter(norm_template_spike_n,template_depths,15,'k','filled');
 set(unit_ax,'YDir','reverse');
 ylim([min_depths,max_depths]);
 xlabel('N spikes')
@@ -81,6 +96,7 @@ set(multiunit_ax,'FontSize',12)
 xlabel(multiunit_ax,'Multiunit depth');
 
 % Plot LFP median-subtracted correlation
+if length(lfp)>1
 lfp_moving_median = 10; % channels to take sliding median
 lfp_ax = subplot('Position',[0.5,0.1,0.3,0.8]);
 imagesc([min_depths,max_depths],[min_depths,max_depths], ...
@@ -94,6 +110,7 @@ set(lfp_ax,'FontSize',12)
 caxis([-1,1])
 xlabel(lfp_ax,'Depth (\mum)'); 
 colormap(lfp_ax,brewermap([],'*RdBu'));
+end
 
 % Plot probe areas (interactive)
 % (load the colormap - located in the repository, find by associated fcn)
@@ -106,6 +123,7 @@ probe_areas_ax = subplot('Position',[0.8,0.1,0.05,0.8]);
 % Convert probe CCF coordinates to linear depth (*10 to convert to um)
 % (use the dorsal-most coordinate as the reference point)
 [~,dv_sort_idx] = sort(probe_ccf(use_probe).trajectory_coords(:,2));
+
 
 probe_trajectory_depths = ...
     pdist2(probe_ccf(use_probe).trajectory_coords, ...

@@ -80,12 +80,32 @@ channel_positions = evalin('base','channel_positions');
 template_depths = evalin('base','template_depths');
 spike_times = evalin('base','spike_times_timeline');
 spike_templates = evalin('base','spike_templates');
+template_xdepths = evalin('base','template_xdepths');
 template_amplitudes = evalin('base','template_amplitudes');
+spike_xdepths = evalin('base','spike_xdepths');
+curr_shank = evalin('base','curr_shank');
 catch me
     missing_var = textscan(me.message,'Undefined function or variable '' %s');
     error(['Ephys variable missing from base workspace: ' cell2mat(missing_var{:})]);
 end
-
+if ~isnan(curr_shank)
+    theseChannelPositions = [(curr_shank-1) * 250, (curr_shank-1)*250 + 32];
+    theseChannels = ismember(channel_positions(:,1), theseChannelPositions);
+    theseTemplates = ismember(template_xdepths, theseChannelPositions);
+    theseSpikes = ismember(spike_xdepths, theseChannelPositions);
+    spike_times = spike_times(theseSpikes);
+    spike_templates = spike_templates(theseSpikes);
+    %rename 
+    good_templates_idx = unique(spike_templates);
+    new_spike_idx = nan(max(spike_templates), 1);
+    new_spike_idx(good_templates_idx) = 1:length(good_templates_idx);
+    spike_templates = new_spike_idx(spike_templates);
+    
+    template_amplitudes = template_amplitudes(theseSpikes);
+    template_depths = template_depths(theseTemplates);
+    channel_positions = channel_positions(theseChannels,:);
+    templates = templates(theseTemplates,:,theseChannels); 
+end
 % Sort the units by depth if not specified
 if ~exist('unit_sort','var')
    [~,unit_sort] = sort(template_depths); 
@@ -103,7 +123,7 @@ unit_dots = plot(norm_spike_n,template_depths,'.k','MarkerSize',20,'ButtonDownFc
 curr_unit_dots = plot(0,0,'.r','MarkerSize',20);
 multiunit_lines = arrayfun(@(x) line(xlim,[0,0],'linewidth',2,'visible','off'),1:2);
 xlim(unit_axes,[-0.1,1]);
-ylim([-50, max(channel_positions(:,2))+50]);
+ylim([min(channel_positions(:,2))-50, max(channel_positions(:,2))+50]);
 ylabel('Depth (\mum)')
 xlabel('Normalized log rate')
 

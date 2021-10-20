@@ -1,0 +1,6 @@
+%load probe_ccf for each animal, find which contains regions and at what
+%depth 
+
+mice = {'AP080', 'AP082', 'AP083', 'AP084', 'JF017', 'JF019', 'JF020', 'JF022', 'JF023',...
+    'JF024', 'JF030', 'JF045','JF047','JF048','JF049','JF052'}; % JF020 doesn't have histology yet. JF021 and JF022 to come, and many more
+locations = {'CP', 'GPe', 'GPi', 'STN','SNr'};

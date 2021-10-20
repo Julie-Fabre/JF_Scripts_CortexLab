@@ -59,15 +59,15 @@ server2 = tempServerPath;
 server3 = znasPath;
 
 % Check that servers are accessible (login needed on restart)
-if ~exist([server1])
-    error('Zserver not available');
-end
-if ~exist([server2])
-    error('Zubjects not available');
-end
-if ~exist([server3])
-    error('Znas not available');
-end
+% if ~exist([server1])
+%     error('Zserver not available');
+% end
+% if ~exist([server2])
+%     error('Zubjects not available');
+% end
+% if ~exist([server3])
+%     error('Znas not available');
+% end
 
 % List all folders to check
 server_location = cell(0);
@@ -95,7 +95,7 @@ switch file
         filepattern = [animal filesep 'Histology/processed/slices/probe_ccf.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
     case 'acuteRecInfo'
-        filepattern = [animal filesep 'Acute_rec_' animal '.ods'];
+        filepattern = [animal filesep 'Acute_rec_' animal '.csv'];
         [filename,file_exists] = check_locations(filepattern,server_location);
     case 'probe2ephys'
         filepattern = [animal filesep 'Histology/processed/probe2ephys.mat'];
@@ -179,6 +179,18 @@ switch file
                 filesep 'continuous'  filesep 'Neuropix-3a-100.0' filesep 'continuous.dat'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
+        if ~file_exists
+            filepattern = [animal filesep day filesep ...
+                'ephys' site_dir filesep 'recording*' ...
+                filesep 'continuous'  filesep 'Neuropix-3a-100.0' filesep 'continuous.dat'];
+            [filename,file_exists] = check_locations(filepattern,server_location);
+        end
+        if ~file_exists
+            filepattern = [animal filesep day filesep ...
+                'ephys' site_dir  ...
+                filesep 'continuous'  filesep 'Neuropix-3a-100.0' filesep 'continuous.dat'];
+            [filename,file_exists] = check_locations(filepattern,server_location);
+        end
         %spike glx
         if ~file_exists
             filepattern = [animal filesep day filesep ...
@@ -206,6 +218,16 @@ switch file
         
         filepattern = [animal filesep day filesep 'ephys'  filesep 'kilosort2' filesep site_dir filesep recording_dir];
         [filename,file_exists] = check_locations(filepattern,server_location);
+         if ~file_exists
+             filepattern = [animal filesep day filesep 'ephys'  filesep 'kilosort2' filesep site_dir filesep 'experiment' num2str(experiment) filesep recording_dir];
+        [filename,file_exists] = check_locations(filepattern,server_location);
+        
+         end
+         if ~file_exists
+             filepattern = [animal filesep day filesep 'ephys'  filesep 'kilosort2' filesep site_dir   ];
+        [filename,file_exists] = check_locations(filepattern,server_location);
+        
+         end
         if file_exists
             filename = fileparts(filename{1});
         end

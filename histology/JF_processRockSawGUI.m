@@ -9,7 +9,7 @@
 
 %% params / loading 
 myPaths; 
-animal = 'JF043';
+animal = 'JF047';
 % get in 'AP' format: histology_ccf.mat with tv_slices, av_slices,
 % plane_ap, plane_ml, plane_dv 
 allen_atlas_path = [allenAtlasPath 'allenCCF'];
@@ -33,8 +33,8 @@ allenAtlas10um = flipud(rot90(permute(allenAtlas10um, [3,2,1])));
 %% crop template to fit image to register 
 StackSlider(greenChannel);
 StackSlider(allenAtlas10um);
-cropAllenLimits = [271, 1287]; 
-cropImgLimits = [1, 397]; 
+cropAllenLimits = [240,1211]; 
+cropImgLimits = [1,418]; 
 allenAtlas10um = allenAtlas10um(:,:,cropAllenLimits(1):cropAllenLimits(2));
 greenChannel = greenChannel(:,:,cropImgLimits(1):cropImgLimits(2));
 redChannel = redChannel(:,:,cropImgLimits(1):cropImgLimits(2));
@@ -67,96 +67,97 @@ save([extraHDPath filesep animal '/slices/histology_ccf.mat'], 'histology_ccf','
 save([extraHDPath filesep animal '/slices/atlas2histology_tform.mat'], 'atlas2histology_tform')
 
 %% draw probes 
-
+regRed = loadtiff([extraHDPath filesep animal '/regRedChan.tiff']);
 AP_get_probe_histologyJF(tv, av, st, slice_path,'rocksaw',regRed); % shift+1 = 11, alt+1 = 21, ctrl+1=31, .. 
+set(gcf, 'Color', 'black')
 im_path = [extraHDPath filesep animal];
 
 %% align ephys depth
 %% BLUE, ORANGE, YELLOW, PURPLE, GREEN , LIGHT BLUE, RED correspondance (manual):
 probe2ephys = struct;
 probe2ephys.animal = animal;
-probe2ephys(1).day = 4;
-probe2ephys(1).site = 1;
-probe2ephys(1).shank = NaN;
+probe2ephys(1).day = 2;
+probe2ephys(1).site = 2;
+probe2ephys(1).shank = 4;
 
-probe2ephys(2).day = 3;
-probe2ephys(2).site = 1;
-probe2ephys(2).shank = NaN;
+probe2ephys(2).day = 2;
+probe2ephys(2).site = 2;
+probe2ephys(2).shank = 3;
 
-probe2ephys(3).day = 7;
-probe2ephys(3).site = 1;
-probe2ephys(3).shank = NaN;
+probe2ephys(3).day = 2;
+probe2ephys(3).site = 2;
+probe2ephys(3).shank = 2;
 
-probe2ephys(4).day = 6;
-probe2ephys(4).site = 1;
-probe2ephys(4).shank = NaN;
+probe2ephys(4).day = 2;
+probe2ephys(4).site = 2;
+probe2ephys(4).shank = 1;
 
-probe2ephys(5).day = 2;
-probe2ephys(5).site = 1;
-probe2ephys(5).shank = NaN;
+probe2ephys(5).day = 1;
+probe2ephys(5).site = 2;
+probe2ephys(5).shank = 4;
 
-probe2ephys(6).day = 6;
+probe2ephys(6).day = 1;
 probe2ephys(6).site = 2;
-probe2ephys(6).shank = 1;
+probe2ephys(6).shank = 3;
 
-probe2ephys(7).day = 6;
+probe2ephys(7).day = 1;
 probe2ephys(7).site = 2;
 probe2ephys(7).shank = 2;
 
-probe2ephys(8).day = 6;
+probe2ephys(8).day = 1;
 probe2ephys(8).site = 2;
-probe2ephys(8).shank = 3;
+probe2ephys(8).shank = 1;
 
-probe2ephys(9).day = 6;
-probe2ephys(9).site = 2;
+probe2ephys(9).day = 1;
+probe2ephys(9).site = 4;
 probe2ephys(9).shank = 4;
 
-probe2ephys(10).day = 5;
-probe2ephys(10).site = 1;
-probe2ephys(10).shank = 1;
+probe2ephys(10).day = 1;
+probe2ephys(10).site = 4;
+probe2ephys(10).shank = 3;
 
-probe2ephys(11).day = 5;
-probe2ephys(11).site = 1;
+probe2ephys(11).day = 1;
+probe2ephys(11).site = 4;
 probe2ephys(11).shank = 2;
 
-probe2ephys(12).day = 5;
-probe2ephys(12).site = 1;
-probe2ephys(12).shank = 3;
+probe2ephys(12).day = 1;
+probe2ephys(12).site = 4;
+probe2ephys(12).shank = 1;
 
-probe2ephys(13).day = 5;
-probe2ephys(13).site = 1;
+probe2ephys(13).day = 1;
+probe2ephys(13).site = 6;
 probe2ephys(13).shank = 4;
 
-probe2ephys(14).day = 2;
-probe2ephys(14).site = 2;
-probe2ephys(14).shank = 1;
+probe2ephys(14).day = 1;
+probe2ephys(14).site = 6;
+probe2ephys(14).shank = 3;
 
-probe2ephys(15).day = 2;
-probe2ephys(15).site = 2;
+probe2ephys(15).day = 1;
+probe2ephys(15).site = 6;
 probe2ephys(15).shank = 2;
 
-probe2ephys(16).day = 2;
-probe2ephys(16).site = 2;
-probe2ephys(16).shank = 3;
+probe2ephys(16).day = 1;
+probe2ephys(16).site = 6;
+probe2ephys(16).shank = 1;
 
-probe2ephys(17).day = 2;
-probe2ephys(17).site = 2;
+probe2ephys(17).day = 1;
+probe2ephys(17).site = 1;
 probe2ephys(17).shank = 4;
 
-probe2ephys(18).day = 3;
-probe2ephys(18).site = 2;
-probe2ephys(18).shank = 1;
+probe2ephys(18).day = 1;
+probe2ephys(18).site = 1;
+probe2ephys(18).shank = 3;
 
-probe2ephys(19).day = 3;
-probe2ephys(19).site = 2;
+probe2ephys(19).day = 1;
+probe2ephys(19).site = 1;
 probe2ephys(19).shank = 2;
 
-probe2ephys(20).day = 3;
-probe2ephys(20).site = 2;
-probe2ephys(20).shank = 3;
+probe2ephys(20).day = 1;
+probe2ephys(20).site = 1;
+probe2ephys(20).shank = 1;
 
-probe2ephys(21).day = 3;
-probe2ephys(21).site = 2;
+probe2ephys(21).day = 2;
+probe2ephys(21).site = 3;
 probe2ephys(21).shank = 4;
 
 probe2ephys(22).day = 1;
@@ -196,14 +197,16 @@ save([im_path, '/probe2ephys.mat'], 'probe2ephys')
 %% align ephys
 % Align histology to electrophysiology %% NOTE: YOU HAVE TO DO THESE ONE BY
 % ONE RN (NOT IN LOOP) FOR THINGS TO SAVE PROPERLY
+im_path = [extraHDPath filesep animal];
 load([im_path, '/probe2ephys.mat'])
+load([im_path, '/slices/probe_ccf.mat'])
 dontAnalyze = 0;
-iProbe = 6
+iProbe = 29
 %for iProbe = 1:size(probe2ephys, 2)
-keep st probe2ephys tv av animal iProbe slice_path
+keep st probe2ephys tv av animal iProbe slice_path im_path
     use_probe = iProbe;
     corona = 0;
-    protocol = 'NoGo'; %protocol common to all sites and days
+    protocol = 'nogo'; %protocol common to all sites and days
     experiments = AP_find_experimentsJF(animal, protocol, protocol);
     experiments = experiments([experiments.ephys]);
     curr_day = probe2ephys(iProbe).day;
@@ -225,32 +228,36 @@ keep st probe2ephys tv av animal iProbe slice_path
     load_parts.ephys = true;
     site = probe2ephys(iProbe).site;
     
+    %experiment=[];
+    
     lfp_channel = 'all'; % load lfp 
     loadClusters = 0;
     recording = [];
     [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,day,experiment,'ephys_ap',site,recording);
-    isSpikeGlx = contains(ephysAPfile, 'g0');%spike glx (2.0 probes) or open ephys (3A probes)? 
+    isSpikeGlx = contains(ephysAPfile, '_g');%spike glx (2.0 probes) or open ephys (3A probes)? 
     if isSpikeGlx
          [ephysKSfile,~] = AP_cortexlab_filenameJF(animal,day,experiment,'ephys',site,recording);
         if isempty(dir([ephysKSfile filesep 'sync.mat']))
-            syncFT(ephysAPfile, 385, ephysKSfile)
+            sync = syncFT(ephysAPfile, 385, ephysKSfile);
         end
+        loadLFP=0;
+    else
+        loadLFP=1;
     end
+    loadLFP=0;
+    recording=1;
+    experiment=1
     
-
     AP_load_experimentJF;
 
     if dontAnalyze == 0
         AP_cellrasterJF({stimOn_times}, {stimIDs})
         
-        AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes'}, ...
-            {trial_conditions(:,1).*trial_conditions(:,2), ...
-            trial_conditions(:,3),trial_outcome'});
-
-        AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))'}, ...
-            {trial_conditions(:,1).*trial_conditions(:,2), ...
-            trial_conditions(:,3)});
-
+        
+        AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))',signals_events.responseTimes(n_trials(1):n_trials(end))'}, ...
+            {trial_conditions(:,1),trial_conditions(:,2), ...
+            trial_conditions(:,3),trial_outcome});
+        lfp=nan;
         AP_align_probe_histologyJF(st, slice_path, ...
             spike_times, spike_templates, template_depths, spike_xdepths,template_xdepths,...
             lfp, lfp_channel_positions, lfp_channel_xpositions, ...
@@ -294,5 +301,8 @@ keep st probe2ephys tv av animal iProbe slice_path
 %end
 
 %% save on server
+animal = 'JF043';
+im_path = [extraHDPath filesep animal];
+locationHisto = ['/home/netshare/tempserver/', animal, '/Histology']; % copy files over to local disk
 mkdir([locationHisto, '/processed/']);
 copyfile(im_path, [locationHisto, '/processed/']);

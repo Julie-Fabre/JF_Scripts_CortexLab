@@ -55,7 +55,7 @@ if ~timeline_exists
 end
 
 if timeline_exists
-    if verbose;
+    if verbose
         disp('Loading timeline...');
     end
 
@@ -146,7 +146,7 @@ end
 
 if protocol_exists
 
-    if verbose;
+    if verbose
         disp('Loading mpep protocol...');
     end
 
@@ -215,7 +215,7 @@ end
 
 if block_exists
 
-    if verbose;
+    if verbose
         disp('Loading block file...');
     end
 
@@ -815,7 +815,7 @@ if block_exists
                 [signals_events.stim_idValues'];
             [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
             [~, stimIDs] = ismember(trial_conditions, conditions, 'rows');
-       case {'JF_choiceworldStimuli'}
+       case {'JF_choiceworldStimuli','JF_choiceworldStimuli_wheel'}
             stimOn_times = photodiode_flip_times(2:2:end);
             %n_trials = length(signals_events.endTrialTimes);
             % sanity check: times between stim on times in signals
@@ -1253,8 +1253,8 @@ if ephys_exists && load_parts.ephys
     % Default channel map/positions are from end: make from surface
     % (hardcode this: kilosort2 drops channels)
     if isSpikeGlx
-        max_depth = 0;%already ordered 
-        channel_positions(:, 2) = channel_positions(:, 2);
+        max_depth = 2880;%already ordered 
+        channel_positions(:, 2) = max_depth - channel_positions(:, 2);
     else
         max_depth = 3840;
         channel_positions(:, 2) = max_depth - channel_positions(:, 2);
@@ -1441,19 +1441,32 @@ end
     % Get "good" templates from labels
     if exist('cluster_groups', 'var') && loadClusters
         % If there's a manual classification
-        if verbose;
-            disp('Keeping manually labelled good units...');
-        end
+       
 
         % Check that all used spike templates have a label
         spike_templates_0idx_unique = unique(spike_templates_0idx);
         if ~all(ismember(spike_templates_0idx_unique, uint32(cluster_groups{1}))) || ...
                 ~all(ismember(cluster_groups{2}, {'good', 'mua', 'noise'}))
-            warning([animal, ' ', day, ': not all templates labeled']);
-        end
-
-        % Define good units from labels
-        good_templates_idx = uint32(cluster_groups{1}( ...
+            disp('Removing manually labelled noise units...');
+             good_templates_idx = uint32(cluster_groups{1}( ...
+            strcmp(cluster_groups{2}, 'unsorted') | strcmp(cluster_groups{2}, 'mua') |...
+             strcmp(cluster_groups{2}, 'good') ));
+        template_label_mua= uint32(cluster_groups{1}( ...
+            strcmp(cluster_groups{2}, 'mua') ));
+         template_label_good = uint32(cluster_groups{1}( ...
+            strcmp(cluster_groups{2}, 'good') ));
+        template_labelM = good_templates_idx(ismember(good_templates_idx, template_label_mua));
+        template_labelG = good_templates_idx(ismember(good_templates_idx, template_label_good));
+        
+        [good_templates, ii] = ismember(0:size(templates, 1)-1, good_templates_idx);
+        
+        [good_templatesG, ii] = ismember(0:size(templates, 1)-1, template_labelG);
+        [good_templatesM, ii] = ismember(0:size(templates, 1)-1, template_labelM);
+        
+       
+        else
+            disp('Keeping manually labelled good units...');
+             good_templates_idx = uint32(cluster_groups{1}( ...
             strcmp(cluster_groups{2}, 'good') | strcmp(cluster_groups{2}, 'mua')));
         template_label_mua= uint32(cluster_groups{1}( ...
             strcmp(cluster_groups{2}, 'mua') ));
@@ -1468,6 +1481,9 @@ end
         [good_templatesM, ii] = ismember(0:size(templates, 1)-1, template_labelM);
         
          template_label=good_templatesG.*1+(good_templatesM).*2;
+        end
+
+
 
     elseif exist([ephys_path, filesep, 'cluster_AP_triage.tsv'], 'file')
         % If no manual but AP_triage clusters are available
@@ -1546,7 +1562,7 @@ if ephys_exists && load_parts.ephys && exist('lfp_channel', 'var')
         % Get LFP properties
         % (NOTE: LFP channel map is different from kilosort channel map because
         % kilosort2 drops channels without spikes)
-        channel_map_fn = [dropboxPath filesep 'MATLAB/JF_scripts_CortexLab/kilosort/forPRBimecP3opt3.mat'];
+        channel_map_fn = [dropboxPath filesep 'MATLAB/onPaths/JF_Scripts_CortexLab/kilosort/forPRBimecP3opt3.mat'];
         channel_map_full = load(channel_map_fn);
         max_depth = 3840;
         lfp_channel_positions = max_depth - channel_map_full.ycoords;
@@ -1569,16 +1585,36 @@ if ephys_exists && load_parts.ephys && exist('lfp_channel', 'var')
         [filename,file_exists] = AP_cortexlab_filenameJF(animal,day,experiment,'mainfolder',site,recording);
         mainFolder = filename{1}(1:end-1);
         lfpDir = dir([mainFolder filesep 'lfp' filesep 'lfp.mat']);
-        if isempty(lfpDir) %only compute LFP if not already saved on disk
+        if isempty(lfpDir) && loadLFP %only compute LFP if not already saved on disk
             n_channels = header.n_channels;
             lfp = JF_get_NPX2_LFP(ephys_path); 
             mkdir([mainFolder filesep 'lfp'])
             save([mainFolder filesep 'lfp' filesep 'lfp.mat'], 'lfp', '-v7.3')%save lfp 
-        else
+        elseif loadLFP
             load([mainFolder filesep 'lfp' filesep 'lfp.mat'])
+        else
+            lfp=NaN;
+            lfp_sample_rate = 30000 / 1000; 
+            binFile = dir([ephys_path(1:end-15) ephys_path(end-4:end)  filesep '*.meta']);
+            if isempty(binFile)
+                binFile = dir([ephys_path(1:end-15) ephys_path(end-4:end)  filesep 'experiment1/*.meta']);
+            end
+            meta = ReadMeta_GLX(binFile.name, binFile.folder);
+            ephysAPfile = [ephys_path(1:end-15) ephys_path(end-4:end)];
+            %max_depth = 0;%already ordered
+            if contains(meta.imRoFile, 'NPtype24_hStripe_botRow0_ref0.imro') %2.0 4 shank, bottom stripe
+                chanMapData = load([dropboxPath, filesep, 'MATLAB/onPaths/JF_Scripts_CortexLab/kilosort/chanMapNP2_4Shank_bottRow_flipper.mat']);
+               lfp_channel_positions = chanMapData.ycoords;
+               lfp_channel_xpositions = chanMapData.xcoords;
+            else %1.0 bottom row
+                chanMapData = load([dropboxPath, filesep, 'MATLAB/onPaths/JF_Scripts_CortexLab/kilosort/chanMapNP2_1Shank_flipper.mat']);
+                lfp_channel_positions = chanMapData.ycoords;
+                lfp_channel_xpositions = chanMapData.xcoords;
+            end
+            
         end 
     end
-    if isnumeric(lfp_channel)
+    if isnumeric(lfp_channel)&&loadLFP
 
         % Load LFP of whole current experiment from one channel
         if verbose;
@@ -1673,7 +1709,7 @@ if ephys_exists && load_parts.ephys && exist('lfp_channel', 'var')
         %     [b100s, a100s] = butter(2,freqCutoff/(lfp_sample_rate/2),'low');
         %     lfp_lightfix = single(filtfilt(b100s,a100s,double(lfp_lightfix)')');
 
-    elseif strcmp(lfp_channel, 'all')
+    elseif strcmp(lfp_channel, 'all')&& loadLFP
 
         % Load short LFP segment (from start = no light) from all channels
         if verbose
@@ -1712,6 +1748,10 @@ if ephys_exists && load_parts.ephys && exist('lfp_channel', 'var')
             lfp_t= [0:size(lfp, 1) - 1] / (30000)*100;
             lfp_sample_rate = 30000 / 1000; 
             binFile = dir([ephys_path(1:end-15) ephys_path(end-4:end)  filesep '*.meta']);
+            if isempty(binFile)
+                binFile = dir([ephys_path(1:end-15) ephys_path(end-4:end)  filesep 'experiment1/*.meta']);
+            end
+            
             meta = ReadMeta_GLX(binFile.name, binFile.folder);
             ephysAPfile = [ephys_path(1:end-15) ephys_path(end-4:end)];
             %max_depth = 0;%already ordered

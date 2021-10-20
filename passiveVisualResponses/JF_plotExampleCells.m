@@ -1,30 +1,28 @@
 figure(8);
 clf;
-<<<<<<< HEAD
+
 iRegion = 1;
 regions = {'CP', 'STN', 'GPe', 'SNr', 'GPi'};
 thisData = ephysData;
-=======
+
 iRegion = 4;
 regions = {'CP', 'STN', 'GPe', 'SNr', 'GPi'};
-thisData = ephysDataSnr;
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
+thisData = ephysData;
+
 %iUnit = 1;
 %all Units
 CNew = cat(1, thisData.location);
 CProt = strcat(thisData.protocol);
 newStr = split(CProt, 'J');
-load('C:\Users\Julie\Dropbox\Presentations\UpgradeDataAndPlots\conditionsOriGratPassive.mat')
-load('C:\Users\Julie\Dropbox\Presentations\UpgradeDataAndPlots\conditionsOriGratPassiveNew.mat')
+load([dropboxPath 'Presentations/UpgradeDataAndPlots/conditionsOriGratPassive.mat'])
+load([dropboxPath 'Presentations/UpgradeDataAndPlots/conditionsOriGratPassiveNew.mat'])
 
 ind = find(ismember(CNew, regions{iRegion}) & contains(newStr(2:end), 'ratingPassive'));
 
-%thisRec = 0;
-<<<<<<< HEAD
+
 thisRec = thisRec - 1;
-=======
-thisRec = thisRec + 1;
->>>>>>> a4b9a243a83c58bf74cc0891f6913b2d82bea8b3
+
+thisRec=13
 iUnit = 0;
 theseTemplates = unique(thisData(ind(thisRec)).spike_templates);
 
