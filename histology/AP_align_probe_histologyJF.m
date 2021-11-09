@@ -88,7 +88,7 @@ ylabel('Depth (\mum)');
 % Plot multiunit correlation
 multiunit_ax = subplot('Position',[0.2,0.1,0.3,0.8]);
 imagesc(depth_group_centers,depth_group_centers,mua_corr);
-caxis([0,max(mua_corr(mua_corr ~= 1))]); colormap(hot);
+%caxis([0,max(mua_corr(mua_corr ~= 1))]); colormap(hot);
 ylim([min_depths,max_depths]);
 set(multiunit_ax,'YTick',[]);
 title('MUA correlation');

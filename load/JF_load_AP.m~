@@ -40,9 +40,9 @@ load_parts.imaging=false;
 load_parts.ephys=true;
 
 
-site = 2;%1,1; 2,4; 3,7
+site = 1;%1,1; 2,4; 3,7
 recording = []; 
-experiment = 1;
+experiment = 1  ;
 loadClusters = 0;
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,day,experiment,'ephys_ap',site,recording);
 isSpikeGlx = contains(ephysAPfile, '_g');
@@ -55,15 +55,13 @@ end
 
 AP_load_experimentJF;
 
-
-                
  
 curr_shank=NaN;
 AP_cellrasterJF({stimOn_times(:)}, {stimIDs});
 
-AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))',stimOn_times}, ...
+AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))',signals_events.responseTimes(n_trials(1):n_trials(end))'}, ...
     {trial_conditions(:,1),trial_conditions(:,2), ...
-    trial_conditions(:,3),movement_after200ms_and_type});
+    trial_conditions(:,3),correct_trials_and_type});
 
 AP_cellrasterACGJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))',signals_events.responseTimes(n_trials(1):n_trials(end))'}, ...
     {trial_conditions(:,1),trial_conditions(:,2), ...

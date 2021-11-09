@@ -9,7 +9,7 @@
 
 %% params / loading 
 myPaths; 
-animal = 'JF047';
+animal = 'JF054';
 % get in 'AP' format: histology_ccf.mat with tv_slices, av_slices,
 % plane_ap, plane_ml, plane_dv 
 allen_atlas_path = [allenAtlasPath 'allenCCF'];
@@ -201,12 +201,12 @@ im_path = [extraHDPath filesep animal];
 load([im_path, '/probe2ephys.mat'])
 load([im_path, '/slices/probe_ccf.mat'])
 dontAnalyze = 0;
-iProbe = 29
+iProbe = 16
 %for iProbe = 1:size(probe2ephys, 2)
 keep st probe2ephys tv av animal iProbe slice_path im_path
     use_probe = iProbe;
     corona = 0;
-    protocol = 'nogo'; %protocol common to all sites and days
+    protocol = 'rating'; %protocol common to all sites and days
     experiments = AP_find_experimentsJF(animal, protocol, protocol);
     experiments = experiments([experiments.ephys]);
     curr_day = probe2ephys(iProbe).day;
@@ -301,7 +301,7 @@ keep st probe2ephys tv av animal iProbe slice_path im_path
 %end
 
 %% save on server
-animal = 'JF043';
+animal = 'JF054';
 im_path = [extraHDPath filesep animal];
 locationHisto = ['/home/netshare/tempserver/', animal, '/Histology']; % copy files over to local disk
 mkdir([locationHisto, '/processed/']);

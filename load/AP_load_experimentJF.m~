@@ -445,16 +445,15 @@ if block_exists
                 (signals_events.hitValues(n_trials(1):n_trials(end)) == 0 & (signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 2 | signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 1));
            
             % reaction time 
-%             trial_wheel_starts = arrayfun(@(x) ...
-%                                 wheel_starts(find(wheel_starts > block.events.stimulusOnTimes(x), 1)), ...
-%                                 response_trials);
+            trial_wheel_starts = arrayfun(@(x) ...
+                                wheel_starts(find(wheel_starts > block.events.stimulusOnTimes(x), 1)), ...
+                                response_trials);
 
-            trial_move_t = stim_to_move<0.2;%trial_wheel_starts - block.events.stimulusOnTimes(response_trials);
+            trial_move_t = trial_wheel_starts - block.events.stimulusOnTimes(response_trials);
 
             
             movement_after200ms_and_type = signals_events.stimulusTypeValues(n_trials(1):n_trials(end))';
-            movement_after200ms_and_type(trial_move_t<0.4) =  movement_after200ms_and_type(trial_move_t<0.2)-3;
-            movement_after200ms_and_type(movement_after200ms_and_type>=1) = 1;
+            movement_after200ms_and_type(trial_move_t<0.2) =  movement_after200ms_and_type(trial_move_t<0.2)-3;
             imageN = unique(signals_events.stimulusTypeValues);
             sides = [ 1];
             choices = [-1, 1];

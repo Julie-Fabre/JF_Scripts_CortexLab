@@ -32,7 +32,7 @@ for iAnimal = 1:size(animalsAll, 2)
     keep_day = [];
     noGoDay = [];
          theseD = 1:length(experiments);
-%theseD = length(experiments)-1;
+theseD = length(experiments)-1;
     for curr_day = theseD %[1:19, 21:length(experiments)]%JF039
 
 
@@ -699,8 +699,8 @@ end
 
 figure();
 
-for iAnimal = 1
-    %subplot(3, 1, iAnimal)
+for iAnimal = [5:7]
+    subplot(3, 1, iAnimal-4)
     transparencyValues = 0:1 / length(an(iAnimal).noGoDay):1;
     for iDay = 1:size(an(iAnimal).noGoDay, 2)
         if iDay == size(an(iAnimal).noGoDay, 2)

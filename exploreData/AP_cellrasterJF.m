@@ -285,7 +285,7 @@ curr_group = gui_data.align_groups{gui_data.curr_align}(:,gui_data.curr_group);
 if length(unique(curr_group)) == 1
     % Black if one group
     group_colors = [0,0,0];
-elseif length(unique(sign(curr_group(curr_group ~= 0)))) == 1
+elseif length(unique(sign(curr_group(curr_group ~= 0)))) == 1 || length(unique(curr_group)) == 4
     % 'Lines' colors if all groups positive
     n_groups = length(unique(curr_group));
     group_colors = lines(n_groups);
@@ -300,7 +300,8 @@ elseif length(unique(sign(curr_group(curr_group ~= 0)))) == 2
     n_groups_zero = length(unique(curr_group(curr_group == 0)));
     group_colors_zero = [zeros(n_groups_zero,1),zeros(n_groups_zero,1),zeros(n_groups_zero,1)];
     
-    group_colors = [flipud(group_colors_neg);group_colors_zero;group_colors_pos];    
+    group_colors = [flipud(group_colors_neg);group_colors_zero;group_colors_pos];  
+ 
 end
 
 % Plot smoothed PSTH
