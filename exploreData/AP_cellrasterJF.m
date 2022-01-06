@@ -24,7 +24,12 @@ function AP_cellrasterJF(align_times,align_groups,unit_sort)
 
 
 % Initiate align_times
-
+% if size(align_times,2)==size(align_groups,2)+1
+%     stim_to_move = align_times{end};
+%     align_times=align_times(1:size(align_times,2)-1);
+% else
+%     stim_to_move = NaN;
+% end
 % (align times required as input)
 if ~exist('align_times','var')
     error('No align times');
@@ -340,7 +345,7 @@ if length(gui_data.curr_unit) == 1
     % (single unit mode)
     
     % (sort raster by group)
-    [~,trial_sort] = sort(curr_group);
+     [~,trial_sort] = sort(curr_group);
     curr_raster_sorted = curr_raster(trial_sort,:);
     
     % (plot raster matrix as x,y)
@@ -357,6 +362,8 @@ if length(gui_data.curr_unit) == 1
     if iscell(psth_colors); psth_colors = cell2mat(psth_colors); end
     raster_dot_color = psth_colors(row_group(raster_y),:);
     set(gui_data.raster_dots,'CData',raster_dot_color);
+%     subplot(5,5,[8,9,10,13,14,15,18,19,20],'YDir','reverse','YAxisLocation','right')
+%     scatter(stim_to_move(trial_sort),1:length(trial_sort))
     
 elseif length(gui_data.curr_unit) > 1
     % (multiunit mode)

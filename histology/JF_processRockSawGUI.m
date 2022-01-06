@@ -9,7 +9,7 @@
 
 %% params / loading 
 myPaths; 
-animal = 'JF054';
+animal = 'JF043';
 % get in 'AP' format: histology_ccf.mat with tv_slices, av_slices,
 % plane_ap, plane_ml, plane_dv 
 allen_atlas_path = [allenAtlasPath 'allenCCF'];
@@ -33,8 +33,8 @@ allenAtlas10um = flipud(rot90(permute(allenAtlas10um, [3,2,1])));
 %% crop template to fit image to register 
 StackSlider(greenChannel);
 StackSlider(allenAtlas10um);
-cropAllenLimits = [240,1211]; 
-cropImgLimits = [1,418]; 
+cropAllenLimits = [213,1285]; 
+cropImgLimits = [1,464]; 
 allenAtlas10um = allenAtlas10um(:,:,cropAllenLimits(1):cropAllenLimits(2));
 greenChannel = greenChannel(:,:,cropImgLimits(1):cropImgLimits(2));
 redChannel = redChannel(:,:,cropImgLimits(1):cropImgLimits(2));
@@ -76,113 +76,113 @@ im_path = [extraHDPath filesep animal];
 %% BLUE, ORANGE, YELLOW, PURPLE, GREEN , LIGHT BLUE, RED correspondance (manual):
 probe2ephys = struct;
 probe2ephys.animal = animal;
-probe2ephys(1).day = 2;
-probe2ephys(1).site = 2;
+probe2ephys(1).day = 1;
+probe2ephys(1).site = 1;
 probe2ephys(1).shank = 4;
 
-probe2ephys(2).day = 2;
-probe2ephys(2).site = 2;
+probe2ephys(2).day = 1;
+probe2ephys(2).site = 1;
 probe2ephys(2).shank = 3;
 
-probe2ephys(3).day = 2;
-probe2ephys(3).site = 2;
+probe2ephys(3).day =1;
+probe2ephys(3).site = 1;
 probe2ephys(3).shank = 2;
 
-probe2ephys(4).day = 2;
-probe2ephys(4).site = 2;
+probe2ephys(4).day = 1;
+probe2ephys(4).site = 1;
 probe2ephys(4).shank = 1;
 
-probe2ephys(5).day = 1;
-probe2ephys(5).site = 2;
-probe2ephys(5).shank = 4;
+probe2ephys(5).day = 3;
+probe2ephys(5).site = 1;
+probe2ephys(5).shank = NaN;
 
-probe2ephys(6).day = 1;
-probe2ephys(6).site = 2;
-probe2ephys(6).shank = 3;
+probe2ephys(6).day = 6;
+probe2ephys(6).site = 1;
+probe2ephys(6).shank = NaN;
 
-probe2ephys(7).day = 1;
-probe2ephys(7).site = 2;
-probe2ephys(7).shank = 2;
+probe2ephys(7).day = 7;
+probe2ephys(7).site = 1;
+probe2ephys(7).shank = NaN;
 
-probe2ephys(8).day = 1;
+probe2ephys(8).day = 5;
 probe2ephys(8).site = 2;
-probe2ephys(8).shank = 1;
+probe2ephys(8).shank = 4;
 
-probe2ephys(9).day = 1;
-probe2ephys(9).site = 4;
-probe2ephys(9).shank = 4;
+probe2ephys(9).day = 5;
+probe2ephys(9).site = 2;
+probe2ephys(9).shank = 3;
 
-probe2ephys(10).day = 1;
-probe2ephys(10).site = 4;
-probe2ephys(10).shank = 3;
+probe2ephys(10).day = 5;
+probe2ephys(10).site = 2;
+probe2ephys(10).shank = 2;
 
-probe2ephys(11).day = 1;
-probe2ephys(11).site = 4;
-probe2ephys(11).shank = 2;
+probe2ephys(11).day = 5;
+probe2ephys(11).site = 2;
+probe2ephys(11).shank = 1;
 
-probe2ephys(12).day = 1;
-probe2ephys(12).site = 4;
-probe2ephys(12).shank = 1;
+probe2ephys(12).day = 4;
+probe2ephys(12).site = 2;
+probe2ephys(12).shank = 4;
 
-probe2ephys(13).day = 1;
-probe2ephys(13).site = 6;
-probe2ephys(13).shank = 4;
+probe2ephys(13).day = 4;
+probe2ephys(13).site = 2;
+probe2ephys(13).shank = 3;
 
-probe2ephys(14).day = 1;
-probe2ephys(14).site = 6;
-probe2ephys(14).shank = 3;
+probe2ephys(14).day = 4;
+probe2ephys(14).site = 2;
+probe2ephys(14).shank = 2;
 
-probe2ephys(15).day = 1;
-probe2ephys(15).site = 6;
-probe2ephys(15).shank = 2;
+probe2ephys(15).day = 4;
+probe2ephys(15).site = 2;
+probe2ephys(15).shank = 1;
 
-probe2ephys(16).day = 1;
-probe2ephys(16).site = 6;
-probe2ephys(16).shank = 1;
+probe2ephys(16).day = 2;
+probe2ephys(16).site = 2;
+probe2ephys(16).shank = 4;
 
-probe2ephys(17).day = 1;
-probe2ephys(17).site = 1;
-probe2ephys(17).shank = 4;
+probe2ephys(17).day = 2;
+probe2ephys(17).site = 2;
+probe2ephys(17).shank = 3;
 
-probe2ephys(18).day = 1;
-probe2ephys(18).site = 1;
-probe2ephys(18).shank = 3;
+probe2ephys(18).day = 2;
+probe2ephys(18).site = 2;
+probe2ephys(18).shank = 2;
 
-probe2ephys(19).day = 1;
-probe2ephys(19).site = 1;
-probe2ephys(19).shank = 2;
+probe2ephys(19).day = 2;
+probe2ephys(19).site = 2;
+probe2ephys(19).shank = 1;
 
-probe2ephys(20).day = 1;
-probe2ephys(20).site = 1;
-probe2ephys(20).shank = 1;
+probe2ephys(20).day = 3;
+probe2ephys(20).site = 2;
+probe2ephys(20).shank = 4;
 
-probe2ephys(21).day = 2;
-probe2ephys(21).site = 3;
-probe2ephys(21).shank = 4;
+probe2ephys(21).day = 3;
+probe2ephys(21).site = 2;
+probe2ephys(21).shank = 3;
 
-probe2ephys(22).day = 1;
-probe2ephys(22).site = 1;
-probe2ephys(22).shank = 1;
+probe2ephys(22).day = 3;
+probe2ephys(22).site = 2;
+probe2ephys(22).shank = 2;
 
-probe2ephys(23).day = 1;
-probe2ephys(23).site = 1;
-probe2ephys(23).shank = 2;
+probe2ephys(23).day = 3;
+probe2ephys(23).site = 2;
+probe2ephys(23).shank = 1;
 
 probe2ephys(24).day = 1;
-probe2ephys(24).site = 1;
-probe2ephys(24).shank = 3;
+probe2ephys(24).site = 2;
+probe2ephys(24).shank = 4;
 
 probe2ephys(25).day = 1;
-probe2ephys(25).site = 1;
-probe2ephys(25).shank = 4;
+probe2ephys(25).site = 2;
+probe2ephys(25).shank = 3;
 
-probe2ephys(26).day = 4;
+probe2ephys(26).day = 1;
 probe2ephys(26).site = 2;
-probe2ephys(26).shank = 1;
+probe2ephys(26).shank = 2;
 
-probe2ephys(27).day = 4;
+probe2ephys(27).day = 1;
 probe2ephys(27).site = 2;
-probe2ephys(27).shank = 2;
+probe2ephys(27).shank = 1;
 
 probe2ephys(28).day = 4;
 probe2ephys(28).site = 2;
@@ -201,12 +201,13 @@ im_path = [extraHDPath filesep animal];
 load([im_path, '/probe2ephys.mat'])
 load([im_path, '/slices/probe_ccf.mat'])
 dontAnalyze = 0;
-iProbe = 16
+iProbe=0
+iProbe =9
 %for iProbe = 1:size(probe2ephys, 2)
 keep st probe2ephys tv av animal iProbe slice_path im_path
     use_probe = iProbe;
     corona = 0;
-    protocol = 'rating'; %protocol common to all sites and days
+    protocol = 'oice'; %protocol common to all sites and days
     experiments = AP_find_experimentsJF(animal, protocol, protocol);
     experiments = experiments([experiments.ephys]);
     curr_day = probe2ephys(iProbe).day;
@@ -245,13 +246,13 @@ keep st probe2ephys tv av animal iProbe slice_path im_path
         loadLFP=1;
     end
     loadLFP=0;
-    recording=1;
+    recording=[];
     experiment=1
     
     AP_load_experimentJF;
 
-    if dontAnalyze == 0
-        AP_cellrasterJF({stimOn_times}, {stimIDs})
+    %if dontAnalyze == 0
+        %AP_cellrasterJF({stimOn_times}, {stimIDs})
         
         
         AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))',signals_events.responseTimes(n_trials(1):n_trials(end))'}, ...
@@ -301,7 +302,7 @@ keep st probe2ephys tv av animal iProbe slice_path im_path
 %end
 
 %% save on server
-animal = 'JF054';
+
 im_path = [extraHDPath filesep animal];
 locationHisto = ['/home/netshare/tempserver/', animal, '/Histology']; % copy files over to local disk
 mkdir([locationHisto, '/processed/']);

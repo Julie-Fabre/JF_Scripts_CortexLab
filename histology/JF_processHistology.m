@@ -1,12 +1,13 @@
 %AP_preprocess_phase3_newOEJF_onlysync('JF022', '2020-12-14')
 
 clear all;
-animal = 'JF045';
-im_type = 'tiffUnmergedNoDef';
+myPaths;
+animal = 'JF050';
+im_type = 'brainSaw';
 
 %% get histology slices and copy locally
 if strcmp(im_type, 'brainSaw') == 1
-     locationHisto = ['/home/netshare/znas-brainsaw/*JF054/', animal]; % copy files over to local disk
+     locationHisto = ['/home/netshare/znas-brainsaw/*JF*/', animal]; % copy files over to local disk
 else
     locationHisto = [znasPath, animal, '/Histology/']; % copy files over to local disk
 end
@@ -24,7 +25,7 @@ if strcmp(im_type, 'o') == 1
 elseif strcmp(im_type, 'brainSaw') == 1
     imagetFolders = dir([locationHisto, '/downsampled_stacks']);
     imagetFolders(1:2) = []; % remove current dir and one above
-    imageFolders = dir([imagetFolders(1).folder '\' imagetFolders(1).name]);
+    imageFolders = dir([imagetFolders(1).folder '/' imagetFolders(1).name]);
     
     im_dir = extraHDPath;
     im_path = [im_dir, animal];
@@ -112,21 +113,21 @@ set(gcf,'Color','k')
 %% BLUE, ORANGE, YELLOW, PURPLE, GREEN , LIGHT BLUE, RED correspondance (manual):
 probe2ephys = struct;
 probe2ephys.animal = animal;
-probe2ephys(1).day = 1;
-probe2ephys(1).site = 4;
-probe2ephys(1).shank = NaN;
+probe2ephys(1).day = 2;
+probe2ephys(1).site = 2;
+probe2ephys(1).shank = 4;
 
 probe2ephys(2).day = 2;
-probe2ephys(2).site = 3;
-probe2ephys(2).shank = NaN;
+probe2ephys(2).site = 2;
+probe2ephys(2).shank = 3;
 
 probe2ephys(3).day = 2;
 probe2ephys(3).site = 2;
-probe2ephys(3).shank = NaN;
+probe2ephys(3).shank = 2;
 
-probe2ephys(4).day = 1;
-probe2ephys(4).site = 3;
-probe2ephys(4).shank = NaN;
+probe2ephys(4).day = 2;
+probe2ephys(4).site = 2;
+probe2ephys(4).shank = 1;
 
 probe2ephys(5).day = 1;
 probe2ephys(5).site = 1;
@@ -237,12 +238,12 @@ save([im_path, '/probe2ephys.mat'], 'probe2ephys')
 im_path = [extraHDPath filesep animal];
 load([im_path, '/probe2ephys.mat'])
 dontAnalyze = 0;
-iProbe = 4
+iProbe = 1
 
 keep st probe2ephys tv av animal iProbe slice_path im_path 
     use_probe = iProbe;
     corona = 0;
-    protocol = 'rating'; %protocol common to all sites and days
+    protocol = 'oice'; %protocol common to all sites and days
     experiments = AP_find_experimentsJF(animal, protocol, protocol);
     experiments = experiments([experiments.ephys]);
     curr_day = probe2ephys(iProbe).day;

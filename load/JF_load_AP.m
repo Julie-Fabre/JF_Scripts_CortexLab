@@ -3,12 +3,12 @@
 close all;
 myPaths;
 
-animals={'JF043'};
+animals={'JF054'};
 curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};
 
-protocol = 'oice'; % (this is the name of the Signals protocol)
+protocol = 'atural'; % (this is the name of the Signals protocol)
 %protocol = 'JF_GratingPassive'; % (this is the name of the Signals protocol)
 %protocol = 'JF_natural_images';
 experiments = AP_find_experimentsJF(animal, protocol, true);
@@ -27,18 +27,17 @@ curr_plot_structure = find(strcmp(st.acronym, 'GPe'));
 
 %% Load data from experiment 
 
-curr_day = 6; % (set which day to use)
+curr_day = 1; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
 thisDate = thisDay;
 experiment = experiments(curr_day).experiment; % experiment number
 
-verbose = true; % display load progress and some info figures
+verbose = false; % display load progress and some info figures
 load_parts.cam=false;
 load_parts.imaging=false;
 load_parts.ephys=true;
-
 
 site = 2;%1,1; 2,4; 3,7
 recording = []; 
@@ -54,16 +53,19 @@ if isSpikeGlx
 end
 
 AP_load_experimentJF;
-
-
-                
- 
 curr_shank=NaN;
-AP_cellrasterJF({stimOn_times(:)}, {stimIDs});
 
+ %      curr_shank=2         
 AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))',stimOn_times}, ...
     {trial_conditions(:,1),trial_conditions(:,2), ...
     trial_conditions(:,3),movement_after200ms_and_type});
+
+AP_cellrasterJF({stimOn_times(ismember(stimIDs, [4,6,7]))}, {stimIDs(ismember(stimIDs, [4,6,7]))});
+AP_cellrasterJF({stimOn_times(~isnan(stimOn_times))}, {stimIDs(~isnan(stimOn_times))});
+
+
+
+
 
 AP_cellrasterACGJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))',signals_events.responseTimes(n_trials(1):n_trials(end))'}, ...
     {trial_conditions(:,1),trial_conditions(:,2), ...

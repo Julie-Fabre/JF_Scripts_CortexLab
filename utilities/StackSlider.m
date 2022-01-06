@@ -91,7 +91,7 @@ end
 % All handles and the image stack are stored in the struct SS             %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 SCRSZ=get(0,'ScreenSize');                                                  %Get user's screen size
-figheight=SCRSZ(4)-800;                                                     %A reasonable height for the GUI
+figheight=SCRSZ(4)-1400;                                                     %A reasonable height for the GUI
 figwidth=SCRSZ(4)*0.6;                                                      %A reasonable width for the GUI (the height of the screen*1.1)
 pad=10;                                                                     %Inside padding in the GUI
 smallstep=1/(size(S.I,3)-1);                                                %Step the slider will take when moved using the arrow buttons: 1 frame
@@ -199,7 +199,7 @@ set(S.smbutgrp,'SelectedObject',S.smnone);                                  %Set
 %%%%%%Create a "reset" button to reset everything to defaults%%%%%%%%%%%%%%
 S.resetbutton = uicontrol('style','pushbutton',...                          %Pushbutton to reset everything to defaults
     'unit','pix',...
-    'position',[figwidth-13.5*pad figheight-50*pad 10*pad 4*pad],...
+    'position',[figwidth-13.5*pad figheight-100*pad 10*pad 4*pad],...
     'fontsize',12,...
     'string','Reset all');
     

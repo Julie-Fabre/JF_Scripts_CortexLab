@@ -1,5 +1,5 @@
 
-animal = 'JF043';
+animal = 'JF054';
 myPaths;
 
 slice_spacing = 10;
@@ -33,7 +33,12 @@ for curr_probe = 1:length(probe_ccf)
     
 end
 
-
+%    probe_ccf(19).points = probe_ccf(16).points;
+%    probe_ccf(19).points(:,1) = probe_ccf(16).points(:,1)+60;
+%    probe_ccf(19).trajectory_coords = probe_ccf(16).trajectory_coords;
+%   probe_ccf(19).trajectory_coords(:,1) = probe_ccf(16).trajectory_coords(:,1)+60;
+%    probe_ccf(19).trajectory_areas = probe_ccf(16).trajectory_areas
+%  trajectory_coords
 [~, brain_outline] = plotBrainGrid([], []);
 theseColors = {rgb('DeepSkyBlue');   rgb('DarkOrange'); rgb('Hotpink');rgb('SeaGreen');rgb('Crimson')};
 regionsNames = {'CP', 'GPe', 'GPi', 'STN', 'SNr'};

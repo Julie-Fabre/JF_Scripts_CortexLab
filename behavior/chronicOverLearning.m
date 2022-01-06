@@ -51,24 +51,25 @@ for iAnimal = 1:size(animalsAll, 2)
 
             unitCount(curr_day) = length(unique(spike_templates));
             deadChannels(curr_day) = length(unique(channel_map));
-%             figure(1);
-%             subplot(1, size(experiments, 1), curr_day)
-%             [spikeTimes, spikeAmps, spikeDepths, spikeSites] = ksDriftmap([ephys_filename, '/site1/']);
-%             plotDriftmap(spikeTimes, amplitudes, spikeDepths);
-%             makeprettyLarge;
-%             xlim([0, max(spikeTimes)])
-%             ylim([0, 2880])
-% 
-%             xticks([0, max(spikeTimes)])
-%             xticklabels({'0', num2str(max(spikeTimes)/60)})
-%             if curr_day == 1
-%                 ylabel('Depth from tip (\mum)');
-%                 xlabel('time (min)')
-%                 makeprettyLarge;
-%             else
-%                 set(gca, 'ytick', [])
-%                 set(gca, 'yticklabel', [])
-%             end
+            figure(1);
+            subplot(1, size(experiments, 1), curr_day)
+            [spikeTimes, spikeAmps, spikeDepths, spikeSites] = ksDriftmap([ephys_filename, '/site1/']);
+            plotDriftmap(spikeTimes, amplitudes, spikeDepths);
+            makeprettyLarge;
+            xlim([0, max(spikeTimes)])
+            ylim([0, 2880])
+
+            xticks([0, max(spikeTimes)])
+            xticklabels({'0', num2str(max(spikeTimes)/60)})
+            if curr_day == 1
+                ylabel('Depth from tip (\mum)');
+                xlabel('time (min)')
+                makeprettyLarge;
+            else
+                set(gca, 'ytick', [])
+                set(gca, 'yticklabel', [])
+                ylabel('')
+            end
 
             
             day = experiments(curr_day).day;
@@ -107,13 +108,13 @@ for iAnimal = 1:size(animalsAll, 2)
     hold on;
     ylabel('# of units')
     makeprettyLarge;
-    yyaxis right;
-    plot(alldaysNum, 384-deadChannels, 'Color', 'b')
+    %yyaxis right;
+    %plot(alldaysNum, 384-deadChannels, 'Color', 'b')
     makeprettyLarge;
     ax = gca;
-    ax.YAxis(2).Color = 'b';
+    %ax.YAxis(2).Color = 'b';
     xlabel('post-implant day #')
-    ylabel('# of dead channels')
+    %ylabel('# of channels with no units')
     xlim([alldaysNum(1), alldaysNum(end)])
 
 

@@ -27,4 +27,4 @@ if size(y,1)==3 % also draw mean
     plot(x,y(2,:),fstr);
 end;
  
-alpha(.2); % make patch transparent
+alpha(.3); % make patch transparent

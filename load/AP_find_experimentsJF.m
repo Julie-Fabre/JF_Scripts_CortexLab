@@ -46,6 +46,18 @@ days_combined = [days_combined,curr_days];
 days_pathnames_combined = [days_pathnames_combined,curr_days_pathname];
 
 % (look in server 2)
+expInfo_path = [znasPath filesep animal];
+expInfo_dir = dir(expInfo_path);
+day_paths = cellfun(@(x) ~isempty(regexp(x,'\d\d\d\d-\d\d-\d\d')),{expInfo_dir.name}) &...
+    [expInfo_dir.isdir];
+curr_days = {expInfo_dir(day_paths).name};
+curr_days_pathname = cellfun(@(x) [expInfo_path filesep x],curr_days,'uni',false);
+
+days_combined = [days_combined,curr_days];
+days_pathnames_combined = [days_pathnames_combined,curr_days_pathname];
+
+
+% (look in server 3)
 expInfo_path = [tempServerPath filesep animal];
 expInfo_dir = dir(expInfo_path);
 day_paths = cellfun(@(x) ~isempty(regexp(x,'\d\d\d\d-\d\d-\d\d')),{expInfo_dir.name}) &...
@@ -56,16 +68,6 @@ curr_days_pathname = cellfun(@(x) [expInfo_path filesep x],curr_days,'uni',false
 days_combined = [days_combined,curr_days];
 days_pathnames_combined = [days_pathnames_combined,curr_days_pathname];
 
-% (look in server 3)
-expInfo_path = [znasPath filesep animal];
-expInfo_dir = dir(expInfo_path);
-day_paths = cellfun(@(x) ~isempty(regexp(x,'\d\d\d\d-\d\d-\d\d')),{expInfo_dir.name}) &...
-    [expInfo_dir.isdir];
-curr_days = {expInfo_dir(day_paths).name};
-curr_days_pathname = cellfun(@(x) [expInfo_path filesep x],curr_days,'uni',false);
-
-days_combined = [days_combined,curr_days];
-days_pathnames_combined = [days_pathnames_combined,curr_days_pathname];
 
 % If multiple days: experiment number folders should be preserved across
 % all folders so just pick one

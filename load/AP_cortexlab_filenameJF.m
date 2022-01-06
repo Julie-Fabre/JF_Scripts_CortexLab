@@ -107,20 +107,35 @@ switch file
         filepattern = [animal filesep day filesep experiment ...
             filesep day '_' experiment '_' animal '_Timeline.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
+        if ~file_exists %server down, had to use 'default'
+             filepattern = [animal filesep day filesep experiment ...
+            filesep day '_' experiment '_default_Timeline.mat'];
+        [filename,file_exists] = check_locations(filepattern,server_location);
+        end
         
     case 'block'
         filepattern = [animal filesep day filesep experiment ...
             filesep day '_' experiment '_' animal '_Block.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
-        
+        if ~file_exists %server down, had to use 'default'
+            filepattern = [animal filesep day filesep experiment ...
+            filesep day '_' experiment '_default_Block.mat'];
+        [filename,file_exists] = check_locations(filepattern,server_location);
+        end
+            
     case 'parameters'
         filepattern = [animal filesep day filesep experiment ...
             filesep day '_' experiment '_' animal '_parameters.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
-        
+        if ~file_exists %server down, had to use 'default'
+            filepattern = [animal filesep day filesep experiment ...
+            filesep day '_' experiment '_default_parameters.mat'];
+        [filename,file_exists] = check_locations(filepattern,server_location);
+        end
     case 'protocol'
         filepattern = [animal filesep day filesep experiment filesep 'Protocol.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
+        
         
     case 'eyecam'
         filepattern = [animal filesep day filesep experiment filesep 'eye.mj2'];
@@ -147,7 +162,11 @@ switch file
         filepattern = [animal filesep day filesep experiment ...
             filesep day '_' experiment '_' animal '_hardwareInfo.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
-        
+        if ~file_exists %server down, had to use 'default'
+            filepattern = [animal filesep day filesep experiment ...
+            filesep day '_' experiment '_default_hardwareInfo.mat'];
+        [filename,file_exists] = check_locations(filepattern,server_location);
+        end
     case 'imaging'
         filepattern = [animal filesep day filesep filesep 'svd*'];
         [filename,file_exists] = check_locations(filepattern,server_location);
@@ -228,6 +247,12 @@ switch file
         [filename,file_exists] = check_locations(filepattern,server_location);
         
          end
+         if ~file_exists
+             filepattern = [animal filesep day filesep 'ephys'  filesep 'kilosort3' filesep site_dir   ];
+        [filename,file_exists] = check_locations(filepattern,server_location);
+        
+         end
+         
         if file_exists
             filename = fileparts(filename{1});
         end

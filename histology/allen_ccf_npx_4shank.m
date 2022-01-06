@@ -102,7 +102,7 @@ probe_ref_line = line(probe_ref_vector(1,:),allshanks_ref_vector,probe_ref_vecto
 % probe_ref_line = line(probe_ref_vector(1,:),probe_ref_vector(2,:),probe_ref_vector(3,:), ...
 %     'linewidth',1.5,'color','r','linestyle','--');
 
-probe_length = 384.0; % IMEC phase 3 (in 10 ums)
+probe_length = 75;%384.0; % IMEC phase 3 (in 10 ums)
 probe_vector = [probe_ref_vector(:,1),diff(probe_ref_vector,[],2)./ ...
     norm(diff(probe_ref_vector,[],2))*probe_length + probe_ref_vector(:,1)];
 
