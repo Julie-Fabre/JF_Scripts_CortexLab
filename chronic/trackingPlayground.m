@@ -22,10 +22,10 @@ foldersAll = {d1_folder; d2_folder};
 %% load experimental data
 for iDay = 1:size(foldersAll, 1)
     
-    templates{:, :, :, iDay} = readNPY([foldersAll{iDay, 1}, filesep, 'templates.npy']);
-    channel_positions{:, :, iDay} = readNPY([foldersAll{iDay, 1}, filesep, 'channel_positions.npy']);
-    spike_times{:, iDay} = double(readNPY([foldersAll{iDay, 1}, filesep, 'spike_times.npy']))./30000; % sample rate hard-coded as 30000 - should load this in from params 
-    spike_templates{:, iDay} = readNPY([foldersAll{iDay, 1}, filesep, 'spike_templates.npy']) + 1; % 0-idx -> 1-idx
+    templates{iDay} = readNPY([foldersAll{iDay, 1}, filesep, 'templates.npy']);
+    channel_positions{iDay} = readNPY([foldersAll{iDay, 1}, filesep, 'channel_positions.npy']);
+    spike_times{iDay} = double(readNPY([foldersAll{iDay, 1}, filesep, 'spike_times.npy']))./30000; % sample rate hard-coded as 30000 - should load this in from params 
+    spike_templates{iDay} = readNPY([foldersAll{iDay, 1}, filesep, 'spike_templates.npy']) + 1; % 0-idx -> 1-idx
     template_amplitude{iDay} = readNPY([foldersAll{iDay, 1}, filesep, 'amplitudes.npy']);
     
 end
@@ -42,16 +42,16 @@ for iDay = 1:size(foldersAll, 1)
     n_clu = size(unique_clu, 1);
     
     % Get the waveform of all templates (channel with largest amplitude)
-    [~, max_site] = max(max(abs(templates{:, :, :, iDay}(unique_clu, :, :)), [], 2), [], 3);
-    templates_max = nan(n_clu, size(templates{:, :, :, iDay}, 2));
+    [~, max_site] = max(max(abs(templates{iDay}(unique_clu, :, :)), [], 2), [], 3);
+    templates_max = nan(n_clu, size(templates{iDay}, 2));
     
     for curr_template = 1:n_clu
         this_template = unique_clu(curr_template);
         templates_max(curr_template, :) = ...
-            templates{:, :, :, iDay}(this_template, :, max_site(curr_template));
-        template_positions(curr_template, :, iDay) = channel_positions{:, :, iDay}(max_site(curr_template), :); % template position 
+            templates{iDay}(this_template, :, max_site(curr_template));
+        template_positions(curr_template, :, iDay) = channel_positions{iDay}(max_site(curr_template), :); % template position 
     end
-    waveforms{:, :, iDay} = templates_max; %template waveform on max channel
+    waveforms{iDay} = templates_max; %template waveform on max channel
 
 end
 
@@ -86,8 +86,8 @@ xlabel('cluster depth day 1')
 makepretty;
 
 subplot(234)
-spiking_stat_window = max(spike_times{:,1}) - min(spike_times{:,1});
-spiking_stat_bins = [min(spike_times{:,1}), max(spike_times{:,1})]; % not uysing this right now, but change spiking stat bins (increase the number of bins)
+spiking_stat_window = max(spike_times{1}) - min(spike_times{1});
+spiking_stat_bins = [min(spike_times{1}), max(spike_times{1})]; % not uysing this right now, but change spiking stat bins (increase the number of bins)
 % to exclude epochs where unit has drifted/there are no spikes 
 
 % Get firing rate across the session
@@ -98,7 +98,7 @@ bin_spikes = nan(n_clu, ...
 for curr_template = 1:n_clu
     this_template = unique_clu(curr_template);
     bin_spikes(curr_template, :) = ...
-        histcounts(spike_times{:,1}(spike_templates{:, 1} == this_template), ...
+        histcounts(spike_times{1}(spike_templates{1} == this_template), ...
         spiking_stat_bins);
 end
 min_spikes = 10;
@@ -131,12 +131,12 @@ iCluster = 1;
 
 iCluster=iCluster+1;
 unique_clu = dat.d1.clu.ID;
-theseSpikes1 = spike_times{:, 1}(spike_templates{:, 1} == unique_clu(iCluster)); 
-thisWaveform1 = waveforms{:, :, 1}(iCluster,:);
+theseSpikes1 = spike_times{1}(spike_templates{1} == unique_clu(iCluster)); 
+thisWaveform1 = waveforms{1}(iCluster,:);
 
 unique_clu = dat.d2.clu.ID;
-theseSpikes2 = spike_times{:, 2}(spike_templates{:, 2} == unique_clu(iCluster)); 
-thisWaveform2 = waveforms{:, :, 2}(iCluster,:);
+theseSpikes2 = spike_times{2}(spike_templates{2} == unique_clu(iCluster)); 
+thisWaveform2 = waveforms{2}(iCluster,:);
 
 [ccg1, t] = CCGBz([double(theseSpikes1); double(theseSpikes1)], [ones(size(theseSpikes1, 1), 1); ...
         ones(size(theseSpikes1, 1), 1) * 2], 'binSize', 0.001, 'duration', 0.5, 'norm', 'rate');
@@ -180,35 +180,83 @@ plot(thisWaveform2);
 
 %% ~~method 2: first use quality metrics to subselect units~~
 qMetric = struct; 
-for iUnit = 1:length()
+for iUnit = 1:length(dat.d1.clu.ID)
 %n spikes
+theseSpikes = spike_times{iDay}(spike_templates{iDay} == iUnit);
+theseAmplis = template_amplitude{iDay}(spike_templates{iDay} == iUnit);
+if ~isempty(theseSpikes)
     qMetric.numSpikes(iUnit) = numel(theseSpikes);
 
-    %% % spikes missing in xx chunks
+    % % spikes missing in xx chunks
     %super hacky - you have to cd to directory where gaussFit.py lives for
     %this to work. - change to where your file lives on your computer
-    cd('C:\Users\Julie\Dropbox\MATLAB\bombcell\helpers\qualityMetricHelpers')
-    try
-        [percent_missing_ndtrAll, ~] = ampli_fit_prc_missJF(theseAmplis, 0);
-    catch
-        percent_missing_ndtrAll = NaN;
+%     cd('/home/julie/Dropbox/MATLAB/onPaths/bombcell/helpers/qualityMetricHelpers')
+%     try
+%         [percent_missing_ndtrAll, ~] = ampli_fit_prc_missJF(theseAmplis, 0);
+%     catch
+%         percent_missing_ndtrAll = NaN;
+%     end
+%     qMetric.pMissing(iUnit) = percent_missing_ndtrAll;
+     [p,mu,stdev,n,x] = gaussian_mssing(theseAmplis);
+     qMetric.pMissing(iUnit) = p;
+        waveformsTemp_mean = waveforms{1}(iUnit,:);
+    minProminence = 0.2 * max(abs(squeeze(waveformsTemp_mean)));
+
+    %figure();plot(qMetric.waveform(iUnit, :))
+    [PKS, LOCS] = findpeaks(squeeze(waveformsTemp_mean), 'MinPeakProminence', minProminence);
+    [TRS, LOCST] = findpeaks(squeeze(waveformsTemp_mean)*-1, 'MinPeakProminence', minProminence);
+    if isempty(TRS)
+        TRS = min(squeeze(waveformsTemp_mean));
+        if numel(TRS) > 1
+            TRS = TRS(1);
+        end
+        LOCST = find(squeeze(waveformsTemp_mean) == TRS);
     end
-    qMetric.pMissing(iUnit) = percent_missing_ndtrAll;
+    if isempty(PKS)
+        PKS = max(squeeze(waveformsTemp_mean));
+        if numel(PKS) > 1
+            PKS = PKS(1);
+        end
+        LOCS = find(squeeze(waveformsTemp_mean) == PKS);
+    end
+
+    peakLoc = LOCS(PKS == max(PKS));
+    if numel(peakLoc) > 1
+        peakLoc = peakLoc(1);
+
+    end
+    troughLoc = LOCST(TRS == max(TRS));
+    if numel(troughLoc) > 1
+        troughLoc = troughLoc(1);
+    end
+
+    if peakLoc > troughLoc
+        qMetric.somatic(iUnit) = 1;
+    else
+        qMetric.somatic(iUnit) = 0;
+    end
+
+    %false positives
+    [qMetric.fractionRPVchunk(iUnit), qMetric.numRPVchunk(iUnit)] = fractionRPviolationsJF( ...
+        numel(theseSpikes), theseSpikes, 0.0010, 0.0002,  max(theseSpikes)- min(theseSpikes)); %method from Hill et al., 2011
 end
+    
+end
+keepUnits = qMetric.numSpikes > 300 & qMetric.somatic & qMetric.fractionRPVchunk <= 2 & qMetric.pMissing < 0.000001;
 %% ~~method 1: find closest ACG and waveform match for each cell ~~
 
 % get ACGs on day 1+2
 for iDay = 1:size(foldersAll, 1)
     % n clusters
     if iDay == 1
-        unique_clu = dat.d1.clu.ID;
+        unique_clu = dat.d1.clu.ID(keepUnits);
     else
-        unique_clu = dat.d2.clu.ID;
+        unique_clu = dat.d2.clu.ID(keepUnits);
     end
     n_clu = size(unique_clu, 1);
     % Get the waveform of all templates (channel with largest amplitude)
     for curr_template = 1:n_clu
-       theseSpikes = spike_times{:, iDay}(spike_templates{:, iDay} == unique_clu(curr_template)); 
+       theseSpikes = spike_times{iDay}(spike_templates{iDay} == unique_clu(curr_template)); 
            [ccg, t] = CCGBz([double(theseSpikes); double(theseSpikes)], [ones(size(theseSpikes, 1), 1); ...
         ones(size(theseSpikes, 1), 1) * 2], 'binSize', 0.001, 'duration', 0.5, 'norm', 'rate');
     ccg(t==0,1,1)=0;
@@ -220,11 +268,11 @@ end
 % correlations
 clearvars all_corrs
 
-unique_clu = dat.d1.clu.ID;%subset the @good@ ones
+unique_clu = dat.d1.clu.ID(keepUnits);%subset the @good@ ones
 n_clu = size(unique_clu, 1);
 % Get the waveform of all templates (channel with largest amplitude)
 for curr_template = 1:n_clu
-    unique_clu2 = dat.d2.clu.ID;
+    unique_clu2 = dat.d2.clu.ID(keepUnits);
     n_clu2 = size(unique_clu, 1);
    for curr_template2 = 1:n_clu2
        
@@ -235,10 +283,10 @@ for curr_template = 1:n_clu
         all_corrs(curr_template, curr_template2, 1) = ccc(2);
         % normalize waveforms to reduce effect of cell bring closer/further
         % away from probe
-        normWF1 = (waveforms{:, :, 1}(curr_template,25:end) - min(waveforms{:, :, 1}(curr_template,25:end))) ./...
-                (max(waveforms{:, :, 1}(curr_template,25:end)) - min(waveforms{:, :, 1}(curr_template,25:end)));
-        normWF2 = (waveforms{:, :, 2}(curr_template,25:end) - min(waveforms{:, :, 2}(curr_template,25:end))) ./...
-                (max(waveforms{:, :, 2}(curr_template,25:end)) - min(waveforms{:, :, 2}(curr_template,25:end)));
+        normWF1 = (waveforms{1}(curr_template,25:end) - min(waveforms{1}(curr_template,25:end))) ./...
+                (max(waveforms{1}(curr_template,25:end)) - min(waveforms{1}(curr_template,25:end)));
+        normWF2 = (waveforms{2}(curr_template,25:end) - min(waveforms{2}(curr_template,25:end))) ./...
+                (max(waveforms{2}(curr_template,25:end)) - min(waveforms{2}(curr_template,25:end)));
         
         cc = max(xcorr(normWF1 , ...
          normWF2 )); % take max of xcorr is simplest way to ensure there's no artefact of waveforms not being properly aligned 
@@ -280,10 +328,13 @@ all_corrs_excluded = sum(all_corrs,3);
 %% plot ACG/WF matching vs functional matching 
 figure()
 subplot(231)
-euclidian_dist2 = abs(sum(template_positions(:, :, 1)-template_positions(single_best_match, :, 2), 2));
-scatter(1:n_clu, euclidian_dist, 'filled')
+euclidian_dist2 = abs(sum(template_positions(keepUnits, :, 1)-template_positions(single_best_match, :, 2), 2));
+scatter(find(keepUnits), euclidian_dist(keepUnits), 'filled')
 hold on;
-scatter(1:n_clu, euclidian_dist2, 'filled')
+scatter(1:145, euclidian_dist, 'filled')
+hold on;
+
+scatter(find(keepUnits), euclidian_dist2, 'filled')
 xlabel('cluster #')
 ylabel({'euclidean distance', 'between best match'})
 makepretty;
@@ -293,7 +344,7 @@ set(gcf, 'color', 'white')
 subplot(232)
 scatter(template_positions(:, 1, 1), euclidian_dist, 'filled')
 hold on;
-scatter(template_positions(:, 1, 1), euclidian_dist2, 'filled')
+scatter(template_positions(keepUnits, 1, 1), euclidian_dist2, 'filled')
 xlabel('cluster shank position day 1')
 
 makepretty;
@@ -301,14 +352,14 @@ makepretty;
 subplot(233)
 scatter(template_positions(:, 2, 1), euclidian_dist, 'filled')
 hold on;
-scatter(template_positions(:, 2, 1), euclidian_dist2, 'filled')
+scatter(template_positions(keepUnits, 2, 1), euclidian_dist2, 'filled')
 xlabel('cluster depth day 1')
 
 makepretty;
 
 subplot(234)
-spiking_stat_window = max(spike_times{:,1}) - min(spike_times{:,1});
-spiking_stat_bins = [min(spike_times{:,1}), max(spike_times{:,1})]; % not uysing this right now, but change spiking stat bins (increase the number of bins)
+spiking_stat_window = max(spike_times{1}) - min(spike_times{1});
+spiking_stat_bins = [min(spike_times{1}), max(spike_times{1})]; % not uysing this right now, but change spiking stat bins (increase the number of bins)
 % to exclude epochs where unit has drifted/there are no spikes 
 
 % Get firing rate across the session
@@ -319,7 +370,7 @@ bin_spikes = nan(n_clu, ...
 for curr_template = 1:n_clu
     this_template = unique_clu(curr_template);
     bin_spikes(curr_template, :) = ...
-        histcounts(spike_times{:,1}(spike_templates{:, 1} == this_template), ...
+        histcounts(spike_times{1}(spike_templates{1} == this_template), ...
         spiking_stat_bins);
 end
 min_spikes = 10;
@@ -329,7 +380,7 @@ spike_rate = sum(bin_spikes, 2) ./ ...
 
 scatter(spike_rate, euclidian_dist, 'filled')
 hold on;
-scatter(spike_rate, euclidian_dist2, 'filled')
+scatter(spike_rate(keepUnits), euclidian_dist2, 'filled')
 xlabel('spike rate day 1')
 makepretty;
 
@@ -337,7 +388,7 @@ makepretty;
 subplot(235)
 scatter(template_amplitude{iDay}(unique_clu), euclidian_dist, 'filled');
 hold on;
-scatter(template_amplitude{iDay}(unique_clu), euclidian_dist2, 'filled');
+scatter(template_amplitude{iDay}(unique_clu(keepUnits)), euclidian_dist2, 'filled');
 xlabel('amplitude day 1')
 makepretty;
 
@@ -380,19 +431,19 @@ makepretty;
 corrcoef(smoothedACG1,smoothedACG2)
 corrcoef(smoothedACG1,ss3)
 subplot(122)
-plot((waveforms{:, :, 1}(curr_template,25:end) - min(waveforms{:, :, 1}(curr_template,25:end))) ./...
-    (max(waveforms{:, :, 1}(curr_template,25:end)) - min(waveforms{:, :, 1}(curr_template,25:end))))
+plot((waveforms{1}(curr_template,25:end) - min(waveforms{1}(curr_template,25:end))) ./...
+    (max(waveforms{1}(curr_template,25:end)) - min(waveforms{1}(curr_template,25:end))))
 
 hold on;
-plot((waveforms{:, :, 2}(curr_template,25:end) - min(waveforms{:, :, 2}(curr_template,25:end))) ./...
-    (max(waveforms{:, :, 2}(curr_template,25:end)) - min(waveforms{:, :, 2}(curr_template,25:end))))
+plot((waveforms{2}(curr_template,25:end) - min(waveforms{2}(curr_template,25:end))) ./...
+    (max(waveforms{2}(curr_template,25:end)) - min(waveforms{2}(curr_template,25:end))))
 
 hold on; 
-plot((waveforms{:, :, 2}(single_best_match(curr_template),25:end) - min(waveforms{:, :, 2}(single_best_match(curr_template),25:end))) ./...
-    (max(waveforms{:, :, 2}(single_best_match(curr_template),25:end)) - min(waveforms{:, :, 2}(single_best_match(curr_template),25:end))))
+plot((waveforms{2}(single_best_match(curr_template),25:end) - min(waveforms{2}(single_best_match(curr_template),25:end))) ./...
+    (max(waveforms{2}(single_best_match(curr_template),25:end)) - min(waveforms{2}(single_best_match(curr_template),25:end))))
 
-max(xcorr(waveforms{:, :, 1}(curr_template,25:end),waveforms{:, :, 2}(curr_template,25:end)))
-max(xcorr(waveforms{:, :, 1}(curr_template,25:end),waveforms{:, :, 2}(single_best_match(curr_template),25:end)))
+max(xcorr(waveforms{1}(curr_template,25:end),waveforms{2}(curr_template,25:end)))
+max(xcorr(waveforms{1}(curr_template,25:end),waveforms{2}(single_best_match(curr_template),25:end)))
 legend({'', ['eucl. distance functional match = ' num2str(euclidian_dist1(curr_template))],...
     ['eucl. distance ACG/WV match = ' num2str(euclidian_dist2(curr_template))]})
 makepretty;
