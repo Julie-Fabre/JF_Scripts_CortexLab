@@ -1,6 +1,8 @@
 
 %% ~~tracking cells over days playground~~
-% dependancies: CCGBz 
+% dependancies: 
+% - CCGBz 
+% - makepretty
 
 % load dataset from Celian:
 % It contains the matched clusters IDs for 2 different days (d1 and d2). It should be hopefully straightforward to interpret:
@@ -15,6 +17,10 @@ d1_folder = strrep(dat.d1.ephysSortingFolder, '\', filesep); % windows -> linux
 d2_folder = strrep(dat.d2.ephysSortingFolder, '\', filesep); % windows -> linux
 d1_folder = strrep(d1_folder, '/128.40.224.65/Subjects/', 'home/netshare/tempserver/'); % folder location
 d2_folder = strrep(d2_folder, '/128.40.224.65/Subjects/', 'home/netshare/tempserver/'); % folder location
+d1_rawfolder = strrep(dat.d1.ephysFolder, '\', filesep); % windows -> linux
+d2_rawfolder = strrep(dat.d2.ephysFolder, '\', filesep); % windows -> linux
+d1_rawfolder = strrep(d1_rawfolder, '/128.40.224.65/Subjects/', 'home/netshare/tempserver/'); % folder location
+d2_rawfolder = strrep(d2_rawfolder, '/128.40.224.65/Subjects/', 'home/netshare/tempserver/'); % folder location
 dat.d1.clu.ID = dat.d1.clu.ID + 1; % 0-idx -> 1-idx
 dat.d2.clu.ID = dat.d2.clu.ID + 1; % 0-idx -> 1-idx
 foldersAll = {d1_folder; d2_folder};
@@ -27,7 +33,8 @@ for iDay = 1:size(foldersAll, 1)
     spike_times{iDay} = double(readNPY([foldersAll{iDay, 1}, filesep, 'spike_times.npy']))./30000; % sample rate hard-coded as 30000 - should load this in from params 
     spike_templates{iDay} = readNPY([foldersAll{iDay, 1}, filesep, 'spike_templates.npy']) + 1; % 0-idx -> 1-idx
     template_amplitude{iDay} = readNPY([foldersAll{iDay, 1}, filesep, 'amplitudes.npy']);
-    
+    spike_clusters{iDay} = readNPY([foldersAll{iDay, 1}, filesep, 'spike_clusters.npy']) + 1;
+    %mean_template_ampltiude
 end
 
 %% re-do location plot (ground truth)
@@ -56,7 +63,7 @@ for iDay = 1:size(foldersAll, 1)
 end
 
 % get euclidean distance
-euclidian_dist = abs(sum(template_positions(:, :, 1)-template_positions(:, :, 2), 2));
+euclidian_dist = abs(sum(abs(template_positions(:, :, 1)-template_positions(:, :, 2)), 2));
 
 % plot
 figure()
@@ -111,10 +118,10 @@ xlabel('spike rate day 1')
 makepretty;
 
 % amplitude (usually a good proxy for unit quality)
-subplot(235)
-scatter(template_amplitude{iDay}(unique_clu), euclidian_dist, 'filled')
-xlabel('amplitude day 1')
-makepretty;
+% subplot(235)
+% scatter(nanmean(template_amplitude{iDay}(spike_template==unique_clu)), euclidian_dist, 'filled')
+% xlabel('amplitude day 1')
+% makepretty;
 
 %Celian's pairCorr
 subplot(236)
@@ -244,7 +251,7 @@ end
 end
 keepUnits = qMetric.numSpikes > 300 & qMetric.somatic & qMetric.fractionRPVchunk <= 2 & qMetric.pMissing < 0.000001;
 %% ~~method 1: find closest ACG and waveform match for each cell ~~
-
+keepUnits = ones(numel(dat.d1.clu.ID),1);
 % get ACGs on day 1+2
 for iDay = 1:size(foldersAll, 1)
     % n clusters
@@ -285,8 +292,8 @@ for curr_template = 1:n_clu
         % away from probe
         normWF1 = (waveforms{1}(curr_template,25:end) - min(waveforms{1}(curr_template,25:end))) ./...
                 (max(waveforms{1}(curr_template,25:end)) - min(waveforms{1}(curr_template,25:end)));
-        normWF2 = (waveforms{2}(curr_template,25:end) - min(waveforms{2}(curr_template,25:end))) ./...
-                (max(waveforms{2}(curr_template,25:end)) - min(waveforms{2}(curr_template,25:end)));
+        normWF2 = (waveforms{2}(curr_template2,25:end) - min(waveforms{2}(curr_template2,25:end))) ./...
+                (max(waveforms{2}(curr_template2,25:end)) - min(waveforms{2}(curr_template2,25:end)));
         
         cc = max(xcorr(normWF1 , ...
          normWF2 )); % take max of xcorr is simplest way to ensure there's no artefact of waveforms not being properly aligned 
@@ -328,8 +335,11 @@ all_corrs_excluded = sum(all_corrs,3);
 %% plot ACG/WF matching vs functional matching 
 figure()
 subplot(231)
-euclidian_dist2 = abs(sum(template_positions(keepUnits, :, 1)-template_positions(single_best_match, :, 2), 2));
-scatter(find(keepUnits), euclidian_dist(keepUnits), 'filled')
+keepUnits(single_best_match==0)=0;
+single_best_match(single_best_match==0)=[];
+
+euclidian_dist2 = abs(sum(template_positions(logical(keepUnits), :, 1)-template_positions(single_best_match, :, 2), 2));
+scatter(find(keepUnits), euclidian_dist(logical(keepUnits)), 'filled')
 hold on;
 scatter(1:145, euclidian_dist, 'filled')
 hold on;
@@ -342,22 +352,25 @@ set(gcf, 'color', 'white')
 
 
 subplot(232)
+cla;
 scatter(template_positions(:, 1, 1), euclidian_dist, 'filled')
 hold on;
-scatter(template_positions(keepUnits, 1, 1), euclidian_dist2, 'filled')
+scatter(template_positions(logical(keepUnits), 1, 1), euclidian_dist2, 'filled')
 xlabel('cluster shank position day 1')
 
 makepretty;
 
 subplot(233)
+cla;
 scatter(template_positions(:, 2, 1), euclidian_dist, 'filled')
 hold on;
-scatter(template_positions(keepUnits, 2, 1), euclidian_dist2, 'filled')
+scatter(template_positions(logical(keepUnits), 2, 1), euclidian_dist2, 'filled')
 xlabel('cluster depth day 1')
 
 makepretty;
 
 subplot(234)
+cla;
 spiking_stat_window = max(spike_times{1}) - min(spike_times{1});
 spiking_stat_bins = [min(spike_times{1}), max(spike_times{1})]; % not uysing this right now, but change spiking stat bins (increase the number of bins)
 % to exclude epochs where unit has drifted/there are no spikes 
@@ -380,7 +393,7 @@ spike_rate = sum(bin_spikes, 2) ./ ...
 
 scatter(spike_rate, euclidian_dist, 'filled')
 hold on;
-scatter(spike_rate(keepUnits), euclidian_dist2, 'filled')
+scatter(spike_rate(logical(keepUnits)), euclidian_dist2, 'filled')
 xlabel('spike rate day 1')
 makepretty;
 
@@ -388,7 +401,7 @@ makepretty;
 subplot(235)
 scatter(template_amplitude{iDay}(unique_clu), euclidian_dist, 'filled');
 hold on;
-scatter(template_amplitude{iDay}(unique_clu(keepUnits)), euclidian_dist2, 'filled');
+scatter(template_amplitude{iDay}(unique_clu(logical(keepUnits))), euclidian_dist2, 'filled');
 xlabel('amplitude day 1')
 makepretty;
 

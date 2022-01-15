@@ -3,7 +3,7 @@
 close all;
 myPaths;
 
-animals={'JF054'};
+animals={'JF059'};
 curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};
@@ -27,7 +27,7 @@ curr_plot_structure = find(strcmp(st.acronym, 'GPe'));
 
 %% Load data from experiment 
 
-curr_day = 1; % (set which day to use)
+curr_day = 2; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
@@ -39,7 +39,7 @@ load_parts.cam=false;
 load_parts.imaging=false;
 load_parts.ephys=true;
 
-site = 2;%1,1; 2,4; 3,7
+site = 6;%1,1; 2,4; 3,7
 recording = []; 
 experiment = 1;
 loadClusters = 0;

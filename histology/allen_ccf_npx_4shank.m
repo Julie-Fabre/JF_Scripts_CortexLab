@@ -742,7 +742,7 @@ for myshank=1:numel(gui_data.handles.probe_ref_line)
 
     % Get the depth of the bottom of the probe (sign: hack by z offset)
     probe_depth = round(sqrt(sum((trajectory_brain_intersect - probe_vector(:,2)).^2))*10)* ...
-        sign(probe_vector(3,2)-trajectory_brain_intersect(3));
+        sign(probe_vector(3,2)-trajectory_brain_intersect(3))*0.945;
 
     % Update the text
     if myshank==1 

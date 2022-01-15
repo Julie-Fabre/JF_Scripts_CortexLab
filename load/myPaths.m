@@ -5,7 +5,7 @@
 znasPath = '/home/netshare/znas/';
 zserverPath = '/home/netshare/zserver-data/';
 zserverLabPath = '/home/netshare/zserver-lab/';
-tempServerPath = '/home/netshare/tempserver/';
+tempServerPath = '/home/netshare/zinu/';
 
 %% extra/backup drives 
 
