@@ -18,8 +18,8 @@ function nptype24_imro
 patternType = 2;
 shankChoice = 2;   % 0-3, needed for patternType 0
 botRow =  0;     
-refElec = 0;     % 0 for external, 1-4 for tip reference on shank 0-3
-elecChoice = 0:1; % 0-3, needed for patternType 2
+refElec = 4;     % 0 for external, 1-4 for tip reference on shank 0-3
+elecChoice = 2:3; % 0-3, needed for patternType 2
 
 shank = zeros(384,1,'single');
 bank = zeros(384,1,'single');
@@ -61,7 +61,7 @@ switch patternType
     case 2
         %horizontal stripe of 2 channel blocks (96 sites) across all four shanks
         shElecInd = (botRow*2:(botRow*2 + 192)); %these are the electrode indices on each shank
-        nameStr = sprintf( 'NPtype24_hStripe_shanks%d_botRow%d_ref%d', elecChoice, botRow, refElec );
+        nameStr = sprintf( 'NPtype24_hStripe_shanks%d%d_botRow%d_ref%d', elecChoice(1), elecChoice(2),botRow, refElec );
         %loop over shanks; for each, calculate the channels that correspond
         %to these electrode indices       
         nE = 192; %electrodes in pattern per shank

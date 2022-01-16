@@ -29,14 +29,10 @@
 % JF_preprocess_NPX2_3('JF063', '2021-11-10', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 3, []);
 
 %JF044 all
-JF_preprocess_NPX2('JF059', '2022-01-13', 'chanMapNP2_4Shank_bottRow_shank2_flipper0x2Emat_kilosortChanMap.mat', 1, 1, []);
-JF_preprocess_NPX2('JF059', '2022-01-13', 'chanMapNP2_4Shank_bottRow_shank2_flipper0x2Emat_kilosortChanMap.mat', 1, 2, []);
-JF_preprocess_NPX2('JF059', '2022-01-14', 'chanMapNP2_4Shank_bottRow_shank01_flipper0x2Emat_kilosortChanMap.mat', 1, 1, []);
-JF_preprocess_NPX2('JF059', '2022-01-14', 'chanMapNP2_4Shank_bottRow_shank01_flipper0x2Emat_kilosortChanMap.mat', 1, 2, []);
-JF_preprocess_NPX2('JF059', '2022-01-14', 'chanMapNP2_4Shank_bottRow_shank2_flipper0x2Emat_kilosortChanMap.mat', 1, 3, []);
-JF_preprocess_NPX2('JF059', '2022-01-14', 'chanMapNP2_4Shank_bottRow_shank2_flipper0x2Emat_kilosortChanMap.mat', 1, 4, []);
-JF_preprocess_NPX2('JF059', '2022-01-14', 'chanMapNP2_4Shank_bottRow_shank2_flipper0x2Emat_kilosortChanMap.mat', 1, 5, []);
-JF_preprocess_NPX2('JF059', '2022-01-14', 'chanMapNP2_4Shank_bottRow_shank2_flipper0x2Emat_kilosortChanMap.mat', 1, 6, []);
+JF_preprocess_NPX2('JF059', '2022-01-15', 'chanMapNP2_4Shank_bottRow_shank01_flipper0x2Emat_kilosortChanMap.mat', 1, 1, []);
+JF_preprocess_NPX2('JF059', '2022-01-15', 'chanMapNP2_4Shank_bottRow_shank2_flipper0x2Emat_kilosortChanMap.mat', 1, 2, []);
+JF_preprocess_NPX2('JF059', '2022-01-15', 'chanMapNP2_4Shank_bottRow_shank3_flipper0x2Emat_kilosortChanMap.mat', 1, 3, []);
+
 %JF026 last day
 
 
