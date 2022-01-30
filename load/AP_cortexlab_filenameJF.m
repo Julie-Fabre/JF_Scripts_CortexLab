@@ -1,6 +1,6 @@
-function [filename,file_exists] = AP_cortexlab_filenameJF(animal,day,experiment,file,site,recording)
+function [filename,file_exists] = AP_cortexlab_filenameJF(animal,date,experiment,file,site,recording)
 myPaths;
-% [filename,file_exists] = AP_cortexlab_filename(animal,day,experiment,file,site,recording)
+% [filename,file_exists] = AP_cortexlab_filename(animal,date,experiment,file,site,recording)
 %
 % This is an absolute mess because of lab-wide inconsistency
 %
@@ -27,8 +27,8 @@ if isnumeric(experiment)
     experiment = num2str(experiment);
 end
 
-if isnumeric(day)
-    experiment = num2str(day);
+if isnumeric(date)
+    experiment = num2str(date);
 end
 
 % Site = multiple probes
@@ -81,13 +81,13 @@ server_location{end+1} = [server1  filesep 'EyeCamera'];
 switch file
     
     case 'expInfo'
-        filepattern = [animal filesep day filesep];
+        filepattern = [animal filesep date filesep];
         [filename,file_exists] = check_locations(filepattern,server_location);
         if file_exists
             filename = fileparts(filename{1});
         end
     case 'syncMess'
-        filepattern = [animal filesep day filesep ...
+        filepattern = [animal filesep date filesep ...
                 'ephys' site_dir filesep 'experiment*' filesep 'recording*' ...
                 filesep 'sync_messages.txt'];
             [filename,file_exists] = check_locations(filepattern,server_location);
@@ -101,74 +101,74 @@ switch file
         filepattern = [animal filesep 'Histology/processed/probe2ephys.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
     case 'mainfolder'
-        filepattern = [animal filesep day];
+        filepattern = [animal filesep date];
         [filename,file_exists] = check_locations(filepattern,server_location);
     case 'timeline'
-        filepattern = [animal filesep day filesep experiment ...
-            filesep day '_' experiment '_' animal '_Timeline.mat'];
+        filepattern = [animal filesep date filesep experiment ...
+            filesep date '_' experiment '_' animal '_Timeline.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
         if ~file_exists %server down, had to use 'default'
-             filepattern = [animal filesep day filesep experiment ...
-            filesep day '_' experiment '_default_Timeline.mat'];
+             filepattern = [animal filesep date filesep experiment ...
+            filesep date '_' experiment '_default_Timeline.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
         end
         
     case 'block'
-        filepattern = [animal filesep day filesep experiment ...
-            filesep day '_' experiment '_' animal '_Block.mat'];
+        filepattern = [animal filesep date filesep experiment ...
+            filesep date '_' experiment '_' animal '_Block.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
         if ~file_exists %server down, had to use 'default'
-            filepattern = [animal filesep day filesep experiment ...
-            filesep day '_' experiment '_default_Block.mat'];
+            filepattern = [animal filesep date filesep experiment ...
+            filesep date '_' experiment '_default_Block.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
         end
             
     case 'parameters'
-        filepattern = [animal filesep day filesep experiment ...
-            filesep day '_' experiment '_' animal '_parameters.mat'];
+        filepattern = [animal filesep date filesep experiment ...
+            filesep date '_' experiment '_' animal '_parameters.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
         if ~file_exists %server down, had to use 'default'
-            filepattern = [animal filesep day filesep experiment ...
-            filesep day '_' experiment '_default_parameters.mat'];
+            filepattern = [animal filesep date filesep experiment ...
+            filesep date '_' experiment '_default_parameters.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
         end
     case 'protocol'
-        filepattern = [animal filesep day filesep experiment filesep 'Protocol.mat'];
+        filepattern = [animal filesep date filesep experiment filesep 'Protocol.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
         
         
     case 'eyecam'
-        filepattern = [animal filesep day filesep experiment filesep 'eye.mj2'];
+        filepattern = [animal filesep date filesep experiment filesep 'eye.mj2'];
         [filename,file_exists] = check_locations(filepattern,server_location);
         
     case 'facecam'
-        filepattern = [animal filesep day filesep experiment filesep 'face.mj2'];
+        filepattern = [animal filesep date filesep experiment filesep 'face.mj2'];
         [filename,file_exists] = check_locations(filepattern,server_location);
         
     case 'eyecam_processed'
-        filepattern = [animal filesep day filesep experiment filesep 'eye_proc.mat'];
+        filepattern = [animal filesep date filesep experiment filesep 'eye_proc.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
         
     case 'facecam_processed'
-        filepattern = [animal filesep day filesep experiment filesep 'face_proc.mat'];
+        filepattern = [animal filesep date filesep experiment filesep 'face_proc.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
         
     case 'facecam_movement'
         % (output from AP_mouse_movie_movement)
-        filepattern = [animal filesep day filesep experiment filesep 'facecam_movement.mat'];
+        filepattern = [animal filesep date filesep experiment filesep 'facecam_movement.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
         
     case 'hardware'
-        filepattern = [animal filesep day filesep experiment ...
-            filesep day '_' experiment '_' animal '_hardwareInfo.mat'];
+        filepattern = [animal filesep date filesep experiment ...
+            filesep date '_' experiment '_' animal '_hardwareInfo.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
         if ~file_exists %server down, had to use 'default'
-            filepattern = [animal filesep day filesep experiment ...
-            filesep day '_' experiment '_default_hardwareInfo.mat'];
+            filepattern = [animal filesep date filesep experiment ...
+            filesep date '_' experiment '_default_hardwareInfo.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
         end
     case 'imaging'
-        filepattern = [animal filesep day filesep filesep 'svd*'];
+        filepattern = [animal filesep date filesep filesep 'svd*'];
         [filename,file_exists] = check_locations(filepattern,server_location);
         if file_exists && iscell(filename)
             filename = fileparts(filename{1});
@@ -178,7 +178,7 @@ switch file
         
     case 'ephys_dir'
         % (the path where the ephys data is kept)
-        filepattern = [animal filesep day filesep 'ephys' site_dir];
+        filepattern = [animal filesep date filesep 'ephys' site_dir];
         [filename,file_exists] = check_locations(filepattern,server_location);
         if file_exists
             filename = fileparts(filename{1});
@@ -188,41 +188,41 @@ switch file
         % (the raw action potential band data file)
         
         % Old open ephys
-        filepattern = [animal filesep day filesep 'ephys' site_dir filesep 'experiment*_10*-0_0.dat'];
+        filepattern = [animal filesep date filesep 'ephys' site_dir filesep 'experiment*_10*-0_0.dat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
         
         % New open ephys
         if ~file_exists
-            filepattern = [animal filesep day filesep ...
+            filepattern = [animal filesep date filesep ...
                 'ephys' site_dir filesep 'experiment*' filesep 'recording*' ...
                 filesep 'continuous'  filesep 'Neuropix-3a-100.0' filesep 'continuous.dat'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
         if ~file_exists
-            filepattern = [animal filesep day filesep ...
+            filepattern = [animal filesep date filesep ...
                 'ephys' site_dir filesep 'recording*' ...
                 filesep 'continuous'  filesep 'Neuropix-3a-100.0' filesep 'continuous.dat'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
         if ~file_exists
-            filepattern = [animal filesep day filesep ...
+            filepattern = [animal filesep date filesep ...
                 'ephys' site_dir  ...
                 filesep 'continuous'  filesep 'Neuropix-3a-100.0' filesep 'continuous.dat'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
         %spike glx
         if ~file_exists
-            filepattern = [animal filesep day filesep ...
+            filepattern = [animal filesep date filesep ...
                 'ephys' site_dir filesep recording_dir filesep '*.bin'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
         if ~file_exists
-            filepattern = [animal filesep day filesep ...
+            filepattern = [animal filesep date filesep ...
                 'ephys' site_dir filesep 'experiment*' filesep '*.bin'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
         if ~file_exists
-            filepattern = [animal filesep day filesep ...
+            filepattern = [animal filesep date filesep ...
                 'ephys' site_dir filesep 'experiment*' filesep 'recording*' filesep '*.bin'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
@@ -235,20 +235,20 @@ switch file
         % Drop the kilosort version in the base workspace
         assignin('base','kilosort_version',kilosort_version);
         
-        filepattern = [animal filesep day filesep 'ephys'  filesep 'kilosort2' filesep site_dir filesep recording_dir];
+        filepattern = [animal filesep date filesep 'ephys'  filesep 'kilosort2' filesep site_dir filesep recording_dir];
         [filename,file_exists] = check_locations(filepattern,server_location);
          if ~file_exists
-             filepattern = [animal filesep day filesep 'ephys'  filesep 'kilosort2' filesep site_dir filesep 'experiment' num2str(experiment) filesep recording_dir];
-        [filename,file_exists] = check_locations(filepattern,server_location);
-        
-         end
-         if ~file_exists
-             filepattern = [animal filesep day filesep 'ephys'  filesep 'kilosort2' filesep site_dir   ];
+             filepattern = [animal filesep date filesep 'ephys'  filesep 'kilosort2' filesep site_dir filesep 'experiment' num2str(experiment) filesep recording_dir];
         [filename,file_exists] = check_locations(filepattern,server_location);
         
          end
          if ~file_exists
-             filepattern = [animal filesep day filesep 'ephys'  filesep 'kilosort3' filesep site_dir   ];
+             filepattern = [animal filesep date filesep 'ephys'  filesep 'kilosort2' filesep site_dir   ];
+        [filename,file_exists] = check_locations(filepattern,server_location);
+        
+         end
+         if ~file_exists
+             filepattern = [animal filesep date filesep 'ephys'  filesep 'kilosort3' filesep site_dir   ];
         [filename,file_exists] = check_locations(filepattern,server_location);
         
          end
@@ -266,7 +266,7 @@ switch file
         % Drop the kilosort version in the base workspace
         assignin('base','kilosort_version',kilosort_version);
         
-        filepattern = [animal filesep day filesep 'ephys' filesep 'kilosort' filesep site_dir filesep recording_dir];
+        filepattern = [animal filesep date filesep 'ephys' filesep 'kilosort' filesep site_dir filesep recording_dir];
         [filename,file_exists] = check_locations(filepattern,server_location);
         if file_exists
             filename = fileparts(filename{1});

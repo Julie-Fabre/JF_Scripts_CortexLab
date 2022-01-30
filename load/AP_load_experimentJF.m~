@@ -1641,7 +1641,6 @@ theseDepths = this_ccf.probe_depths(theseLocationsInterest);
 template_exists = ismember(1:max(spikeTemplates), unique(spikeTemplates));
 theseTemplates = template_depths(template_exists) >= min(theseDepths) & template_depths(template_exists) <= max(theseDepths); %correct depth units
 good_templates = goodUnits & theseTemplates';
-good_templates_idx = find(good_templates) - 1;
     end
     else
         % If no cluster groups at all, keep all

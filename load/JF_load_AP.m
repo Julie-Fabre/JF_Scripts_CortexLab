@@ -3,12 +3,12 @@
 close all;
 myPaths;
 
-animals={'JF059'};
+animals={'JF067'};
 curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};
 
-protocol = 'atural'; % (this is the name of the Signals protocol)
+protocol = 'orl'; % (this is the name of the Signals protocol)
 %protocol = 'JF_GratingPassive'; % (this is the name of the Signals protocol)
 %protocol = 'JF_natural_images';
 experiments = AP_find_experimentsJF(animal, protocol, true);
@@ -27,11 +27,11 @@ curr_plot_structure = find(strcmp(st.acronym, 'GPe'));
 
 %% Load data from experiment 
 
-curr_day = 3; % (set which day to use)
+curr_day = 4; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
-thisDate = thisDay;
+date = thisDay;
 experiment = experiments(curr_day).experiment; % experiment number
 
 verbose = false; % display load progress and some info figures
@@ -39,11 +39,14 @@ load_parts.cam=false;
 load_parts.imaging=false;
 load_parts.ephys=true;
 
-site = 3;%1,1; 2,4; 3,7
+site = 1;%1,1; 2,4; 3,7
 recording = []; 
 experiment = 1;
 loadClusters = 0;
-[ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,day,experiment,'ephys_ap',site,recording);
+[ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys_ap',site,recording);
+if size(ephysAPfile,2) ==2 %keep only ap
+    ephysAPfile = ephysAPfile{1};
+end
 isSpikeGlx = contains(ephysAPfile, '_g');
 if isSpikeGlx
      [ephysKSfile,~] = AP_cortexlab_filenameJF(animal,day,experiment,'ephys',site,recording);
@@ -56,6 +59,11 @@ AP_load_experimentJF;
 curr_shank=NaN;
 
  %      curr_shank=2         
+ 
+ AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))'}, ...
+    {trial_conditions(:,1),trial_conditions(:,2), ...
+    trial_conditions(:,3)});
+
 AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))',stimOn_times}, ...
     {trial_conditions(:,1),trial_conditions(:,2), ...
     trial_conditions(:,3),movement_after200ms_and_type});

@@ -5,6 +5,9 @@ function JF_preprocess_NPX2(animal, date, chanMapFile, experiment, site, recordi
 %% kilosort
 myPaths;
 [ephysAPfile, ~] = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_ap', site, recording);
+if size(ephysAPfile,2) ==2 %keep only ap
+    ephysAPfile = ephysAPfile{1};
+end
 rootZ = fileparts(ephysAPfile);
 rootH = tempPath;
 pathToYourConfigFile = [dropboxPath, 'MATLAB/onPaths/Kilosort2/configFiles'];
@@ -22,6 +25,9 @@ master_kilosort;
 
 %% extract sync channel
 [ephysAPfile, ~] = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_ap', site, recording);
+if size(ephysAPfile,2) ==2 %keep only ap
+    ephysAPfile = ephysAPfile{1};
+end
 isSpikeGlx = contains(ephysAPfile, '_g'); %spike glx (2.0 probes) or open ephys (3A probes)?
 if isSpikeGlx
     [ephysKSfile, ~] = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys', site, recording);

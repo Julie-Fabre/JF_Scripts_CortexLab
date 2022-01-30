@@ -1,5 +1,5 @@
 
-animal = 'JF054';
+animal = 'JF024';
 myPaths;
 
 slice_spacing = 10;
@@ -66,7 +66,7 @@ else
     
 end
 
-for thisthisProbe = 1:length(probe_ccf)
+for thisthisProbe = 1%:length(probe_ccf)
 
           r0 = mean(probe_ccf(thisthisProbe).points, 1);
                 xyz = bsxfun(@minus, probe_ccf(thisthisProbe).points, r0);

@@ -125,10 +125,14 @@ if numFlipsDiff>0 && numFlipsDiff<20
 
 
         if isempty(find(abs(diff(diff(compareVect,[],2)))>0.005,1)); fprintf('Success! \n');
-            co=robustfit(flipperFlipTimesFPGA,flipperFlipTimesTimelineA);
+            co=robustfit(flipperFlipTimesFPGA,flipperFlipTimesTimeline);
         end
     end
-elseif numFlipsDiff==0, co=robustfit(flipperFlipTimesFPGA,flipperFlipTimesTimeline);
+elseif diff([length(flipperFlipTimesPXIE) length(flipperFlipTimesTimeline)]) ==0 
+    flipperFlipTimesFPGA = flipperFlipTimesPXIE;
+    co=robustfit(flipperFlipTimesFPGA,flipperFlipTimesTimeline);
+elseif numFlipsDiff==0, 
+    co=robustfit(flipperFlipTimesFPGA,flipperFlipTimesTimeline);
 else %several experiments in one ephys thing: keep only flips for timeline 
     %load all exp timelines 
       
