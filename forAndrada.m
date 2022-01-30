@@ -16,7 +16,7 @@ animals = {'JF020', 'JF024'};
 days = [1,4];
 sites = [1, 1];
 probes = [2, 1];
-iDataset = 2; % 1 = dorsomedial striatum dataset, 2 = posterior striatum datatset
+iDataset = 1; % 1 = dorsomedial striatum dataset, 2 = posterior striatum datatset
 
 protocol = 'JF_natural_images';
 
