@@ -12,7 +12,7 @@ animals = {'JF020', 'JF024'};
 days = [1,4];
 sites = [1, 1];
 probes = [2, 1];
-iDataset = 1; % 1 = dorsomedial striatum dataset, 2 = posterior striatum datatset
+iDataset = 2; % 1 = dorsomedial striatum dataset, 2 = posterior striatum datatset
 
 protocol = 'JF_natural_images';
 
@@ -22,6 +22,7 @@ experiments = experiments([experiments.ephys]);
 
 day = experiments(days(iDataset)).day;
 experiment = experiments(days(iDataset)).experiment;
+experiment = experiment(1);
 site = sites(iDataset);
 isSpikeGlx = false;
 load_parts.cam=false;
