@@ -7,6 +7,10 @@
 %   5
 % stimOn_times = stimOnset time (in seconds) for each trial
 % stimIDs = which of the 30 natural images where shown for each trial
+
+% note to self: 
+% -in dataste 2 basically only one cell responsive - fine for now, but should get a better dataset
+% -axonal remove 
 %% ~~ DMS and PS dataset info ~~
 animals = {'JF020', 'JF024'};
 days = [1,4];
