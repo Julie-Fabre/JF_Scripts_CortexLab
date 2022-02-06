@@ -20,10 +20,11 @@ savePath = fullfile(ephysDirPath, 'qMetrics');
 %% run qmetrics 
 param = struct;
 param.plotThis = 0;
+param.plotGlobal =1;
 % refractory period parameters
-param.tauR = 0.0010; %refractory period time (s)
-param.tauC = 0.0002; %censored period time (s)
-param.maxRPVviolations = 0.2;
+param.tauR = 0.0020; %refractory period time (s)
+param.tauC = 0.0001; %censored period time (s)
+param.maxRPVviolations = 20;
 % percentage spikes missing parameters 
 param.maxPercSpikesMissing = 30;
 param.computeTimeChunks = 0;
@@ -42,8 +43,8 @@ param.minAmplitude = 20;
 param.ephys_sample_rate = 30000;
 param.nChannels = 385;
 % distance metric parameters
-param.computeDistanceMetrics = 0;
-param.nChannelsIsoDist = NaN;
+param.computeDistanceMetrics = 1;
+param.nChannelsIsoDist = 4;
 param.isoDmin = NaN;
 param.lratioMin = NaN;
 param.ssMin = NaN; 
@@ -60,37 +61,38 @@ param.pss = 40;
 %% compute quality metrics 
 [qMetric, goodUnits] = bc_runAllQualityMetrics(param, spikeTimes, spikeTemplates, ...
     templateWaveforms, templateAmplitudes,pcFeatures,pcFeatureIdx,usedChannels, savePath);
-
+load(fullfile(savePath, 'qMetric.mat'))
+load(fullfile(savePath, 'param.mat'))
 %% compare labeling to AP noise manual curation 
-% QQ check correct matching 
-AP_load_experimentJF;
-APnoiseUnits = good_templates == 0;
-removeThese = ~ismember(1:max(spikeTemplates), unique(spikeTemplates));
-APnoiseUnits(removeThese) = [];
-BCbadUnits = goodUnits == 0;
-fracConcordance = sum(BCbadUnits(APnoiseUnits) == 1) / numel(BCbadUnits(APnoiseUnits));
-
-diffLabeled = find(BCbadUnits(APnoiseUnits) == 1 );
-%plot the waveform of units not indentified as noise by me 
-for iDiffLabeledUnit = 1:length(diffLabeled)
-    figure();
-    minWv = max([-2, -qMetric.maxChannels(diffLabeled(iDiffLabeledUnit)) + 1]);
-    maxWv = min([6-abs(minWv), size(templateWaveforms,3) - qMetric.maxChannels(diffLabeled(iDiffLabeledUnit))]);
-    waveformSelect = abs(maxWv)-6:1:maxWv;
-    yLim = [min(templateWaveforms(diffLabeled(iDiffLabeledUnit), :, qMetric.maxChannels(diffLabeled(iDiffLabeledUnit)))), ...
-        max(templateWaveforms(diffLabeled(iDiffLabeledUnit), :, qMetric.maxChannels(diffLabeled(iDiffLabeledUnit))))];
-    
-    for iSubPlot = 1:6
-        subplot(3,2,iSubPlot)
-        plot(templateWaveforms(diffLabeled(iDiffLabeledUnit), :, ...
-            qMetric.maxChannels(diffLabeled(iDiffLabeledUnit))+waveformSelect(iSubPlot)))
-        xlim([0 82])
-        ylim([yLim(1), yLim(2)])
-        box off; makepretty; 
-        set(gca,'xtick',[])
-        set(gca,'ytick',[])
-    end
-end
+% % QQ check correct matching 
+% AP_load_experimentJF;
+% APnoiseUnits = good_templates == 0;
+% removeThese = ~ismember(1:max(spikeTemplates), unique(spikeTemplates));
+% APnoiseUnits(removeThese) = [];
+% BCbadUnits = goodUnits == 0;
+% fracConcordance = sum(BCbadUnits(APnoiseUnits) == 1) / numel(BCbadUnits(APnoiseUnits));
+% 
+% diffLabeled = find(BCbadUnits(APnoiseUnits) == 1 );
+% %plot the waveform of units not indentified as noise by me 
+% for iDiffLabeledUnit = 1:length(diffLabeled)
+%     figure();
+%     minWv = max([-2, -qMetric.maxChannels(diffLabeled(iDiffLabeledUnit)) + 1]);
+%     maxWv = min([6-abs(minWv), size(templateWaveforms,3) - qMetric.maxChannels(diffLabeled(iDiffLabeledUnit))]);
+%     waveformSelect = abs(maxWv)-6:1:maxWv;
+%     yLim = [min(templateWaveforms(diffLabeled(iDiffLabeledUnit), :, qMetric.maxChannels(diffLabeled(iDiffLabeledUnit)))), ...
+%         max(templateWaveforms(diffLabeled(iDiffLabeledUnit), :, qMetric.maxChannels(diffLabeled(iDiffLabeledUnit))))];
+%     
+%     for iSubPlot = 1:6
+%         subplot(3,2,iSubPlot)
+%         plot(templateWaveforms(diffLabeled(iDiffLabeledUnit), :, ...
+%             qMetric.maxChannels(diffLabeled(iDiffLabeledUnit))+waveformSelect(iSubPlot)))
+%         xlim([0 82])
+%         ylim([yLim(1), yLim(2)])
+%         box off; makepretty; 
+%         set(gca,'xtick',[])
+%         set(gca,'ytick',[])
+%     end
+% end
 
 %% look through good/bad cells 
 

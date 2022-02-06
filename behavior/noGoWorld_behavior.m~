@@ -1,4 +1,4 @@
-%clear all;
+clear all;
 %clc;
 
 plotAll = false;
@@ -11,7 +11,7 @@ animalsPhase2 = {[3, 4], [3:5], [5:9]};
 animalsPhase3 = {[5], [6], [10]};
 animalsPhase4 = {[6:12], [7:14], [11:13]};
 animalsPhase5 = {[13, 14, 16], [16], []};
-keep = struct;
+
 for iAnimal = 1%:size(animalsAll, 2)
 
 
@@ -532,8 +532,7 @@ for iAnimal = 1%:size(animalsAll, 2)
 
     transparencyValues = 0:1 / length(noGoDay):1;
 
-    keep(iAnimal).binBorders = binBorders;
-    keep(iAnimal).movingFrac = bhv.movingFrac;
+
     if length(noGoDay) == 0
         transparencyValues = 0:1 / length(keep_day):1;
         cla;

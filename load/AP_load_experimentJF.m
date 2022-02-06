@@ -121,44 +121,22 @@ if timeline_exists
         photodiode_flip = find(~photodiode_trace_diff(1:end-1) & ...
             photodiode_trace_diff(2:end)) + photodiode_diff_samples + 1;
         photodiode_flip_times = stimScreen_on_t(photodiode_flip)';
-        %size(photodiode_flip)
-
-        %     % (define stim screen on from photodiode - sometimes sample-length
-        %     % offset maybe because of backlight onset delay)
-        %     stimScreen_on = Timeline.rawDAQData(:, photodiode_idx) > 0.2;
-        %     stimScreen_on_t = Timeline.rawDAQTimestamps(stimScreen_on);
-        %     photodiode_thresh = 2; % old: max(Timeline.rawDAQData(:,photodiode_idx))/2
-        %     photodiode_trace = Timeline.rawDAQData(stimScreen_on, photodiode_idx) > photodiode_thresh;
-        %     %figure();plot(photodiode_trace)
-        %
-        %     % (medfilt because photodiode can be intermediate value when backlight
-        %     % coming on)
-        %
-        %     photodiode_trace_medfilt = medfilt1(Timeline.rawDAQData(stimScreen_on, ...
-        %         photodiode_idx), 3) > photodiode_thresh;
-        %     photodiode_flip = find((~photodiode_trace_medfilt(1:end-1) & photodiode_trace_medfilt(2:end)) | ...
-        %         (photodiode_trace_medfilt(1:end-1) & ~photodiode_trace_medfilt(2:end))) + 1;
-        %     photodiode_flip_times = stimScreen_on_t(photodiode_flip)';
-    
-    figure();
-    clf;
-    valu = 8000;
-    title('Photodiode');
-    hold on;
-    plot(photodiode_trace(1:valu));
-    hold on;
-    scatter(photodiode_flip(find(photodiode_flip <= valu)), ones(size(find(photodiode_flip <= valu), 1), 1))
-    hold on;
-    plot(Timeline.rawDAQData(1:valu, photodiode_idx))
-    hold on;
-    plot(medfilt1(Timeline.rawDAQData(1:valu, ...
-        photodiode_idx), 3))
-    hold on;
-    pp = photodiode_flip(find(photodiode_flip <= valu));
-%     cc = block.stimWindowUpdateTimes(1:end) * 1000 - (block.stimWindowUpdateTimes(1) * 1000 - pp(2));
-%     scatter(cc, ones(size(cc, 1), 1)*1.1)
-%     ccr = block.stimWindowRenderTimes(1:end) * 1000 - (block.stimWindowRenderTimes(1) * 1000 - pp(2));
-%     scatter(ccr, ones(size(ccr, 1), 1)*1.2)
+         
+%     figure();
+%     clf;
+%     valu = 8000;
+%     title('Photodiode');
+%     hold on;
+%     plot(photodiode_trace(1:valu));
+%     hold on;
+%     scatter(photodiode_flip(find(photodiode_flip <= valu)), ones(size(find(photodiode_flip <= valu), 1), 1))
+%     hold on;
+%     plot(Timeline.rawDAQData(1:valu, photodiode_idx))
+%     hold on;
+%     plot(medfilt1(Timeline.rawDAQData(1:valu, ...
+%         photodiode_idx), 3))
+%     hold on;
+%     pp = photodiode_flip(find(photodiode_flip <= valu));
 
     % Get flipper signal (this was added late, might not be present)
     flipper_name = 'flipper';
@@ -169,14 +147,14 @@ if timeline_exists
         (flipper_trace(1:end-1) & ~flipper_trace(2:end))) + 1;
     flipper_flip_times_timeline = Timeline.rawDAQTimestamps(flipper_flip)';
 
-    figure();
-    title('Flipper channel');
-    hold on;
-    plot(flipper_trace(1:5000));
-    hold on;
-    scatter(flipper_flip(find(flipper_flip <= 5000)), ones(size(find(flipper_flip <= 5000), 1), 1))
-    hold on;
-    plot(Timeline.rawDAQData(1:5000, flipper_idx))
+%     figure();
+%     title('Flipper channel');
+%     hold on;
+%     plot(flipper_trace(1:5000));
+%     hold on;
+%     scatter(flipper_flip(find(flipper_flip <= 5000)), ones(size(find(flipper_flip <= 5000), 1), 1))
+%     hold on;
+%     plot(Timeline.rawDAQData(1:5000, flipper_idx))
 end
 
 %% Load mpep protocol
@@ -396,7 +374,7 @@ if block_exists
                 [signals_events.trialContrastValues(1:n_trials)', signals_events.trialSideValues(1:n_trials)', ...
                 trial_choice(1:n_trials), trial_timing(1:n_trials)];
             [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
-        case {'choiworldNoGoParameterHack_noWhiteNoise'} % stimType,
+        case {'choiworldNoGoParameterHack_noWhiteNoise', 'noGo_stage4', 'noGo_stage5'} % stimType,
             % Hit/miss recorded for last trial, circshift to align
             response_trials = 1:length(block.events.endTrialValues);
             block.events.trialSideValues(response_trials) = 1;
@@ -607,7 +585,7 @@ if block_exists
                 trial_choice, trial_timing];
             [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
 
-        case {'locationWorld', 'noGo_stage1'}
+        case {'locationWorld', 'noGo_stage1', 'noGo_stage2', 'noGo_stage3'}
             % Hit/miss recorded for last trial, circshift to align
             signals_events.hitValues = circshift(signals_events.hitValues, [0, -1]);
             signals_events.missValues = circshift(signals_events.missValues, [0, -1]);
@@ -868,7 +846,7 @@ if block_exists
                 [signals_events.stim_idValues'];
             [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
             [~, stimIDs] = ismember(trial_conditions, conditions, 'rows');
-        case {'JF_choiceworldStimuli', 'JF_choiceworldStimuli_wheel'}
+        case {'JF_choiceworldStimuli', 'JF_choiceworldStimuli_wheel','JF_choiceworldStimuli_wheel_left_center'}
             %             block_stim_iti = mean(diff(block.stimWindowUpdateTimes));
             %
             %             photodiode_flip_diff = diff(stimScreen_on_t(photodiode_flip));

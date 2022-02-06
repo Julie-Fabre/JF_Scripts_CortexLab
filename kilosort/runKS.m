@@ -30,7 +30,23 @@
 
 %JF044 all
 
+
+JF_preprocess_NPX2('JF067', '2022-02-05', 'neuropixPhase3B1_kilosortChanMap.mat', 1, 1, []);
+JF_preprocess_NPX2('JF067', '2022-02-06', 'neuropixPhase3B1_kilosortChanMap.mat', 1, 1, []);
+JF_preprocess_NPX2('JF067', '2022-02-01', 'neuropixPhase3B1_kilosortChanMap.mat', 1, 1, []);
+JF_preprocess_NPX2('JF067', '2022-02-02', 'neuropixPhase3B1_kilosortChanMap.mat', 1, 1, []);
+JF_preprocess_NPX2('JF067', '2022-02-03', 'neuropixPhase3B1_kilosortChanMap.mat', 1, 1, []);
+JF_preprocess_NPX2('JF067', '2022-02-04', 'neuropixPhase3B1_kilosortChanMap.mat', 1, 1, []);
+JF_preprocess_NPX2('JF067', '2022-01-31', 'neuropixPhase3B1_kilosortChanMap.mat', 1, 1, []);
+JF_preprocess_NPX2('JF067', '2022-01-30', 'neuropixPhase3B1_kilosortChanMap.mat', 1, 1, []);
+JF_preprocess_NPX2('JF067', '2022-01-29', 'neuropixPhase3B1_kilosortChanMap.mat', 1, 1, []);
 JF_preprocess_NPX2('JF067', '2022-01-28', 'neuropixPhase3B1_kilosortChanMap.mat', 1, 1, []);
+JF_preprocess_NPX2('JF067', '2022-01-27', 'neuropixPhase3B1_kilosortChanMap.mat', 1, 1, []);
+JF_preprocess_NPX2('JF067', '2022-01-26', 'neuropixPhase3B1_kilosortChanMap.mat', 1, 1, []);
+JF_preprocess_NPX2('JF067', '2022-01-25', 'neuropixPhase3B1_kilosortChanMap.mat', 1, 1, []);
+
+
+
 JF_preprocess_NPX2('JF068', '2022-01-27', 'chanMapNP2_4Shank_bottRow_shank01_flipper0x2Emat_kilosortChanMap.mat', 1, 1, []);
 JF_preprocess_NPX2('JF068', '2022-01-27', 'chanMapNP2_4Shank_bottRow_shank01_flipper0x2Emat_kilosortChanMap.mat', 1, 2, []);
 JF_preprocess_NPX2('JF068', '2022-01-27', 'chanMapNP2_4Shank_bottRow_shank23_flipper0x2Emat_kilosortChanMap.mat', 1, 3, []);

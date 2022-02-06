@@ -27,7 +27,7 @@ curr_plot_structure = find(strcmp(st.acronym, 'GPe'));
 
 %% Load data from experiment 
 
-curr_day = 10; % (set which day to use)
+curr_day = 9; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
@@ -41,7 +41,7 @@ load_parts.ephys=true;
 
 site = 1;%1,1; 2,4; 3,7
 recording = []; 
-experiment = 2;
+experiment = 1;
 loadClusters = 0;
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys_ap',site,recording);
 if size(ephysAPfile,2) ==2 %keep only ap
