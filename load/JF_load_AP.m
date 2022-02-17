@@ -9,15 +9,12 @@ corona = 0;
 animal = animals{curr_animal};
 
 protocol = 'orl'; % (this is the name of the Signals protocol)
-%protocol = 'JF_GratingPassive'; % (this is the name of the Signals protocol)
-%protocol = 'JF_natural_images';
 experiments = AP_find_experimentsJF(animal, protocol, true);
 experiments = experiments([experiments.ephys]);
 
-allen_atlas_path = [allenAtlasPath, filesep, 'allenCCF/'];
-st = loadStructureTreeJF([allen_atlas_path, filesep, 'structure_tree_safe_2017.csv']);
-
-curr_plot_structure = find(strcmp(st.acronym, 'GPe'));
+% allen_atlas_path = [allenAtlasPath, filesep, 'allenCCF/'];
+% st = loadStructureTreeJF([allen_atlas_path, filesep, 'structure_tree_safe_2017.csv']);
+% curr_plot_structure = find(strcmp(st.acronym, 'GPe'));
 % histoFile = AP_cortexlab_filenameJF(animal, [], [], 'histo', [], []);
 % load(histoFile)
 % probe2ephysFile = AP_cortexlab_filenameJF(animal, [], [], 'probe2ephys', [], []);
@@ -27,13 +24,11 @@ curr_plot_structure = find(strcmp(st.acronym, 'GPe'));
 
 %% Load data from experiment 
 
-curr_day = 10; % (set which day to use)
+curr_day = 19; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
 date = thisDay;
-experiment = experiments(curr_day).experiment; % experiment number
-
 verbose = false; % display load progress and some info figures
 load_parts.cam=false;
 load_parts.imaging=false;
@@ -55,18 +50,33 @@ if isSpikeGlx
     end
 end
 
+ephysDirPath = AP_cortexlab_filenameJF(animal, day, experiment, 'ephys_dir', site);
+savePath = fullfile(ephysDirPath, 'qMetrics');
+qMetricsExist = dir(fullfile(savePath, 'qMetric*.mat'));
+if ~isempty(qMetricsExist)
+
+load(fullfile(savePath, 'qMetric.mat'))
+load(fullfile(savePath, 'param.mat'))
+unitType = nan(length(qMetric.percSpikesMissing),1);
+
+unitType(qMetric.nPeaks > param.maxNPeaks | qMetric.nTroughs > param.maxNTroughs ) = 0; %NOISE OR AXONAL
+unitType(qMetric.percSpikesMissing <= 40 & qMetric.nSpikes > param.minNumSpikes & ...
+    qMetric.nPeaks <= param.maxNPeaks & qMetric.nTroughs <= param.maxNTroughs & qMetric.Fp <= 30 & ...
+     qMetric.rawAmplitude > param.minAmplitude) = 1;%SINGLE SEXY UNIT
+unitType(isnan(unitType)) = 2;% MULTI UNIT 
+end
+
 AP_load_experimentJF;
 curr_shank=NaN;
 
-     
  
- AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))'}, ...
+AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))'}, ...
     {trial_conditions(:,1),trial_conditions(:,2), ...
     trial_conditions(:,3)});
 AP_cellrasterJF({stimOn_times(~isnan(stimOn_times)), stimOn_times(~isnan(stimOn_times))}, ...
     {trial_conditions(~isnan(stimOn_times),1), trial_conditions(~isnan(stimOn_times),2)});
-AP_cellrasterJF({stimOn_times(ismember(trial_conditions(:,1), [4])), stimOn_times(ismember(trial_conditions(:,1), [4]))}, ...
-    {trial_conditions(ismember(trial_conditions(:,1), [4]),1), trial_conditions(ismember(trial_conditions(:,1), [4]),2)});
+AP_cellrasterJF({stimOn_times(ismember(trial_conditions(:,1), [4,6,7])), stimOn_times(ismember(trial_conditions(:,1), [4,6,7]))}, ...
+    {trial_conditions(ismember(trial_conditions(:,1), [4,6,7]),1), trial_conditions(ismember(trial_conditions(:,1), [4,6,7]),2)});
 
 
 AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))',stimOn_times}, ...

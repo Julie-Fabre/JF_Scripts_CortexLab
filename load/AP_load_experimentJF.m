@@ -105,38 +105,38 @@ if timeline_exists
 
     % Get photodiode flips (compensate for screen flicker)
     photodiode_idx = strcmp({Timeline.hw.inputs.name}, 'photoDiode');
-       stimScreen_on = Timeline.rawDAQData(:,photodiode_idx) > 0.2;
+    stimScreen_on = Timeline.rawDAQData(:, photodiode_idx) > 0.2;
     stimScreen_on_t = Timeline.rawDAQTimestamps(stimScreen_on);
     photodiode_thresh = 2; % old: max(Timeline.rawDAQData(:,photodiode_idx))/2
-    photodiode_trace = Timeline.rawDAQData(stimScreen_on,photodiode_idx) > photodiode_thresh;
+    photodiode_trace = Timeline.rawDAQData(stimScreen_on, photodiode_idx) > photodiode_thresh;
 
-        photodiode_trace_medfilt = medfilt1(Timeline.rawDAQData(stimScreen_on, ...
-            photodiode_idx), 3);
-        photodiode_diff_thresh = range(Timeline.rawDAQData(:, photodiode_idx)) * 0.2;
-        photodiode_diff_t = 20; % time (in ms) to get delayed differential
-        photodiode_diff_samples = round(Timeline.hw.daqSampleRate/1000*photodiode_diff_t);
-        photodiode_diff_filt = [1, zeros(1, photodiode_diff_samples), -1];
-        photodiode_trace_diff = abs(conv(photodiode_trace_medfilt, photodiode_diff_filt, 'valid')) > ...
-            photodiode_diff_thresh;
-        photodiode_flip = find(~photodiode_trace_diff(1:end-1) & ...
-            photodiode_trace_diff(2:end)) + photodiode_diff_samples + 1;
-        photodiode_flip_times = stimScreen_on_t(photodiode_flip)';
-         
-%     figure();
-%     clf;
-%     valu = 8000;
-%     title('Photodiode');
-%     hold on;
-%     plot(photodiode_trace(1:valu));
-%     hold on;
-%     scatter(photodiode_flip(find(photodiode_flip <= valu)), ones(size(find(photodiode_flip <= valu), 1), 1))
-%     hold on;
-%     plot(Timeline.rawDAQData(1:valu, photodiode_idx))
-%     hold on;
-%     plot(medfilt1(Timeline.rawDAQData(1:valu, ...
-%         photodiode_idx), 3))
-%     hold on;
-%     pp = photodiode_flip(find(photodiode_flip <= valu));
+    photodiode_trace_medfilt = medfilt1(Timeline.rawDAQData(stimScreen_on, ...
+        photodiode_idx), 3);
+    photodiode_diff_thresh = range(Timeline.rawDAQData(:, photodiode_idx)) * 0.2;
+    photodiode_diff_t = 20; % time (in ms) to get delayed differential
+    photodiode_diff_samples = round(Timeline.hw.daqSampleRate/1000*photodiode_diff_t);
+    photodiode_diff_filt = [1, zeros(1, photodiode_diff_samples), -1];
+    photodiode_trace_diff = abs(conv(photodiode_trace_medfilt, photodiode_diff_filt, 'valid')) > ...
+        photodiode_diff_thresh;
+    photodiode_flip = find(~photodiode_trace_diff(1:end-1) & ...
+        photodiode_trace_diff(2:end)) + photodiode_diff_samples + 1;
+    photodiode_flip_times = stimScreen_on_t(photodiode_flip)';
+
+    %     figure();
+    %     clf;
+    %     valu = 8000;
+    %     title('Photodiode');
+    %     hold on;
+    %     plot(photodiode_trace(1:valu));
+    %     hold on;
+    %     scatter(photodiode_flip(find(photodiode_flip <= valu)), ones(size(find(photodiode_flip <= valu), 1), 1))
+    %     hold on;
+    %     plot(Timeline.rawDAQData(1:valu, photodiode_idx))
+    %     hold on;
+    %     plot(medfilt1(Timeline.rawDAQData(1:valu, ...
+    %         photodiode_idx), 3))
+    %     hold on;
+    %     pp = photodiode_flip(find(photodiode_flip <= valu));
 
     % Get flipper signal (this was added late, might not be present)
     flipper_name = 'flipper';
@@ -147,14 +147,14 @@ if timeline_exists
         (flipper_trace(1:end-1) & ~flipper_trace(2:end))) + 1;
     flipper_flip_times_timeline = Timeline.rawDAQTimestamps(flipper_flip)';
 
-%     figure();
-%     title('Flipper channel');
-%     hold on;
-%     plot(flipper_trace(1:5000));
-%     hold on;
-%     scatter(flipper_flip(find(flipper_flip <= 5000)), ones(size(find(flipper_flip <= 5000), 1), 1))
-%     hold on;
-%     plot(Timeline.rawDAQData(1:5000, flipper_idx))
+    %     figure();
+    %     title('Flipper channel');
+    %     hold on;
+    %     plot(flipper_trace(1:5000));
+    %     hold on;
+    %     scatter(flipper_flip(find(flipper_flip <= 5000)), ones(size(find(flipper_flip <= 5000), 1), 1))
+    %     hold on;
+    %     plot(Timeline.rawDAQData(1:5000, flipper_idx))
 end
 
 %% Load mpep protocol
@@ -292,6 +292,83 @@ if block_exists
     expDef = strrep(block.expDef, '\', '/'); % for windows to UNIX paths
     [~, expDef] = fileparts(expDef);
     switch expDef
+        case {'AP_stimWheelRight', 'AP_stimWheelLeft', 'AP_stimWheelLeftReverse'}
+            % Hit/miss recorded for previous trial, circshift to align
+            signals_events.hitValues = circshift(signals_events.hitValues, [0, -1]);
+            signals_events.missValues = circshift(signals_events.missValues, [0, -1]);
+
+            % Get number of completed trials (if uncompleted last trial)
+            n_trials = length(signals_events.endTrialTimes);
+
+            % Get stim on times by closest photodiode flip
+            [~, closest_stimOn_photodiode] = ...
+                arrayfun(@(x) min(abs(signals_events.stimOnTimes(x)- ...
+                photodiode_flip_times)), ...
+                1:n_trials);
+            stimOn_times = photodiode_flip_times(closest_stimOn_photodiode);
+
+            % Check that the stim times aren't off by a certain threshold
+            % (skip the first one - that's usually delayed a little)
+            stim_time_offset_thresh = 0.05;
+            if any(abs(stimOn_times(2:end)-signals_events.stimOnTimes(2:n_trials)') >= ...
+                    stim_time_offset_thresh)
+                figure;
+                plot(stimOn_times-signals_events.stimOnTimes(1:n_trials)', '.k')
+                line(xlim, repmat(stim_time_offset_thresh, 2, 1), 'color', 'r');
+                line(xlim, repmat(-stim_time_offset_thresh, 2, 1), 'color', 'r');
+                warning('Stim signals/photodiode offset over threshold');
+                xlabel('Stim number');
+                ylabel('Photodiode - signals stim time');
+                title([animal, ' ', day, ' ', num2str(experiment)]);
+            end
+            rotaryEncoder_idx = strcmp({Timeline.hw.inputs.name}, 'rotaryEncoder');
+            % (this is a very strange hack to overcome a problem in the rotary
+            % encoder that's known in the lab and was put on the wiki)
+            wheel_position = Timeline.rawDAQData(:, rotaryEncoder_idx);
+            wheel_position(wheel_position > 2^31) = wheel_position(wheel_position > 2^31) - 2^32;
+            [wheel_velocity, wheel_move] = AP_parse_wheel(wheel_position, Timeline.hw.daqSampleRate);
+
+
+            % Get wheel movement on/offsets
+            wheel_starts = Timeline.rawDAQTimestamps(diff([0; wheel_move]) == 1)';
+            wheel_stops = Timeline.rawDAQTimestamps(diff([wheel_move; 0]) == -1)';
+
+            % (stim move: first move after stim)
+            % (give this a little leeway, sometimes movement starts early but
+            % stim comes on anyway)
+            stim_leeway = 0.1;
+            wheel_move_stim_idx = ...
+                arrayfun(@(stim) find(wheel_starts > stim-stim_leeway, 1, 'first'), ...
+                stimOn_times);
+            wheel_types = ones(size(wheel_starts, 1), 1);
+            wheel_types(wheel_move_stim_idx) = 2;
+
+
+            % (response move: last move start before response signal)
+            wheel_move_response_idx = ...
+                arrayfun(@(response) find(wheel_starts <= response, 1, 'last'), ...
+                signals_events.responseTimes(1:n_trials)');
+
+            % (iti move: move start with no stim on screen)
+            stimOff_times = signals_events.stimOffTimes';
+            stimOn_epochs = logical(interp1([0; stimOn_times; stimOff_times], ...
+                [0; ones(size(stimOn_times)); zeros(size(stimOff_times))], ...
+                Timeline.rawDAQTimestamps', 'previous', 'extrap'));
+            wheel_move_iti_idx = find(ismember(wheel_starts, ...
+                Timeline.rawDAQTimestamps(~stimOn_epochs)));
+
+            % Get time from stim to rewarded movement onset and feedback
+            stim_to_move = wheel_starts(wheel_move_stim_idx) - stimOn_times(1:n_trials);
+            stim_to_feedback = signals_events.responseTimes(1:n_trials)' - stimOn_times(1:n_trials);
+
+            % (choice and outcome)
+            go_left = (signals_events.trialSideValues == 1 & signals_events.hitValues == 1) | ...
+                (signals_events.trialSideValues == -1 & signals_events.missValues == 1);
+            go_right = (signals_events.trialSideValues == -1 & signals_events.hitValues == 1) | ...
+                (signals_events.trialSideValues == 1 & signals_events.missValues == 1);
+            trial_choice = go_right(1:n_trials)' - go_left(1:n_trials)';
+            trial_outcome = signals_events.hitValues(1:n_trials)' - signals_events.missValues(1:n_trials)';
+
         case {'vanillaChoiceworld', 'vanillaChoiceworldBias', 'vanillaChoiceworldNoRepeats', 'AP_stimWheelRight'}
             % Hit/miss recorded for last trial, circshift to align
             signals_events.hitValues = circshift(signals_events.hitValues, [0, -1]);
@@ -454,7 +531,7 @@ if block_exists
             no_go = (signals_events.hitValues(n_trials(1):n_trials(end)) == 1 & (signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 3)) | ...
                 (signals_events.hitValues(n_trials(1):n_trials(end)) == 0 & (signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 2 | signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 1));
             trial_choice = no_go(n_trials(1):n_trials(end))' - go_left(n_trials(1):n_trials(end))';
-            trial_outcome = [signals_events.hitValues(n_trials(1):n_trials(end))'  signals_events.missValues(n_trials(1):n_trials(end))'];
+            trial_outcome = [signals_events.hitValues(n_trials(1):n_trials(end))', signals_events.missValues(n_trials(1):n_trials(end))'];
 
             go_left = (signals_events.hitValues(n_trials(1):n_trials(end)) == 1 & ...
                 (signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 2 | signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 1)) | ...
@@ -477,7 +554,7 @@ if block_exists
             sides = [1];
             choices = [-1, 1];
             timings = [1, 2];
-            outcomes=[0,1];
+            outcomes = [0, 1];
 
 
             conditions = combvec(imageN, choices, outcomes)';
@@ -741,6 +818,24 @@ if block_exists
                 [signals_events.stimContrastValues; signals_events.stimAzimuthValues]';
             [~, stimIDs] = ismember(trial_conditions, conditions, 'rows');
 
+            wheel_position = Timeline.rawDAQData(:, rotaryEncoder_idx);
+            wheel_position(wheel_position > 2^31) = wheel_position(wheel_position > 2^31) - 2^32;
+            [wheel_velocity, wheel_move] = AP_parse_wheel(wheel_position, Timeline.hw.daqSampleRate);
+            wheel_move_stim_idx = ...
+                arrayfun(@(stim) find(wheel_starts > stim-stim_leeway, 1, 'first'), ...
+                stimOn_times);
+
+            % Get wheel movement on/offsets
+            wheel_starts = Timeline.rawDAQTimestamps(diff([0; wheel_move]) == 1)';
+            wheel_stops = Timeline.rawDAQTimestamps(diff([wheel_move; 0]) == -1)';
+            wheel_types = ones(size(wheel_starts, 1), 1);
+            wheel_types(wheel_move_stim_idx) = 2;
+            % (stim move: first move after stim)
+            % (give this a little leeway, sometimes movement starts early but
+            % stim comes on anyway)
+            stim_leeway = 0.1;
+
+
         case 'AP_lcrGratingPassiveFlicker'
             % Flickering stim: get first photodiode after long gap
             % (ignore the first flip because that's initializing)
@@ -787,7 +882,7 @@ if block_exists
             % Get rid of the first one for now
             trial_conditions = trial_conditions(2:end);
             stimIDs = stimIDs(2:end);
-        case {'JF_GratingPassive', 'JF_GratingPassiveVarITI', 'JF_GratingPassiveVarITI_moreComb', 'JF_GratingPassiveVarITI_moreCombnew',...
+        case {'JF_GratingPassive', 'JF_GratingPassiveVarITI', 'JF_GratingPassiveVarITI_moreComb', 'JF_GratingPassiveVarITI_moreCombnew', ...
                 'JF_GratingPassiveVarITI_moreCombnew_correct'}
             stimOn_times = photodiode_flip_times(2:2:end);
             %n_trials = length(signals_events.endTrialTimes);
@@ -846,7 +941,7 @@ if block_exists
                 [signals_events.stim_idValues'];
             [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
             [~, stimIDs] = ismember(trial_conditions, conditions, 'rows');
-        case {'JF_choiceworldStimuli', 'JF_choiceworldStimuli_wheel','JF_choiceworldStimuli_wheel_left_center'}
+        case {'JF_choiceworldStimuli', 'JF_choiceworldStimuli_wheel', 'JF_choiceworldStimuli_wheel_left_center'}
             %             block_stim_iti = mean(diff(block.stimWindowUpdateTimes));
             %
             %             photodiode_flip_diff = diff(stimScreen_on_t(photodiode_flip));
@@ -862,8 +957,8 @@ if block_exists
 
             x = photodiode_flip_times(2:2:end);
             y = block.events.stim_idTimes(1:1:end) - photodiode_flip_times(2);
-            yy=photodiode_flip_times(2:2:end);
-            if length(x) < length(y) % only if there is a problem 
+            yy = photodiode_flip_times(2:2:end);
+            if length(x) < length(y) % only if there is a problem
                 clearvars yy
                 for k = 1:numel(y)
                     [val, idx] = min(abs(x-y(k)));
@@ -887,57 +982,59 @@ if block_exists
             %hacky--issues with protocol I need to fix
             %closest photodiode if exists. when doesn't exist, err ??
             % Get stim ID and conditions
-            
+
             if isfield(block.events, 'stim_aziValues')
-                conditions = unique([ceil(signals_events.stim_idValues/3)', block.events.stim_aziValues'],'rows')';
-            n_conditions = size(conditions, 1);
-            
-                trial_conditions = ...,
-                [ceil(signals_events.stim_idValues/3)', block.events.stim_aziValues'];
-            [~, trial_id] = ismember(trial_conditions(:,2), conditions(:,2), 'rows');
-            [~, stimIDs] = ismember(trial_conditions(:,1), conditions(:,1), 'rows');
-            
+                conditions = unique([ceil(signals_events.stim_idValues/3)', block.events.stim_aziValues'], 'rows')';
+                n_conditions = size(conditions, 1);
+
+                trial_conditions = ... ,
+                    [ceil(signals_events.stim_idValues/3)', block.events.stim_aziValues'];
+                [~, trial_id] = ismember(trial_conditions(:, 2), conditions(:, 2), 'rows');
+                [~, stimIDs] = ismember(trial_conditions(:, 1), conditions(:, 1), 'rows');
+
             else
                 warning('Azimuth not saved in the choiceworld stim version')
                 conditions = unique(ceil(signals_events.stim_idValues/3))';
-            n_conditions = size(conditions, 1);
+                n_conditions = size(conditions, 1);
                 trial_conditions = ...
-                [ceil(signals_events.stim_idValues/3)'];
-            [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
-            [~, stimIDs] = ismember(trial_conditions, conditions, 'rows');
-            
+                    [ceil(signals_events.stim_idValues/3)'];
+                [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
+                [~, stimIDs] = ismember(trial_conditions, conditions, 'rows');
+
             end
-            
-            
-            try
-                wheel_time = block.inputs.wheelTimes;
-                wheel = block.inputs.wheelValues;
-                surround_time = [-0.5, 2];
-                surround_sample_rate = 1 / Timeline.hw.samplingInterval; % (match this to framerate)
-                surround_time_points = surround_time(1):1 / surround_sample_rate:surround_time(2);
-                pull_times = bsxfun(@plus, stimOn_times, surround_time_points);
 
-                stim_aligned_wheel = interp1(Timeline.rawDAQTimestamps, ...
-                    wheel_velocity, pull_times);
-                % (set a threshold in speed and time for wheel movement)
-                thresh_displacement = 0.025;
-                time_over_thresh = 0.05; % ms over velocity threshold to count
-                samples_over_thresh = time_over_thresh .* surround_sample_rate;
-                wheel_over_thresh_fullconv = convn( ...
-                    abs(stim_aligned_wheel) > thresh_displacement, ...
-                    ones(1, samples_over_thresh)) >= samples_over_thresh;
-                wheel_over_thresh = wheel_over_thresh_fullconv(:, end-size(stim_aligned_wheel, 2)+1:end);
 
-                [move_trial, wheel_move_sample] = max(wheel_over_thresh, [], 2);
-                wheel_move_time = arrayfun(@(x) pull_times(x, wheel_move_sample(x)), 1:size(pull_times, 1))';
-                wheel_move_time(~move_trial) = NaN;
-
-                % Get conditions for all trials
-
-                % (trial_timing)
-
-                stim_to_move = padarray(wheel_move_time-stimOn_times, [n_trials - length(stimOn_times), 0], NaN, 'post');
+            wheel_time = block.inputs.wheelTimes;
+            wheel = block.inputs.wheelValues;
+            surround_time = [-0.5, 2];
+            surround_sample_rate = 1 / Timeline.hw.samplingInterval; % (match this to framerate)
+            surround_time_points = surround_time(1):1 / surround_sample_rate:surround_time(2);
+            if size(stimOn_times, 2) > 1
+                stimOn_times = permute(stimOn_times, [2, 1]);
             end
+            pull_times = bsxfun(@plus, stimOn_times, surround_time_points);
+
+            stim_aligned_wheel = interp1(Timeline.rawDAQTimestamps, ...
+                wheel_velocity, pull_times);
+            % (set a threshold in speed and time for wheel movement)
+            thresh_displacement = 0.025;
+            time_over_thresh = 0.05; % ms over velocity threshold to count
+            samples_over_thresh = time_over_thresh .* surround_sample_rate;
+            wheel_over_thresh_fullconv = convn( ...
+                abs(stim_aligned_wheel) > thresh_displacement, ...
+                ones(1, samples_over_thresh)) >= samples_over_thresh;
+            wheel_over_thresh = wheel_over_thresh_fullconv(:, end-size(stim_aligned_wheel, 2)+1:end);
+
+            [move_trial, wheel_move_sample] = max(wheel_over_thresh, [], 2);
+            wheel_move_time = arrayfun(@(x) pull_times(x, wheel_move_sample(x)), 1:size(pull_times, 1))';
+            wheel_move_time(~move_trial) = NaN;
+
+            % Get conditions for all trials
+
+            % (trial_timing)
+
+            stim_to_move = padarray(wheel_move_time-stimOn_times, [length(stimOn_times) - length(stimOn_times), 0], NaN, 'post');
+            no_move_trials = isnan(stim_to_move) | stim_to_move < 0.2 | stim_to_move > 0.2;
 
 
         case 'AP_auditoryStim'
@@ -1361,7 +1458,14 @@ if ephys_exists && load_parts.ephys
     % (hardcode this: kilosort2 drops channels)
     if isSpikeGlx
         max_depth = 2880;
-        channel_positions(:, 2) = max_depth - channel_positions(:, 2);
+        if any(max_depth-channel_positions(:, 2) < 0) %1.0
+            max_depth = 3840;
+            channel_positions(:, 2) = max_depth - channel_positions(:, 2);
+        else
+            max_depth = 2880;
+            channel_positions(:, 2) = max_depth - channel_positions(:, 2);
+        end
+
     else
         max_depth = 3840;
         channel_positions(:, 2) = max_depth - channel_positions(:, 2); % 0 = tip in NP1s, 3840 = top, reorder here
@@ -1590,41 +1694,41 @@ if ephys_exists && load_parts.ephys
         end
 
 
-    elseif exist('goodUnits', 'var')
+    elseif exist('unitType', 'var')
         % If no manual but qualityMetrics are available
         if verbose;
             disp('Keeping quality metrics good units...');
         end
 
         % Load triage labels
-       
+
         %triage_good_templates = goodUnits;
 
         good_templates = ...
-            goodUnits;
-        good_templates_idx = find(goodUnits) - 1;
-        
-    if exist('locationKeep', 'var')
-        if verbose;
-            disp('Keeping location data...');
+            unitType == 1;
+        good_templates_idx = find(unitType == 1) - 1;
+
+        if exist('locationKeep', 'var')
+            if verbose;
+                disp('Keeping location data...');
+            end
+            myPaths;
+            allenAt = loadStructureTreeJF([allenAtlasPath, filesep, 'allenCCF/structure_tree_safe_2017.csv']);
+            probeccf = AP_cortexlab_filenameJF(animal, [], [], 'histo', [], []);
+            load(probeccf)
+            this_ccf = probe_ccf(probes(iDataset));
+            theseLocations = allenAt.acronym(this_ccf.trajectory_areas);
+            theseLocationsInterest = contains(theseLocations, locationKeep);
+            theseDepths = this_ccf.probe_depths(theseLocationsInterest);
+            template_exists = ismember(1:max(spikeTemplates), unique(spikeTemplates));
+            theseTemplates = template_depths(template_exists) >= min(theseDepths) & template_depths(template_exists) <= max(theseDepths); %correct depth units
+            good_templates = goodUnits & theseTemplates';
+            good_templates_idx = find(good_templates) - 1;
         end
-        myPaths;
-        allenAt = loadStructureTreeJF([allenAtlasPath filesep 'allenCCF/structure_tree_safe_2017.csv']);
-probeccf = AP_cortexlab_filenameJF(animal, [], [], 'histo', [], []);
-load(probeccf)
-this_ccf = probe_ccf(probes(iDataset));
-theseLocations = allenAt.acronym(this_ccf.trajectory_areas);
-theseLocationsInterest = contains(theseLocations, locationKeep);
-theseDepths = this_ccf.probe_depths(theseLocationsInterest);
-template_exists = ismember(1:max(spikeTemplates), unique(spikeTemplates));
-theseTemplates = template_depths(template_exists) >= min(theseDepths) & template_depths(template_exists) <= max(theseDepths); %correct depth units
-good_templates = goodUnits & theseTemplates';
-good_templates_idx = find(good_templates) - 1;
-    end
     else
         % If no cluster groups at all, keep all
         warning([animal, ' ', day, ' - no cluster groups']);
-        if verbose;
+        if verbose
             disp('No manual labeling, keeping all and re-indexing');
         end
         good_templates_idx = unique(spike_templates_0idx);
@@ -1957,21 +2061,21 @@ end
 %     if verbose;
 %         disp('Classifying spikes...');
 %     end
-% 
+%
 %     str_templates = template_depths >= str_depth(1) & template_depths <= str_depth(2);
 %     non_str_templates = ~str_templates;
-% 
+%
 %     % Define the window to look for spiking statistics in (spikes go in and
 %     % out, so take the bin with the largest firing rate for each cell and work
 %     % with that one)
 %     % spiking_stat_window = 60*5; % seconds
 %     % spiking_stat_bins = min(spike_times_timeline):spiking_stat_window: ...
 %     %     max(spike_times_timeline);
-% 
+%
 %     % % (for whole session)
 %     spiking_stat_window = max(spike_times_timeline) - min(spike_times_timeline);
 %     spiking_stat_bins = [min(spike_times_timeline), max(spike_times_timeline)];
-% 
+%
 %     % Get firing rate across the session
 %     bin_spikes = nan(size(templates, 1), ...
 %         length(spiking_stat_bins)-1);
@@ -1984,12 +2088,12 @@ end
 %     use_spiking_stat_bins = bsxfun(@ge, bin_spikes, prctile(bin_spikes, 80, 2)) & bin_spikes > min_spikes;
 %     spike_rate = sum(bin_spikes.*use_spiking_stat_bins, 2) ./ ...
 %         (sum(use_spiking_stat_bins, 2) * spiking_stat_window);
-% 
+%
 %     % Get proportion of ISI > 2s (Yamin/Cohen 2013) and CV2 (Stalnaker/Schoenbaum 2016)
 %     prop_long_isi = nan(size(templates, 1), 1);
 %     cv2 = nan(size(templates, 1), 1);
 %     for curr_template = unique(spike_templates)'
-% 
+%
 %         long_isi_total = 0;
 %         isi_ratios = [];
 %         for curr_bin = find(use_spiking_stat_bins(curr_template, :))
@@ -1998,49 +2102,49 @@ end
 %                 spike_times_timeline < spiking_stat_bins(curr_bin+1) & ...
 %                 spike_templates == curr_template);
 %             curr_isi = diff(curr_spike_times);
-% 
+%
 %             long_isi_total = long_isi_total + sum(curr_isi(curr_isi > 2));
-% 
+%
 %             isi_ratios = [isi_ratios; (2 * abs(curr_isi(2:end)-curr_isi(1:end-1))) ./ ...
 %                 (curr_isi(2:end) + curr_isi(1:end-1))];
 %         end
-% 
+%
 %         prop_long_isi(curr_template) = long_isi_total / ...
 %             (sum(use_spiking_stat_bins(curr_template, :)) * spiking_stat_window);
 %         cv2(curr_template) = nanmean(isi_ratios);
-% 
+%
 %     end
-% 
+%
 %     % Cortical classification (like Bartho JNeurophys 2004)
 %     waveform_duration_cutoff = 400;
 %     narrow = non_str_templates & templateDuration_us <= waveform_duration_cutoff;
 %     wide = non_str_templates & templateDuration_us > waveform_duration_cutoff;
-% 
+%
 %     % Striatum classification
 %     prop_long_isi_cutoff = 0.35;
 %     cv2_cutoff = 0.8;
-% 
+%
 %     msn = str_templates & ...
 %         templateDuration_us > waveform_duration_cutoff & ...
 %         prop_long_isi >= prop_long_isi_cutoff;
-% 
+%
 %     fsi = str_templates & ...
 %         templateDuration_us <= waveform_duration_cutoff & ...
 %         prop_long_isi < prop_long_isi_cutoff;
-% 
+%
 %     tan = str_templates & ...
 %         templateDuration_us > waveform_duration_cutoff & ...
 %         prop_long_isi < prop_long_isi_cutoff;
-% 
+%
 %     uin = str_templates & ~msn & ~fsi & ~tan;
-% 
+%
 %     waveform_t = 1e3 * ((0:size(templates, 2) - 1) / ephys_sample_rate);
-% 
+%
 %     if verbose
-% 
+%
 %         % Plot the waveforms and spike statistics
 %         figure;
-% 
+%
 %         if any(non_str_templates)
 %             subplot(2, 2, 1);
 %             hold on;
@@ -2051,7 +2155,7 @@ end
 %             title('Not striatum');
 %             legend([p(find(wide(non_str_templates), 1)), p(find(narrow(non_str_templates), 1))], {'Wide', 'Narrow'})
 %         end
-% 
+%
 %         subplot(2, 2, 2);
 %         hold on;
 %         p = plot(waveform_t, waveforms(str_templates, :)');
@@ -2063,62 +2167,62 @@ end
 %         title('Striatum');
 %         legend([p(find(msn(str_templates), 1)), p(find(fsi(str_templates), 1)), ...
 %             p(find(tan(str_templates), 1)), p(find(uin(str_templates), 1))], {'MSN', 'FSI', 'TAN', 'UIN'});
-% 
+%
 %         subplot(2, 2, 3);
 %         hold on;
-% 
+%
 %         stem3( ...
 %             templateDuration_us(wide)/1000, ...
 %             prop_long_isi(wide), ...
 %             spike_rate(wide), 'k');
-% 
+%
 %         stem3( ...
 %             templateDuration_us(narrow)/1000, ...
 %             prop_long_isi(narrow), ...
 %             spike_rate(narrow), 'r');
-% 
+%
 %         xlabel('waveform duration (ms)')
 %         ylabel('frac long ISI')
 %         zlabel('spike rate')
-% 
+%
 %         set(gca, 'YDir', 'reverse')
 %         set(gca, 'XDir', 'reverse')
 %         view(3);
 %         grid on;
 %         axis vis3d;
-% 
+%
 %         subplot(2, 2, 4);
 %         hold on;
 %         stem3( ...
 %             templateDuration_us(msn)/1000, ...
 %             prop_long_isi(msn), ...
 %             spike_rate(msn), 'm');
-% 
+%
 %         stem3( ...
 %             templateDuration_us(fsi)/1000, ...
 %             prop_long_isi(fsi), ...
 %             spike_rate(fsi), 'b');
-% 
+%
 %         stem3( ...
 %             templateDuration_us(tan)/1000, ...
 %             prop_long_isi(tan), ...
 %             spike_rate(tan), 'g');
-% 
+%
 %         stem3( ...
 %             templateDuration_us(uin)/1000, ...
 %             prop_long_isi(uin), ...
 %             spike_rate(uin), 'c');
-% 
+%
 %         xlabel('waveform duration (ms)')
 %         ylabel('frac long ISI')
 %         zlabel('spike rate')
-% 
+%
 %         set(gca, 'YDir', 'reverse')
 %         set(gca, 'XDir', 'reverse')
 %         view(3);
 %         grid on;
 %         axis vis3d;
-% 
+%
 %         % Plot depth vs. firing rate colored by cell type
 %         celltype_labels = {'Wide', 'Narrow', 'MSN', 'FSI', 'TAN', 'UIN'};
 %         celltypes = wide .* 1 + narrow .* 2 + msn .* 3 + fsi .* 4 + tan .* 5 + uin .* 6;
@@ -2129,11 +2233,11 @@ end
 %             0, 0, 1; ...
 %             0, 1, 0; ...
 %             0, 1, 1];
-% 
+%
 %         plot_celltypes = any([wide, narrow, msn, fsi, tan, uin], 1);
-% 
+%
 %         norm_spike_n = mat2gray(log10(accumarray(spike_templates, 1)+1));
-% 
+%
 %         figure('Position', [94, 122, 230, 820]);
 %         gscatter(norm_spike_n, template_depths, celltypes, use_colors, [], 10);
 %         xlim([0, 1])
@@ -2142,14 +2246,14 @@ end
 %         ylabel('Depth (\mum)');
 %         legend(celltype_labels(plot_celltypes), 'location', 'NW');
 %         ylim([0, max(channel_positions(:, 2))])
-% 
+%
 %         drawnow;
-% 
+%
 %     end
 
 %end
 
 %% Finished
-if verbose;
+if verbose
     disp('Finished loading experiment.');
 end

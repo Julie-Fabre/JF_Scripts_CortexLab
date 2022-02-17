@@ -4,14 +4,14 @@
 % an index to dead channels too). chanMap(1) is the row in the raw binary
 % file for the first channel. chanMap(385) = flipper in my case
 
-chanMap = 1:385;
+chanMap = 1:384;
 
 % the first thing Kilosort does is reorder the data with data = data(chanMap, :).
 % Now we declare which channels are "connected" in this normal ordering, 
 % meaning not dead or used for non-ephys data
 
-connected = true(385, 1); 
-connected(385) = 0;%flipper channel
+connected = true(384, 1); 
+%connected(385) = 0;%flipper channel
 
 % now we define the horizontal (x) and vertical (y) coordinates of these
 % 34 channels. For dead or nonephys channels the values won't matter. Again
@@ -20,9 +20,9 @@ connected(385) = 0;%flipper channel
 % algorithm. 
 
 xcoords = repmat([0,32, 250,250+32,500,500+32,750, 750+32],[1,384/8])';
-xcoords(385) = NaN;
+%xcoords(385) = NaN;
 ycoords =  sort(repmat([2865:-15: 2865-(384/8*15)+15], [1,8])');
-ycoords(385) = NaN;
+%ycoords(385) = NaN;
 % Often, multi-shank probes or tetrodes will be organized into groups of
 % channels that cannot possibly share spikes with the rest of the probe. This helps
 % the algorithm discard noisy templates shared across groups. In
@@ -31,7 +31,7 @@ ycoords(385) = NaN;
 % assign them all to group 1. 
 
 kcoords =repmat([1,1,2,2,3,3,4,4],[1,384/8])';
-kcoords(385) = NaN;
+%kcoords(385) = NaN;
 % at this point in Kilosort we do data = data(connected, :), ycoords =
 % ycoords(connected), xcoords = xcoords(connected) and kcoords =
 % kcoords(connected) and no more channel map information is needed (in particular
@@ -54,7 +54,7 @@ kcoords(385) = NaN;
 fs = 30000; 
 
 
-save(fullfile('C:\Users\Julie\Dropbox\spikeSorting', 'chanMapNP2_4Shank_bottRow_flipper.mat'), 'chanMap', 'connected', 'xcoords', 'ycoords', 'kcoords', 'fs')
+save('chanMapNP2_4Shank_bottRow.mat', 'chanMap', 'connected', 'xcoords', 'ycoords', 'kcoords', 'fs')
 
 %% example 2.0 4-shank, using only shank 3
 %  list of channel indices (and give

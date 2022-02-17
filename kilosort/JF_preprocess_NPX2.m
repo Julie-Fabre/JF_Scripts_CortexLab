@@ -56,13 +56,14 @@ end
 % end
 
 %% run quality metrics
-ephysPath = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys');
+ephysPath = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys', site);
 
-ephysap_path = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_ap');
-ephysDirPath = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_dir');
+ephysap_path = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_ap', site);
+ephysDirPath = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_dir',site);
 savePath = fullfile(ephysDirPath, 'qMetrics');
 qMetricsExist = dir(fullfile(savePath, 'qMetric*.mat'));
-if isempty(qMetricsExist)
+%if isempty(qMetricsExist)
+    disp('getting quality metrics ...')
     [spikeTimes, spikeTemplates, ...
         templateWaveforms, templateAmplitudes, pcFeatures, pcFeatureIdx, usedChannels] = bc_loadEphysData(ephysPath);
 
@@ -83,7 +84,7 @@ if isempty(qMetricsExist)
     % waveform parameters
     param.maxNPeaks = 2;
     param.maxNTroughs = 1;
-    param.axonal = 0;
+    param.somatic = 1;
     % amplitude parameters
     param.rawFolder = [ephysap_path, '/..'];
     param.nRawSpikesToExtract = 100;
@@ -109,6 +110,6 @@ if isempty(qMetricsExist)
 
 
     bc_runAllQualityMetrics(param, spikeTimes, spikeTemplates, ...
-        templateWaveforms, templateAmplitudes, pcFeatures, pcFeatureIdx, usedChannels, savePath);
-end
+        templateWaveforms, templateAmplitudes, pcFeatures, pcFeatureIdx, savePath);
+%end
 end

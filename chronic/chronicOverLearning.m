@@ -1,13 +1,19 @@
 animalsAll = {'JF067'};
 implantDays = {'2022-01-24'};
 implantSide = 90;
-plotDriftMap = 0; 
-ex = [4,6];
-startTr = 3;
+plotDriftMap = 0;
+ex = [4, 6, 7];
+startTrainingDayNum = 3;
+startStage4DayNum = 12;
+depths1 = [2050, 2800];
+depths2 = [2800, 3500];
+
+bhvData = noGoWorld_behavior(animalsAll);
+
 for iAnimal = 1:size(animalsAll, 2)
 
-     figure(4); 
-     clf;
+    figure(4);
+    clf;
     animal = animalsAll{1, iAnimal}; %this animal
     implantDay = implantDays{1, iAnimal}; %this animal
     protocol1 = 'JF_choiceworldStimuli_wheel'; %protocol name contains this name
@@ -22,49 +28,76 @@ for iAnimal = 1:size(animalsAll, 2)
     startTraining = split(startTraining, '-');
     startTraining = datetime(str2num(startTraining{1}), str2num(startTraining{2}), str2num(startTraining{3}));
     keepPassive = zeros(size(experiments, 1), 1);
-%     for iPassiveDate = 1:min(size(experiments0, 1), 10) %look max 10 first days
-%         expD = split(experiments0(iPassiveDate).day, '-');
-%         keepPassive(iPassiveDate) = datetime(str2num(expD{1}), str2num(expD{2}), str2num(expD{3})) < startTraining;
-%     end
-%    experiments0 = experiments0(logical(keepPassive));
-    %only keep experiments0 befoire training sdtarts
-%     experiments2 = AP_find_experimentsJF(animal, protocol2, flexible_name);
-%     experiments1 = AP_find_experimentsJF(animal, protocol3, flexible_name);
-%     experiments(1:size(experiments0, 1), 1) = experiments0;
-%     experiments(size(experiments0, 1)+1:size(experiments0, 1)+size(experiments1, 1), 1) = experiments1;
-%     experiments(size(experiments0, 1)+size(experiments1, 1)+1:size(experiments0, 1)+size(experiments1, 1)+size(experiments2, 1), 1) = experiments2;
-%     %experiments(size(experiments0, 1)+size(experiments1, 1)+size(experiments2, 1)+1:size(experiments0, 1)+size(experiments1, 1)+size(experiments2, 1)+size(experiments3, 1), 1) = experiments3;
-    %experiments(end)=[];
     bhv = struct; %initialize structure
     keep_day = [];
     noGoDay = [];
-    experiments(ex)=[];
-    movingFrac = keep(iAnimal).movingFrac;
-    movingFrac(ex - startTr + 1,:)=[];
+    movingFrac = bhvData(iAnimal).movingFracGo1;
+    movingFrac(ex-startTrainingDayNum+1, :) = [];
     alldays = {experiments.day};
-    for curr_day = 1:size(experiments, 1)
-        alldaysNum(curr_day) = hours((datetime(alldays{curr_day}, 'InputFormat', 'yyyy-MM-dd') - datetime(implantDay, 'InputFormat', 'yyyy-MM-dd'))/24);
+    theseDays = 1:size(experiments,1);
+    theseDays(ex) = [];
+    for curr_day = 1:size(theseDays, 2)
+        currDayIdx = theseDays(curr_day);
+        alldaysNum(curr_day) = hours((datetime(alldays{currDayIdx}, 'InputFormat', 'yyyy-MM-dd') - datetime(implantDay, 'InputFormat', 'yyyy-MM-dd'))/24);
         % if kilosorted, load the spikes, spike_templates, amplitudes,
         % spike_depths
-        thisDay = experiments(curr_day).day;
-        thisExperiment = experiments(curr_day).experiment(end);
+        thisDay = experiments(currDayIdx).day;
+        day = experiments(currDayIdx).day;
+        experiment = experiments(currDayIdx).experiment(end);
+        thisExperiment = experiments(currDayIdx).experiment(end);
+        site = 1;
+        isSpikeGlx = 1;
         [ephys_filename, ~] = AP_cortexlab_filenameJF(animal, thisDay, thisExperiment, 'ephys');
         if ~isempty(dir([ephys_filename, '/site1/spike_templates.npy'])) %is has been already kilosorted
-            amplitudes = readNPY([ephys_filename, '/site1/amplitudes.npy']);
-            spike_templates = readNPY([ephys_filename, '/site1/spike_templates.npy']);
+            verbose = false; % display load progress and some info figures
+            load_parts.cam=false;
+            load_parts.imaging=false;
+            load_parts.ephys=true;
 
-            template_depths = readNPY([ephys_filename, '/site1/templates.npy']);
-            channel_positions = readNPY([ephys_filename, '/site1/channel_positions.npy']);
-            channel_map = readNPY([ephys_filename, '/site1/channel_map.npy']);
-
-            unitCount(curr_day) = length(unique(spike_templates));
+            site = 1;%1,1; 2,4; 3,7
+            if  ~isempty(dir([ephys_filename, '/site2/spike_templates.npy']))
+                site = 2;
+            end
+            recording = []; 
+            loadClusters = 0;
+            [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,thisDay,experiment,'ephys_ap',site,recording);
+            if size(ephysAPfile,2) ==2 %keep only ap
+                ephysAPfile = ephysAPfile{1};
+            end
+            isSpikeGlx = contains(ephysAPfile, '_g');
+            if isSpikeGlx
+                 [ephysKSfile,~] = AP_cortexlab_filenameJF(animal,thisDay,experiment,'ephys',site,recording);
+                if isempty(dir([ephysKSfile filesep 'sync.mat']))
+                    sync = syncFT(ephysAPfile, 385, ephysKSfile);
+                end
+            end
+            ephysDirPath = AP_cortexlab_filenameJF(animal, thisDay, experiment, 'ephys_dir', site);
+            savePath = fullfile(ephysDirPath, 'qMetrics');
+            qMetricsExist = dir(fullfile(savePath, 'qMetric*.mat'));
+            if ~isempty(qMetricsExist)
+                
+            load(fullfile(savePath, 'qMetric.mat'))
+            load(fullfile(savePath, 'param.mat'))
+            unitType = nan(length(qMetric.percSpikesMissing),1);
+           
+            unitType(qMetric.nPeaks > param.maxNPeaks | qMetric.nTroughs > param.maxNTroughs ) = 0; %NOISE OR AXONAL
+            unitType(qMetric.percSpikesMissing <= param.maxPercSpikesMissing & qMetric.nSpikes > param.minNumSpikes & ...
+                qMetric.nPeaks <= param.maxNPeaks & qMetric.nTroughs <= param.maxNTroughs & qMetric.Fp <= param.maxRPVviolations & ...
+                 qMetric.rawAmplitude > param.minAmplitude) = 1;%SINGLE SEXY UNIT
+            unitType(isnan(unitType)) = 2;% MULTI UNIT 
+            end
+            AP_load_experimentJF;
+            multiUnitCount(curr_day) = length(find(unitType==2));
+            noiseCount(curr_day) = length(find(unitType==0));
+            singleUnitCount(curr_day) = length(unique(spike_templates));
             deadChannels(curr_day) = length(unique(channel_map));
-            
+
             if plotDriftMap
+                %% drift map
                 figure(1);
                 subplot(1, size(experiments, 1), curr_day)
                 [spikeTimes, spikeAmps, spikeDepths, spikeSites] = ksDriftmap([ephys_filename, '/site1/']);
-                plotDriftmap(spikeTimes, amplitudes, spikeDepths);
+                plotDriftmap(spikeTimes, template_amplitudes, spikeDepths);
                 makeprettyLarge;
                 xlim([0, max(spikeTimes)])
                 ylim([0, 2880])
@@ -81,23 +114,15 @@ for iAnimal = 1:size(animalsAll, 2)
                     ylabel('')
                 end
             end
-            
-            day = experiments(curr_day).day;
-            experiment = experiments(curr_day).experiment(end); % last one = passive 
-            site = 1;%1,1; 2,4; 3,7
-            recording = []; 
-            [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,day,experiment,'ephys_ap',site,recording);
-            isSpikeGlx = contains(ephysAPfile, 'g0') | contains(ephysAPfile, 'g1')  | contains(ephysAPfile, 'g2')  | contains(ephysAPfile, 'g3') ;%spike glx (2.0 probes) or open ephys (3A probes)? 
-            loadClusters=0;
-            AP_load_experimentJF;
-            
+
+            %% units: depths * normalized log rate 
             figure(3)
             subplot(1, size(experiments, 1), curr_day)
-            
+
             norm_spike_n = mat2gray(log10(accumarray(spike_templates, 1)+1));
             unit_dots = plot(norm_spike_n, template_depths, '.k', 'MarkerSize', 20);
             xlim([-0.1, 1]);
-            ylim([-50, 2880 + 50]);
+            ylim([-10, 3880 + 50]);
             if curr_day == 1
                 ylabel('Depth (\mum)')
                 xlabel('Normalized log rate')
@@ -105,127 +130,211 @@ for iAnimal = 1:size(animalsAll, 2)
                 set(gca, 'ytick', [])
                 set(gca, 'yticklabel', [])
             end
+            set(gca, 'Ydir', 'reverse')
             makeprettyLarge;
             
+            %% behavior 
             figure(4);
-            if curr_day >= startTr
-                subplot(2, size(experiments, 1), curr_day)
-                plot(keep(iAnimal).binBorders(1:end-1), movingFrac(curr_day - startTr +1 , :), 'b');
-                box off;
-                if curr_day == startTr
-                    ylabel('frac. mov.')
-                    %legend({'go1, contra','go1, center','other, contra','other, center'})
+            if curr_day >= startTrainingDayNum
+                subplot(5, size(experiments, 1), curr_day)
+                if curr_day >= startStage4DayNum
+                    hold on;
+                    scatter([1, 2, 3], bhvData(iAnimal).goLeft(currDayIdx-startTrainingDayNum+1, [1, 3, 2])./...
+                        bhvData(iAnimal).nTrials(currDayIdx-startTrainingDayNum+1, [1, 3, 2]), [], rgb('DarkBlue'), 'filled')
+                    p1 = plot([1, 2, 3], bhvData(iAnimal).goLeft(currDayIdx-startTrainingDayNum+1, [1, 3, 2])./...
+                        bhvData(iAnimal).nTrials(currDayIdx-startTrainingDayNum+1, [1, 3, 2]), 'Color', rgb('DarkBlue'));
+                    makepretty;
+                    scatter([1, 2, 3], bhvData(iAnimal).noGo(currDayIdx-startTrainingDayNum+1, [1, 3, 2])./...
+                        bhvData(iAnimal).nTrials(currDayIdx-startTrainingDayNum+1, [1, 3, 2]), [], rgb('Red'), 'filled')
+                    p2 = plot([1, 2, 3], bhvData(iAnimal).noGo((currDayIdx-startTrainingDayNum+1), [1, 3, 2])./...
+                        bhvData(iAnimal).nTrials(currDayIdx-startTrainingDayNum+1, [1, 3, 2]), 'Color', rgb('Red'));
+                    makepretty;
+                    if curr_day == startStage4DayNum
+                        legend([p1, p2], {'\color[rgb]{0,0,1}go left', ' \color[rgb]{1,0,0} no go'})
+                    end
+                    xticks([1, 2, 3])
+                    xticklabels({'Go1', 'NoGo', 'Go2'})
+                    ylim([0, 1])
+    
+        
                 else
-                    set(gca,'ytick',[])
-                    set(gca,'yticklabel',[])
-                    set(gca, 'XColor','white')
-                    set(gca, 'YColor','white')
+                    plot(bhvData(iAnimal).binBorders(1:end-1), movingFrac(currDayIdx-startTrainingDayNum+1, :), 'b');
+                    box off;
+                    if curr_day == startTrainingDayNum
+                        ylabel('frac. mov.')
+                        %legend({'go1, contra','go1, center','other, contra','other, center'})
+                    else
+                        set(gca, 'ytick', [], 'yticklabel', [],'XColor', 'white', 'YColor', 'white')
+                    end
+                    line([0, 0], [0, 1], 'Color', 'k')
+                    makepretty;
+                    ylim([0, 1])
+                    xlim([-5, 10])
                 end
-                line([0, 0], [0 1],'Color','k')
-                makepretty;
-                ylim([ 0 1])
-                
-            end
-            stimType = nan(size(trial_conditions,1),1);
-            stimType(trial_conditions(:,1) == 4 & trial_conditions(:,2) == -implantSide(iAnimal))=1;% go1 stim, contra
-            stimType(trial_conditions(:,1) == 4 & trial_conditions(:,2) == 0)=2;% go1 stim, center
-            stimType(ismember(trial_conditions(:,1), [1,2,3,5,6]) & trial_conditions(:,2) == -implantSide(iAnimal))=3;% other stims, contra
-            stimType(ismember(trial_conditions(:,1), [1,2,3,5,6]) & trial_conditions(:,2) == 0)=4;% % other stims, center
-      
-            
-            subplot(2, size(experiments, 1), curr_day+size(experiments,1))
-            colorsO = [rgb('Purple');...
-                    rgb('RoyalBlue');rgb('Turquoise'); rgb('Green'); ];
-            alphaV=1;
-            szV=2;
 
-            [pltTime1, pltY1, pltTime2, pltY2,pltTime3, pltY3, pltCol3, pltTime4, pltY4, pltG4] =...
-                plotExCellRasterPSTH(stimType, unique(stimType(~isnan(stimType))), ...
-                colorsO, stimOn_times,spike_templates,...
-                spike_times_timeline, unique(spike_templates),alphaV,szV,9,0, 0);
-            pltY4= (pltY4 - nanmean(pltY4(:, pltTime4<0),2))./nanmean(pltY4(:, pltTime4<0),2);
-            psth_lines = plot(pltTime4,pltY4); hold on;
-            arrayfun(@(align_group) set(psth_lines(align_group), ...
-                'XData',pltTime4,'YData',pltY4(align_group,:), ...
-                'Color',colorsO(align_group,:)),1:size(pltY4,1));
-            
-            xlim([pltTime4(1), 0.25])
-            %ylim([-300, 1000])
-            line([0, 0], [-0.37, 1.6],'Color','k')
-            box off;
-            
-            if curr_day == 1
-                %ylabel('sp/s')
-                legend({'go1, contra','go1, center','other, contra','other, center'})
-            else
-                set(gca,'ytick',[])
-                set(gca,'yticklabel',[])
-                set(gca, 'XColor','white')
-                set(gca, 'YColor','white')
             end
-            if curr_day == min(2, size(experiments,1))
+            stimType = nan(size(trial_conditions(no_move_trials), 1), 1);
+            stimType(trial_conditions(no_move_trials, 1) == 4 & trial_conditions(no_move_trials, 2) == -implantSide(iAnimal)) = 1; % go1 stim, contra
+            stimType(trial_conditions(no_move_trials, 1) == 4 & trial_conditions(no_move_trials, 2) == 0) = 2; % go1 stim, center
+            stimType(trial_conditions(no_move_trials, 1) == 7 & trial_conditions(no_move_trials, 2) == -implantSide(iAnimal)) = 3; % no go stim, contra
+            stimType(trial_conditions(no_move_trials, 1) == 7 & trial_conditions(no_move_trials, 2) == 0) = 4; % no go stim, center
+            stimType(ismember(trial_conditions(no_move_trials, 1), [1, 2, 3, 5, 6]) & trial_conditions(no_move_trials, 2) == -implantSide(iAnimal)) = 5; % other stims, contra
+            stimType(ismember(trial_conditions(no_move_trials, 1), [1, 2, 3, 5, 6]) & trial_conditions(no_move_trials, 2) == 0) = 6; % % other stims, center
+
+            %% center stims top striatum 
+            subplot(5, size(experiments, 1), curr_day+size(experiments, 1))
+            colorsO = [rgb('Navy'); rgb('DarkRed');  rgb('Green');rgb('DeepSkyBlue'); ...
+                rgb('Crimson');rgb('MediumSeaGreen')];
+            alphaV = 1;
+            szV = 2;
+            spikes1= spike_depths >= depths1(1) & spike_depths <= depths1(2);
+            [~, ~, ~, ~, ~, ~, ~, pltTime4, pltY4, ~] = ...
+                plotExCellRasterPSTH(stimType, unique(stimType(~isnan(stimType))), ...
+                colorsO, stimOn_times(no_move_trials), spike_templates(spikes1), ...
+                spike_times_timeline(spikes1), unique(spike_templates(spikes1)), alphaV, szV, 9, 0, 0);
+            pltY4 = (pltY4 - nanmean(pltY4(:, pltTime4 < 0), 2)) ./ nanmean(pltY4(:, pltTime4 < 0), 2);
+            pp = pltY4(2:2:6, :);
+            psth_lines2 = plot(pltTime4, pp);
+            hold on;
+            arrayfun(@(align_group) set(psth_lines2(align_group), ...
+                'XData', pltTime4, 'YData', pp(align_group, :), ...
+                'Color', colorsO(align_group, :)), 1:size(pp(1:2, :), 1));
+            
+
+            xlim([pltTime4(1), 0.25])
+            line([0, 0], [-0.37, 1.6], 'Color', 'k')
+            box off;
+
+            if curr_day == 1
+                legend({'go1, center', 'no go, center', 'other, center'})
+            else
+                set(gca, 'ytick', [],'yticklabel', [],'XColor', 'white','YColor', 'white')
+            end
+            if curr_day == min(2, size(experiments, 1))
                 xlabel('time from stim onset')
             end
+            makepretty;
+            ylim([-0.37, 8])
             
-             makepretty;
-             ylim([-0.37, 1.6])
-             
-%             pos = get(gca, 'Position');
-%             spacing = 0.01:1/(size(experiments, 1)+1):0.99;
-%             pos(1) = spacing(curr_day);
-%             pos(3) = spacing(curr_day+1);
-%             set(gca, 'Position', pos)
+            %% contra normalized top striatum 
+            subplot(5, size(experiments, 1), curr_day+size(experiments, 1)+size(experiments, 1))
+            colorsO = [rgb('DeepSkyBlue'); ...
+                rgb('Crimson');rgb('MediumSeaGreen')];
+            alphaV = 1;
+            szV = 2;
+            %pltY4(2:2:6, :) = (pltY4(2:2:6, :) - nanmean(pltY4(1:2:6, pltTime4 > 0), 2)) ./ nanmean(pltY4(1:2:6, pltTime4 > 0), 2);
+            pp = pltY4(1:2:6, :);
+            psth_lines2 = plot(pltTime4, pp);
+            hold on;
+            arrayfun(@(align_group) set(psth_lines2(align_group), ...
+                'XData', pltTime4, 'YData', pp(align_group, :), ...
+                'Color', colorsO(align_group, :)), 1:size(pp(1:2, :), 1));
+            xlim([pltTime4(1), 0.25])
+            line([0, 0], [-0.37, 1.6], 'Color', 'k')
+            box off;
+
+            if curr_day == 1
+                legend({'go1, contra', 'no go, contra', 'other, contra'})
+            else
+                set(gca, 'ytick', [],'yticklabel', [],'XColor', 'white','YColor', 'white')
+            end
+            if curr_day == min(2, size(experiments, 1))
+                xlabel('time from stim onset')
+            end
+            makepretty;
+            ylim([-0.37, 4])
+            
+             %% center stims top striatum 
+            subplot(5, size(experiments, 1), curr_day+size(experiments, 1)+size(experiments, 1)+size(experiments, 1))
+            colorsO = [rgb('Navy'); rgb('DarkRed');  rgb('Green');rgb('DeepSkyBlue'); ...
+                rgb('Crimson');rgb('MediumSeaGreen')];
+            alphaV = 1;
+            szV = 2;
+            spikes2= spike_depths >= depths2(1) & spike_depths <= depths2(2);
+            [~, ~, ~, ~, ~, ~, ~, pltTime4, pltY4, ~] = ...
+                plotExCellRasterPSTH(stimType, unique(stimType(~isnan(stimType))), ...
+                colorsO, stimOn_times(no_move_trials), spike_templates(spikes2), ...
+                spike_times_timeline(spikes2), unique(spike_templates(spikes2)), alphaV, szV, 9, 0, 0);
+            pltY4 = (pltY4 - nanmean(pltY4(:, pltTime4 < 0), 2)) ./ nanmean(pltY4(:, pltTime4 < 0), 2);
+            pp = pltY4(2:2:6, :);
+            psth_lines2 = plot(pltTime4, pp);
+            hold on;
+            arrayfun(@(align_group) set(psth_lines2(align_group), ...
+                'XData', pltTime4, 'YData', pp(align_group, :), ...
+                'Color', colorsO(align_group, :)), 1:size(pp(1:2, :), 1));
+            
+
+            xlim([pltTime4(1), 0.25])
+            line([0, 0], [-0.37, 1.6], 'Color', 'k')
+            box off;
+
+            if curr_day == 1
+                legend({'go1, center', 'no go, center', 'other, center'})
+            else
+                set(gca, 'ytick', [],'yticklabel', [],'XColor', 'white','YColor', 'white')
+            end
+            if curr_day == min(2, size(experiments, 1))
+                xlabel('time from stim onset')
+            end
+            makepretty;
+            ylim([-0.37, 4])
+            
+            %% contra normalized top striatum 
+            subplot(5, size(experiments, 1), curr_day+size(experiments, 1)+size(experiments, 1)+size(experiments, 1)+size(experiments, 1))
+            colorsO = [rgb('DeepSkyBlue'); ...
+                rgb('Crimson');rgb('MediumSeaGreen')];
+            alphaV = 1;
+            szV = 2;
+            spikes1= spike_depths >= depths1(1) & spike_depths <= depths1(2);
+            %pltY4(2:2:6, :) = (pltY4(2:2:6, :) - nanmean(pltY4(1:2:6, pltTime4 < 0), 2)) ./ nanmean(pltY4(1:2:6, pltTime4 < 0), 2);
+            pp = pltY4(1:2:6, :);
+            psth_lines2 = plot(pltTime4, pp);
+            hold on;
+            arrayfun(@(align_group) set(psth_lines2(align_group), ...
+                'XData', pltTime4, 'YData', pp(align_group, :), ...
+                'Color', colorsO(align_group, :)), 1:size(pp(1:2, :), 1));
+            xlim([pltTime4(1), 0.25])
+            line([0, 0], [-0.37, 1.6], 'Color', 'k')
+            box off;
+
+            if curr_day == 1
+                legend({'go1, contra', 'no go, contra', 'other, contra'})
+            else
+                set(gca, 'ytick', [],'yticklabel', [],'XColor', 'white','YColor', 'white')
+            end
+            if curr_day == min(2, size(experiments, 1))
+                xlabel('time from stim onset')
+            end
+            makepretty;
+            ylim([-0.37, 4])
+
+            
+
         else
-            unitCount(curr_day) = NaN;
+            singleUnitCount(curr_day) = NaN;
             deadChannels(curr_day) = NaN;
+            multiUnitCount(curr_day) = NaN;
+            noiseCount(curr_day) = NaN;
         end
+        clearvars goodUnits qMetric param
     end
     figure(2);
     clf;
-    plot(alldaysNum, unitCount, 'Color', 'k')
+    plot(alldaysNum, singleUnitCount, 'Color', 'k')
     hold on;
-
+    plot(alldaysNum, multiUnitCount, 'Color', rgb('Orange'))
+    plot(alldaysNum, noiseCount, 'Color', rgb('Red'))
     grid minor;
     ylabel('# of units')
-    makeprettyLarge;
-    yyaxis right;
-    plot(alldaysNum, 384-deadChannels, 'Color', 'b')
-    makeprettyLarge;
-    ax = gca;
-    ax.YAxis(2).Color = 'b';
+    makepretty;
+    legend({'nice single units', 'multi units', 'noise units'})
+    %yyaxis right;
+    %plot(alldaysNum, 384-deadChannels, 'Color', 'b')
+    %ax = gca;
+    %ax.YAxis(2).Color = 'b';
     xlabel('post-implant day #')
-    ylabel('# of channels with no units')
+    %ylabel('# of channels with no units')
     xlim([alldaysNum(1), alldaysNum(end)])
-    
-    
-    
+
 
 end
-figure(6)
-subplot(2, 2, 1)
-plot(keep(iAnimal).binBorders(1:end-1), movingFrac(curr_day-1 - startTr +1 , :), 'b');
-box off;
-if curr_day == startTr
-    ylabel('frac. mov.')
-    %legend({'go1, contra','go1, center','other, contra','other, center'})
-else
-    set(gca,'ytick',[])
-    set(gca,'yticklabel',[])
-    set(gca, 'XColor','white')
-    set(gca, 'YColor','white')
-end
-makepretty;
-
-subplot(2, 2, 2)
-plot(keep(iAnimal).binBorders(1:end-1), movingFrac(curr_day - startTr +1 , :), 'b');
-box off;
-if curr_day == startTr
-    ylabel('frac. mov.')
-    %legend({'go1, contra','go1, center','other, contra','other, center'})
-else
-    set(gca,'ytick',[])
-    set(gca,'yticklabel',[])
-    set(gca, 'XColor','white')
-    set(gca, 'YColor','white')
-end
-makepretty;

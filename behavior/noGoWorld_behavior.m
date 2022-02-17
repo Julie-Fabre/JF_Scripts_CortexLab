@@ -1,18 +1,14 @@
 %clear all;
 %clc;
-
+function bhvOut = noGoWorld_behavior(animalsAll)
 plotAll = false;
-% to add first half, second half
-% add weight %
-% 2021 04 08 added no go analysis
-animalsAll = {'JF067', 'JF070', 'JF071', 'JF072', 'JF073'}; %{'JF036', 'JF037', 'JF038', 'JF039', 'JF042', 'JF043', 'JF044'};
 animalsPhase1 = {[1, 2], [1, 2], [1:4]};
 animalsPhase2 = {[3, 4], [3:5], [5:9]};
 animalsPhase3 = {[5], [6], [10]};
 animalsPhase4 = {[6:12], [7:14], [11:13]};
 animalsPhase5 = {[13, 14, 16], [16], []};
-keep = struct;
-for iAnimal = 1%:size(animalsAll, 2)
+bhvOut = struct;
+for iAnimal = 1:size(animalsAll, 2)
 
 
     animal = animalsAll{1, iAnimal}; %this animal
@@ -27,13 +23,11 @@ for iAnimal = 1%:size(animalsAll, 2)
     experiments(1:size(experiments1, 1)) = experiments1;
     experiments(size(experiments1, 1)+1:size(experiments1, 1)+size(experiments2, 1)) = experiments2;
     experiments(size(experiments1, 1)+size(experiments2, 1)+1:size(experiments1, 1)+size(experiments2, 1)+size(experiments3, 1)) = experiments3;
-    %experiments(end)=[];
     bhv = struct; %initialize structure
     keep_day = [];
     noGoDay = [];
     theseD = 1:length(experiments);
-    %theseD = length(experiments)-1;
-    for curr_day = theseD %[1:19, 21:length(experiments)]%JF039
+    for curr_day = theseD 
 
 
         day = experiments(curr_day).day;
@@ -80,6 +74,7 @@ for iAnimal = 1%:size(animalsAll, 2)
             sum(correctTrialsRight);
             n_trials = length(block.paramsValues);
             total_water = sum(block.outputs.rewardValues);
+            water_amount = block.outputs.rewardValues(1);
 
 
             response_trials = 1:length(block.events.endTrialValues);
@@ -106,7 +101,7 @@ for iAnimal = 1%:size(animalsAll, 2)
                 go1Trials = block.events.trialTypeValues(response_trials) == 1;
                 go2Trials = block.events.trialTypeValues(response_trials) == 2;
                 noGoTrials = block.events.trialTypeValues(response_trials) == 3;
-            elseif contains(block.expDef, 'Hack')
+            elseif contains(block.expDef, 'Hack') || contains(block.expDef, 'noGo_stage4') || contains(block.expDef, 'noGo_stage5')
                 go1Trials = block.events.stimulusTypeValues(response_trials) == 1;
                 go2Trials = block.events.stimulusTypeValues(response_trials) == 2;
                 noGoTrials = block.events.stimulusTypeValues(response_trials) == 3;
@@ -142,7 +137,20 @@ for iAnimal = 1%:size(animalsAll, 2)
 
             conditi = [1, 2, 3];
 
-
+            if contains(block.expDef, 'Hack') || contains(block.expDef, 'noGo_stage4') || contains(block.expDef, 'noGo_stage5')
+                goLeft((iImg - 1)*3+1) = sum(~repeatOnMisses(response_trials) & ...
+                ...
+                block.events.hitValues(response_trials) == -1 & go1Trials ...
+                );
+            goLeft((iImg - 1)*3+2) = sum(~repeatOnMisses(response_trials) & ...
+                ...
+                block.events.hitValues(response_trials) == -1 & go2Trials ...
+                );
+            goLeft((iImg - 1)*3+3) = sum(~repeatOnMisses(response_trials) & ...
+                ...
+                block.events.hitValues(response_trials) == -1 & noGoTrials ...
+                );
+            else
             goLeft((iImg - 1)*3+1) = sum(~repeatOnMisses(response_trials) & ...
                 ...
                 block.events.hitValues(response_trials) == 1 & go1Trials ...
@@ -155,7 +163,7 @@ for iAnimal = 1%:size(animalsAll, 2)
                 ...
                 block.events.hitValues(response_trials) == 1 & noGoTrials ...
                 );
-
+            end
 
             if contains(block.expDef, 'goNoGo')
                 allOffs = sort([block.events.goStimOffTimes, block.events.noGoStimOffTimes]);
@@ -190,32 +198,6 @@ for iAnimal = 1%:size(animalsAll, 2)
             noGo((iImg - 1)*3+3) = sum(~repeatOnMisses(response_trials) & ...
                 ...
                 (block.events.hitValues(response_trials) == 0) & noGoTrials ...
-                );
-
-            noGo1((iImg - 1)*3+1) = sum(~repeatOnMisses(response_trials(1:round(size(response_trials, 2)/2))) & ...
-                ...
-                (block.events.hitValues(response_trials(1:round(size(response_trials, 2)/2))) == 0) & go1Trials(1:round(size(response_trials, 2)/2)) ...
-                );
-            noGo1((iImg - 1)*3+2) = sum(~repeatOnMisses(response_trials(1:round(size(response_trials, 2)/2))) & ...
-                ...
-                (block.events.hitValues(response_trials(1:round(size(response_trials, 2)/2))) == 0) & go2Trials(1:round(size(response_trials, 2)/2)) ...
-                );
-            noGo1((iImg - 1)*3+3) = sum(~repeatOnMisses(response_trials(1:round(size(response_trials, 2)/2))) & ...
-                ...
-                (block.events.hitValues(response_trials(1:round(size(response_trials, 2)/2))) == 0) & noGoTrials(1:round(size(response_trials, 2)/2)) ...
-                );
-
-            noGo2((iImg - 1)*3+1) = sum(~repeatOnMisses(response_trials(round(size(response_trials, 2)/2):end)) & ...
-                ...
-                (block.events.hitValues(response_trials(round(size(response_trials, 2)/2):end)) == 0) & go1Trials(round(size(response_trials, 2)/2):end) ...
-                );
-            noGo2((iImg - 1)*3+2) = sum(~repeatOnMisses(response_trials(round(size(response_trials, 2)/2):end)) & ...
-                ...
-                (block.events.hitValues(response_trials(round(size(response_trials, 2)/2):end)) == 0) & go2Trials(round(size(response_trials, 2)/2):end) ...
-                );
-            noGo2((iImg - 1)*3+3) = sum(~repeatOnMisses(response_trials(round(size(response_trials, 2)/2):end)) & ...
-                ...
-                (block.events.hitValues(response_trials(round(size(response_trials, 2)/2):end)) == 0) & noGoTrials(round(size(response_trials, 2)/2):end) ...
                 );
 
             wheel_resample_rate = 1000;
@@ -390,15 +372,14 @@ for iAnimal = 1%:size(animalsAll, 2)
             bhv.nTrials(curr_day, :) = nTrials;
             bhv.n_trials(curr_day, :) = n_trials;
             bhv.total_water(curr_day, :) = total_water;
+            bhv.water_amount(curr_day, :) = water_amount;
             bhv.conditions(curr_day, :) = conditi;
             bhv.goLeft(curr_day, :) = goLeft;
             bhv.noGo(curr_day, :) = noGo;
-            bhv.noGo1(curr_day, :) = noGo1;
-            bhv.noGo2(curr_day, :) = noGo2;
             bhv.trialTime(curr_day, :) = trialTime;
 
             keep_day = [keep_day, curr_day];
-            if contains(block.expDef, 'NoGo')
+            if contains(block.expDef, 'NoGo') || contains(block.expDef, 'stage4')|| contains(block.expDef, 'stage5')
                 noGoDay = [noGoDay, curr_day];
                 if sum(go2Trials) >= 1
 
@@ -435,22 +416,22 @@ for iAnimal = 1%:size(animalsAll, 2)
     scatter(day_num, bhv.n_trials(keep_day, :));
     hold on;
     plot(day_num, bhv.n_trials(keep_day, :), 'linewidth', 2);
+    plot(day_num, bhv.water_amount(keep_day, :)*100, 'linewidth', 2, 'color', [1.0000, 0.6445, 0]);
     ylabel('Trials');
     yyaxis right
 
     scatter(day_num, bhv.total_water(keep_day, :), 'linewidth', 2);
     hold on;
     plot(day_num, bhv.total_water(keep_day, :), 'linewidth', 2);
+    
     ax = gca;
     hold on;
 
     ylabel('Total water (ul)');
     xlabel('Session');
-    %     set(gca, 'XTick', day_num);
-    %     set(gca, 'XTickLabel', day_labels);
-    %     set(gca, 'XTickLabelRotation', 90);
     makeprettyLarge;
-    % figure();
+
+    
     subplot(333)
     con = bhv.conditions(keep_day(1), :);
     ccc = num2str(con(1, :));
@@ -471,15 +452,9 @@ for iAnimal = 1%:size(animalsAll, 2)
     set(gca, 'YTickLabel', day_labels);
     xticks([1, 2, 3])
     xticklabels({'Go1', 'Go2', 'NoGo'})
-    %
-    %     for iDay = 1:size(keep_day, 2)
-    %         txt = num2str(bhv.correctTrials(keep_day(iDay), :)');
-    %         text((1:length(con))-0.2, ones(1, length(con))*iDay, txt, 'BackgroundColor', 'w')
-    %     end
-    %axis square;
     caxis([0, 1])
     makeprettyLarge;
-    %  figure();
+
     subplot(334)
     con = bhv.conditions(keep_day(1), :);
     ccc = num2str(con(1, :));
@@ -532,9 +507,21 @@ for iAnimal = 1%:size(animalsAll, 2)
 
     transparencyValues = 0:1 / length(noGoDay):1;
 
-    keep(iAnimal).binBorders = binBorders;
-    keep(iAnimal).movingFrac = bhv.movingFrac;
+    bhvOut(iAnimal).binBorders = binBorders;
+    bhvOut(iAnimal).movingFracGo1 = bhv.movingFrac;
+    bhvOut(iAnimal).goLeft = bhv.goLeft(keep_day, :);
+    bhvOut(iAnimal).nTrials = bhv.nTrials(keep_day, :);
+    bhvOut(iAnimal).noGo = bhv.noGo(keep_day, :);
+    if length(noGoDay) >= 1
+        bhvOut(iAnimal).movingFracGo1(noGoDay,:) = bhv.movingFracGo1(noGoDay,:);
+        bhvOut(iAnimal).movingFracNoGo = bhv.movingFracNoGo;
+    else
+        bhvOut(iAnimal).movingFracNoGo = zeros(size(bhv.movingFrac,1), size(bhv.movingFrac,2));
+    end
+    
     if length(noGoDay) == 0
+
+    
         transparencyValues = 0:1 / length(keep_day):1;
         cla;
         for iDay = length(keep_day)
@@ -545,7 +532,7 @@ for iAnimal = 1%:size(animalsAll, 2)
         end
         ylim([0, 1])
     else
-        for iDay = 1:length(noGoDay)
+        for iDay = length(noGoDay)
             p1 = plot(binBorders(1:end-1), bhv.movingFracGo1(noGoDay(iDay), :), 'b');
             p1.Color(4) = transparencyValues(iDay+1);
             makeprettyLarge;
@@ -572,7 +559,7 @@ for iAnimal = 1%:size(animalsAll, 2)
     if length(noGoDay) == 0
     else
         transparencyValues = 0:1 / length(noGoDay):1;
-        for iDay = 1:length(noGoDay)
+        for iDay = length(noGoDay)
 
             p3 = plot(binBorders(1:end-1), bhv.movingFracNoGo(noGoDay(iDay), :), 'k');
             p3.Color(4) = transparencyValues(iDay+1);
@@ -596,81 +583,8 @@ for iAnimal = 1%:size(animalsAll, 2)
         meanGo2Incorrect(iNoGoday, :) = nanmean(abs(bhv.trialMoveGo2Incorrect{noGoDay(iNoGoday), :, :}));
         meanNoGoIncorrect(iNoGoday, :) = nanmean(abs(bhv.trialMoveNoGoIncorrect{noGoDay(iNoGoday), :, :}));
     end
-    if ~isempty(noGoDay)
-        subplot(337)
-        cla;
-        plot(0:1.6/1600:1.6-1.6/1600, nanmean(meanGo1Correct), 'Color', 'b');
-        hold on;
-        plotshaded(0:1.6/1600:1.6-1.6/1600, [- nanstd(meanGo1Correct) + ...
-            nanmean(meanGo1Correct); nanstd(meanGo1Correct) + nanmean(meanGo1Correct)], 'b')
-        makeprettyLarge;
 
-
-        plot(0:1.6/1600:1.6-1.6/1600, nanmean(meanGo2Correct), 'Color', 'r');
-        hold on;
-        plotshaded(0:1.6/1600:1.6-1.6/1600, [- nanstd(meanGo2Correct) + ...
-            nanmean(meanGo2Correct); nanstd(meanGo2Correct) + nanmean(meanGo2Correct)], 'r')
-        makeprettyLarge;
-
-
-        plot(0:1.6/1600:1.6-1.6/1600, nanmean(meanNoGoIncorrect), 'Color', 'k');
-        hold on;
-        plotshaded(0:1.6/1600:1.6-1.6/1600, [- nanstd(meanNoGoIncorrect) + ...
-            nanmean(meanNoGoIncorrect); nanstd(meanNoGoIncorrect) + nanmean(meanNoGoIncorrect)], 'k')
-        makeprettyLarge;
-        xlim([0, 1.6])
-
-        subplot(338)
-        cla;
-        plot(0:1.6/1600:1.6-1.6/1600, nanmean(meanGo1Incorrect), 'Color', 'b');
-        hold on;
-        plotshaded(0:1.6/1600:1.6-1.6/1600, [- nanstd(meanGo1Incorrect) + ...
-            nanmean(meanGo1Incorrect); nanstd(meanGo1Incorrect) + nanmean(meanGo1Incorrect)], 'b')
-        makeprettyLarge;
-
-        plot(0:1.6/1600:1.6-1.6/1600, nanmean(meanGo2Incorrect), 'Color', 'r');
-        hold on;
-        plotshaded(0:1.6/1600:1.6-1.6/1600, [- nanstd(meanGo2Incorrect) + ...
-            nanmean(meanGo2Incorrect); nanstd(meanGo2Incorrect) + nanmean(meanGo2Incorrect)], 'r')
-        makeprettyLarge;
-
-
-        plot(0:1.6/1600:1.6-1.6/1600, nanmean(meanNoGoCorrect), 'Color', 'k');
-        hold on;
-        plotshaded(0:1.6/1600:1.6-1.6/1600, [- nanstd(meanNoGoCorrect) + ...
-            nanmean(meanNoGoCorrect); nanstd(meanNoGoCorrect) + nanmean(meanNoGoCorrect)], 'k')
-        makeprettyLarge;
-        xlim([0, 1.6])
-    end
-
-    %     subplot(326)
-    %     if length(noGoDay)==0
-    %         else
-    %     transparencyValues = 0:1 / length(noGoDay):1;
-    %     for iDay = 1:length(noGoDay)
-    %
-    %         p3 = plot(binBorders(1:end-1), bhv.movingFracNoGo(noGoDay(iDay), :), 'k');
-    %         p3.Color(4) = transparencyValues(iDay+1);
-    %         makeprettyLarge;
-    %         hold on;
-    %         ylim([0 1])
-    %     end
-    %     ylim([0 1])
-    %     xlim([binBorders(1), binBorders(end)])
-    %     legend([p3], {'NoGo'})
-    %     xlabel('time from stim onset (s)')
-    %     ylabel('fraction moving')
-    %     makeprettyLarge;
-    %     ylim([0 1])
-    %     end
-
-
-    %plot(nanmean(bhv.
-    %an(iAnimal).movingFracGo = movingFracGo;
-    %an(iAnimal).movingFracGo = movingFracNoGo;
     an(iAnimal).noGo = bhv.noGo;
-    an(iAnimal).noGo1 = bhv.noGo1;
-    an(iAnimal).noGo2 = bhv.noGo2;
     an(iAnimal).nTrials = bhv.nTrials;
     an(iAnimal).goLeft = bhv.goLeft;
     an(iAnimal).noGoDay = noGoDay;
@@ -682,29 +596,16 @@ for iAnimal = 1%:size(animalsAll, 2)
 
 end
 
-% figure();
-% plot(binBorders(1:end-1), an(1).movingFrac);
-% hold on;
-% makeprettyLarge;
-% plot(binBorders(1:end-1), an(2).movingFrac);
-% hold on;
-% makeprettyLarge;
-% plot(binBorders(1:end-1), an(3).movingFrac);
-% hold on;
-% makeprettyLarge;
-% plot(binBorders(1:end-1), an(4).movingFrac);
-% hold on;
-% legend(animalsAll)
-% xlabel('time from stim onset (s)')
-% ylabel('fraction moving')
-% makeprettyLarge;
+
 
 %% summary: % no go per stim per mouse on last day only
 
-figure();
 
-for iAnimal = 1
+
+for iAnimal = 1:length(animalsAll)
+    try
     %subplot(3, 1, iAnimal)
+    figure();
     transparencyValues = 0:1 / length(an(iAnimal).noGoDay):1;
     for iDay = 1:size(an(iAnimal).noGoDay, 2)
         if iDay == size(an(iAnimal).noGoDay, 2)
@@ -736,99 +637,111 @@ for iAnimal = 1
     ylim([0, 1])
     makeprettyLarge;
     grid on;
+    catch
+    end
 end
 if plotAll
-figure();
-
-for iAnimal = [5:7]
-    subplot(3, 1, iAnimal-4)
-    transparencyValues = 0:1 / length(an(iAnimal).noGoDay):1;
-    for iDay = size(an(iAnimal).noGoDay, 2)
-        if iDay == size(an(iAnimal).noGoDay, 2)
-            col1 = rgb('DarkBlue');
-            col2 = rgb('DarkRed');
-
-        else
-            col1 = 'b';
-            col2 = 'r';
-        end
-        scatter([1, 2, 3], an(iAnimal).goLeft(an(iAnimal).noGoDay(iDay), [1, 2, 3])./an(iAnimal).nTrials(an(iAnimal).noGoDay(iDay), [1, 2, 3]), [], col1, 'filled', ...
-            'MarkerFaceAlpha', transparencyValues(iDay+1), 'MarkerEdgeAlpha', transparencyValues(iDay+1))
-        p = plot([1, 2, 3], an(iAnimal).goLeft(an(iAnimal).noGoDay(iDay), [1, 2, 3])./an(iAnimal).nTrials(an(iAnimal).noGoDay(iDay), [1, 2, 3]), 'Color', col1);
-        p.Color(4) = transparencyValues(iDay+1);
-        hold on;
-        makeprettyLarge;
-        scatter([1, 2, 3], an(iAnimal).noGo(an(iAnimal).noGoDay(iDay), [1, 2, 3])./an(iAnimal).nTrials(an(iAnimal).noGoDay(iDay), [1, 2, 3]), [], col2, 'filled', ...
-            'MarkerFaceAlpha', transparencyValues(iDay+1), 'MarkerEdgeAlpha', transparencyValues(iDay+1))
-        p = plot([1, 2, 3], an(iAnimal).noGo(an(iAnimal).noGoDay(iDay), [1, 2, 3])./an(iAnimal).nTrials(an(iAnimal).noGoDay(iDay), [1, 2, 3]), 'Color', col2);
-        p.Color(4) = transparencyValues(iDay+1);
-        makeprettyLarge;
-    end
-
-    xlabel('image type')
-    ylabel('frac \color[rgb]{0,0,1}go left \color[rgb]{1,0,0} no go')
-
-    xticks([1, 2, 3])
-    xticklabels({'Go1', 'Go2', 'NoGo'})
-    ylim([0, 1])
-    makeprettyLarge;
-    grid on;
-end
-
-
-if plotAll == true
     figure();
 
-    for iAnimal = 5:6
-        subplot(2, 1, iAnimal-4)
+    for iAnimal = [5:7]
+        subplot(3, 1, iAnimal-4)
         transparencyValues = 0:1 / length(an(iAnimal).noGoDay):1;
-        if iAnimal == 6
-            thiD = size(an(iAnimal).noGoDay, 2) - 2:size(an(iAnimal).noGoDay, 2);
-            % thiD=thiD(1,2,4);
-        elseif iAnimal == 5
-            thiD = size(an(iAnimal).noGoDay, 2) - 2:size(an(iAnimal).noGoDay, 2);
-            %thiD=thiD([1,2,4,5]);
-        else
+        for iDay = size(an(iAnimal).noGoDay, 2)
+            if iDay == size(an(iAnimal).noGoDay, 2)
+                col1 = rgb('DarkBlue');
+                col2 = rgb('DarkRed');
 
-
+            else
+                col1 = 'b';
+                col2 = 'r';
+            end
+            scatter([1, 2, 3], an(iAnimal).goLeft(an(iAnimal).noGoDay(iDay), [1, 2, 3])./an(iAnimal).nTrials(an(iAnimal).noGoDay(iDay), [1, 2, 3]), [], col1, 'filled', ...
+                'MarkerFaceAlpha', transparencyValues(iDay+1), 'MarkerEdgeAlpha', transparencyValues(iDay+1))
+            p = plot([1, 2, 3], an(iAnimal).goLeft(an(iAnimal).noGoDay(iDay), [1, 2, 3])./an(iAnimal).nTrials(an(iAnimal).noGoDay(iDay), [1, 2, 3]), 'Color', col1);
+            p.Color(4) = transparencyValues(iDay+1);
+            hold on;
+            makeprettyLarge;
+            scatter([1, 2, 3], an(iAnimal).noGo(an(iAnimal).noGoDay(iDay), [1, 2, 3])./an(iAnimal).nTrials(an(iAnimal).noGoDay(iDay), [1, 2, 3]), [], col2, 'filled', ...
+                'MarkerFaceAlpha', transparencyValues(iDay+1), 'MarkerEdgeAlpha', transparencyValues(iDay+1))
+            p = plot([1, 2, 3], an(iAnimal).noGo(an(iAnimal).noGoDay(iDay), [1, 2, 3])./an(iAnimal).nTrials(an(iAnimal).noGoDay(iDay), [1, 2, 3]), 'Color', col2);
+            p.Color(4) = transparencyValues(iDay+1);
+            makeprettyLarge;
         end
 
+        xlabel('image type')
+        ylabel('frac \color[rgb]{0,0,1}go left \color[rgb]{1,0,0} no go')
 
-        col1 = 'b';
-        col2 = 'r';
-        if length(thiD) == 1
-            thisS = [an(iAnimal).noGo(an(iAnimal).noGoDay(thiD), [1, 2, 3]) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(thiD), [1, 2, 3]))];
-        else
-            thisS = nanmean([an(iAnimal).noGo(an(iAnimal).noGoDay(thiD), [1, 2, 3]) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(thiD), [1, 2, 3]))]);
-            thisSt = nanstd([an(iAnimal).noGo(an(iAnimal).noGoDay(thiD), [1, 2, 3]) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(thiD), [1, 2, 3]))]);
-        end
-        scatter([1, 2, 3], thisS, [], col2, 'filled')
-        hold on;
-        if length(thiD) == 1
-        else
-            errorbar([1, 2, 3], thisS, thisSt, thisSt, 'Color', col2, 'LineWidth', 2)
-        end
-        p1 = plot([1, 2, 3], thisS, 'Color', col2);
+        xticks([1, 2, 3])
+        xticklabels({'Go1', 'Go2', 'NoGo'})
+        ylim([0, 1])
         makeprettyLarge;
-        hold on;
-        if length(thiD) == 1
-            thisS = [an(iAnimal).goLeft(an(iAnimal).noGoDay(thiD), [1, 2, 3]) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(thiD), [1, 2, 3]))];
-        else
+        grid on;
+    end
 
-            thisS = nanmean([an(iAnimal).goLeft(an(iAnimal).noGoDay(thiD), [1, 2, 3]) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(thiD), [1, 2, 3]))]);
-            thisSt = nanstd([an(iAnimal).goLeft(an(iAnimal).noGoDay(thiD), [1, 2, 3]) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(thiD), [1, 2, 3]))]);
+
+    if plotAll == true
+        figure();
+
+        for iAnimal = 5:6
+            subplot(2, 1, iAnimal-4)
+            transparencyValues = 0:1 / length(an(iAnimal).noGoDay):1;
+            if iAnimal == 6
+                thiD = size(an(iAnimal).noGoDay, 2) - 2:size(an(iAnimal).noGoDay, 2);
+                % thiD=thiD(1,2,4);
+            elseif iAnimal == 5
+                thiD = size(an(iAnimal).noGoDay, 2) - 2:size(an(iAnimal).noGoDay, 2);
+                %thiD=thiD([1,2,4,5]);
+            else
+
+
+            end
+
+
+            col1 = 'b';
+            col2 = 'r';
+            if length(thiD) == 1
+                thisS = [an(iAnimal).noGo(an(iAnimal).noGoDay(thiD), [1, 2, 3]) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(thiD), [1, 2, 3]))];
+            else
+                thisS = nanmean([an(iAnimal).noGo(an(iAnimal).noGoDay(thiD), [1, 2, 3]) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(thiD), [1, 2, 3]))]);
+                thisSt = nanstd([an(iAnimal).noGo(an(iAnimal).noGoDay(thiD), [1, 2, 3]) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(thiD), [1, 2, 3]))]);
+            end
+            scatter([1, 2, 3], thisS, [], col2, 'filled')
+            hold on;
+            if length(thiD) == 1
+            else
+                errorbar([1, 2, 3], thisS, thisSt, thisSt, 'Color', col2, 'LineWidth', 2)
+            end
+            p1 = plot([1, 2, 3], thisS, 'Color', col2);
+            makeprettyLarge;
+            hold on;
+            if length(thiD) == 1
+                thisS = [an(iAnimal).goLeft(an(iAnimal).noGoDay(thiD), [1, 2, 3]) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(thiD), [1, 2, 3]))];
+            else
+
+                thisS = nanmean([an(iAnimal).goLeft(an(iAnimal).noGoDay(thiD), [1, 2, 3]) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(thiD), [1, 2, 3]))]);
+                thisSt = nanstd([an(iAnimal).goLeft(an(iAnimal).noGoDay(thiD), [1, 2, 3]) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(thiD), [1, 2, 3]))]);
+            end
+            scatter([1, 2, 3], thisS, [], col1, 'filled')
+            hold on;
+            if length(thiD) == 1
+            else
+                errorbar([1, 2, 3], thisS, thisSt, thisSt, 'Color', col1, 'LineWidth', 2)
+            end
+
+            p2 = plot([1, 2, 3], thisS, 'Color', col1);
+            makeprettyLarge;
+            hold on;
+
+            xlabel('image type')
+            ylabel('frac \color[rgb]{0,0,1}go left \color[rgb]{1,0,0} no go')
+            xticks([1, 2, 3])
+            xticklabels({'Go1', 'Go2', 'NoGo'})
+            ylim([0, 1])
+            makeprettyLarge;
+            grid on;
+
+
         end
-        scatter([1, 2, 3], thisS, [], col1, 'filled')
-        hold on;
-        if length(thiD) == 1
-        else
-            errorbar([1, 2, 3], thisS, thisSt, thisSt, 'Color', col1, 'LineWidth', 2)
-        end
-
-        p2 = plot([1, 2, 3], thisS, 'Color', col1);
-        makeprettyLarge;
-        hold on;
-
         xlabel('image type')
         ylabel('frac \color[rgb]{0,0,1}go left \color[rgb]{1,0,0} no go')
         xticks([1, 2, 3])
@@ -837,511 +750,502 @@ if plotAll == true
         makeprettyLarge;
         grid on;
 
+        figure();
 
-    end
-    xlabel('image type')
-    ylabel('frac \color[rgb]{0,0,1}go left \color[rgb]{1,0,0} no go')
-    xticks([1, 2, 3])
-    xticklabels({'Go1', 'Go2', 'NoGo'})
-    ylim([0, 1])
-    makeprettyLarge;
-    grid on;
+        for iAnimal = [5:7]
+            subplot(3, 2, (iAnimal - 4 - 1)*2+1)
+            transparencyValues = 0:1 / length(an(iAnimal).noGoDay):1;
+            for iDay = 1:size(an(iAnimal).noGoDay, 2)
+                if iDay == size(an(iAnimal).noGoDay, 2)
+                    col1 = rgb('DarkBlue');
+                    col2 = rgb('DarkRed');
 
-    figure();
-
-    for iAnimal = [5:7]
-        subplot(3, 2, (iAnimal - 4 - 1)*2+1)
-        transparencyValues = 0:1 / length(an(iAnimal).noGoDay):1;
-        for iDay = 1:size(an(iAnimal).noGoDay, 2)
-            if iDay == size(an(iAnimal).noGoDay, 2)
-                col1 = rgb('DarkBlue');
-                col2 = rgb('DarkRed');
-
-            else
-                col1 = 'b';
-                col2 = 'r';
+                else
+                    col1 = 'b';
+                    col2 = 'r';
+                end
+                thisS = [an(iAnimal).noGo1(an(iAnimal).noGoDay(iDay), 1) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(iDay), 1) ./ 2), ...
+                    an(iAnimal).noGo2(an(iAnimal).noGoDay(iDay), 1) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(iDay), 1) ./ 2)];
+                scatter([1, 2], thisS, [], col2, 'filled', ...
+                    'MarkerFaceAlpha', transparencyValues(iDay+1), 'MarkerEdgeAlpha', transparencyValues(iDay+1))
+                p = plot([1, 2], thisS, 'Color', col2);
+                p.Color(4) = transparencyValues(iDay+1);
+                makeprettyLarge;
+                hold on;
             end
-            thisS = [an(iAnimal).noGo1(an(iAnimal).noGoDay(iDay), 1) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(iDay), 1) ./ 2), ...
-                an(iAnimal).noGo2(an(iAnimal).noGoDay(iDay), 1) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(iDay), 1) ./ 2)];
-            scatter([1, 2], thisS, [], col2, 'filled', ...
-                'MarkerFaceAlpha', transparencyValues(iDay+1), 'MarkerEdgeAlpha', transparencyValues(iDay+1))
-            p = plot([1, 2], thisS, 'Color', col2);
-            p.Color(4) = transparencyValues(iDay+1);
+
+
+            xlabel('image type')
+            ylabel('frac nogo on go1 trials(red)')
+            xticks([1, 2, 3])
+            xticklabels({'Go1 1/2 trials', 'Go1 2/2 trials'})
+            ylim([0, 1])
             makeprettyLarge;
-            hold on;
-        end
+            grid on;
+            subplot(3, 2, (iAnimal - 4 - 1)*2+2)
+            transparencyValues = 0:1 / length(an(iAnimal).noGoDay):1;
+            for iDay = 1:size(an(iAnimal).noGoDay, 2)
+                if iDay == size(an(iAnimal).noGoDay, 2)
+                    col1 = rgb('DarkBlue');
+                    col2 = rgb('DarkRed');
 
-
-        xlabel('image type')
-        ylabel('frac nogo on go1 trials(red)')
-        xticks([1, 2, 3])
-        xticklabels({'Go1 1/2 trials', 'Go1 2/2 trials'})
-        ylim([0, 1])
-        makeprettyLarge;
-        grid on;
-        subplot(3, 2, (iAnimal - 4 - 1)*2+2)
-        transparencyValues = 0:1 / length(an(iAnimal).noGoDay):1;
-        for iDay = 1:size(an(iAnimal).noGoDay, 2)
-            if iDay == size(an(iAnimal).noGoDay, 2)
-                col1 = rgb('DarkBlue');
-                col2 = rgb('DarkRed');
-
-            else
-                col1 = 'b';
-                col2 = 'r';
+                else
+                    col1 = 'b';
+                    col2 = 'r';
+                end
+                thisS = [an(iAnimal).noGo1(an(iAnimal).noGoDay(iDay), 3) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(iDay), 3) ./ 2), ...
+                    an(iAnimal).noGo2(an(iAnimal).noGoDay(iDay), 3) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(iDay), 3) ./ 2)];
+                scatter([1, 2], thisS, [], col2, 'filled', ...
+                    'MarkerFaceAlpha', transparencyValues(iDay+1), 'MarkerEdgeAlpha', transparencyValues(iDay+1))
+                p = plot([1, 2], thisS, 'Color', col2);
+                p.Color(4) = transparencyValues(iDay+1);
+                makeprettyLarge;
+                hold on;
             end
-            thisS = [an(iAnimal).noGo1(an(iAnimal).noGoDay(iDay), 3) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(iDay), 3) ./ 2), ...
-                an(iAnimal).noGo2(an(iAnimal).noGoDay(iDay), 3) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(iDay), 3) ./ 2)];
-            scatter([1, 2], thisS, [], col2, 'filled', ...
-                'MarkerFaceAlpha', transparencyValues(iDay+1), 'MarkerEdgeAlpha', transparencyValues(iDay+1))
-            p = plot([1, 2], thisS, 'Color', col2);
-            p.Color(4) = transparencyValues(iDay+1);
+
+
+            xlabel('image type')
+            ylabel('frac \color[rgb]{0,0,1}go left \color[rgb]{1,0,0} no go')
+
+            xticks([1, 2, 3])
+            xticklabels({'NoGo 1/2 trials', 'NoGo 2/2 trials'})
+            ylim([0, 1])
+            makeprettyLarge;
+            grid on;
+
+        end
+        % plot(1:10, rand(1,10))
+        % ax = gca;
+        % % Simply color an XTickLabel
+        % ax.XTickLabel{3} = ['\color{red}' ax.XTickLabel{3}];
+        % % Use TeX symbols
+        % ax.XTickLabel{4} = '\color{blue} \uparrow';
+        % % Use multiple colors in one XTickLabel
+        % ax.XTickLabel{5} = '\color[rgb]{0,1,0}green\color{orange}?';
+        % % Color YTickLabels with colormap
+        % nColors = numel(ax.YTickLabel);
+        % cm = jet(nColors);
+        % for i = 1:nColors
+        %     ax.YTickLabel{i} = sprintf('\color[rgb]{%f,%f,%f}%s', cm(i,:), ax.YTickLabel{i});
+        % end
+
+        %% Going Left phase 1
+        figure();
+        animalCol = {rgb('HotPink'); rgb('Crimson'); rgb('RoyalBlue')};
+        for iAnimal = 5:7
+            cmap = brewermap(length(animalsPhase1{iAnimal-4})+2, 'Greens');
+
+            scatter(1:length(animalsPhase1{iAnimal-4}), ...
+                an(iAnimal).goLeft(animalsPhase1{iAnimal-4}, 1)./an(iAnimal).nTrials(animalsPhase1{iAnimal-4}, 1), [], animalCol{iAnimal-4}, 'filled');
+            hold on;
+            p(iAnimal) = plot(1:length(animalsPhase1{iAnimal-4}), ...
+                an(iAnimal).goLeft(animalsPhase1{iAnimal-4}, 1)./an(iAnimal).nTrials(animalsPhase1{iAnimal-4}, 1), 'Color', animalCol{iAnimal-4});
+            makeprettyLarge;
+            hold on;
+
+        end
+        legend([p(5), p(6), p(7)], {'JF042', 'JF043', 'JF044'})
+        ylabel('Frac. go left')
+        xticks([1, 2, 3, 4])
+        xlabel('Day #')
+        grid on;
+        makeprettyLargeLarge;
+
+        %% Fraction moving phase 1 vs 2
+        figure();
+
+        for iAnimal = 5:7
+            meanMovingFrac(iAnimal, :) = nanmean(an(iAnimal).movingFrac(animalsPhase1{iAnimal-4}, :));
+            %     plot( meanMovingFrac(iAnimal,:), 'Color',rgb('DeepSkyBlue'))
+            %     makeprettyLarge;
+            %      hold on;
+        end
+        plot(binBorders(1:end-1), nanmean(meanMovingFrac), 'Color', rgb('RoyalBlue'))
+        fuckyou = nanmean(meanMovingFrac) - (nanstd(meanMovingFrac) ./ sqrt(3));
+        fuckyoutoo = nanmean(meanMovingFrac) + (nanstd(meanMovingFrac) ./ sqrt(3));
+        plotshaded(binBorders(1:end-1), [fuckyou; fuckyoutoo], rgb('RoyalBlue'));
+        makeprettyLarge;
+        hold on;
+        for iAnimal = 5:7
+            meanMovingFrac(iAnimal, :) = nanmean(an(iAnimal).movingFrac(animalsPhase2{iAnimal-4}(1:end - 1), :));
+            %     plot( meanMovingFrac(iAnimal,:), 'Color',rgb('DeepSkyBlue'))
+            %     makeprettyLarge;
+            %      hold on;
+        end
+        plot(binBorders(1:end-1), nanmean(meanMovingFrac), 'Color', rgb('Green'))
+        fuckyou = nanmean(meanMovingFrac) - (nanstd(meanMovingFrac) ./ sqrt(3));
+        fuckyoutoo = nanmean(meanMovingFrac) + (nanstd(meanMovingFrac) ./ sqrt(3));
+        plotshaded(binBorders(1:end-1), [fuckyou; fuckyoutoo], rgb('Green'));
+        makeprettyLarge;
+        hold on;
+        for iAnimal = 5:7
+            meanMovingFrac(iAnimal, :) = an(iAnimal).movingFrac(animalsPhase2{iAnimal-4}(end), :);
+            %     plot( meanMovingFrac(iAnimal,:), 'Color',rgb('DeepSkyBlue'))
+            %     makeprettyLarge;
+            %      hold on;
+        end
+        plot(binBorders(1:end-1), nanmean(meanMovingFrac), 'Color', rgb('Purple'))
+        fuckyou = nanmean(meanMovingFrac) - (nanstd(meanMovingFrac) ./ sqrt(3));
+        fuckyoutoo = nanmean(meanMovingFrac) + (nanstd(meanMovingFrac) ./ sqrt(3));
+        plotshaded(binBorders(1:end-1), [fuckyou; fuckyoutoo], rgb('Purple'));
+        makeprettyLarge;
+        xlim([binBorders(1), binBorders(end)])
+        xlabel('time from stim onset (s)')
+        ylabel('fraction moving')
+        L(1) = plot(nan, nan, 'Color', rgb('RoyalBlue'), 'LineWidth', 2);
+        L(2) = plot(nan, nan, 'Color', rgb('Green'), 'LineWidth', 2);
+        L(3) = plot(nan, nan, 'Color', rgb('Purple'), 'LineWidth', 2);
+        legend(L, {'Phase 1', 'Phase 2', 'Last day phase 2'})
+
+        makeprettyLargeLarge;
+
+        %% moving frac phase 2 vs 3
+        figure();
+        for iAnimal = 5:7
+            meanMovingFrac(iAnimal, :) = an(iAnimal).movingFrac(animalsPhase3{iAnimal-4}(end), :);
+            %     plot( meanMovingFrac(iAnimal,:), 'Color',rgb('DeepSkyBlue'))
+            %     makeprettyLarge;
+            %      hold on;
+        end
+        plot(binBorders(1:end-1), nanmean(meanMovingFrac), 'Color', rgb('Orange'))
+        fuckyou = nanmean(meanMovingFrac) - (nanstd(meanMovingFrac) ./ sqrt(3));
+        fuckyoutoo = nanmean(meanMovingFrac) + (nanstd(meanMovingFrac) ./ sqrt(3));
+        plotshaded(binBorders(1:end-1), [fuckyou; fuckyoutoo], rgb('Orange'));
+        makeprettyLarge;
+        hold on;
+        for iAnimal = 5:7
+            meanMovingFrac(iAnimal, :) = an(iAnimal).movingFrac(animalsPhase2{iAnimal-4}(end), :);
+            %     plot( meanMovingFrac(iAnimal,:), 'Color',rgb('DeepSkyBlue'))
+            %     makeprettyLarge;
+            %      hold on;
+        end
+        plot(binBorders(1:end-1), nanmean(meanMovingFrac), 'Color', rgb('Purple'))
+        fuckyou = nanmean(meanMovingFrac) - (nanstd(meanMovingFrac) ./ sqrt(3));
+        fuckyoutoo = nanmean(meanMovingFrac) + (nanstd(meanMovingFrac) ./ sqrt(3));
+        plotshaded(binBorders(1:end-1), [fuckyou; fuckyoutoo], rgb('Purple'));
+        makeprettyLarge;
+        xlim([binBorders(1), binBorders(end)])
+        xlabel('time from stim onset (s)')
+        ylabel('fraction moving')
+        L(1) = plot(nan, nan, 'Color', rgb('Purple'), 'LineWidth', 2);
+        L(2) = plot(nan, nan, 'Color', rgb('Orange'), 'LineWidth', 2);
+        legend(L, {'Last day phase 2', 'Phase 3'})
+        makeprettyLargeLarge;
+
+        %% Reaction times phase 1 vs 2
+        figure();
+        for iAnimal = 5:7
+            cmap = brewermap(length(animalsPhase1{iAnimal-4})+3, 'Greens');
+            errorbar(iAnimal-4, nanmean(an(iAnimal).stim_rxn_time(animalsPhase1{iAnimal-4})), ...
+                nanstd(an(iAnimal).stim_rxn_time(animalsPhase1{iAnimal-4})/sqrt(length(an(iAnimal).stim_rxn_time(animalsPhase1{iAnimal-4})))), ...
+                'Color', 'k', 'LineWidth', 2);
+            makeprettyLarge;
+            hold on;
+            scatter(repmat(iAnimal-4, length(animalsPhase1{iAnimal-4}), 1), an(iAnimal).stim_rxn_time(animalsPhase1{iAnimal-4}), [], cmap(2:end-2, :), 'filled');
+            makeprettyLarge;
+            hold on;
+            scatter(iAnimal-4, nanmean(an(iAnimal).stim_rxn_time(animalsPhase1{iAnimal-4})), [], 'k', 'filled');
             makeprettyLarge;
             hold on;
         end
-
-
-        xlabel('image type')
-        ylabel('frac \color[rgb]{0,0,1}go left \color[rgb]{1,0,0} no go')
-
+        ylabel('Reaction time (s)')
         xticks([1, 2, 3])
-        xticklabels({'NoGo 1/2 trials', 'NoGo 2/2 trials'})
-        ylim([0, 1])
-        makeprettyLarge;
+        xticklabels({'JF042', 'JF043', 'JF044'})
+        legend({'mean +/ - se'})
+        ylim([0, 6])
         grid on;
 
-    end
-    % plot(1:10, rand(1,10))
-    % ax = gca;
-    % % Simply color an XTickLabel
-    % ax.XTickLabel{3} = ['\color{red}' ax.XTickLabel{3}];
-    % % Use TeX symbols
-    % ax.XTickLabel{4} = '\color{blue} \uparrow';
-    % % Use multiple colors in one XTickLabel
-    % ax.XTickLabel{5} = '\color[rgb]{0,1,0}green\color{orange}?';
-    % % Color YTickLabels with colormap
-    % nColors = numel(ax.YTickLabel);
-    % cm = jet(nColors);
-    % for i = 1:nColors
-    %     ax.YTickLabel{i} = sprintf('\color[rgb]{%f,%f,%f}%s', cm(i,:), ax.YTickLabel{i});
-    % end
 
-    %% Going Left phase 1
-    figure();
-    animalCol = {rgb('HotPink'); rgb('Crimson'); rgb('RoyalBlue')};
-    for iAnimal = 5:7
-        cmap = brewermap(length(animalsPhase1{iAnimal-4})+2, 'Greens');
+        for iAnimal = 5:7
+            cmap = brewermap(length(animalsPhase2{iAnimal-4})+3, 'Blues');
 
-        scatter(1:length(animalsPhase1{iAnimal-4}), ...
-            an(iAnimal).goLeft(animalsPhase1{iAnimal-4}, 1)./an(iAnimal).nTrials(animalsPhase1{iAnimal-4}, 1), [], animalCol{iAnimal-4}, 'filled');
-        hold on;
-        p(iAnimal) = plot(1:length(animalsPhase1{iAnimal-4}), ...
-            an(iAnimal).goLeft(animalsPhase1{iAnimal-4}, 1)./an(iAnimal).nTrials(animalsPhase1{iAnimal-4}, 1), 'Color', animalCol{iAnimal-4});
-        makeprettyLarge;
-        hold on;
-
-    end
-    legend([p(5), p(6), p(7)], {'JF042', 'JF043', 'JF044'})
-    ylabel('Frac. go left')
-    xticks([1, 2, 3, 4])
-    xlabel('Day #')
-    grid on;
-    makeprettyLargeLarge;
-
-    %% Fraction moving phase 1 vs 2
-    figure();
-
-    for iAnimal = 5:7
-        meanMovingFrac(iAnimal, :) = nanmean(an(iAnimal).movingFrac(animalsPhase1{iAnimal-4}, :));
-        %     plot( meanMovingFrac(iAnimal,:), 'Color',rgb('DeepSkyBlue'))
-        %     makeprettyLarge;
-        %      hold on;
-    end
-    plot(binBorders(1:end-1), nanmean(meanMovingFrac), 'Color', rgb('RoyalBlue'))
-    fuckyou = nanmean(meanMovingFrac) - (nanstd(meanMovingFrac) ./ sqrt(3));
-    fuckyoutoo = nanmean(meanMovingFrac) + (nanstd(meanMovingFrac) ./ sqrt(3));
-    plotshaded(binBorders(1:end-1), [fuckyou; fuckyoutoo], rgb('RoyalBlue'));
-    makeprettyLarge;
-    hold on;
-    for iAnimal = 5:7
-        meanMovingFrac(iAnimal, :) = nanmean(an(iAnimal).movingFrac(animalsPhase2{iAnimal-4}(1:end - 1), :));
-        %     plot( meanMovingFrac(iAnimal,:), 'Color',rgb('DeepSkyBlue'))
-        %     makeprettyLarge;
-        %      hold on;
-    end
-    plot(binBorders(1:end-1), nanmean(meanMovingFrac), 'Color', rgb('Green'))
-    fuckyou = nanmean(meanMovingFrac) - (nanstd(meanMovingFrac) ./ sqrt(3));
-    fuckyoutoo = nanmean(meanMovingFrac) + (nanstd(meanMovingFrac) ./ sqrt(3));
-    plotshaded(binBorders(1:end-1), [fuckyou; fuckyoutoo], rgb('Green'));
-    makeprettyLarge;
-    hold on;
-    for iAnimal = 5:7
-        meanMovingFrac(iAnimal, :) = an(iAnimal).movingFrac(animalsPhase2{iAnimal-4}(end), :);
-        %     plot( meanMovingFrac(iAnimal,:), 'Color',rgb('DeepSkyBlue'))
-        %     makeprettyLarge;
-        %      hold on;
-    end
-    plot(binBorders(1:end-1), nanmean(meanMovingFrac), 'Color', rgb('Purple'))
-    fuckyou = nanmean(meanMovingFrac) - (nanstd(meanMovingFrac) ./ sqrt(3));
-    fuckyoutoo = nanmean(meanMovingFrac) + (nanstd(meanMovingFrac) ./ sqrt(3));
-    plotshaded(binBorders(1:end-1), [fuckyou; fuckyoutoo], rgb('Purple'));
-    makeprettyLarge;
-    xlim([binBorders(1), binBorders(end)])
-    xlabel('time from stim onset (s)')
-    ylabel('fraction moving')
-    L(1) = plot(nan, nan, 'Color', rgb('RoyalBlue'), 'LineWidth', 2);
-    L(2) = plot(nan, nan, 'Color', rgb('Green'), 'LineWidth', 2);
-    L(3) = plot(nan, nan, 'Color', rgb('Purple'), 'LineWidth', 2);
-    legend(L, {'Phase 1', 'Phase 2', 'Last day phase 2'})
-
-    makeprettyLargeLarge;
-
-    %% moving frac phase 2 vs 3
-    figure();
-    for iAnimal = 5:7
-        meanMovingFrac(iAnimal, :) = an(iAnimal).movingFrac(animalsPhase3{iAnimal-4}(end), :);
-        %     plot( meanMovingFrac(iAnimal,:), 'Color',rgb('DeepSkyBlue'))
-        %     makeprettyLarge;
-        %      hold on;
-    end
-    plot(binBorders(1:end-1), nanmean(meanMovingFrac), 'Color', rgb('Orange'))
-    fuckyou = nanmean(meanMovingFrac) - (nanstd(meanMovingFrac) ./ sqrt(3));
-    fuckyoutoo = nanmean(meanMovingFrac) + (nanstd(meanMovingFrac) ./ sqrt(3));
-    plotshaded(binBorders(1:end-1), [fuckyou; fuckyoutoo], rgb('Orange'));
-    makeprettyLarge;
-    hold on;
-    for iAnimal = 5:7
-        meanMovingFrac(iAnimal, :) = an(iAnimal).movingFrac(animalsPhase2{iAnimal-4}(end), :);
-        %     plot( meanMovingFrac(iAnimal,:), 'Color',rgb('DeepSkyBlue'))
-        %     makeprettyLarge;
-        %      hold on;
-    end
-    plot(binBorders(1:end-1), nanmean(meanMovingFrac), 'Color', rgb('Purple'))
-    fuckyou = nanmean(meanMovingFrac) - (nanstd(meanMovingFrac) ./ sqrt(3));
-    fuckyoutoo = nanmean(meanMovingFrac) + (nanstd(meanMovingFrac) ./ sqrt(3));
-    plotshaded(binBorders(1:end-1), [fuckyou; fuckyoutoo], rgb('Purple'));
-    makeprettyLarge;
-    xlim([binBorders(1), binBorders(end)])
-    xlabel('time from stim onset (s)')
-    ylabel('fraction moving')
-    L(1) = plot(nan, nan, 'Color', rgb('Purple'), 'LineWidth', 2);
-    L(2) = plot(nan, nan, 'Color', rgb('Orange'), 'LineWidth', 2);
-    legend(L, {'Last day phase 2', 'Phase 3'})
-    makeprettyLargeLarge;
-
-    %% Reaction times phase 1 vs 2
-    figure();
-    for iAnimal = 5:7
-        cmap = brewermap(length(animalsPhase1{iAnimal-4})+3, 'Greens');
-        errorbar(iAnimal-4, nanmean(an(iAnimal).stim_rxn_time(animalsPhase1{iAnimal-4})), ...
-            nanstd(an(iAnimal).stim_rxn_time(animalsPhase1{iAnimal-4})/sqrt(length(an(iAnimal).stim_rxn_time(animalsPhase1{iAnimal-4})))), ...
-            'Color', 'k', 'LineWidth', 2);
-        makeprettyLarge;
-        hold on;
-        scatter(repmat(iAnimal-4, length(animalsPhase1{iAnimal-4}), 1), an(iAnimal).stim_rxn_time(animalsPhase1{iAnimal-4}), [], cmap(2:end-2, :), 'filled');
-        makeprettyLarge;
-        hold on;
-        scatter(iAnimal-4, nanmean(an(iAnimal).stim_rxn_time(animalsPhase1{iAnimal-4})), [], 'k', 'filled');
-        makeprettyLarge;
-        hold on;
-    end
-    ylabel('Reaction time (s)')
-    xticks([1, 2, 3])
-    xticklabels({'JF042', 'JF043', 'JF044'})
-    legend({'mean +/ - se'})
-    ylim([0, 6])
-    grid on;
-
-
-    for iAnimal = 5:7
-        cmap = brewermap(length(animalsPhase2{iAnimal-4})+3, 'Blues');
-
-        errorbar(iAnimal-4+0.1, nanmean(an(iAnimal).stim_rxn_time(animalsPhase2{iAnimal-4})), ...
-            nanstd(an(iAnimal).stim_rxn_time(animalsPhase2{iAnimal-4})/sqrt(length(an(iAnimal).stim_rxn_time(animalsPhase2{iAnimal-4})))), ...
-            'Color', 'k', 'LineWidth', 2);
-        makeprettyLarge;
-        hold on;
-        scatter(repmat(iAnimal-4+0.1, length(animalsPhase2{iAnimal-4}), 1), an(iAnimal).stim_rxn_time(animalsPhase2{iAnimal-4}), [], cmap(2:end-2, :), 'filled');
-        makeprettyLarge;
-        hold on;
-        scatter(iAnimal-4+0.1, nanmean(an(iAnimal).stim_rxn_time(animalsPhase2{iAnimal-4})), [], 'k', 'filled');
-        makeprettyLarge;
-        hold on;
-    end
-    ylabel('Reaction time (s)')
-    xticks([1, 2, 3])
-    xticklabels({'JF042', 'JF043', 'JF044'})
-    L(3) = scatter(nan, nan, [], rgb('DeepSkyBlue'), 'filled');
-    L(2) = scatter(nan, nan, [], rgb('MediumSeaGreen'), 'filled');
-    L(1) = errorbar(nan, nan, 'Color', 'k', 'LineWidth', 2);
-    legend(L, {'mean +/ - SE', 'Phase 1', 'Phase 2'})
-    %legend({'mean +/ - SE'})
-    ylim([0, 6])
-    grid on;
-    xlim([0.5, 3.6])
-    makeprettyLargeLarge;
-
-    %% reaction time phase 2 and 3
-    figure();
-    for iAnimal = 5:7
-        cmap = brewermap(length(animalsPhase2{iAnimal-4})+3, 'Blues');
-
-        errorbar(iAnimal-4, nanmean(an(iAnimal).stim_rxn_time(animalsPhase2{iAnimal-4})), ...
-            nanstd(an(iAnimal).stim_rxn_time(animalsPhase2{iAnimal-4})/sqrt(length(an(iAnimal).stim_rxn_time(animalsPhase2{iAnimal-4})))), ...
-            'Color', 'k', 'LineWidth', 2);
-        makeprettyLarge;
-        hold on;
-        scatter(repmat(iAnimal-4, length(animalsPhase2{iAnimal-4}), 1), an(iAnimal).stim_rxn_time(animalsPhase2{iAnimal-4}), [], cmap(2:end-2, :), 'filled');
-        makeprettyLarge;
-        hold on;
-        scatter(iAnimal-4, nanmean(an(iAnimal).stim_rxn_time(animalsPhase2{iAnimal-4})), [], 'k', 'filled');
-        makeprettyLarge;
-        hold on;
-    end
-    ylabel('Reaction time (s)')
-    xticks([1, 2, 3])
-    xticklabels({'JF042', 'JF043', 'JF044'})
-    legend({'mean +/ - se'})
-    ylim([0, 6])
-    grid on;
-
-
-    for iAnimal = 5:7
-        cmap = brewermap(length(animalsPhase3{iAnimal-4})+3, 'Oranges');
-
-        errorbar(iAnimal-4+0.1, nanmean(an(iAnimal).stim_rxn_time(animalsPhase3{iAnimal-4})), ...
-            nanstd(an(iAnimal).stim_rxn_time(animalsPhase3{iAnimal-4})/sqrt(length(an(iAnimal).stim_rxn_time(animalsPhase3{iAnimal-4})))), ...
-            'Color', 'k', 'LineWidth', 2);
-        makeprettyLarge;
-        hold on;
-        scatter(repmat(iAnimal-4+0.1, length(animalsPhase3{iAnimal-4}), 1), an(iAnimal).stim_rxn_time(animalsPhase3{iAnimal-4}), [], cmap(3:end-1, :), 'filled');
-        makeprettyLarge;
-        hold on;
-        %scatter(iAnimal-4+0.1, nanmean(an(iAnimal).stim_rxn_time(animalsPhase3{iAnimal-4})),[],'k', 'filled') ;
-        makeprettyLarge;
-        hold on;
-    end
-    ylabel('Reaction time (s)')
-    xticks([1, 2, 3])
-    xticklabels({'JF042', 'JF043', 'JF044'})
-    L(2) = scatter(nan, nan, [], rgb('DeepSkyBlue'), 'filled');
-    L(3) = scatter(nan, nan, [], cmap(3:end-1, :), 'filled');
-    L(1) = errorbar(nan, nan, 'Color', 'k', 'LineWidth', 2);
-    legend(L, {'mean +/ - SE', 'Phase 2', 'Phase 3'})
-    %legend({'mean +/ - SE'})
-    ylim([0, 2.1])
-    grid on;
-    xlim([0.5, 3.6])
-    makeprettyLargeLarge;
-
-    %% Phase 4: no going
-
-    figure();
-    for iAnimal = 5:7
-        for iDay = 1:length(animalsPhase4{iAnimal-4})
-            cmap = copper(length(animalsPhase4{iAnimal-4}+1));
-            plot([iAnimal - 4, iAnimal - 4 + 0.5], [an(iAnimal).goLeft(animalsPhase4{iAnimal-4}(iDay)) ./ an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(iDay)), ...
-                an(iAnimal).noGo(animalsPhase4{iAnimal-4}(iDay)) ./ an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(iDay))], 'Color', cmap(size(cmap, 1)+1-iDay, :));
+            errorbar(iAnimal-4+0.1, nanmean(an(iAnimal).stim_rxn_time(animalsPhase2{iAnimal-4})), ...
+                nanstd(an(iAnimal).stim_rxn_time(animalsPhase2{iAnimal-4})/sqrt(length(an(iAnimal).stim_rxn_time(animalsPhase2{iAnimal-4})))), ...
+                'Color', 'k', 'LineWidth', 2);
             makeprettyLarge;
             hold on;
-            scatter([iAnimal - 4, iAnimal - 4 + 0.5], [an(iAnimal).goLeft(animalsPhase4{iAnimal-4}(iDay)) ./ an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(iDay)), ...
-                an(iAnimal).noGo(animalsPhase4{iAnimal-4}(iDay)) ./ an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(iDay))], [], cmap(size(cmap, 1)+1-iDay, :), 'filled')
+            scatter(repmat(iAnimal-4+0.1, length(animalsPhase2{iAnimal-4}), 1), an(iAnimal).stim_rxn_time(animalsPhase2{iAnimal-4}), [], cmap(2:end-2, :), 'filled');
+            makeprettyLarge;
+            hold on;
+            scatter(iAnimal-4+0.1, nanmean(an(iAnimal).stim_rxn_time(animalsPhase2{iAnimal-4})), [], 'k', 'filled');
+            makeprettyLarge;
+            hold on;
         end
-    end
+        ylabel('Reaction time (s)')
+        xticks([1, 2, 3])
+        xticklabels({'JF042', 'JF043', 'JF044'})
+        L(3) = scatter(nan, nan, [], rgb('DeepSkyBlue'), 'filled');
+        L(2) = scatter(nan, nan, [], rgb('MediumSeaGreen'), 'filled');
+        L(1) = errorbar(nan, nan, 'Color', 'k', 'LineWidth', 2);
+        legend(L, {'mean +/ - SE', 'Phase 1', 'Phase 2'})
+        %legend({'mean +/ - SE'})
+        ylim([0, 6])
+        grid on;
+        xlim([0.5, 3.6])
+        makeprettyLargeLarge;
 
-    figure();
+        %% reaction time phase 2 and 3
+        figure();
+        for iAnimal = 5:7
+            cmap = brewermap(length(animalsPhase2{iAnimal-4})+3, 'Blues');
 
-    for iAnimal = 5
-        transparencyValues = 0:1 / length(an(iAnimal).noGoDay):1;
-        if iAnimal == 7
-
-            thiD = size(an(iAnimal).noGoDay, 2) - 1:size(an(iAnimal).noGoDay, 2);
-        elseif iAnimal == 5
-            thiD = size(an(iAnimal).noGoDay, 2) - 1:size(an(iAnimal).noGoDay, 2);
-        else
-
-
+            errorbar(iAnimal-4, nanmean(an(iAnimal).stim_rxn_time(animalsPhase2{iAnimal-4})), ...
+                nanstd(an(iAnimal).stim_rxn_time(animalsPhase2{iAnimal-4})/sqrt(length(an(iAnimal).stim_rxn_time(animalsPhase2{iAnimal-4})))), ...
+                'Color', 'k', 'LineWidth', 2);
+            makeprettyLarge;
+            hold on;
+            scatter(repmat(iAnimal-4, length(animalsPhase2{iAnimal-4}), 1), an(iAnimal).stim_rxn_time(animalsPhase2{iAnimal-4}), [], cmap(2:end-2, :), 'filled');
+            makeprettyLarge;
+            hold on;
+            scatter(iAnimal-4, nanmean(an(iAnimal).stim_rxn_time(animalsPhase2{iAnimal-4})), [], 'k', 'filled');
+            makeprettyLarge;
+            hold on;
         end
+        ylabel('Reaction time (s)')
+        xticks([1, 2, 3])
+        xticklabels({'JF042', 'JF043', 'JF044'})
+        legend({'mean +/ - se'})
+        ylim([0, 6])
+        grid on;
 
 
-        col1 = 'b';
-        col2 = 'r';
+        for iAnimal = 5:7
+            cmap = brewermap(length(animalsPhase3{iAnimal-4})+3, 'Oranges');
 
-        thisS = nanmean([an(iAnimal).noGo(an(iAnimal).noGoDay(thiD), [1, 2, 3]) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(thiD), [1, 2, 3]))]);
-        thisSt = nanstd([an(iAnimal).noGo(an(iAnimal).noGoDay(thiD), [1, 2, 3]) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(thiD), [1, 2, 3]))]);
-        scatter([1, 2, 3], thisS, [], col2, 'filled')
-        hold on;
-        errorbar([1, 2, 3], thisS, thisSt, thisSt, 'Color', col2, 'LineWidth', 2)
-        p1 = plot([1, 2, 3], thisS, 'Color', col2);
-        makeprettyLarge;
-        hold on;
+            errorbar(iAnimal-4+0.1, nanmean(an(iAnimal).stim_rxn_time(animalsPhase3{iAnimal-4})), ...
+                nanstd(an(iAnimal).stim_rxn_time(animalsPhase3{iAnimal-4})/sqrt(length(an(iAnimal).stim_rxn_time(animalsPhase3{iAnimal-4})))), ...
+                'Color', 'k', 'LineWidth', 2);
+            makeprettyLarge;
+            hold on;
+            scatter(repmat(iAnimal-4+0.1, length(animalsPhase3{iAnimal-4}), 1), an(iAnimal).stim_rxn_time(animalsPhase3{iAnimal-4}), [], cmap(3:end-1, :), 'filled');
+            makeprettyLarge;
+            hold on;
+            %scatter(iAnimal-4+0.1, nanmean(an(iAnimal).stim_rxn_time(animalsPhase3{iAnimal-4})),[],'k', 'filled') ;
+            makeprettyLarge;
+            hold on;
+        end
+        ylabel('Reaction time (s)')
+        xticks([1, 2, 3])
+        xticklabels({'JF042', 'JF043', 'JF044'})
+        L(2) = scatter(nan, nan, [], rgb('DeepSkyBlue'), 'filled');
+        L(3) = scatter(nan, nan, [], cmap(3:end-1, :), 'filled');
+        L(1) = errorbar(nan, nan, 'Color', 'k', 'LineWidth', 2);
+        legend(L, {'mean +/ - SE', 'Phase 2', 'Phase 3'})
+        %legend({'mean +/ - SE'})
+        ylim([0, 2.1])
+        grid on;
+        xlim([0.5, 3.6])
+        makeprettyLargeLarge;
 
-        thisS = nanmean([an(iAnimal).goLeft(an(iAnimal).noGoDay(thiD), [1, 2, 3]) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(thiD), [1, 2, 3]))]);
-        thisSt = nanstd([an(iAnimal).goLeft(an(iAnimal).noGoDay(thiD), [1, 2, 3]) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(thiD), [1, 2, 3]))]);
-        scatter([1, 2, 3], thisS, [], col1, 'filled')
-        hold on;
-        errorbar([1, 2, 3], thisS, thisSt, thisSt, 'Color', col1, 'LineWidth', 2)
-        p2 = plot([1, 2, 3], thisS, 'Color', col1);
-        makeprettyLarge;
-        hold on;
+        %% Phase 4: no going
 
-
-    end
-    xlabel('image type')
-    ylabel('frac \color[rgb]{0,0,1}go left \color[rgb]{1,0,0} no go')
-    xticks([1, 2, 3])
-    xticklabels({'Go1', 'Go2', 'NoGo'})
-    ylim([0, 1])
-    makeprettyLarge;
-    grid on;
-
-    figure();
-
-    for iAnimal = [5:7]
-        subplot(3, 1, iAnimal-4)
-        transparencyValues = 0:1 / size(animalsPhase4{iAnimal-4}, 2):1;
-        for iDay = 1:size(animalsPhase4{iAnimal-4}, 2)
-            if iDay == size(animalsPhase4{iAnimal-4}, 2)
-                col1 = rgb('DarkBlue');
-                col2 = rgb('DarkRed');
-
-            else
-                col1 = 'b';
-                col2 = 'r';
+        figure();
+        for iAnimal = 5:7
+            for iDay = 1:length(animalsPhase4{iAnimal-4})
+                cmap = copper(length(animalsPhase4{iAnimal-4}+1));
+                plot([iAnimal - 4, iAnimal - 4 + 0.5], [an(iAnimal).goLeft(animalsPhase4{iAnimal-4}(iDay)) ./ an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(iDay)), ...
+                    an(iAnimal).noGo(animalsPhase4{iAnimal-4}(iDay)) ./ an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(iDay))], 'Color', cmap(size(cmap, 1)+1-iDay, :));
+                makeprettyLarge;
+                hold on;
+                scatter([iAnimal - 4, iAnimal - 4 + 0.5], [an(iAnimal).goLeft(animalsPhase4{iAnimal-4}(iDay)) ./ an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(iDay)), ...
+                    an(iAnimal).noGo(animalsPhase4{iAnimal-4}(iDay)) ./ an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(iDay))], [], cmap(size(cmap, 1)+1-iDay, :), 'filled')
             end
-            scatter([1, 2, 3], an(iAnimal).goLeft(animalsPhase4{iAnimal-4}(iDay), [1, 3, 2])./an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(iDay), [1, 3, 2]), [], col1, 'filled', ...
-                'MarkerFaceAlpha', transparencyValues(iDay+1), 'MarkerEdgeAlpha', transparencyValues(iDay+1))
-            p = plot([1, 2, 3], an(iAnimal).goLeft(animalsPhase4{iAnimal-4}(iDay), [1, 3, 2])./an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(iDay), [1, 3, 2]), 'Color', col1);
-            p.Color(4) = transparencyValues(iDay+1);
-            hold on;
-            makeprettyLarge;
-            scatter([1, 2, 3], an(iAnimal).noGo(animalsPhase4{iAnimal-4}(iDay), [1, 3, 2])./an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(iDay), [1, 3, 2]), [], col2, 'filled', ...
-                'MarkerFaceAlpha', transparencyValues(iDay+1), 'MarkerEdgeAlpha', transparencyValues(iDay+1))
-            p = plot([1, 2, 3], an(iAnimal).noGo(animalsPhase4{iAnimal-4}(iDay), [1, 3, 2])./an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(iDay), [1, 3, 2]), 'Color', col2);
-            p.Color(4) = transparencyValues(iDay+1);
-            makeprettyLarge;
         end
 
-        xlabel('image type')
-        ylabel('frac \color[rgb]{0,0,1}go left \color[rgb]{1,0,0} no go')
+        figure();
 
-        xticks([1, 2, 3])
-        xticklabels({'Go1', 'NoGo', 'Go2'})
-        ylim([0, 1])
-        makeprettyLarge;
-        grid on;
-    end
-if plotAll
-    figure(); %last two days
-    iAnimal = 6
-    plot(nanmean([an(iAnimal).goLeft(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]), 'Color', rgb('RoyalBlue'))
-    makeprettyLarge;
-    hold on;
-    errorbar([1, 2], nanmean([an(iAnimal).goLeft(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]), ...
-        nanstd([an(iAnimal).goLeft(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]./sqrt(2)), ...
-        'Color', rgb('RoyalBlue'), 'LineWidth', 2)
-    makeprettyLarge;
-    hold on;
-    plot(nanmean([an(iAnimal).noGo(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]), 'Color', rgb('IndianRed'))
-    makeprettyLarge;
-    hold on;
-    errorbar([1, 2], nanmean([an(iAnimal).noGo(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]), ...
-        nanstd([an(iAnimal).noGo(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]./sqrt(2)), ...
-        'Color', rgb('IndianRed'), 'LineWidth', 2)
-    makeprettyLarge;
-    hold on;
+        for iAnimal = 5
+            transparencyValues = 0:1 / length(an(iAnimal).noGoDay):1;
+            if iAnimal == 7
 
-    iAnimal = 5
-    plot(nanmean([an(iAnimal).goLeft(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]), 'Color', rgb('Blue'))
-    makeprettyLarge;
-    hold on;
-    errorbar([1, 2], nanmean([an(iAnimal).goLeft(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]), ...
-        nanstd([an(iAnimal).goLeft(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]./sqrt(2)), ...
-        'Color', rgb('Blue'), 'LineWidth', 2)
-    makeprettyLarge;
-    hold on;
-
-    hold on;
-    plot(nanmean([an(iAnimal).noGo(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]), 'Color', rgb('Red'))
-    makeprettyLarge;
-    hold on;
-    errorbar([1, 2], nanmean([an(iAnimal).noGo(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]), ...
-        nanstd([an(iAnimal).noGo(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]./sqrt(2)), ...
-        'Color', rgb('Red'), 'LineWidth', 2)
-    makeprettyLarge;
-    hold on;
-
-    ylabel('frac \color[rgb]{0,0,1}go left \color[rgb]{1,0,0} no go')
-    xticks([1, 2, 3])
-    xticklabels({'Go1', 'NoGo'})
-    ylim([0, 1])
-    makeprettyLarge;
-    grid on;
-
-    %% phases
-    figure();
-    min = [-0.1, 0, 0.1];
-    for iAnimal = 5:7
-        phases = [ones(length(animalsPhase1{iAnimal-4}), 1); ones(length(animalsPhase2{iAnimal-4}), 1) .* 2; ones(length(animalsPhase3{iAnimal-4}), 1) .* 3; ...
-            ones(length(animalsPhase4{iAnimal-4}), 1) .* 4; ones(length(animalsPhase5{iAnimal-4}), 1) .* 5];
-        p(iAnimal) = plot(phases+min(iAnimal-4), 'Color', animalCol{iAnimal-4});
-        makeprettyLarge;
-        hold on;
-    end
-    xlabel('Training day #')
-    ylabel('Training phase')
-    legend([p(5), p(6), p(7)], {'JF042', 'JF043', 'JF044'})
-    makeprettyLargeLarge;
-
-    %% n trials
-    figure();
-    min = [-0.1, 0, 0.1];
-    for iAnimal = 5:7
-        phases = [sum(an(iAnimal).n_trials(animalsPhase1{iAnimal-4}, :), 2); sum(an(iAnimal).n_trials(animalsPhase2{iAnimal-4}, :), 2); ...
-            sum(an(iAnimal).n_trials(animalsPhase3{iAnimal-4}, :), 2); sum(an(iAnimal).n_trials(animalsPhase4{iAnimal-4}, :), 2); sum(an(iAnimal).n_trials(animalsPhase5{iAnimal-4}, :), 2)];
-        p(iAnimal) = plot(phases+min(iAnimal-4), 'Color', animalCol{iAnimal-4});
-        makeprettyLarge;
-        hold on;
-    end
-    xlabel('Training day')
-    ylabel('# trials')
-    legend([p(5), p(6), p(7)], {'JF042', 'JF043', 'JF044'})
-    makeprettyLargeLarge;
-end
+                thiD = size(an(iAnimal).noGoDay, 2) - 1:size(an(iAnimal).noGoDay, 2);
+            elseif iAnimal == 5
+                thiD = size(an(iAnimal).noGoDay, 2) - 1:size(an(iAnimal).noGoDay, 2);
+            else
 
 
-for iMouse = [5:6]
-    subplot(2, 1, iMouse-4)
-    transparencyValues = 0:1 / length(an(iMouse).noGoDay):1;
-    for iDay = 1:size(an(iMouse).noGoDay, 2)
-        if iDay == size(an(iMouse).noGoDay, 2)
-            col1 = rgb('DarkBlue');
-            col2 = rgb('DarkRed');
+            end
 
-        else
+
             col1 = 'b';
             col2 = 'r';
-        end
-        scatter([1, 2, 3], an(iMouse).goLeft(an(iMouse).noGoDay(iDay), [1, 3, 2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1, 3, 2]), [], col1, 'filled', ...
-            'MarkerFaceAlpha', transparencyValues(iDay+1), 'MarkerEdgeAlpha', transparencyValues(iDay+1))
-        p = plot([1, 2, 3], an(iMouse).goLeft(an(iMouse).noGoDay(iDay), [1, 3, 2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1, 3, 2]), 'Color', col1);
-        p.Color(4) = transparencyValues(iDay+1);
-        hold on;
-        makeprettyLarge;
-        scatter([1, 2, 3], an(iMouse).noGo(an(iMouse).noGoDay(iDay), [1, 3, 2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1, 3, 2]), [], col2, 'filled', ...
-            'MarkerFaceAlpha', transparencyValues(iDay+1), 'MarkerEdgeAlpha', transparencyValues(iDay+1))
-        p = plot([1, 2, 3], an(iMouse).noGo(an(iMouse).noGoDay(iDay), [1, 3, 2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1, 3, 2]), 'Color', col2);
-        p.Color(4) = transparencyValues(iDay+1);
-        makeprettyLarge;
-    end
 
-    xlabel('image type')
-    ylabel('frac go left(blue)/nogo (red)')
-    xticks([1, 2, 3])
-    xticklabels({'Go1', 'NoGo', 'Go2'})
-    ylim([0, 1])
-    makeprettyLarge;
-    grid on;
-end
+            thisS = nanmean([an(iAnimal).noGo(an(iAnimal).noGoDay(thiD), [1, 2, 3]) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(thiD), [1, 2, 3]))]);
+            thisSt = nanstd([an(iAnimal).noGo(an(iAnimal).noGoDay(thiD), [1, 2, 3]) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(thiD), [1, 2, 3]))]);
+            scatter([1, 2, 3], thisS, [], col2, 'filled')
+            hold on;
+            errorbar([1, 2, 3], thisS, thisSt, thisSt, 'Color', col2, 'LineWidth', 2)
+            p1 = plot([1, 2, 3], thisS, 'Color', col2);
+            makeprettyLarge;
+            hold on;
+
+            thisS = nanmean([an(iAnimal).goLeft(an(iAnimal).noGoDay(thiD), [1, 2, 3]) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(thiD), [1, 2, 3]))]);
+            thisSt = nanstd([an(iAnimal).goLeft(an(iAnimal).noGoDay(thiD), [1, 2, 3]) ./ (an(iAnimal).nTrials(an(iAnimal).noGoDay(thiD), [1, 2, 3]))]);
+            scatter([1, 2, 3], thisS, [], col1, 'filled')
+            hold on;
+            errorbar([1, 2, 3], thisS, thisSt, thisSt, 'Color', col1, 'LineWidth', 2)
+            p2 = plot([1, 2, 3], thisS, 'Color', col1);
+            makeprettyLarge;
+            hold on;
+
+
+        end
+        xlabel('image type')
+        ylabel('frac \color[rgb]{0,0,1}go left \color[rgb]{1,0,0} no go')
+        xticks([1, 2, 3])
+        xticklabels({'Go1', 'Go2', 'NoGo'})
+        ylim([0, 1])
+        makeprettyLarge;
+        grid on;
+
+        figure();
+
+        for iAnimal = [5:7]
+            subplot(3, 1, iAnimal-4)
+            transparencyValues = 0:1 / size(animalsPhase4{iAnimal-4}, 2):1;
+            for iDay = 1:size(animalsPhase4{iAnimal-4}, 2)
+                if iDay == size(animalsPhase4{iAnimal-4}, 2)
+                    col1 = rgb('DarkBlue');
+                    col2 = rgb('DarkRed');
+
+                else
+                    col1 = 'b';
+                    col2 = 'r';
+                end
+                scatter([1, 2, 3], an(iAnimal).goLeft(animalsPhase4{iAnimal-4}(iDay), [1, 3, 2])./an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(iDay), [1, 3, 2]), [], col1, 'filled', ...
+                    'MarkerFaceAlpha', transparencyValues(iDay+1), 'MarkerEdgeAlpha', transparencyValues(iDay+1))
+                p = plot([1, 2, 3], an(iAnimal).goLeft(animalsPhase4{iAnimal-4}(iDay), [1, 3, 2])./an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(iDay), [1, 3, 2]), 'Color', col1);
+                p.Color(4) = transparencyValues(iDay+1);
+                hold on;
+                makeprettyLarge;
+                scatter([1, 2, 3], an(iAnimal).noGo(animalsPhase4{iAnimal-4}(iDay), [1, 3, 2])./an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(iDay), [1, 3, 2]), [], col2, 'filled', ...
+                    'MarkerFaceAlpha', transparencyValues(iDay+1), 'MarkerEdgeAlpha', transparencyValues(iDay+1))
+                p = plot([1, 2, 3], an(iAnimal).noGo(animalsPhase4{iAnimal-4}(iDay), [1, 3, 2])./an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(iDay), [1, 3, 2]), 'Color', col2);
+                p.Color(4) = transparencyValues(iDay+1);
+                makeprettyLarge;
+            end
+
+            xlabel('image type')
+            ylabel('frac \color[rgb]{0,0,1}go left \color[rgb]{1,0,0} no go')
+
+            xticks([1, 2, 3])
+            xticklabels({'Go1', 'NoGo', 'Go2'})
+            ylim([0, 1])
+            makeprettyLarge;
+            grid on;
+        end
+        if plotAll
+            figure(); %last two days
+            iAnimal = 6
+            plot(nanmean([an(iAnimal).goLeft(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]), 'Color', rgb('RoyalBlue'))
+            makeprettyLarge;
+            hold on;
+            errorbar([1, 2], nanmean([an(iAnimal).goLeft(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]), ...
+                nanstd([an(iAnimal).goLeft(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]./sqrt(2)), ...
+                'Color', rgb('RoyalBlue'), 'LineWidth', 2)
+            makeprettyLarge;
+            hold on;
+            plot(nanmean([an(iAnimal).noGo(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]), 'Color', rgb('IndianRed'))
+            makeprettyLarge;
+            hold on;
+            errorbar([1, 2], nanmean([an(iAnimal).noGo(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]), ...
+                nanstd([an(iAnimal).noGo(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]./sqrt(2)), ...
+                'Color', rgb('IndianRed'), 'LineWidth', 2)
+            makeprettyLarge;
+            hold on;
+
+            iAnimal = 5
+            plot(nanmean([an(iAnimal).goLeft(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]), 'Color', rgb('Blue'))
+            makeprettyLarge;
+            hold on;
+            errorbar([1, 2], nanmean([an(iAnimal).goLeft(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]), ...
+                nanstd([an(iAnimal).goLeft(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]./sqrt(2)), ...
+                'Color', rgb('Blue'), 'LineWidth', 2)
+            makeprettyLarge;
+            hold on;
+
+            hold on;
+            plot(nanmean([an(iAnimal).noGo(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]), 'Color', rgb('Red'))
+            makeprettyLarge;
+            hold on;
+            errorbar([1, 2], nanmean([an(iAnimal).noGo(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]), ...
+                nanstd([an(iAnimal).noGo(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]) ./ (an(iAnimal).nTrials(animalsPhase4{iAnimal-4}(end, -1:end), [1, 3]))]./sqrt(2)), ...
+                'Color', rgb('Red'), 'LineWidth', 2)
+            makeprettyLarge;
+            hold on;
+
+            ylabel('frac \color[rgb]{0,0,1}go left \color[rgb]{1,0,0} no go')
+            xticks([1, 2, 3])
+            xticklabels({'Go1', 'NoGo'})
+            ylim([0, 1])
+            makeprettyLarge;
+            grid on;
+
+            %% phases
+            figure();
+            min = [-0.1, 0, 0.1];
+            for iAnimal = 5:7
+                phases = [ones(length(animalsPhase1{iAnimal-4}), 1); ones(length(animalsPhase2{iAnimal-4}), 1) .* 2; ones(length(animalsPhase3{iAnimal-4}), 1) .* 3; ...
+                    ones(length(animalsPhase4{iAnimal-4}), 1) .* 4; ones(length(animalsPhase5{iAnimal-4}), 1) .* 5];
+                p(iAnimal) = plot(phases+min(iAnimal-4), 'Color', animalCol{iAnimal-4});
+                makeprettyLarge;
+                hold on;
+            end
+            xlabel('Training day #')
+            ylabel('Training phase')
+            legend([p(5), p(6), p(7)], {'JF042', 'JF043', 'JF044'})
+            makeprettyLargeLarge;
+
+            %% n trials
+            figure();
+            min = [-0.1, 0, 0.1];
+            for iAnimal = 5:7
+                phases = [sum(an(iAnimal).n_trials(animalsPhase1{iAnimal-4}, :), 2); sum(an(iAnimal).n_trials(animalsPhase2{iAnimal-4}, :), 2); ...
+                    sum(an(iAnimal).n_trials(animalsPhase3{iAnimal-4}, :), 2); sum(an(iAnimal).n_trials(animalsPhase4{iAnimal-4}, :), 2); sum(an(iAnimal).n_trials(animalsPhase5{iAnimal-4}, :), 2)];
+                p(iAnimal) = plot(phases+min(iAnimal-4), 'Color', animalCol{iAnimal-4});
+                makeprettyLarge;
+                hold on;
+            end
+            xlabel('Training day')
+            ylabel('# trials')
+            legend([p(5), p(6), p(7)], {'JF042', 'JF043', 'JF044'})
+            makeprettyLargeLarge;
+        end
+
+
+        for iMouse = [5:6]
+            subplot(2, 1, iMouse-4)
+            transparencyValues = 0:1 / length(an(iMouse).noGoDay):1;
+            for iDay = 1:size(an(iMouse).noGoDay, 2)
+                if iDay == size(an(iMouse).noGoDay, 2)
+                    col1 = rgb('DarkBlue');
+                    col2 = rgb('DarkRed');
+
+                else
+                    col1 = 'b';
+                    col2 = 'r';
+                end
+                scatter([1, 2, 3], an(iMouse).goLeft(an(iMouse).noGoDay(iDay), [1, 3, 2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1, 3, 2]), [], col1, 'filled', ...
+                    'MarkerFaceAlpha', transparencyValues(iDay+1), 'MarkerEdgeAlpha', transparencyValues(iDay+1))
+                p = plot([1, 2, 3], an(iMouse).goLeft(an(iMouse).noGoDay(iDay), [1, 3, 2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1, 3, 2]), 'Color', col1);
+                p.Color(4) = transparencyValues(iDay+1);
+                hold on;
+                makeprettyLarge;
+                scatter([1, 2, 3], an(iMouse).noGo(an(iMouse).noGoDay(iDay), [1, 3, 2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1, 3, 2]), [], col2, 'filled', ...
+                    'MarkerFaceAlpha', transparencyValues(iDay+1), 'MarkerEdgeAlpha', transparencyValues(iDay+1))
+                p = plot([1, 2, 3], an(iMouse).noGo(an(iMouse).noGoDay(iDay), [1, 3, 2])./an(iMouse).nTrials(an(iMouse).noGoDay(iDay), [1, 3, 2]), 'Color', col2);
+                p.Color(4) = transparencyValues(iDay+1);
+                makeprettyLarge;
+            end
+
+            xlabel('image type')
+            ylabel('frac go left(blue)/nogo (red)')
+            xticks([1, 2, 3])
+            xticklabels({'Go1', 'NoGo', 'Go2'})
+            ylim([0, 1])
+            makeprettyLarge;
+            grid on;
+        end
+    end
 end
 end
