@@ -40,6 +40,7 @@ param.maxNTroughs = 1;
 param.somatic = 1; 
 param.minWvDuration = 100; %ms
 param.maxWvDuration = 900; %ms
+param.minSpatialDecaySlope = -45;
 % amplitude parameters
 param.rawFolder = [ephysap_path, '/..'];
 param.nRawSpikesToExtract = 100; 
@@ -48,7 +49,7 @@ param.minAmplitude = 40;
 param.ephys_sample_rate = 30000;
 param.nChannels = 385;
 % distance metric parameters
-param.computeDistanceMetrics = 1;
+param.computeDistanceMetrics = 0;
 param.nChannelsIsoDist = 4;
 param.isoDmin = NaN;
 param.lratioMin = NaN;
@@ -74,7 +75,9 @@ else
     load(fullfile(savePath, 'qMetric.mat'))
     load(fullfile(savePath, 'param.mat'))
     unitType = nan(length(qMetric.percSpikesMissing),1);
-    unitType(qMetric.nPeaks > param.maxNPeaks | qMetric.nTroughs > param.maxNTroughs |qMetric.somatic ~= param.somatic) = 0; %NOISE OR NON-SOMATIC
+    unitType(qMetric.nPeaks > param.maxNPeaks | qMetric.nTroughs > param.maxNTroughs | qMetric.somatic ~= param.somatic ...
+        | qMetric.spatialDecaySlope <=  param.minSpatialDecaySlope | qMetric.waveformDuration < param.minWvDuration |...
+        qMetric.waveformDuration > param.maxWvDuration) = 0; %NOISE or NON-SOMATIC
     unitType(qMetric.percSpikesMissing <= param.maxPercSpikesMissing & qMetric.nSpikes > param.minNumSpikes & ...
         qMetric.nPeaks <= param.maxNPeaks & qMetric.nTroughs <= param.maxNTroughs & qMetric.Fp <= param.maxRPVviolations & ...
         qMetric.somatic == param.somatic & qMetric.rawAmplitude > param.minAmplitude) = 1;%SINGLE SEXY UNIT
@@ -83,23 +86,23 @@ end
 end
  
 % %get memmap
-% bc_getRawMemMap;
-% 
-% ephysData = struct;
-% ephysData.spike_times = spikeTimes;
-% ephysData.spike_times_timeline = spikeTimes ./ 30000;
-% ephysData.spike_templates = spikeTemplates;
-% ephysData.templates = templateWaveforms;
-% ephysData.template_amplitudes = templateAmplitudes;
-% ephysData.channel_positions = readNPY([ephysPath filesep 'channel_positions.npy']);
-% ephysData.ephys_sample_rate = 30000;
-% ephysData.waveform_t = 1e3*((0:size(templateWaveforms, 2) - 1) / 30000);
-% ephysParams = struct;
-% plotRaw = 0;
-% probeLocation=[];
-% %keep ap_data ephysData qMetric param probeLocation unitType plotRaw animal experiments iDay
-% 
-% bc_unitQualityGUI(ap_data.Data.data,ephysData,qMetric, param, probeLocation, unitType, plotRaw);
+bc_getRawMemMap;
+
+ephysData = struct;
+ephysData.spike_times = spikeTimes;
+ephysData.spike_times_timeline = spikeTimes ./ 30000;
+ephysData.spike_templates = spikeTemplates;
+ephysData.templates = templateWaveforms;
+ephysData.template_amplitudes = templateAmplitudes;
+ephysData.channel_positions = readNPY([ephysPath filesep 'channel_positions.npy']);
+ephysData.ephys_sample_rate = 30000;
+ephysData.waveform_t = 1e3*((0:size(templateWaveforms, 2) - 1) / 30000);
+ephysParams = struct;
+plotRaw = 0;
+probeLocation=[];
+%keep ap_data ephysData qMetric param probeLocation unitType plotRaw animal experiments iDay
+
+bc_unitQualityGUI(memMapData,ephysData,qMetric, param, probeLocation, unitType, plotRaw);
 
 %% get histology ? 
 

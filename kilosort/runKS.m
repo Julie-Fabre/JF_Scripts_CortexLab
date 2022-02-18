@@ -25,7 +25,7 @@
 % JF_preprocess_NPX2('JF067', '2022-02-13', 'neuropixPhase3B1_kilosortChanMap.mat', 1, 1, []);
 % JF_preprocess_NPX2('JF067', '2022-02-14', 'neuropixPhase3B1_kilosortChanMap.mat', 1, 1, []);
 % JF_preprocess_NPX2('JF067', '2022-02-15', 'neuropixPhase3B1_kilosortChanMap.mat', 1, 1, []);
-JF_preprocess_NPX2('JF067', '2022-02-17', 'neuropixPhase3B1_kilosortChanMap.mat', 1, 1, []);
+JF_preprocess_NPX2('JF067', '2022-02-16', 'neuropixPhase3B1_kilosortChanMap.mat', 1, 1, []);
 % m2acc_playground;
 % 
 % 

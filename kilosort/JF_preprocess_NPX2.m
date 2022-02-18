@@ -6,7 +6,7 @@ function JF_preprocess_NPX2(animal, date, chanMapFile, experiment, site, recordi
 
 myPaths;
 [ephysAPfile, ~] = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_ap', site, recording);
-if size(ephysAPfile, 2) == 2 %keep only ap
+if size(ephysAPfile, 2) > 1 %keep only ap
     ephysAPfile = ephysAPfile{1};
 end
 rootZ = fileparts(ephysAPfile);
@@ -85,6 +85,9 @@ qMetricsExist = dir(fullfile(savePath, 'qMetric*.mat'));
     param.maxNPeaks = 2;
     param.maxNTroughs = 1;
     param.somatic = 1;
+    param.minWvDuration = 100; %ms
+    param.maxWvDuration = 900; %ms
+    param.minSpatialDecaySlope = -45;
     % amplitude parameters
     param.rawFolder = [ephysap_path, '/..'];
     param.nRawSpikesToExtract = 100;
