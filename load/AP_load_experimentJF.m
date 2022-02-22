@@ -830,19 +830,20 @@ if block_exists
             wheel_position = Timeline.rawDAQData(:, rotaryEncoder_idx);
             wheel_position(wheel_position > 2^31) = wheel_position(wheel_position > 2^31) - 2^32;
             [wheel_velocity, wheel_move] = AP_parse_wheel(wheel_position, Timeline.hw.daqSampleRate);
+             wheel_starts = Timeline.rawDAQTimestamps(diff([0; wheel_move]) == 1)';
+            wheel_stops = Timeline.rawDAQTimestamps(diff([wheel_move; 0]) == -1)';
+           stim_leeway = 0.1;
             wheel_move_stim_idx = ...
                 arrayfun(@(stim) find(wheel_starts > stim-stim_leeway, 1, 'first'), ...
                 stimOn_times);
 
             % Get wheel movement on/offsets
-            wheel_starts = Timeline.rawDAQTimestamps(diff([0; wheel_move]) == 1)';
-            wheel_stops = Timeline.rawDAQTimestamps(diff([wheel_move; 0]) == -1)';
             wheel_types = ones(size(wheel_starts, 1), 1);
             wheel_types(wheel_move_stim_idx) = 2;
             % (stim move: first move after stim)
             % (give this a little leeway, sometimes movement starts early but
             % stim comes on anyway)
-            stim_leeway = 0.1;
+            
           %  stim_to_move = wheel_starts - stimOn_times(1:n_trials);
 
 

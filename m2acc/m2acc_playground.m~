@@ -11,13 +11,13 @@ accCellPvalstim = [];
 accCellPvalmove = [];
 accCellPSTHmove = [];
 accCellPSTHstim = [];
-for iAnimal = 1:size(animals, 2)
+for iAnimal = 1%:size(animals, 2)
     animal = animals{iAnimal};
     experimentsBhv = AP_find_experimentsJF(animal, bhvProtocol, true);
     experimentsBhv = experimentsBhv([experimentsBhv.ephys]);
     experimentsPass = AP_find_experimentsJF(animal, passiveProtocol, true);
     experimentsPass = experimentsPass([experimentsPass.ephys]);
-    for iDay = 1:size(experimentsBhv, 1)
+    for iDay = 1:2%:size(experimentsBhv, 1)
         
             day = experimentsBhv(iDay).day;
             experimentBhv = experimentsBhv(iDay).experiment;
@@ -199,7 +199,8 @@ for iAnimal = 1:size(animals, 2)
 
     %% wide vs narrow
 end
-figure('color', 'white');
+
+figure();
 suptitle('m2')
 subplot(221)
 im = (m2CellPSTHstim - nanmean(m2CellPSTHstim(:, 1:200), 2)) ./ nanmean(m2CellPSTHstim(:, 1:200), 2);
@@ -230,7 +231,7 @@ imagesc(t, [], im(sorted_im_idx, :))
 xlabel('time from stim')
 ylabel('cell (sorted by move increase)')
 
-figure('color', 'white');
+figure();
 suptitle('acc')
 subplot(221)
 im = (accCellPSTHstim - nanmean(accCellPSTHstim(:, 1:200), 2)) ./ nanmean(accCellPSTHstim(:, 1:200), 2);
@@ -262,22 +263,20 @@ imagesc(t, [], im(sorted_im_idx, :))
 xlabel('time from stim')
 ylabel('cell (sorted by move increase)')
 
-
 accCellSinc = nanmean((accCellPSTHstim(:, 400:700) - nanmean(accCellPSTHstim(:, 1:200), 2))./nanmean(accCellPSTHstim(:, 1:200), 2), 2);
 accCellMinc = nanmean((accCellPSTHmove(:, 400:700) - nanmean(accCellPSTHmove(:, 1:200), 2))./nanmean(accCellPSTHmove(:, 1:200), 2), 2);
 m2CellSinc = nanmean((m2CellPSTHstim(:, 400:700) - nanmean(m2CellPSTHstim(:, 1:200), 2))./nanmean(m2CellPSTHstim(:, 1:200), 2), 2);
 m2CellMinc = nanmean((m2CellPSTHmove(:, 400:700) - nanmean(m2CellPSTHmove(:, 1:200), 2))./nanmean(m2CellPSTHmove(:, 1:200), 2), 2);
 
 figure();
-subplot(121)
-title('m2'); hold on;
-scatter(m2CellSinc, m2CellMinc, 2,'filled')
-xlabel('increase after stim')
-ylabel('increase after move')
-makepretty;
 subplot(122)
-title('acc'); hold on; 
-scatter(accCellSinc, accCellMinc, 2,'filled')
+title('m2'); hold on;
+scatter(m2CellSinc, m2CellMinc)
 xlabel('increase after stim')
 ylabel('increase after move')
-makepretty;
+subplot(222)
+title('acc'); hold on; 
+scatter(accCellSinc, accCellMinc)
+xlabel('increase after stim')
+ylabel('increase after move')
+
