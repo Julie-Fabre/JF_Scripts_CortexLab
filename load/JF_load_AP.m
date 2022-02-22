@@ -24,7 +24,7 @@ experiments = experiments([experiments.ephys]);
 
 %% Load data from experiment 
 
-curr_day = 19; % (set which day to use)
+curr_day = 24; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
@@ -57,13 +57,7 @@ if ~isempty(qMetricsExist)
 
 load(fullfile(savePath, 'qMetric.mat'))
 load(fullfile(savePath, 'param.mat'))
-unitType = nan(length(qMetric.percSpikesMissing),1);
-
-unitType(qMetric.nPeaks > param.maxNPeaks | qMetric.nTroughs > param.maxNTroughs ) = 0; %NOISE OR AXONAL
-unitType(qMetric.percSpikesMissing <= 40 & qMetric.nSpikes > param.minNumSpikes & ...
-    qMetric.nPeaks <= param.maxNPeaks & qMetric.nTroughs <= param.maxNTroughs & qMetric.Fp <= 30 & ...
-     qMetric.rawAmplitude > param.minAmplitude) = 1;%SINGLE SEXY UNIT
-unitType(isnan(unitType)) = 2;% MULTI UNIT 
+bc_getQualityUnitType;
 end
 
 AP_load_experimentJF;

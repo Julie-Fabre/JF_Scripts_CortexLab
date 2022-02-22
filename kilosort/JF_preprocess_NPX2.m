@@ -1,6 +1,6 @@
 
 %% preprocess for npx 2.0 probes : run kilosort, extract sync and lfp channels
-function JF_preprocess_NPX2(animal, date, chanMapFile, experiment, site, recording)
+function JF_preprocess_NPX2(animal, date, chanMapFile, experiment, site, recording, rerunQM)
 
 %% kilosort
 
@@ -39,7 +39,7 @@ if isempty(syncExists)
     if isSpikeGlx
         [ephysKSfile, ~] = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys', site, recording);
         if isempty(dir([ephysKSfile, filesep, 'sync.mat']))
-            syncFT(ephysAPfile, 385, ephysKSfile)
+            syncFT(ephysAPfile, 385, ephysKSfile);
         end
     end
 end
@@ -62,57 +62,15 @@ ephysap_path = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_ap', sit
 ephysDirPath = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_dir',site);
 savePath = fullfile(ephysDirPath, 'qMetrics');
 qMetricsExist = dir(fullfile(savePath, 'qMetric*.mat'));
-%if isempty(qMetricsExist)
+if isempty(qMetricsExist) || rerunQM 
     disp('getting quality metrics ...')
     [spikeTimes, spikeTemplates, ...
-        templateWaveforms, templateAmplitudes, pcFeatures, pcFeatureIdx, usedChannels] = bc_loadEphysData(ephysPath);
+        templateWaveforms, templateAmplitudes, pcFeatures, pcFeatureIdx, channelPositions] = bc_loadEphysData(ephysPath);
 
-
-    param = struct;
-    param.plotThis = 0;
-    param.plotGlobal = 1;
-    % refractory period parameters
-    param.tauR = 0.0020; %refractory period time (s)
-    param.tauC = 0.0001; %censored period time (s)
-    param.maxRPVviolations = 20;
-    % percentage spikes missing parameters
-    param.maxPercSpikesMissing = 30;
-    param.computeTimeChunks = 0;
-    param.deltaTimeChunk = NaN;
-    % number of spikes
-    param.minNumSpikes = 300;
-    % waveform parameters
-    param.maxNPeaks = 2;
-    param.maxNTroughs = 1;
-    param.somatic = 1;
-    param.minWvDuration = 100; %ms
-    param.maxWvDuration = 900; %ms
-    param.minSpatialDecaySlope = -45;
-    % amplitude parameters
-    param.rawFolder = [ephysap_path, '/..'];
-    param.nRawSpikesToExtract = 100;
-    param.minAmplitude = 20;
-    % recording parametrs
-    param.ephys_sample_rate = 30000;
-    param.nChannels = 385;
-    % distance metric parameters
-    param.computeDistanceMetrics = 1;
-    param.nChannelsIsoDist = 4;
-    param.isoDmin = NaN;
-    param.lratioMin = NaN;
-    param.ssMin = NaN;
-    % ACG parameters
-    param.ACGbinSize = 0.001;
-    param.ACGduration = 1;
-    % ISI parameters
-    param.longISI = 2;
-    % cell classification parameters
-    param.propISI = 0.1;
-    param.templateDuration = 400;
-    param.pss = 40;
-
+    bc_qualityParamValues; 
+  
 
     bc_runAllQualityMetrics(param, spikeTimes, spikeTemplates, ...
-        templateWaveforms, templateAmplitudes, pcFeatures, pcFeatureIdx, savePath);
-%end
+        templateWaveforms, templateAmplitudes, pcFeatures, pcFeatureIdx, channelPositions, savePath);
+end
 end

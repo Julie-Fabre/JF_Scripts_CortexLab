@@ -368,8 +368,17 @@ if block_exists
                 (signals_events.trialSideValues == 1 & signals_events.missValues == 1);
             trial_choice = go_right(1:n_trials)' - go_left(1:n_trials)';
             trial_outcome = signals_events.hitValues(1:n_trials)' - signals_events.missValues(1:n_trials)';
-
-        case {'vanillaChoiceworld', 'vanillaChoiceworldBias', 'vanillaChoiceworldNoRepeats', 'AP_stimWheelRight'}
+            sides = [-1, 1];
+            choices = [-1, 1];
+            conditions = combvec(sides, choices)';
+            n_conditions = size(conditions, 1);
+            
+            trial_conditions = ...
+                [ signals_events.trialSideValues(1:n_trials)', ...
+                trial_choice(1:n_trials)];
+            [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
+            
+        case {'vanillaChoiceworld', 'vanillaChoiceworldBias', 'vanillaChoiceworldNoRepeats'}
             % Hit/miss recorded for last trial, circshift to align
             signals_events.hitValues = circshift(signals_events.hitValues, [0, -1]);
             signals_events.missValues = circshift(signals_events.missValues, [0, -1]);
@@ -451,7 +460,7 @@ if block_exists
                 [signals_events.trialContrastValues(1:n_trials)', signals_events.trialSideValues(1:n_trials)', ...
                 trial_choice(1:n_trials), trial_timing(1:n_trials)];
             [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
-        case {'choiworldNoGoParameterHack_noWhiteNoise', 'noGo_stage4', 'noGo_stage5'} % stimType,
+        case {'choiworldNoGoParameterHack_noWhiteNoise', 'noGo_stage4', 'noGo_stage4_q', 'noGo_stage5'} % stimType,
             % Hit/miss recorded for last trial, circshift to align
             response_trials = 1:length(block.events.endTrialValues);
             block.events.trialSideValues(response_trials) = 1;
@@ -834,6 +843,7 @@ if block_exists
             % (give this a little leeway, sometimes movement starts early but
             % stim comes on anyway)
             stim_leeway = 0.1;
+          %  stim_to_move = wheel_starts - stimOn_times(1:n_trials);
 
 
         case 'AP_lcrGratingPassiveFlicker'
@@ -2034,24 +2044,101 @@ end
 
 if ephys_exists && load_parts.ephys
     if verbose;
-        disp('Estimating striatum boundaries on probe...');
+        disp('Estimating cortex boundaries on probe...');
     end
 
-    % str_align = alignment method ('none', 'depth', or 'kernel')
-
-    % requires n_aligned_depths for alignment, set default
-    if ~exist('n_aligned_depths', 'var')
-        n_aligned_depths = 3;
+    % Cortex alignment: assume top of probe out of brain and very
+    % correlated, look for big drop in correlation from top-down
+    lfp_corr = corrcoef(double(transpose(lfp-nanmedian(lfp,1))));
+    lfp_corr_diag = lfp_corr;
+    lfp_corr_diag(triu(true(size(lfp_corr)),1)) = NaN;
+    lfp_corr_from_top = nanmean(lfp_corr_diag,2)';
+    
+    n_lfp_medfilt = 5;
+    ctx_start = lfp_channel_positions( ...
+        find(medfilt1(lfp_corr_from_top,n_lfp_medfilt) > ...
+        sum(minmax(medfilt1(lfp_corr_from_top,n_lfp_medfilt)))*0.9,1,'last'));
+    disp(ctx_start)
+% [c,b]=histcounts(template_depths,20);
+% ctx_startJF = b(find(c(3:end)>max(c)*0.1, 1,'first')+2);
+% figure();
+% plot(b(1:end-1)+10,c)
+% hold on;
+% line([0 3840],[max(c)*0.1 max(c)*0.1])
+    if verbose
+        figure;
+        imagesc(lfp_channel_positions,lfp_channel_positions,lfp_corr_diag);
+        axis image
+        colormap(brewermap([],'*RdBu'));
+        caxis([-1,1])
+        xlabel('Depth (\mum)');
+        ylabel('Depth (\mum)');
+        c = colorbar;
+        ylabel(c,'Med. sub. correlation');
+        line(xlim,[ctx_start,ctx_start],'color','k','linewidth',2);
+        line([ctx_start,ctx_start],ylim,'color','k','linewidth',2);
+        title(sprintf('%s %s: LFP correlation and cortex start',animal,day));
     end
-
-    % if no alignment specified, default kernel
-    if ~exist('str_align', 'var')
-        str_align = 'kernel';
+            
+    % (if the detected cortex start is after the first unit, debug)
+    ctx_lfp_spike_diff = ctx_start-min(template_depths);
+%     if ctx_lfp_spike_diff > 100 % 100um leeway
+%         error('%s %s: LFP-estimated cortex start is after first unit %.0f um', ...
+%             animal,day,ctx_lfp_spike_diff);
+%     end
+    
+    
+    %%% If histology is aligned, get areas by depth
+    [probe_ccf_fn,probe_ccf_fn_exists] = AP_cortexlab_filenameJF(animal,[],[],'histo');
+    if ~probe_ccf_fn_exists
+        if verbose; disp('No histology alignment for probe...'); end
+    elseif probe_ccf_fn_exists
+        if verbose; disp('Estimating histology-aligned cortical areas on probe...'); end
+        
+        % (load the CCF structure tree)
+        myPaths;
+        %allen_atlas_path = fileparts(which('template_volume_10um.npy'));
+        st = loadStructureTree([allenAtlasPath filesep 'allenCCF' filesep 'structure_tree_safe_2017.csv']);
+        
+        % Load probe CCF alignment
+        load(probe_ccf_fn);
+        
+        % Get area names and borders across probe
+        [~,dv_sort_idx] = sort(probe_ccf.trajectory_coords(:,2));
+        dv_voxel2um = 10*0.945; % CCF DV estimated scaling
+        probe_trajectory_depths = ...
+            pdist2(probe_ccf.trajectory_coords, ...
+            probe_ccf.trajectory_coords((dv_sort_idx == 1),:))*dv_voxel2um;
+        
+        probe_depths = probe_trajectory_depths + ctx_start;
+        
+        % Get recorded areas and boundaries (ignore layer distinctions)
+        probe_areas = unique(regexprep( ...
+            st(probe_ccf.trajectory_areas(probe_depths > 0 & ...
+            probe_depths < max(channel_positions(:,2))),:).safe_name, ...
+            ' layer .*',''));
+        
+        probe_area_boundaries = cellfun(@(area) ...
+            minmax(probe_depths(contains( ...
+            st(probe_ccf.trajectory_areas,:).safe_name,area))), ...
+            probe_areas,'uni',false);
     end
-    try
-        [str_depth, aligned_str_depth_group] = AP_align_striatum_ephysJF;
-    catch
-    end
+    
+%     % str_align = alignment method ('none', 'depth', or 'kernel')
+% 
+%     % requires n_aligned_depths for alignment, set default
+%     if ~exist('n_aligned_depths', 'var')
+%         n_aligned_depths = 3;
+%     end
+% 
+%     % if no alignment specified, default kernel
+%     if ~exist('str_align', 'var')
+%         str_align = 'kernel';
+%     end
+%     try
+%         [str_depth, aligned_str_depth_group] = AP_align_striatum_ephysJF;
+%     catch
+%     end
 
 end
 

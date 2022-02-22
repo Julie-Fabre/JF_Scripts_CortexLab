@@ -92,8 +92,12 @@ switch file
                 filesep 'sync_messages.txt'];
             [filename,file_exists] = check_locations(filepattern,server_location);
     case 'histo'
-        filepattern = [animal filesep 'Histology/processed/slices/probe_ccf.mat'];
+        filepattern = [animal filesep '*istology/processed/slices/probe_ccf.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
+        if ~file_exists
+             filepattern = [animal filesep '*istology/slices/probe_ccf.mat'];
+            [filename,file_exists] = check_locations(filepattern,server_location);
+        end
     case 'acuteRecInfo'
         filepattern = [animal filesep 'Acute_rec_' animal '.csv'];
         [filename,file_exists] = check_locations(filepattern,server_location);
