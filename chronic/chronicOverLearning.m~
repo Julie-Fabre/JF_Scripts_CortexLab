@@ -77,12 +77,10 @@ for iAnimal = 1:size(animalsAll, 2)
             if ~isempty(qMetricsExist)
 
                 load(fullfile(savePath, 'qMetric.mat'))
-                ephysap_path = AP_cortexlab_filenameJF(animal, thisDay, experiment, 'ephys_ap', site);
-               
                 chronicParamValue; 
-                 bc_getQualityUnitType;
+                bc_getQualityUnitType;
             end
-            
+            AP_load_experimentJF;
 %             uniK = unique(spike_templates);
 %             for iUnit = 1:length(uniK)
 %                 thisUnit = uniK(iUnit);
@@ -96,16 +94,9 @@ for iAnimal = 1:size(animalsAll, 2)
             
             multiUnitCount(curr_day) = length(find(unitType == 2));
             noiseCount(curr_day) = length(find(unitType == 0));
-            singleUnitCount(curr_day) = length(unique(unitType==1));
-            %deadChannels(curr_day) = length(unique(channel_map));
-            clearvars unitType %for now, keep multi unit for average 
-            unitType = nan(length(qMetric.percSpikesMissing), 1);
-            unitType(qMetric.nPeaks > param.maxNPeaks | qMetric.nTroughs > param.maxNTroughs | qMetric.somatic ~= param.somatic ...
-                | qMetric.spatialDecaySlope <=  param.minSpatialDecaySlope | qMetric.waveformDuration < param.minWvDuration |...
-                qMetric.waveformDuration > param.maxWvDuration  | qMetric.waveformBaseline >= param.maxWvBaselineFraction) = 0; %NOISE or NON-SOMATIC
-            unitType(isnan(unitType)') = 1; %SINGLE SEXY UNIT
-    
-            AP_load_experimentJF;
+            singleUnitCount(curr_day) = length(unique(spike_templates));
+            deadChannels(curr_day) = length(unique(channel_map));
+
             if plotDriftMap
 
                 %% drift map
@@ -326,7 +317,7 @@ for iAnimal = 1:size(animalsAll, 2)
 
         else
             singleUnitCount(curr_day) = NaN;
-            %deadChannels(curr_day) = NaN;
+            deadChannels(curr_day) = NaN;
             multiUnitCount(curr_day) = NaN;
             noiseCount(curr_day) = NaN;
         end

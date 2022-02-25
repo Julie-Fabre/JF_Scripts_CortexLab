@@ -1,0 +1,7 @@
+%% general methods 
+
+% smoothing
+smooth_filt = [50,1]; % (trials x frames)
+        curr_plot_smooth = nanconv(IMfinal,ones(smooth_filt),'same');
+        
+        

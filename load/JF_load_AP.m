@@ -24,7 +24,7 @@ experiments = experiments([experiments.ephys]);
 
 %% Load data from experiment 
 
-curr_day = 24; % (set which day to use)
+curr_day = 30; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
@@ -36,7 +36,7 @@ load_parts.ephys=true;
 
 site = 1;%1,1; 2,4; 3,7
 recording = []; 
-experiment = 2;
+experiment = 1;
 loadClusters = 0;
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys_ap',site,recording);
 if size(ephysAPfile,2) ==2 %keep only ap
@@ -59,7 +59,7 @@ load(fullfile(savePath, 'qMetric.mat'))
 load(fullfile(savePath, 'param.mat'))
 bc_getQualityUnitType;
 end
-
+clearvars unitType 
 AP_load_experimentJF;
 curr_shank=NaN;
 

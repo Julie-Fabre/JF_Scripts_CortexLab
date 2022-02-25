@@ -11,13 +11,13 @@ accCellPvalstim = [];
 accCellPvalmove = [];
 accCellPSTHmove = [];
 accCellPSTHstim = [];
-for iAnimal = 1%:size(animals, 2)
+for iAnimal = 1:size(animals, 2)
     animal = animals{iAnimal};
     experimentsBhv = AP_find_experimentsJF(animal, bhvProtocol, true);
     experimentsBhv = experimentsBhv([experimentsBhv.ephys]);
     experimentsPass = AP_find_experimentsJF(animal, passiveProtocol, true);
     experimentsPass = experimentsPass([experimentsPass.ephys]);
-    for iDay = 1:2%:size(experimentsBhv, 1)
+    for iDay = 1:size(experimentsBhv, 1)
         
             day = experimentsBhv(iDay).day;
             experimentBhv = experimentsBhv(iDay).experiment;
@@ -41,8 +41,22 @@ for iAnimal = 1%:size(animals, 2)
                 load(fullfile(savePath, 'qMetric.mat'))
                 load(fullfile(savePath, 'param.mat'))
                 clearvars unitType;
+                bc_qualityParamValues;
                 bc_getQualityUnitType;
-                %bc_plotGlobalQualityMetric;
+                bc_plotGlobalQualityMetric;
+                day = experimentsBhv(iDay).day;
+            experiment = experimentBhv;
+            isSpikeGlx = 0;
+            loadClusters = 0;
+            lfp_channel = 'all';
+            loadLFP = 1;
+            ephys_align = 'cortex';
+
+            AP_load_experiment;
+            
+                curr_shank = NaN;
+              AP_cellrasterJF({stimOn_times}, ...
+              {ones(length(stimOn_times), 1)});
             end
 
 
@@ -99,10 +113,9 @@ for iAnimal = 1%:size(animals, 2)
             
             clearvars spike_times_timeline stimOn_times wheel_starts trial_conditions
             
-            % psthGUI(spike_templates, task_spike_timeline, task_stimOn_times, task_wheel_starts, ...
-            %    task_wheel_types, task_reward, task_trial_conditions, task_stim_to_move, task_stim_to_feedback, passive_spike_timeline, ...
-            %    passive_stimOn_times, passive_wheel_starts, ...
-            %    passive_wheel_types, passive_trial_conditions)
+            psthGUI(spike_templates, task_spike_timeline, task_stimOn_times, task_wheel_starts,...
+                task_reward, task_stim_to_move, task_stim_to_feedback, passive_spike_timeline, ...
+               passive_stimOn_times, passive_wheel_starts)
 
             %% get ecah cell location
             m2Loc = contains(probe_areas, 'Secondary motor area');
@@ -112,26 +125,28 @@ for iAnimal = 1%:size(animals, 2)
 
             %% for each cell, get if significant + psth, plot (1) both sorted by stim response (2) both sorted by mov response (3) scatter of increase post stim and post-move.
             uniK = unique(spike_templates);
+            Pvalstim = [];
 
-            ff = find(m2cells);
-            for im2cells = 1:length(find(m2cells))
-                thisC = ff(im2cells);
-                thisUnit = uniK(im2cells);
+            for iUnit = 1:length(uniK)
+                %thisC = ff(im2cells);
+                thisUnit = uniK(iUnit);
                 [raster_x, raster_y, t, curr_smoothed_psth, trial_sort, curr_raster_sorted] = getRaster(spike_templates, thisUnit, passive_spike_timeline, ...
                     passive_stimOn_times, ones(length(passive_stimOn_times), 1));
-                m2CellPSTHstim = [m2CellPSTHstim; curr_smoothed_psth];
-                frB = sum(curr_raster_sorted(1:1:end, 100:290), 2);
-                frA = sum(curr_raster_sorted(1:1:end, 391:581), 2);
+                frB = sum(curr_raster_sorted(1:2:end, 100:290), 2);
+                frA = sum(curr_raster_sorted(1:2:end, 291:481), 2);
                 p = signrank(frB, frA);
-                m2CellPvalstim = [m2CellPvalstim, p];
-                [raster_x, raster_y, t, curr_smoothed_psth, trial_sort, curr_raster_sorted] = getRaster(spike_templates, thisUnit, task_spike_timeline, ...
-                    task_wheel_starts, ones(length(task_wheel_starts), 1));
-                m2CellPSTHmove = [m2CellPSTHmove; curr_smoothed_psth];
-                frB = sum(curr_raster_sorted(1:1:end, 100:290), 2);
-                frA = sum(curr_raster_sorted(1:1:end, 391:581), 2);
-                p = signrank(frB, frA);
-                m2CellPvalmove = [m2CellPvalmove, p];
+                frB = sum(curr_raster_sorted(2:2:end, 100:290), 2);
+                frA = sum(curr_raster_sorted(2:2:end, 291:481), 2);
+                p2 = signrank(frB, frA);
+                Pvalstim = [Pvalstim, p<0.01 & p2<0.01];
             end
+            uniK_stim = uniK(Pvalstim==1);
+            psthGUI(spike_templates(ismember(spike_templates, uniK_stim)), task_spike_timeline(ismember(spike_templates, uniK_stim)), task_stimOn_times, task_wheel_starts,...
+                task_reward, task_stim_to_move, task_stim_to_feedback, passive_spike_timeline(ismember(spike_templates, uniK_stim)), ...
+               passive_stimOn_times, passive_wheel_starts)
+           
+           
+           
 
 
             uniK = unique(spike_templates);
@@ -200,68 +215,84 @@ for iAnimal = 1%:size(animals, 2)
     %% wide vs narrow
 end
 
-figure();
+smooth_filt = [10,100]; % (trials x frames)
+        
+figure('color', 'white');
 suptitle('m2')
 subplot(221)
-im = (m2CellPSTHstim - nanmean(m2CellPSTHstim(:, 1:200), 2)) ./ nanmean(m2CellPSTHstim(:, 1:200), 2);
+im = nanconv((m2CellPSTHstim(m2CellPvalstim<0.05, :) - nanmean(m2CellPSTHstim(m2CellPvalstim<0.05, 1:200), 2)) ./ nanmean(m2CellPSTHstim(m2CellPvalstim<0.05, 1:200), 2), smooth_filt, 'same');
 [~, sorted_im_idx] = sort(nanmean(im(:, 300:500), 2));
 colormap(brewermap([], '*RdBu'));
 imagesc(t, [], im(sorted_im_idx, :))
 xlabel('time from stim')
-ylabel('cell (sorted by stim increase)')
-subplot(222)
-im = (m2CellPSTHmove - nanmean(m2CellPSTHmove(:, 1:200), 2)) ./ nanmean(m2CellPSTHmove(:, 1:200), 2);
-%[~, sorted_im_idx] = sort(nanmean(im(:,300:500),2));
-colormap(brewermap([], '*RdBu'));
-imagesc(t, [], im(sorted_im_idx, :))
-xlabel('time from move')
-ylabel('cell (sorted by stim increase)')
-subplot(223)
-im = (m2CellPSTHmove - nanmean(m2CellPSTHmove(:, 1:200), 2)) ./ nanmean(m2CellPSTHmove(:, 1:200), 2);
-[~, sorted_im_idx] = sort(nanmean(im(:, 300:500), 2));
-colormap(brewermap([], '*RdBu'));
-imagesc(im(sorted_im_idx, :))
-xlabel('time from move')
-ylabel('cell (sorted by move increase)')
-subplot(224)
-im = (m2CellPSTHstim - nanmean(m2CellPSTHstim(:, 1:200), 2)) ./ nanmean(m2CellPSTHstim(:, 1:200), 2);
-%[~, sorted_im_idx] = sort(nanmean(im(:,300:500),2));
-colormap(brewermap([], '*RdBu'));
-imagesc(t, [], im(sorted_im_idx, :))
-xlabel('time from stim')
-ylabel('cell (sorted by move increase)')
+ylabel('cell # (sorted by stim resp)')
+caxis([-500, 500])
 
-figure();
+subplot(222)
+im = nanconv((m2CellPSTHmove(m2CellPvalstim<0.05,:) - nanmean(m2CellPSTHmove(m2CellPvalstim<0.05, 1:200), 2)) ./ nanmean(m2CellPSTHmove(m2CellPvalstim<0.05, 1:200), 2), smooth_filt, 'same');
+%[~, sorted_im_idx] = sort(nanmean(im(:,300:500),2));
+colormap(brewermap([], '*RdBu'));
+imagesc(t, [], im(sorted_im_idx, :))
+xlabel('time from move')
+ylabel('cell # (sorted by stim resp)')
+caxis([-500, 500])
+
+subplot(223)
+im = nanconv((m2CellPSTHmove(m2CellPvalmove<0.05,:) - nanmean(m2CellPSTHmove(m2CellPvalmove<0.05, 1:200), 2)) ./ nanmean(m2CellPSTHmove(m2CellPvalmove<0.05, 1:200), 2), smooth_filt, 'same');
+[~, sorted_im_idx] = sort(nanmean(im(:, 300:500), 2));
+colormap(brewermap([], '*RdBu'));
+imagesc(t, [], im(sorted_im_idx, :))
+xlabel('time from move')
+ylabel('cell # (sorted by move resp)')
+caxis([-500, 500])
+
+subplot(224)
+im = nanconv((m2CellPSTHstim(m2CellPvalmove<0.05,:) - nanmean(m2CellPSTHstim(m2CellPvalmove<0.05, 1:200), 2)) ./ nanmean(m2CellPSTHstim(m2CellPvalmove<0.05, 1:200), 2), smooth_filt, 'same');
+%[~, sorted_im_idx] = sort(nanmean(im(:,300:500),2));
+colormap(brewermap([], '*RdBu'));
+imagesc(t, [], im(sorted_im_idx, :))
+xlabel('time from stim')
+ylabel('cell # (sorted by move resp)')
+caxis([-500, 500])
+
+figure('color', 'white');
 suptitle('acc')
 subplot(221)
-im = (accCellPSTHstim - nanmean(accCellPSTHstim(:, 1:200), 2)) ./ nanmean(accCellPSTHstim(:, 1:200), 2);
+im = nanconv((accCellPSTHstim(accCellPvalstim<0.05,:) - nanmean(accCellPSTHstim(accCellPvalstim<0.05, 1:200), 2)) ./ nanmean(accCellPSTHstim(accCellPvalstim<0.05, 1:200), 2), smooth_filt, 'same');
 [~, sorted_im_idx] = sort(nanmean(im(:, 300:500), 2));
 colormap(brewermap([], '*RdBu'));
 imagesc(t, [], im(sorted_im_idx, :))
 xlabel('time from stim')
-ylabel('cell (sorted by stim increase)')
+ylabel('cell # (sorted by stim resp)')
+caxis([-500, 500])
+
 subplot(222)
-im = (accCellPSTHmove - nanmean(accCellPSTHmove(:, 1:200), 2)) ./ nanmean(accCellPSTHmove(:, 1:200), 2);
+im = nanconv((accCellPSTHmove(accCellPvalstim<0.05,:) - nanmean(accCellPSTHmove(accCellPvalstim<0.05, 1:200), 2)) ./ nanmean(accCellPSTHmove(accCellPvalstim<0.05, 1:200), 2), smooth_filt, 'same');
 %[~, sorted_im_idx] = sort(nanmean(im(:,300:500),2));
 colormap(brewermap([], '*RdBu'));
 imagesc(t, [], im(sorted_im_idx, :))
 xlabel('time from move')
-ylabel('cell (sorted by stim increase)')
+ylabel('cell # (sorted by stim resp)')
+caxis([-500, 500])
 
 subplot(223)
-im = (accCellPSTHmove - nanmean(accCellPSTHmove(:, 1:200), 2)) ./ nanmean(accCellPSTHmove(:, 1:200), 2);
+im = nanconv((accCellPSTHmove(accCellPvalmove<0.05,:) - nanmean(accCellPSTHmove(accCellPvalmove<0.05, 1:200), 2)) ./ nanmean(accCellPSTHmove(accCellPvalmove<0.05, 1:200), 2), smooth_filt, 'same');
 [~, sorted_im_idx] = sort(nanmean(im(:, 300:500), 2));
 colormap(brewermap([], '*RdBu'));
-imagesc(im(sorted_im_idx, :))
+imagesc(t, [], im(sorted_im_idx, :))
 xlabel('time from move')
-ylabel('cell (sorted by move increase)')
+ylabel('cell # (sorted by move resp)')
+caxis([-500, 500])
+
 subplot(224)
-im = (accCellPSTHstim - nanmean(accCellPSTHstim(:, 1:200), 2)) ./ nanmean(accCellPSTHstim(:, 1:200), 2);
+im = nanconv((accCellPSTHstim(accCellPvalmove<0.05,:) - nanmean(accCellPSTHstim(accCellPvalmove<0.05, 1:200), 2)) ./ nanmean(accCellPSTHstim(accCellPvalmove<0.05, 1:200), 2), smooth_filt, 'same');
 %[~, sorted_im_idx] = sort(nanmean(im(:,300:500),2));
 colormap(brewermap([], '*RdBu'));
 imagesc(t, [], im(sorted_im_idx, :))
 xlabel('time from stim')
-ylabel('cell (sorted by move increase)')
+ylabel('cell # (sorted by move resp)')
+caxis([-500, 500])
+
 
 accCellSinc = nanmean((accCellPSTHstim(:, 400:700) - nanmean(accCellPSTHstim(:, 1:200), 2))./nanmean(accCellPSTHstim(:, 1:200), 2), 2);
 accCellMinc = nanmean((accCellPSTHmove(:, 400:700) - nanmean(accCellPSTHmove(:, 1:200), 2))./nanmean(accCellPSTHmove(:, 1:200), 2), 2);
@@ -269,14 +300,19 @@ m2CellSinc = nanmean((m2CellPSTHstim(:, 400:700) - nanmean(m2CellPSTHstim(:, 1:2
 m2CellMinc = nanmean((m2CellPSTHmove(:, 400:700) - nanmean(m2CellPSTHmove(:, 1:200), 2))./nanmean(m2CellPSTHmove(:, 1:200), 2), 2);
 
 figure();
-subplot(122)
+subplot(121)
 title('m2'); hold on;
-scatter(m2CellSinc, m2CellMinc)
+scatter(m2CellSinc, m2CellMinc, 2,'filled')
 xlabel('increase after stim')
 ylabel('increase after move')
-subplot(222)
+xlim([-2, 10])
+ylim([-2, 10])
+makepretty;
+subplot(122)
 title('acc'); hold on; 
-scatter(accCellSinc, accCellMinc)
+scatter(accCellSinc, accCellMinc, 2,'filled')
 xlabel('increase after stim')
 ylabel('increase after move')
-
+xlim([-2, 10])
+ylim([-2, 10])
+makepretty;
