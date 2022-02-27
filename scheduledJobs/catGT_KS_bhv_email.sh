@@ -8,8 +8,20 @@ ls ~/Dropbox/MATLAB/onPaths/JF_Scripts_CortexLab/scheduledJobs/KSerror.log >> $O
 
 echo "yo bb" >> ~/Dropbox/MATLAB/onPaths/JF_Scripts_CortexLab/scheduledJobs/KS.log
 
-DIRSTART="/home/netshare/zinu/JF067/"
+
+FILEDATE=$(date +'%Y_%m_%d')
 DATE=$(date +'%Y-%m-%d')
+DIRSTART="/home/netshare/zinu/JF067/"
+SEP="/"
+ASTERIX="*"
+SPIKEGLXNAME=$DIRSTART$DATE$SEP$FILEDATE$ASTERIX
+EPHYSNAME=$DIRSTART$DATE$SEP$"ephys"
+mv $SPIKEGLXNAME $EPHYSNAME
+
+SITE1SLX=$EPHYSNAME$SEP$FILEDATE$ASTERIX
+SITE1NAME=$EPHYSNAME$SEP$"site1"
+mv $SITE1SLX $SITE1NAME
+
 DIREND="/ephys/site1/"
 DIRFULL="$DIRSTART$DATE$DIREND"
 #echo "$DIRFULL"

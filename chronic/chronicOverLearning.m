@@ -37,6 +37,7 @@ for iAnimal = 1:size(animalsAll, 2)
     theseDays = 1:size(experiments, 1);
     theseDays(ex) = [];
     for curr_day = 1:size(theseDays, 2)
+        try
         currDayIdx = theseDays(curr_day);
         alldaysNum(curr_day) = hours((datetime(alldays{currDayIdx}, 'InputFormat', 'yyyy-MM-dd') - datetime(implantDay, 'InputFormat', 'yyyy-MM-dd'))/24);
         % if kilosorted, load the spikes, spike_templates, amplitudes,
@@ -331,6 +332,12 @@ for iAnimal = 1:size(animalsAll, 2)
             noiseCount(curr_day) = NaN;
         end
         clearvars goodUnits qMetric param
+        catch
+            singleUnitCount(curr_day) = NaN;
+            %deadChannels(curr_day) = NaN;
+            multiUnitCount(curr_day) = NaN;
+            noiseCount(curr_day) = NaN;
+        end
     end
     figure(2);
     clf;

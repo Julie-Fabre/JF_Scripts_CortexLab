@@ -1,6 +1,6 @@
 function sync = syncFT(AP_filename, nChansTotal, outputDir) 
 
-if size(AP_filename,2) > 1
+if size(AP_filename,2) > 1 && iscell(AP_filename)
     AP_filename = AP_filename{1};
 end
       

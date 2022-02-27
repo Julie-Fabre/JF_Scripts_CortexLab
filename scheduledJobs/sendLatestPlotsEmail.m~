@@ -55,14 +55,13 @@ try
 catch
     errors = [errors, 'error behavior '];
 end
-% get PSTH
 try
     chronicOverLearning;% get chronic over learning plots 
     saveas(figure(3), ['~/Documents/cronJobPlots/', thisDate, '_JF067_driftMap.png'])%save behavior plots 
     saveas(figure(2), ['~/Documents/cronJobPlots/', thisDate, '_JF067_unitNumbers.png'])%save behavior plots 
     screensize = get( groot, 'Screensize' );
     set(figure(4), 'Position',  screensize)
-    pause(30)
+    pause(10)
     saveas(figure(4), ['~/Documents/cronJobPlots/', thisDate, '_JF067_PSTH.png'])%save behavior plots 
     close all;
 catch
@@ -107,20 +106,13 @@ try
     location = strfind(contents, searchString);
     locationEnd = strfind(contents(location:end), '" />');
     joke = contents(location+length(searchString):location+locationEnd(1)-2);
-    
-    contents2 = urlread(' https://icanhazdadjoke.com/');
-    location2 = strfind(contents2, searchString);
-    locationEnd2 = strfind(contents2(location2:end), '" />');
-    joke2 = contents2(location2+length(searchString):location2+locationEnd2(1)-2);
 catch
     joke = '';
-    joke2 = '';
 end
 %% send plots by email 
-message = ['Hey Julie, ' newline joke newline 'Here are your behavior and PSTH plots for ', thisDate '.' newline errors newline 'Cheers,' newline 'Automated Julie'];
-message2 = ['Hey Julie, ' newline joke2 newline 'Here are your behavior plots for ', thisDate '.' newline errors newline 'Cheers,' newline 'Automated Julie'];
-sendmail(credentials.mailto{:}, [thisDate ' JF067 plots '], message, theseAttachedPlots)
-sendmail(credentials.mailto{:}, [thisDate ' acute mice training plots '], message2, theseAttachedAcutePlots)
+message = ['Hey Julie, ' newline joke newline 'Here are your behavior and PSTH plots for ', thisDate '.'];
+sendmail(credentials.mailto{:}, [thisDate ' JF067 plots '], [message newline errors newline 'Cheers,' newline 'Automated Julie'], theseAttachedPlots)
+sendmail(credentials.mailto{:}, [thisDate ' acute mice training plots '], [message newline errors newline 'Cheers,' newline 'Automated Julie'], theseAttachedAcutePlots)
 
 %%
 exit; %close matlab

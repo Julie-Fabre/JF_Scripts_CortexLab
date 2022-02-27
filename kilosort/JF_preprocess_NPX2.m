@@ -6,7 +6,7 @@ function JF_preprocess_NPX2(animal, date, chanMapFile, experiment, site, recordi
 
 myPaths;
 [ephysAPfile, ~] = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_ap', site, recording);
-if size(ephysAPfile, 2) > 1 %keep only ap
+if size(ephysAPfile, 2) > 1 && iscell(ephysAPfile)%keep only ap
     ephysAPfile = ephysAPfile{1};
 end
 rootZ = fileparts(ephysAPfile);
@@ -32,7 +32,7 @@ end
 [ephysAPfile, ~] = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_ap', site, recording);
 syncExists = dir(fullfile(saveFile, 'sync.mat'));
 if isempty(syncExists)
-    if size(ephysAPfile, 2) == 2 %keep only ap
+    if size(ephysAPfile, 2) == 2 && iscell(ephysAPfile)%keep only ap
         ephysAPfile = ephysAPfile{1};
     end
     isSpikeGlx = contains(ephysAPfile, '_g'); %spike glx (2.0 probes) or open ephys (3A probes)?
