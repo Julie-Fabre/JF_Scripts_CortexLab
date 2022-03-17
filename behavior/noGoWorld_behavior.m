@@ -582,13 +582,25 @@ for iAnimal = 1:size(animalsAll, 2)
         makeprettyLarge;
         ylim([0, 1])
     end
+    
     for iNoGoday = 1:size(noGoDay, 2)
-        meanGo1Correct(iNoGoday, :) = nanmean(abs(bhv.trialMoveGo1Correct{noGoDay(iNoGoday), :, :}));
+        try
+            meanGo1Correct(iNoGoday, :) = nanmean(abs(bhv.trialMoveGo1Correct{noGoDay(iNoGoday), :, :}));
         meanGo2Correct(iNoGoday, :) = nanmean(abs(bhv.trialMoveGo2Correct{noGoDay(iNoGoday), :, :}));
         meanNoGoCorrect(iNoGoday, :) = nanmean(abs(bhv.trialMoveNoGoCorrect{noGoDay(iNoGoday), :, :}));
         meanGo1Incorrect(iNoGoday, :) = nanmean(abs(bhv.trialMoveGo1Incorrect{noGoDay(iNoGoday), :, :}));
         meanGo2Incorrect(iNoGoday, :) = nanmean(abs(bhv.trialMoveGo2Incorrect{noGoDay(iNoGoday), :, :}));
         meanNoGoIncorrect(iNoGoday, :) = nanmean(abs(bhv.trialMoveNoGoIncorrect{noGoDay(iNoGoday), :, :}));
+        catch
+            meanGo1Correct(iNoGoday, :) = nan(1600,1);
+        meanGo2Correct(iNoGoday, :) = NaN;
+        meanNoGoCorrect(iNoGoday, :) = nan(1600,1);
+        meanGo1Incorrect(iNoGoday, :) = nan(1600,1);
+        meanGo2Incorrect(iNoGoday, :) = nan(1600,1);
+        meanNoGoIncorrect(iNoGoday, :) = nan(1600,1);
+            
+
+        end
     end
 
     an(iAnimal).noGo = bhv.noGo;

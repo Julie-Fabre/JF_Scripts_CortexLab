@@ -79,9 +79,8 @@ for iAnimal = 1:size(animalsAll, 2)
 
                 load(fullfile(savePath, 'qMetric.mat'))
                 ephysap_path = AP_cortexlab_filenameJF(animal, thisDay, experiment, 'ephys_ap', site);
-               
                 chronicParamValue; 
-                 bc_getQualityUnitType;
+                bc_getQualityUnitType;
             end
             
 %             uniK = unique(spike_templates);
@@ -97,7 +96,7 @@ for iAnimal = 1:size(animalsAll, 2)
             
             multiUnitCount(curr_day) = length(find(unitType == 2));
             noiseCount(curr_day) = length(find(unitType == 0));
-            singleUnitCount(curr_day) = length(unique(unitType==1));
+            singleUnitCount(curr_day) = length(find(unitType==1));
             %deadChannels(curr_day) = length(unique(channel_map));
             clearvars unitType %for now, keep multi unit for average 
             unitType = nan(length(qMetric.percSpikesMissing), 1);
