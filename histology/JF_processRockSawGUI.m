@@ -9,7 +9,7 @@
 
 %% params / loading 
 myPaths; 
-animal = 'JF043';
+animal = 'JF065';
 % get in 'AP' format: histology_ccf.mat with tv_slices, av_slices,
 % plane_ap, plane_ml, plane_dv 
 allen_atlas_path = [allenAtlasPath 'allenCCF'];
@@ -33,8 +33,8 @@ allenAtlas10um = flipud(rot90(permute(allenAtlas10um, [3,2,1])));
 %% crop template to fit image to register 
 StackSlider(greenChannel);
 StackSlider(allenAtlas10um);
-cropAllenLimits = [213,1285]; 
-cropImgLimits = [1,464]; 
+cropAllenLimits = [231, 1295]; 
+cropImgLimits = [1, 461]; 
 allenAtlas10um = allenAtlas10um(:,:,cropAllenLimits(1):cropAllenLimits(2));
 greenChannel = greenChannel(:,:,cropImgLimits(1):cropImgLimits(2));
 redChannel = redChannel(:,:,cropImgLimits(1):cropImgLimits(2));

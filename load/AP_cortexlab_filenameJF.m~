@@ -184,16 +184,9 @@ switch file
         % (the path where the ephys data is kept)
         filepattern = [animal filesep date filesep 'ephys' site_dir];
         [filename,file_exists] = check_locations(filepattern,server_location);
-        if ~file_exists
-            filepattern = [animal filesep date filesep 'ephys' filesep 'recording' num2str(recording) site_dir];
-        [filename,file_exists] = check_locations(filepattern,server_location);
-      
-        end
         if file_exists
             filename = fileparts(filename{1});
         end
-        
-        
         
     case 'ephys_ap'
         % (the raw action potential band data file)
@@ -249,14 +242,9 @@ switch file
         
         % Drop the kilosort version in the base workspace
         assignin('base','kilosort_version',kilosort_version);
-         filepattern = [animal filesep date filesep ...
-                'ephys'  filesep  'kilosort2' filesep 'recording' num2str(recording)  site_dir ];
-            [filename,file_exists] = check_locations(filepattern,server_location);
-         
-            if ~file_exists
+        
         filepattern = [animal filesep date filesep 'ephys'  filesep 'kilosort2' filesep site_dir filesep recording_dir];
         [filename,file_exists] = check_locations(filepattern,server_location);
-            end
          if ~file_exists
              filepattern = [animal filesep date filesep 'ephys'  filesep 'kilosort2' filesep site_dir filesep 'experiment' num2str(experiment) filesep recording_dir];
         [filename,file_exists] = check_locations(filepattern,server_location);
@@ -279,10 +267,14 @@ switch file
         
           end
          
-
+         if ~file_exists
+            filepattern = [animal filesep date filesep ...
+                'ephys'  filesep  'kilosort2' 'recording*'  site_dir ];
+            [filename,file_exists] = check_locations(filepattern,server_location);
+         end
         
         if file_exists
-            filename = fileparts(filename{3});
+            filename = fileparts(filename{1});
         end
        
         

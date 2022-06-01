@@ -8,6 +8,8 @@ thisDate = datestr(datetime('today', 'Format', 'yyyy-MM-dd'), 'yyyy-mm-dd');
 % run KS
 try
     JF_preprocess_NPX2('JF067', thisDate, 'neuropixPhase3B1_kilosortChanMap.mat', 1, 1, [],1);
+    JF_preprocess_NPX2('JF071', thisDate, 'neuropixPhase3B1_kilosortChanMap.mat', 1, 1, [],1);
+    JF_preprocess_NPX2('JF071', thisDate, 'neuropixPhase3B1_kilosortChanMap.mat', 1, 2, [],1);
 catch
     errors = [errors, 'error KSing '];
 end

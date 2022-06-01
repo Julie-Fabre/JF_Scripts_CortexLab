@@ -1,4 +1,4 @@
-function AP_preprocess_phase3_newOEJF_onlysync(animal,day,t_range)
+function AP_preprocess_phase3_newOEJF_onlysync(animal,day,sites, t_range)
 % AP_preprocess_phase3(animal,day,t_range)
 %
 % t_range = specify data time range to use
@@ -21,25 +21,24 @@ save_paths = {[ephys_path filesep 'kilosort2']};
 data_paths = {ephys_path};
 
 % Check for multiple sites (assume sites are marked as site#)
-data_path_dir = dir([data_paths{1} filesep 'site*']);
-if ~isempty(data_path_dir)
-    data_paths = cellfun(@(x) [data_paths{1} filesep x],{data_path_dir.name},'uni',false);
-    save_paths = cellfun(@(x) [save_paths{1} filesep x],{data_path_dir.name},'uni',false);
-end
+data_path_dir = dir([data_paths{1} filesep 'site' num2str(sites)]);% filesep 'recording1' filesep 'continuous' filesep 'Neuropix-3a-100.0' filesep 'continuous.dat']);
+% if ~isempty(data_path_dir)
+     data_paths = ([data_path_dir(1).folder] );
+     save_paths = [save_paths{1} filesep 'site' num2str(sites)];
+% end
 
-for curr_site = 1:length(data_paths)  
-    
+   
     % Get experiments (if turned off between)
-    curr_data_path = data_paths{curr_site};   
-    ephys_exp_paths = dir([curr_data_path filesep 'experiment*']);
+    curr_data_path = data_paths;   
+    ephys_exp_paths = dir([curr_data_path filesep 'recording*']);
        
     for curr_exp = 1:length(ephys_exp_paths)
         
         % Update save path with experiment (only if more than one, legacy)
         if length(ephys_exp_paths) == 1
-            curr_save_path = save_paths{curr_site};
+            curr_save_path = save_paths;
         elseif length(ephys_exp_paths) > 1
-            curr_save_path = [save_paths{curr_site} filesep ephys_exp_paths(curr_exp).name];
+            curr_save_path = [save_paths filesep ephys_exp_paths(curr_exp).name];
         end
         
         % Make save path
@@ -48,7 +47,7 @@ for curr_site = 1:length(data_paths)
         end
               
         % Get OE filenames (check for multiple experiments, do separately)
-        exp_rec_dir = [ ephys_exp_paths(curr_exp).name filesep 'recording1'];
+        exp_rec_dir = [ ephys_exp_paths(curr_exp).name filesep ];
         ap_data_filename = [curr_data_path filesep exp_rec_dir filesep 'continuous' filesep 'Neuropix-3a-100.0' filesep 'continuous.dat'];
         lfp_data_filename = [curr_data_path filesep exp_rec_dir filesep 'continuous' filesep 'Neuropix-3a-100.1' filesep 'continuous.dat'];
         sync_filename = [curr_data_path filesep filesep exp_rec_dir filesep 'events' filesep 'Neuropix-3a-100.0' filesep 'TTL_1' filesep 'channel_states.npy' ];
@@ -176,8 +175,7 @@ for curr_site = 1:length(data_paths)
 %         %% Delete all temporary local data
 %         rmdir(ssd_kilosort_path,'s');
 %         mkdir(ssd_kilosort_path);
-%         
-    end
+%
     
 end
 

@@ -165,7 +165,7 @@ ylabel('Template amplitude');
 axis tight
 
 % Set default raster times
-raster_window = [-0.5,3];
+raster_window = [-0.5,2];
 psth_bin_size = 0.001;
 t_bins = raster_window(1):psth_bin_size:raster_window(2);
 t = t_bins(1:end-1) + diff(t_bins)./2;
@@ -328,7 +328,7 @@ arrayfun(@(align_group) set(gui_data.psth_lines(align_group), ...
 arrayfun(@(align_group) set(gui_data.psth_lines(align_group), ...
     'XData',NaN,'YData',NaN), ...
     size(curr_psth,1)+1:length(gui_data.psth_lines));
-
+%xlim([-0.1, 0.3])
 ylim(get(gui_data.psth_lines(1),'Parent'),[min(curr_smoothed_psth(:)), ...
     max(max(curr_smoothed_psth(:),min(curr_smoothed_psth(:))+1))]);
 if length(gui_data.curr_unit) == 1

@@ -15,8 +15,19 @@ pathToYourConfigFile = [dropboxPath, 'MATLAB/onPaths/Kilosort2/configFiles'];
 chanMapFilePath = [dropboxPath, 'MATLAB/onPaths/Kilosort2/configFiles', chanMapFile];
 if contains(rootZ, 'experiment')
     saveFile = [rootZ, filesep, '..', filesep, '..', filesep, 'kilosort2', filesep, 'site', num2str(site), filesep];
+elseif contains(rootZ, 'continuous')
+    saveFile = [rootZ, filesep, '../../../', filesep, 'kilosort2', filesep, 'site', num2str(site), filesep];
+elseif contains(rootZ, 'recording')
+    toot = fileparts(rootZ);
+    saveFile = [rootZ, filesep, '..', filesep, '..', filesep, 'kilosort2', filesep, 'recording', toot(end), filesep, 'site', num2str(site), filesep];
 else
+    
     saveFile = [rootZ, filesep, '..', filesep, 'kilosort2', filesep, 'site', num2str(site), filesep];
+end
+if contains(rootZ, 'continuous')
+    nChannels = 384;
+else
+    nChannels = 385;
 end
 saveDir = dir(saveFile);
 if isempty(saveDir)
@@ -24,7 +35,7 @@ if isempty(saveDir)
 end
 
 kilosortExists = dir(fullfile(saveFile, 'spike_times.npy'));
-if isempty(kilosortExists)
+if isempty(kilosortExists) || rerunQM
     master_kilosort;
 end
 
@@ -32,6 +43,7 @@ end
 [ephysAPfile, ~] = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_ap', site, recording);
 syncExists = dir(fullfile(saveFile, 'sync.mat'));
 if isempty(syncExists)
+    
     if size(ephysAPfile, 2) == 2 && iscell(ephysAPfile)%keep only ap
         ephysAPfile = ephysAPfile{1};
     end
@@ -41,6 +53,8 @@ if isempty(syncExists)
         if isempty(dir([ephysKSfile, filesep, 'sync.mat']))
             syncFT(ephysAPfile, 385, ephysKSfile);
         end
+    else
+        AP_preprocess_phase3_newOEJF_onlysync(animal,date, site)
     end
 end
 
@@ -56,21 +70,31 @@ end
 % end
 
 %% run quality metrics
-ephysPath = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys', site);
-
-ephysap_path = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_ap', site);
-ephysDirPath = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_dir',site);
+ephysPath = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys', site, recording);
+ephysPath = strrep(ephysPath, 'kilosort2', 'kilosort2');
+ephysap_path = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_ap', site, recording);
+ephysDirPath = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_dir',site, recording);
 savePath = fullfile(ephysDirPath, 'qMetrics');
 qMetricsExist = dir(fullfile(savePath, 'qMetric*.mat'));
 if isempty(qMetricsExist) || rerunQM 
     disp('getting quality metrics ...')
     [spikeTimes, spikeTemplates, ...
-        templateWaveforms, templateAmplitudes, pcFeatures, pcFeatureIdx, channelPositions] = bc_loadEphysData(ephysPath);
+        templateWaveforms, templateAmplitudes, pcFeatures, pcFeatureIdx, channelPositions, goodChannels] = bc_loadEphysData(ephysPath);
 
     bc_qualityParamValues; 
   
 
     bc_runAllQualityMetrics(param, spikeTimes, spikeTemplates, ...
-        templateWaveforms, templateAmplitudes, pcFeatures, pcFeatureIdx, channelPositions, savePath);
+        templateWaveforms, templateAmplitudes, pcFeatures, pcFeatureIdx, channelPositions, goodChannels, savePath);
+end
+try
+    tempFile = dir(fullfile([saveDir(1).folder, 'temp_wh.dat']));
+catch
+    tempFile = dir(fullfile([saveDir.folder, 'temp_wh.dat']));
+end
+try
+    delete(fullfile(tempFile.folder, tempFile.name))
+catch
+    disp('did not delete temp file')
 end
 end

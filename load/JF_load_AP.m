@@ -3,12 +3,12 @@
 close all;
 myPaths;
 
-animals={'JF067'};
+animals={'JF078'};
 curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};
 
-protocol = 'orl'; % (this is the name of the Signals protocol)
+protocol = 'oice'; % (this is the name of the Signals protocol)
 experiments = AP_find_experimentsJF(animal, protocol, true);
 experiments = experiments([experiments.ephys]);
 
@@ -24,7 +24,7 @@ experiments = experiments([experiments.ephys]);
 
 %% Load data from experiment 
 
-curr_day = 30; % (set which day to use)
+curr_day = 6; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
@@ -34,9 +34,9 @@ load_parts.cam=false;
 load_parts.imaging=false;
 load_parts.ephys=true;
 
-site = 1;%1,1; 2,4; 3,7
+site = 	3;%1,1; 2,4; 3,7
 recording = []; 
-experiment = 1;
+experiment = 2;
 loadClusters = 0;
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys_ap',site,recording);
 if size(ephysAPfile,2) ==2 %keep only ap
@@ -50,7 +50,7 @@ if isSpikeGlx
     end
 end
 
-ephysDirPath = AP_cortexlab_filenameJF(animal, day, experiment, 'ephys_dir', site);
+ephysDirPath = AP_cortexlab_filenameJF(animal, day, experiment, 'ephys_dir', site, recording);
 savePath = fullfile(ephysDirPath, 'qMetrics');
 qMetricsExist = dir(fullfile(savePath, 'qMetric*.mat'));
 if ~isempty(qMetricsExist)
@@ -67,8 +67,14 @@ curr_shank=NaN;
 AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))'}, ...
     {trial_conditions(:,1),trial_conditions(:,2), ...
     trial_conditions(:,3)});
+
 AP_cellrasterJF({stimOn_times(~isnan(stimOn_times)), stimOn_times(~isnan(stimOn_times))}, ...
     {trial_conditions(~isnan(stimOn_times),1), trial_conditions(~isnan(stimOn_times),2)});
+
+trial_conditions(~ismember(trial_conditions(:,1), [4,6,7]),1) = 0;
+AP_cellrasterJF({stimOn_times(~isnan(stimOn_times)), stimOn_times(~isnan(stimOn_times))}, ...
+    {trial_conditions(~isnan(stimOn_times),1), trial_conditions(~isnan(stimOn_times),2)});
+
 AP_cellrasterJF({stimOn_times(ismember(trial_conditions(:,1), [4,6,7])), stimOn_times(ismember(trial_conditions(:,1), [4,6,7]))}, ...
     {trial_conditions(ismember(trial_conditions(:,1), [4,6,7]),1), trial_conditions(ismember(trial_conditions(:,1), [4,6,7]),2)});
 
@@ -77,16 +83,9 @@ AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_tri
     {trial_conditions(:,1),trial_conditions(:,2), ...
     trial_conditions(:,3),movement_after200ms_and_type});
 
-AP_cellrasterJF({stimOn_times(ismember(stimIDs, [4,6,7]))}, {stimIDs(ismember(stimIDs, [4,6,7]))});
-AP_cellrasterJF({stimOn_times(~isnan(stimOn_times))}, {stimIDs(~isnan(stimOn_times))});
+AP_cellrasterJF({stimOn_times, stimOn_times(ismember(trial_conditions(:,1), [4,6,7]))}, ...
+    {trial_conditions(:,2), trial_conditions(ismember(trial_conditions(:,1), [4,6,7]),1)});
 
-
-
-
-
-AP_cellrasterACGJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))',signals_events.responseTimes(n_trials(1):n_trials(end))'}, ...
-    {trial_conditions(:,1),trial_conditions(:,2), ...
-    trial_conditions(:,3),trial_outcome});
 
 
 

@@ -1,4 +1,3 @@
-
 %clear all;
 %clc;
 function bhvOut = noGoWorld_behavior(animalsAll)
@@ -14,6 +13,11 @@ for iAnimal = 1:size(animalsAll, 2)
 
 
     animal = animalsAll{1, iAnimal}; %this animal
+    if strcmp(animal, 'JF042') || strcmp(animal, 'JF043') || strcmp(animal, 'JF044')
+        thisSide = -1;
+    else
+        thisSide = 1;
+    end
     protocol = 'stage'; %'location'; %protocol name contains this name
     protocol2 = 'location';
     protocol3 = 'Hack';
@@ -75,7 +79,7 @@ for iAnimal = 1:size(animalsAll, 2)
                 if isfield(block.events, 'trialSideValues')
                     correctTrialsRight = block.events.hitValues(response_trials) == 1;
                 else
-                    correctTrialsRight = block.events.feedbackValues(response_trials) == 1; %go1 and go2
+                    correctTrialsRight = block.events.feedbackValues(response_trials) == thisSide; %go1 and go2
                 end
                 sum(correctTrialsRight);
                 n_trials = length(block.paramsValues);
@@ -91,17 +95,17 @@ for iAnimal = 1:size(animalsAll, 2)
                 
                 if isfield(block.events, 'trialSideValues')
                     %leftGood = block.events.sessionPerformanceValues(3, find(block.events.sessionPerformanceValues(1, :) == -1));
-                    rightGood = block.events.sessionPerformanceValues(3, find(block.events.sessionPerformanceValues(1, :) == 1));
+                    rightGood = block.events.sessionPerformanceValues(3, find(block.events.sessionPerformanceValues(1, :) == thisSide));
                     %leftT = block.events.sessionPerformanceValues(2, find(block.events.sessionPerformanceValues(1, :) == -1));
-                    rightT = block.events.sessionPerformanceValues(2, find(block.events.sessionPerformanceValues(1, :) == 1));
+                    rightT = block.events.sessionPerformanceValues(2, find(block.events.sessionPerformanceValues(1, :) == thisSide));
                 elseif isfield(block.events, 'noGoQuiescenceTimes')
-                    block.events.trialSideValues(response_trials) = 1;
+                    block.events.trialSideValues(response_trials) = thisSide;
                     hitTimesPossib = [block.events.feedbackTimes, block.events.noGoQuiescenceTimes];
-                    hitValuesUnsorted = [block.events.feedbackValues, 0 * ones(size(block.events.noGoQuiescenceTimes, 2), 1)'];
+                    hitValuesUnsorted = [block.events.feedbackValues, 0 * ones(size(block.events.noGoQuiescenceTimes, 2), thisSide)'];
                     [sortedV, sortedIdx] = sort(hitTimesPossib);
                     block.events.hitValues(response_trials) = hitValuesUnsorted(sortedIdx(response_trials));
                 else
-                    block.events.trialSideValues(response_trials) = 1;
+                    block.events.trialSideValues(response_trials) = thisSide;
                     ff = block.events.responseValues;
 
                     block.events.hitValues(response_trials) = ff(response_trials);
@@ -145,34 +149,94 @@ for iAnimal = 1:size(animalsAll, 2)
                     );
 
                 conditi = [1, 2, 3];
-
+                
+                go1TrialsFirstHalf = go1Trials;
+                go1TrialsFirstHalf(round(length(go1Trials)/2)+1:end) = 0; 
+                go2TrialsFirstHalf = go2Trials;
+                go2TrialsFirstHalf(round(length(go1Trials)/2)+1:end) = 0; 
+                noGoTrialsFirstHalf = noGoTrials;
+                noGoTrialsFirstHalf(round(length(go1Trials)/2)+1:end) = 0; 
+                
+                go1TrialsSecHalf = go1Trials;
+                go1TrialsSecHalf(1:round(length(go1Trials)/2)) = 0; 
+                go2TrialsSecHalf = go2Trials;
+                go2TrialsSecHalf(1:round(length(go1Trials)/2)) = 0; 
+                noGoTrialsSecHalf = noGoTrials;
+                noGoTrialsSecHalf(1:round(length(go1Trials)/2)) = 0;
+                
                 if contains(block.expDef, 'Hack') || contains(block.expDef, 'noGo_stage4') || contains(block.expDef, 'noGo_stage5')
-                    goLeft((iImg - 1)*3+1) = sum(~repeatOnMisses(response_trials) & ...
-                        ...
-                        block.events.hitValues(response_trials) == -1 & go1Trials ...
-                        );
-                    goLeft((iImg - 1)*3+2) = sum(~repeatOnMisses(response_trials) & ...
-                        ...
-                        block.events.hitValues(response_trials) == -1 & go2Trials ...
-                        );
-                    goLeft((iImg - 1)*3+3) = sum(~repeatOnMisses(response_trials) & ...
-                        ...
-                        block.events.hitValues(response_trials) == -1 & noGoTrials ...
-                        );
+                    if strcmp(animal, 'JF042') || strcmp(animal, 'JF043') || strcmp(animal, 'JF044')
+                        val = 1;
+                    else
+                    val = -1 ;
+                    end
+                    
                 else
+                    if strcmp(animal, 'JF042') || strcmp(animal, 'JF043') || strcmp(animal, 'JF044')
+                        val = -1; 
+                    else
+                        
+                    val = 1;
+                    end
+                end
                     goLeft((iImg - 1)*3+1) = sum(~repeatOnMisses(response_trials) & ...
                         ...
-                        block.events.hitValues(response_trials) == 1 & go1Trials ...
+                        block.events.hitValues(response_trials) == val & go1Trials ...
                         );
                     goLeft((iImg - 1)*3+2) = sum(~repeatOnMisses(response_trials) & ...
                         ...
-                        block.events.hitValues(response_trials) == 1 & go2Trials ...
+                        block.events.hitValues(response_trials) == val & go2Trials ...
                         );
                     goLeft((iImg - 1)*3+3) = sum(~repeatOnMisses(response_trials) & ...
                         ...
-                        block.events.hitValues(response_trials) == 1 & noGoTrials ...
+                        block.events.hitValues(response_trials) == val & noGoTrials ...
                         );
-                end
+                    
+                nTrials1((iImg - 1)*3+1) = sum(~repeatOnMisses(response_trials) & ...
+                    go1TrialsFirstHalf ...
+                    );
+                nTrials1((iImg - 1)*3+2) = sum(~repeatOnMisses(response_trials) & ...
+                    go2TrialsFirstHalf ...
+                    );
+                nTrials1((iImg - 1)*3+3) = sum(~repeatOnMisses(response_trials) & ...
+                    noGoTrialsFirstHalf ...
+                    );
+                nTrials2((iImg - 1)*3+1) = sum(~repeatOnMisses(response_trials) & ...
+                    go1TrialsSecHalf ...
+                    );
+                nTrials2((iImg - 1)*3+2) = sum(~repeatOnMisses(response_trials) & ...
+                    go2TrialsSecHalf ...
+                    );
+                nTrials2((iImg - 1)*3+3) = sum(~repeatOnMisses(response_trials) & ...
+                    noGoTrialsSecHalf ...
+                    );
+                
+                    
+                    goLeft1((iImg - 1)*3+1) = sum(~repeatOnMisses(response_trials) & ...
+                        ...
+                        block.events.hitValues(response_trials) == val & go1TrialsFirstHalf ...
+                        );
+                    goLeft1((iImg - 1)*3+2) = sum(~repeatOnMisses(response_trials) & ...
+                        ...
+                        block.events.hitValues(response_trials) == val & go2TrialsFirstHalf ...
+                        );
+                    goLeft1((iImg - 1)*3+3) = sum(~repeatOnMisses(response_trials) & ...
+                        ...
+                        block.events.hitValues(response_trials) == val & noGoTrialsFirstHalf ...
+                        );
+                    goLeft2((iImg - 1)*3+1) = sum(~repeatOnMisses(response_trials) & ...
+                        ...
+                        block.events.hitValues(response_trials) == val & go1TrialsSecHalf ...
+                        );
+                    goLeft2((iImg - 1)*3+2) = sum(~repeatOnMisses(response_trials) & ...
+                        ...
+                        block.events.hitValues(response_trials) == val & go2TrialsSecHalf ...
+                        );
+                    goLeft2((iImg - 1)*3+3) = sum(~repeatOnMisses(response_trials) & ...
+                        ...
+                        block.events.hitValues(response_trials) == val & noGoTrialsSecHalf ...
+                        );
+               
 
                 if contains(block.expDef, 'goNoGo')
                     allOffs = sort([block.events.goStimOffTimes, block.events.noGoStimOffTimes]);
@@ -208,6 +272,36 @@ for iAnimal = 1:size(animalsAll, 2)
                     ...
                     (block.events.hitValues(response_trials) == 0) & noGoTrials ...
                     );
+                
+                
+                
+                noGo1((iImg - 1)*3+1) = sum(~repeatOnMisses(response_trials) & ...
+                    ...
+                    (block.events.hitValues(response_trials) == 0) & go1TrialsFirstHalf ...
+                    );
+                noGo1((iImg - 1)*3+2) = sum(~repeatOnMisses(response_trials) & ...
+                    ...
+                    (block.events.hitValues(response_trials) == 0) & go2TrialsFirstHalf ...
+                    );
+                noGo1((iImg - 1)*3+3) = sum(~repeatOnMisses(response_trials) & ...
+                    ...
+                    (block.events.hitValues(response_trials) == 0) & noGoTrialsFirstHalf ...
+                    );
+                
+                noGo2((iImg - 1)*3+1) = sum(~repeatOnMisses(response_trials) & ...
+                    ...
+                    (block.events.hitValues(response_trials) == 0) & go1TrialsSecHalf ...
+                    );
+                noGo2((iImg - 1)*3+2) = sum(~repeatOnMisses(response_trials) & ...
+                    ...
+                    (block.events.hitValues(response_trials) == 0) & go2TrialsSecHalf ...
+                    );
+                noGo2((iImg - 1)*3+3) = sum(~repeatOnMisses(response_trials) & ...
+                    ...
+                    (block.events.hitValues(response_trials) == 0) & noGoTrialsSecHalf ...
+                    );
+
+
 
                 
                 wheel_resample_rate = 1000;
@@ -235,6 +329,20 @@ for iAnimal = 1:size(animalsAll, 2)
 
             stim_aligned_wheel = interp1(wheel_t_resample, ...
                 wheel_velocity, pull_times);
+            
+           
+%     wheel_values_resample(wheel_values_resample> 2^31) = wheel_values_resample(wheel_values_resample> 2^31) - 2^32;
+%     
+%     [wheel_velocity,wheel_move,wheel_velocity_split] = ...
+%     AP_parse_wheel(wheel_values_resample,wheel_resample_rate);
+% 
+%             wheel_click2mm = 0.4869; % lilrig's encoder
+%         wheel_mm2deg = 4;  % gain in this expDef
+%         wheel_position_mm = wheel_values_resample*wheel_click2mm;
+%         wheel_position_deg = wheel_position_mm*wheel_mm2deg;
+%         
+%             stim_aligned_wheel_deg = interp1(wheel_t_resample, ...
+%                 wheel_position_deg, pull_times);
 
             % (set a threshold in speed and time for wheel movement)
             thresh_displacement = 0.025;%% QQ SHOULD BE 0.025
@@ -410,8 +518,35 @@ for iAnimal = 1:size(animalsAll, 2)
                         movingFracNoGo = nan(1, 250);
                     end
                 end
-
-
+                if sum(noGoTrials) > 0 
+                    bhv.stim_aligned_wheelGo1{curr_day} = stim_aligned_wheel(go1Trials,:);
+                    bhv.stim_aligned_wheelGo1_inco{curr_day} = stim_aligned_wheel(go1Trials & block.events.hitValues(response_trials) ~= val,:);
+                    bhv.stim_aligned_wheelGo1_corr{curr_day} = stim_aligned_wheel(go1Trials & block.events.hitValues(response_trials) == val,:);
+                else
+                    bhv.stim_aligned_wheelGo1{curr_day} = stim_aligned_wheel;
+                    bhv.stim_aligned_wheelGo1_corr{curr_day} = [];
+                    bhv.stim_aligned_wheelGo1_inco{curr_day} = [];
+                end
+                if sum(go2Trials) > 0
+                    bhv.stim_aligned_wheelGo2{curr_day} = stim_aligned_wheel(go2Trials,:);
+                    bhv.stim_aligned_wheelGo2_inco{curr_day} = stim_aligned_wheel(go2Trials & block.events.hitValues(response_trials) ~= val,:);
+                    bhv.stim_aligned_wheelGo2_corr{curr_day} = stim_aligned_wheel(go2Trials & block.events.hitValues(response_trials) == val,:);
+                
+                else
+                    bhv.stim_aligned_wheelGo2{curr_day} = [];
+                    bhv.stim_aligned_wheelGo2_corr{curr_day} = [];
+                    bhv.stim_aligned_wheelGo2_inco{curr_day} = [];
+                end
+                if sum(noGoTrials) > 0 
+                    bhv.stim_aligned_wheelNoGo{curr_day} = stim_aligned_wheel(noGoTrials,:);
+                    bhv.stim_aligned_wheelNoGo_corr{curr_day} = stim_aligned_wheel(noGoTrials & block.events.hitValues(response_trials) == 0,:);
+                    bhv.stim_aligned_wheelNoGo_inco{curr_day} = stim_aligned_wheel(noGoTrials & block.events.hitValues(response_trials) ~= 0,:);
+              
+                else
+                    bhv.stim_aligned_wheelNoGo{curr_day} = [];
+                    bhv.stim_aligned_wheelNoGo_corr{curr_day} = [];
+                    bhv.stim_aligned_wheelNoGo_inco{curr_day} = [];
+                end
                 bhv.correctTrials(curr_day, :) = correctTrials;
                 bhv.nTrials(curr_day, :) = nTrials;
                 bhv.n_trials(curr_day, :) = n_trials;
@@ -420,6 +555,12 @@ for iAnimal = 1:size(animalsAll, 2)
                 bhv.conditions(curr_day, :) = conditi;
                 bhv.goLeft(curr_day, :) = goLeft;
                 bhv.noGo(curr_day, :) = noGo;
+                bhv.goLeft1(curr_day, :) = goLeft1;
+                bhv.noGo1(curr_day, :) = noGo1;
+                bhv.goLeft2(curr_day, :) = goLeft2;
+                bhv.noGo2(curr_day, :) = noGo2;
+                bhv.nTrials1(curr_day, :) = nTrials1;
+                bhv.nTrials2(curr_day, :) = nTrials2;
                 bhv.trialTime(curr_day, :) = trialTime;
                 if size(stim_to_move,1)==2
                     stim_to_move = stim_to_move(1,:);
@@ -429,8 +570,17 @@ for iAnimal = 1:size(animalsAll, 2)
                 bhv.stim_to_moveMean(curr_day,2) = NaN;
                 bhv.stim_to_moveMean(curr_day,3) = NaN;
                 bhv.stim_aligned_wheel{curr_day} = stim_aligned_wheel;
-
+                bhv.repeatOnMisses{curr_day} = repeatOnMisses;
+                bhv.response_trials{curr_day} = response_trials;
+                bhv.hitValues{curr_day} = block.events.hitValues;
+                bhv.go1trials{curr_day} = go1Trials;
+                bhv.noGotrials{curr_day} = noGoTrials;
+                
                 keep_day = [keep_day, curr_day];
+                expDefNameStart = strfind(block.expDef, 'stage');
+                expDefName = block.expDef(expDefNameStart:expDefNameStart+5);
+                bhv.expDefName{curr_day} = expDefName;
+                
                 if contains(block.expDef, 'NoGo') || contains(block.expDef, 'stage4') || contains(block.expDef, 'stage5')
                     noGoDay = [noGoDay, curr_day];
                     if sum(go2Trials) >= 1
@@ -465,16 +615,31 @@ for iAnimal = 1:size(animalsAll, 2)
                 %stims
                 catch
                 end
+                
             end
         end
     end
-
+    keep_day = unique(keep_day);
     day_num = cellfun(@(x) datenum(x), {experiments(keep_day).day});
-    day_labels = cellfun(@(day) [' ', day(6:end)], ...
-        {experiments(keep_day).day}, 'uni', false);
+    day_labels_temp = cellfun(@(day, protocol) [day(6:end)], ...
+        {experiments(keep_day).day},bhv.expDefName(keep_day), 'uni', false);
+    bhvOut(iAnimal). dates =  cellfun(@(day, protocol) [day], ...
+        {experiments(keep_day).day},bhv.expDefName(keep_day), 'uni', false);
+    %  day_labels = cellfun(@(day, protocol) [protocol, ' ', day(6:end)], ...
+    %    {experiments(keep_day).day},bhv.expDefName(keep_day), 'uni', false);
     %
+    tempLabel = "\\color[rgb]{%s}";
+       
+ 
+
+    [unique_protocols,~,protocol_idx] = unique(bhv.expDefName(keep_day));
+    protocol_col = hsv(length(unique_protocols));
+    for iDay = 1:length(protocol_idx)
+        thisColor = sprintf(tempLabel,num2str(protocol_col(protocol_idx(iDay),:)));
+        day_labels{iDay} = append(thisColor, day_labels_temp{iDay});
+    end
     figure('Name', animal);
-    subplot(331)
+    subplot(231)
     yyaxis left
 
     scatter(day_num, bhv.n_trials(keep_day, :));
@@ -493,10 +658,17 @@ for iAnimal = 1:size(animalsAll, 2)
 
     ylabel('Total water (ul)');
     xlabel('Session');
+    set(gca,'XTick',day_num);
+    set(gca,'XTickLabel',day_labels);
+    set(gca,'XTickLabelRotation',45);
+    %set(gca, 'Color', 
     makepretty;
 
-
-    subplot(332)
+% if ismember(iAnimal, 1:3)
+%     bhv.goLeft(keep_day, 3) = bhv.goLeft(keep_day, 3) -0.2;
+%     bhv.noGo(keep_day, 3) = bhv.noGo(keep_day, 3) +0.2;
+% end
+    subplot(232)
     con = bhv.conditions(keep_day(1), :);
     ccc = num2str(con(1, :));
     cc = textscan(ccc, '%s', 'Delimiter', ' ');
@@ -519,7 +691,7 @@ for iAnimal = 1:size(animalsAll, 2)
     caxis([0, 1])
     makepretty;
 
-    subplot(333)
+    subplot(233)
     con = bhv.conditions(keep_day(1), :);
     ccc = num2str(con(1, :));
     cc = textscan(ccc, '%s', 'Delimiter', ' ');
@@ -548,7 +720,7 @@ for iAnimal = 1:size(animalsAll, 2)
     caxis([0, 1])
     makepretty;
 
-    subplot(334)
+    subplot(234)
     im = imagesc(1:length(con), 1:size(nanmean(bhv.stim_to_moveMean(keep_day, :)), 1), bhv.stim_to_moveMean(keep_day, :));
     set(im, 'AlphaData', ~isnan(get(im, 'CData')));
     set(gca, 'color', [0.5, 0.5, 0.5]);
@@ -565,10 +737,10 @@ for iAnimal = 1:size(animalsAll, 2)
     %         txt = num2str(bhv.trialTime(keep_day(iDay), :)');
     %         text((1:length(con))-0.2, ones(1, length(con))*iDay, txt, 'BackgroundColor', 'w')
     %     end
-    caxis([0, 1])
+    caxis([0, 1.8])
     makepretty;
     try
-    subplot(337) % last day histogram of reaction times per condition 
+    subplot(236) % last day histogram of reaction times per condition 
     [h1, bins1 ]= hist(bhv.stim_to_move{end,1}, 0:0.05:1.8);
     stairs( bins1, h1, 'b', 'LineWidth', 2); hold on;
     [h2, bins2 ]= hist(bhv.stim_to_move{end,2}, 0:0.05:1.8);
@@ -585,10 +757,11 @@ for iAnimal = 1:size(animalsAll, 2)
     makepretty;
     catch
     end
-    subplot(335)
+    subplot(235)
 
     transparencyValues = 0:1 / length(noGoDay):1;
-
+    bhvOut(iAnimal).protocol_idx = protocol_idx;
+    bhvOut(iAnimal).day_labels = day_labels;
     bhvOut(iAnimal).binBorders = binBorders;
     bhvOut(iAnimal).movingFracGo1 = bhv.movingFrac;
     bhvOut(iAnimal).goLeft = bhv.goLeft(:, :);
@@ -596,6 +769,28 @@ for iAnimal = 1:size(animalsAll, 2)
     bhvOut(iAnimal).noGo = bhv.noGo(:, :);
     bhvOut(iAnimal).stim_to_move = stim_to_move; 
     bhvOut(iAnimal).noGoDay = noGoDay;
+    bhvOut(iAnimal).stim_aligned_wheelGo1 = bhv.stim_aligned_wheelGo1;
+    bhvOut(iAnimal).stim_aligned_wheelGo2 = bhv.stim_aligned_wheelGo2;
+    bhvOut(iAnimal).stim_aligned_wheelNoGo = bhv.stim_aligned_wheelNoGo;
+    bhvOut(iAnimal).stim_aligned_wheelGo1_corr = bhv.stim_aligned_wheelGo1_corr;
+    bhvOut(iAnimal).stim_aligned_wheelGo2_corr = bhv.stim_aligned_wheelGo2_corr;
+    bhvOut(iAnimal).stim_aligned_wheelNoGo_corr = bhv.stim_aligned_wheelNoGo_corr;
+    bhvOut(iAnimal).stim_aligned_wheelGo1_inco = bhv.stim_aligned_wheelGo1_inco;
+    bhvOut(iAnimal).stim_aligned_wheelGo2_inco = bhv.stim_aligned_wheelGo2_inco;
+    bhvOut(iAnimal).stim_aligned_wheelNoGo_inco = bhv.stim_aligned_wheelNoGo_inco;
+    bhvOut(iAnimal).goLeft1 =  bhv.goLeft1;
+    bhvOut(iAnimal).goLeft2 =  bhv.goLeft2;
+    bhvOut(iAnimal).noGo1 =  bhv.noGo1;
+    bhvOut(iAnimal).noGo2 =  bhv.noGo2;
+    bhvOut(iAnimal).nTrials1 =  bhv.nTrials1;
+    bhvOut(iAnimal).nTrials2 =  bhv.nTrials2;
+    bhvOut(iAnimal).repeatOnMisses = bhv.repeatOnMisses;
+    bhvOut(iAnimal).response_trials = bhv.response_trials;
+    bhvOut(iAnimal).hitValues = bhv.hitValues;
+    bhvOut(iAnimal).go1trials = bhv.go1trials;
+    bhvOut(iAnimal).noGotrials = bhv.noGotrials;
+    bhvOut(iAnimal).stim_to_move = bhv.stim_to_move;
+
     if length(noGoDay) >= 1
         bhvOut(iAnimal).movingFracGo1(noGoDay, :) = bhv.movingFracGo1(noGoDay, :);
         bhvOut(iAnimal).movingFracNoGo = bhv.movingFracNoGo;
@@ -642,7 +837,7 @@ for iAnimal = 1:size(animalsAll, 2)
     ylabel('fraction moving')
     makepretty;
 
-    subplot(336)
+    %subplot(336)
     if length(noGoDay) == 0
     else
         transparencyValues = 0:1 / length(noGoDay):1;

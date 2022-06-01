@@ -1,4 +1,4 @@
-%load probe_ccf for each animal, find which contains regions and at what
+open JF%load probe_ccf for each animal, find which contains regions and at what
 %depth 
 
 mice = { 'JF054'}; % JF020 doesn't have histology yet. JF021 and JF022 to come, and many more

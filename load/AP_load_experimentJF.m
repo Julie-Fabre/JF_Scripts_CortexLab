@@ -121,22 +121,22 @@ if timeline_exists
     photodiode_flip = find(~photodiode_trace_diff(1:end-1) & ...
         photodiode_trace_diff(2:end)) + photodiode_diff_samples + 1;
     photodiode_flip_times = stimScreen_on_t(photodiode_flip)';
-
-    %     figure();
-    %     clf;
-    %     valu = 8000;
-    %     title('Photodiode');
-    %     hold on;
-    %     plot(photodiode_trace(1:valu));
-    %     hold on;
-    %     scatter(photodiode_flip(find(photodiode_flip <= valu)), ones(size(find(photodiode_flip <= valu), 1), 1))
-    %     hold on;
-    %     plot(Timeline.rawDAQData(1:valu, photodiode_idx))
-    %     hold on;
-    %     plot(medfilt1(Timeline.rawDAQData(1:valu, ...
-    %         photodiode_idx), 3))
-    %     hold on;
-    %     pp = photodiode_flip(find(photodiode_flip <= valu));
+    %
+    %         figure();
+    %         clf;
+    %         valu = 10000;
+    %         title('Photodiode');
+    %         hold on;
+    %         plot(photodiode_trace(1:valu));
+    %         hold on;
+    %         scatter(photodiode_flip(find(photodiode_flip <= valu)), ones(size(find(photodiode_flip <= valu), 1), 1))
+    %         hold on;
+    %         plot(Timeline.rawDAQData(1:valu, photodiode_idx))
+    %         hold on;
+    %         plot(medfilt1(Timeline.rawDAQData(1:valu, ...
+    %             photodiode_idx), 3))
+    %         hold on;
+    %         pp = photodiode_flip(find(photodiode_flip <= valu));
 
     % Get flipper signal (this was added late, might not be present)
     flipper_name = 'flipper';
@@ -372,12 +372,12 @@ if block_exists
             choices = [-1, 1];
             conditions = combvec(sides, choices)';
             n_conditions = size(conditions, 1);
-            
+
             trial_conditions = ...
-                [ signals_events.trialSideValues(1:n_trials)', ...
+                [signals_events.trialSideValues(1:n_trials)', ...
                 trial_choice(1:n_trials)];
             [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
-            
+
         case {'vanillaChoiceworld', 'vanillaChoiceworldBias', 'vanillaChoiceworldNoRepeats'}
             % Hit/miss recorded for last trial, circshift to align
             signals_events.hitValues = circshift(signals_events.hitValues, [0, -1]);
@@ -460,7 +460,7 @@ if block_exists
                 [signals_events.trialContrastValues(1:n_trials)', signals_events.trialSideValues(1:n_trials)', ...
                 trial_choice(1:n_trials), trial_timing(1:n_trials)];
             [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
-        case {'choiworldNoGoParameterHack_noWhiteNoise', 'noGo_stage4', 'noGo_stage4_q', 'noGo_stage5'} % stimType,
+        case {'choiworldNoGoParameterHack_noWhiteNoise', 'noGo_stage4', 'noGo_stage4_q', 'noGo_stage5', 'noGo_stage6'} % stimType,
             % Hit/miss recorded for last trial, circshift to align
             response_trials = 1:length(block.events.endTrialValues);
             block.events.trialSideValues(response_trials) = 1;
@@ -490,10 +490,10 @@ if block_exists
             % Check that the stim times aren't off by a certain threshold
             % (skip the first one - that's usually delayed a little)
             stim_time_offset_thresh = 0.1;
-            if any(abs(stimOn_times(2:end)-signals_events.stimulusOnTimes(n_trials(1)+1:n_trials(2))') >= ...
+            if any(abs(stimOn_times(n_trials(2):n_trials(end))-signals_events.stimulusOnTimes(n_trials(2):n_trials(end))') >= ...
                     stim_time_offset_thresh)
                 figure;
-                plot(stimOn_times(2:end)-signals_events.stimulusOnTimes(n_trials(1)+1:n_trials(2))', '.k')
+                plot(stimOn_times(n_trials)-signals_events.stimulusOnTimes(n_trials)', '.k')
                 line(xlim, repmat(stim_time_offset_thresh, 2, 1), 'color', 'r');
                 line(xlim, repmat(-stim_time_offset_thresh, 2, 1), 'color', 'r');
                 warning('Stim signals/photodiode offset over threshold');
@@ -553,7 +553,7 @@ if block_exists
             %                                 wheel_starts(find(wheel_starts > block.events.stimulusOnTimes(x), 1)), ...
             %                                 response_trials);
 
-            trial_move_t = stim_to_move >= 0.25; %trial_wheel_starts - block.events.stimulusOnTimes(response_trials);
+            trial_move_t = stim_to_move >= 0.3; %trial_wheel_starts - block.events.stimulusOnTimes(response_trials);
 
 
             movement_after200ms_and_type = signals_events.stimulusTypeValues(n_trials(1):n_trials(end))';
@@ -568,10 +568,13 @@ if block_exists
 
             conditions = combvec(imageN, choices, outcomes)';
             n_conditions = size(conditions, 1);
-
+            correctResp = nan(size(signals_events.stimulusTypeValues(n_trials(1):n_trials(end)), 2), 1);
+            correctResp(signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 1) = 1;
+            correctResp(signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 2) = 1;
+            correctResp(signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 3) = 0;
             trial_conditions = ...
                 [signals_events.stimulusTypeValues(n_trials(1):n_trials(end))', ...
-                trial_choice, block.events.feedbackValues(n_trials(1):n_trials(end))'];
+                trial_choice, block.events.responseValues(n_trials(1):n_trials(end))'== correctResp];
             [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
             wheel_time = block.inputs.wheelTimes;
             wheel = block.inputs.wheelValues;
@@ -760,7 +763,7 @@ if block_exists
 
             trial_conditions = ...
                 [signals_events.trialSideValues(n_trials(1):n_trials(end))', ...
-                trial_choice, trial_timing];
+                trial_choice, trial_outcome];
             [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
 
 
@@ -830,9 +833,9 @@ if block_exists
             wheel_position = Timeline.rawDAQData(:, rotaryEncoder_idx);
             wheel_position(wheel_position > 2^31) = wheel_position(wheel_position > 2^31) - 2^32;
             [wheel_velocity, wheel_move] = AP_parse_wheel(wheel_position, Timeline.hw.daqSampleRate);
-             wheel_starts = Timeline.rawDAQTimestamps(diff([0; wheel_move]) == 1)';
+            wheel_starts = Timeline.rawDAQTimestamps(diff([0; wheel_move]) == 1)';
             wheel_stops = Timeline.rawDAQTimestamps(diff([wheel_move; 0]) == -1)';
-           stim_leeway = 0.1;
+            stim_leeway = 0.1;
             wheel_move_stim_idx = ...
                 arrayfun(@(stim) find(wheel_starts > stim-stim_leeway, 1, 'first'), ...
                 stimOn_times);
@@ -843,8 +846,8 @@ if block_exists
             % (stim move: first move after stim)
             % (give this a little leeway, sometimes movement starts early but
             % stim comes on anyway)
-            
-          %  stim_to_move = wheel_starts - stimOn_times(1:n_trials);
+
+            %  stim_to_move = wheel_starts - stimOn_times(1:n_trials);
 
 
         case 'AP_lcrGratingPassiveFlicker'
@@ -952,8 +955,8 @@ if block_exists
                 [signals_events.stim_idValues'];
             [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
             [~, stimIDs] = ismember(trial_conditions, conditions, 'rows');
-        case {'JF_choiceworldStimuli', 'JF_choiceworldStimuli_wheel', 'JF_choiceworldStimuli_wheel_left_center',...
-                'JF_choiceworldStimuli_wheel_left_centerplok','JF_choiceworldStimuli_wheel_left_centerpl'}
+        case {'JF_choiceworldStimuli', 'JF_choiceworldStimuli_wheel', 'JF_choiceworldStimuli_wheel_left_center', ...
+                'JF_choiceworldStimuli_wheel_left_centerplok', 'JF_choiceworldStimuli_wheel_left_centerpl'}
             %             block_stim_iti = mean(diff(block.stimWindowUpdateTimes));
             %
             %             photodiode_flip_diff = diff(stimScreen_on_t(photodiode_flip));
@@ -971,24 +974,29 @@ if block_exists
             y = block.events.stim_idTimes(1:1:end) - photodiode_flip_times(2);
             yy = photodiode_flip_times(2:2:end);
             if length(x) < length(y) % only if there is a problem
-                clearvars yy
-                for k = 1:numel(y)
-                    [val, idx] = min(abs(x-y(k)));
-                    yy(k) = x(idx);
-                end
-                % if value used more than once, only keep smallest value (= correct one).
-                % replace other dup by NaN.
-                [v, w] = unique(yy, 'stable');
-                duplicate_values = yy(setdiff(1:numel(yy), w));
-                for iDV = 1:length(duplicate_values)
-                    theseDUP = find(yy == duplicate_values(iDV));
-                    %[val,idx]= min(abs(y-x(k)));
-                    inD = theseDUP(find(y(theseDUP)-duplicate_values(iDV) == max(y(theseDUP)-duplicate_values(iDV))));
-                    yy(inD) = y(inD);
-                end
-                theseNans = find(isnan(yy));
-                block.events.stim_idValues(theseNans)
-                unique(block.events.stim_idValues(theseNans))
+                %                 clearvars yy
+                %                 for k = 1:numel(y)
+                %                     [val, idx] = min(abs(x-y(k)));
+                %                     yy(k) = x(idx);
+                %                 end
+                %                 % if value used more than once, only keep smallest value (= correct one).
+                %                 % replace other dup by NaN.
+                %                 [v, w] = unique(yy, 'stable');
+                %                 duplicate_values = yy(setdiff(1:numel(yy), w));
+                %                 for iDV = 1:length(duplicate_values)
+                %                     theseDUP = find(yy == duplicate_values(iDV));
+                %                     %[val,idx]= min(abs(y-x(k)));
+                %                     inD = theseDUP(find(y(theseDUP)-duplicate_values(iDV) == max(y(theseDUP)-duplicate_values(iDV))));
+                %                     yy(inD) = y(inD);
+                %                 end
+                %                 theseNans = find(isnan(yy));
+                %                 block.events.stim_idValues(theseNans)
+                %                 unique(block.events.stim_idValues(theseNans))
+
+                thisIsMyLastShot = mode(diff(photodiode_flip_times));
+                thisIsMyLastShotVec = photodiode_flip_times(2):thisIsMyLastShot:photodiode_flip_times(2) + 2 * thisIsMyLastShot * numel(block.events.stim_idTimes(1:1:end));
+                yy = thisIsMyLastShotVec(1:2:end);
+
             end
             stimOn_times = yy;
             %hacky--issues with protocol I need to fix
@@ -996,22 +1004,37 @@ if block_exists
             % Get stim ID and conditions
 
             if isfield(block.events, 'stim_aziValues')
-                conditions = unique([ceil(signals_events.stim_idValues/3)', block.events.stim_aziValues'], 'rows')';
-                n_conditions = size(conditions, 1);
+                if max(signals_events.stim_idValues) > 44
+                    conditions = unique([ceil(signals_events.stim_idValues/3)', block.events.stim_aziValues'], 'rows')';
+                    n_conditions = size(conditions, 1);
 
-                trial_conditions = ... ,
-                    [ceil(signals_events.stim_idValues/3)', block.events.stim_aziValues'];
-                [~, trial_id] = ismember(trial_conditions(:, 2), conditions(:, 2), 'rows');
-                [~, stimIDs] = ismember(trial_conditions(:, 1), conditions(:, 1), 'rows');
+                    trial_conditions = ... ,
+                        [ceil(signals_events.stim_idValues/3)', block.events.stim_aziValues'];
+                    [~, trial_id] = ismember(trial_conditions(:, 2), conditions(:, 2), 'rows');
+                    [~, stimIDs] = ismember(trial_conditions(:, 1), conditions(:, 1), 'rows');
+
+                else
+                    conditions = unique([ceil(signals_events.stim_idValues)', block.events.stim_aziValues'], 'rows')';
+                    n_conditions = size(conditions, 1);
+
+                    trial_conditions = ... ,
+                        [ceil(signals_events.stim_idValues)', block.events.stim_aziValues'];
+                    trial_id = trial_conditions(:, 2);
+                    stimIDs = trial_conditions(:, 1);
+                end
+
 
             else
                 warning('Azimuth not saved in the choiceworld stim version')
                 conditions = unique(ceil(signals_events.stim_idValues/3))';
+                tentativeAzi = zeros(size(conditions, 1), 1);
+                tentativeAzi(signals_events.stim_idValues <= 22) = -90;
+                tentativeAzi(signals_events.stim_idValues > 44) = 90;
                 n_conditions = size(conditions, 1);
                 trial_conditions = ...
-                    [ceil(signals_events.stim_idValues/3)'];
-                [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
-                [~, stimIDs] = ismember(trial_conditions, conditions, 'rows');
+                    [ceil(signals_events.stim_idValues/3)', tentativeAzi];
+                [~, trial_id] = ismember(trial_conditions(:, 1), conditions, 'rows');
+                [~, stimIDs] = ismember(trial_conditions(:, 1), conditions, 'rows');
 
             end
 
@@ -1048,6 +1071,66 @@ if block_exists
             stim_to_move = padarray(wheel_move_time-stimOn_times, [length(stimOn_times) - length(stimOn_times), 0], NaN, 'post');
             no_move_trials = isnan(stim_to_move) | stim_to_move < 0.2 | stim_to_move > 0.2;
 
+        case 'JF_choiceworldStimuli_wheel_left_center_all'
+
+
+            x = photodiode_flip_times(2:2:end);
+            y = block.events.stim_idTimes(1:1:end) - photodiode_flip_times(2);
+            yy = photodiode_flip_times(2:2:end);
+            if length(x) < length(y) % only if there is a problem
+                disp('error')
+                thisIsMyLastShot = mode(diff(photodiode_flip_times));
+                thisIsMyLastShotVec = photodiode_flip_times(2):thisIsMyLastShot:photodiode_flip_times(2) + 2 * thisIsMyLastShot * numel(block.events.stim_idTimes(1:1:end));
+                yy = thisIsMyLastShotVec(1:2:end);
+
+            end
+            stimOn_times = yy;
+            %hacky--issues with protocol I need to fix
+            %closest photodiode if exists. when doesn't exist, err ??
+            % Get stim ID and conditions
+
+
+            conditions = unique([ceil(signals_events.stim_idValues)', block.events.stim_aziValues'], 'rows')';
+            n_conditions = size(conditions, 1);
+
+            trial_conditions = ... ,
+                [ceil(signals_events.stim_idValues)', block.events.stim_aziValues'];
+            trial_id = trial_conditions(:, 2);
+            trial_conditions(trial_conditions(:, 1) > 21, 1) = trial_conditions(trial_conditions(:, 1) > 21, 1) - 21;
+            stimIDs = trial_conditions(:, 1);
+
+
+            wheel_time = block.inputs.wheelTimes;
+            wheel = block.inputs.wheelValues;
+            surround_time = [-0.5, 2];
+            surround_sample_rate = 1 / Timeline.hw.samplingInterval; % (match this to framerate)
+            surround_time_points = surround_time(1):1 / surround_sample_rate:surround_time(2);
+            if size(stimOn_times, 2) > 1
+                stimOn_times = permute(stimOn_times, [2, 1]);
+            end
+            pull_times = bsxfun(@plus, stimOn_times, surround_time_points);
+
+            stim_aligned_wheel = interp1(Timeline.rawDAQTimestamps, ...
+                wheel_velocity, pull_times);
+            % (set a threshold in speed and time for wheel movement)
+            thresh_displacement = 0.025;
+            time_over_thresh = 0.05; % ms over velocity threshold to count
+            samples_over_thresh = time_over_thresh .* surround_sample_rate;
+            wheel_over_thresh_fullconv = convn( ...
+                abs(stim_aligned_wheel) > thresh_displacement, ...
+                ones(1, samples_over_thresh)) >= samples_over_thresh;
+            wheel_over_thresh = wheel_over_thresh_fullconv(:, end-size(stim_aligned_wheel, 2)+1:end);
+
+            [move_trial, wheel_move_sample] = max(wheel_over_thresh, [], 2);
+            wheel_move_time = arrayfun(@(x) pull_times(x, wheel_move_sample(x)), 1:size(pull_times, 1))';
+            wheel_move_time(~move_trial) = NaN;
+
+            % Get conditions for all trials
+
+            % (trial_timing)
+
+            stim_to_move = padarray(wheel_move_time-stimOn_times, [length(stimOn_times) - length(stimOn_times), 0], NaN, 'post');
+            no_move_trials = isnan(stim_to_move) | stim_to_move < 0.2 | stim_to_move > 0.2;
 
         case 'AP_auditoryStim'
             % Auditory stim only, use audioOut to get times
@@ -1427,6 +1510,7 @@ if ephys_exists && load_parts.ephys
         cluster_filename = [ephys_path, filesep, cluster_filedir.name];
         fid = fopen(cluster_filename);
         cluster_groups = textscan(fid, '%d%s', 'HeaderLines', 1);
+        cg = cluster_groups;
         fclose(fid);
     end
 
@@ -1827,10 +1911,11 @@ if ephys_exists && load_parts.ephys && exist('lfp_channel', 'var')
         else
             lfp = NaN;
             lfp_sample_rate = 30000 / 1000;
-            binFile = dir([ephys_path(1:end-15), ephys_path(end-4:end), filesep, '*.meta']);
+            binFile = dir([ephys_path(1:end-15), ephys_path(end-4:end), filesep, '*ap.meta']);
             if isempty(binFile)
-                binFile = dir([ephys_path(1:end-15), ephys_path(end-4:end), filesep, 'experiment1/*.meta']);
+                binFile = dir([ephys_path(1:end-15), ephys_path(end-4:end), filesep, 'experiment1/*ap.meta']);
             end
+
             meta = ReadMeta_GLX(binFile.name, binFile.folder);
             ephysAPfile = [ephys_path(1:end-15), ephys_path(end-4:end)];
             %max_depth = 0;%already ordered
@@ -2045,102 +2130,102 @@ end
 %% Estimate striatal boundaries on probe
 
 if ephys_exists && load_parts.ephys
-%     if verbose;
-%         disp('Estimating cortex boundaries on probe...');
-%     end
-% 
-%     % Cortex alignment: assume top of probe out of brain and very
-%     % correlated, look for big drop in correlation from top-down
-%     lfp_corr = corrcoef(double(transpose(lfp-nanmedian(lfp,1))));
-%     lfp_corr_diag = lfp_corr;
-%     lfp_corr_diag(triu(true(size(lfp_corr)),1)) = NaN;
-%     lfp_corr_from_top = nanmean(lfp_corr_diag,2)';
-%     
-%     n_lfp_medfilt = 5;
-%     ctx_start = lfp_channel_positions( ...
-%         find(medfilt1(lfp_corr_from_top,n_lfp_medfilt) > ...
-%         sum(minmax(medfilt1(lfp_corr_from_top,n_lfp_medfilt)))*0.9,1,'last'));
-%     disp(ctx_start)
-% % [c,b]=histcounts(template_depths,20);
-% % ctx_startJF = b(find(c(3:end)>max(c)*0.1, 1,'first')+2);
-% % figure();
-% % plot(b(1:end-1)+10,c)
-% % hold on;
-% % line([0 3840],[max(c)*0.1 max(c)*0.1])
-%     if verbose
-%         figure;
-%         imagesc(lfp_channel_positions,lfp_channel_positions,lfp_corr_diag);
-%         axis image
-%         colormap(brewermap([],'*RdBu'));
-%         caxis([-1,1])
-%         xlabel('Depth (\mum)');
-%         ylabel('Depth (\mum)');
-%         c = colorbar;
-%         ylabel(c,'Med. sub. correlation');
-%         line(xlim,[ctx_start,ctx_start],'color','k','linewidth',2);
-%         line([ctx_start,ctx_start],ylim,'color','k','linewidth',2);
-%         title(sprintf('%s %s: LFP correlation and cortex start',animal,day));
-%     end
-%             
-%     % (if the detected cortex start is after the first unit, debug)
-%     ctx_lfp_spike_diff = ctx_start-min(template_depths);
-% %     if ctx_lfp_spike_diff > 100 % 100um leeway
-% %         error('%s %s: LFP-estimated cortex start is after first unit %.0f um', ...
-% %             animal,day,ctx_lfp_spike_diff);
-% %     end
-%     
-%     
-%     %%% If histology is aligned, get areas by depth
-%     [probe_ccf_fn,probe_ccf_fn_exists] = AP_cortexlab_filenameJF(animal,[],[],'histo');
-%     if ~probe_ccf_fn_exists
-%         if verbose; disp('No histology alignment for probe...'); end
-%     elseif probe_ccf_fn_exists
-%         if verbose; disp('Estimating histology-aligned cortical areas on probe...'); end
-%         
-%         % (load the CCF structure tree)
-%         myPaths;
-%         %allen_atlas_path = fileparts(which('template_volume_10um.npy'));
-%         st = loadStructureTree([allenAtlasPath filesep 'allenCCF' filesep 'structure_tree_safe_2017.csv']);
-%         
-%         % Load probe CCF alignment
-%         load(probe_ccf_fn);
-%         
-%         % Get area names and borders across probe
-%         [~,dv_sort_idx] = sort(probe_ccf.trajectory_coords(:,2));
-%         dv_voxel2um = 10*0.945; % CCF DV estimated scaling
-%         probe_trajectory_depths = ...
-%             pdist2(probe_ccf.trajectory_coords, ...
-%             probe_ccf.trajectory_coords((dv_sort_idx == 1),:))*dv_voxel2um;
-%         
-%         probe_depths = probe_trajectory_depths + ctx_start;
-%         
-%         % Get recorded areas and boundaries (ignore layer distinctions)
-%         probe_areas = unique(regexprep( ...
-%             st(probe_ccf.trajectory_areas(probe_depths > 0 & ...
-%             probe_depths < max(channel_positions(:,2))),:).safe_name, ...
-%             ' layer .*',''));
-%         
-%         probe_area_boundaries = cellfun(@(area) ...
-%             minmax(probe_depths(contains( ...
-%             st(probe_ccf.trajectory_areas,:).safe_name,area))), ...
-%             probe_areas,'uni',false);
-%     end
-    
-%     % str_align = alignment method ('none', 'depth', or 'kernel')
-% 
-%     % requires n_aligned_depths for alignment, set default
-%     if ~exist('n_aligned_depths', 'var')
-%         n_aligned_depths = 3;
-%     end
-% 
-%     % if no alignment specified, default kernel
-%     if ~exist('str_align', 'var')
-%         str_align = 'kernel';
-%     end
-%     try
-%         [str_depth, aligned_str_depth_group] = AP_align_striatum_ephysJF;
-%     catch
-%     end
+    %     if verbose;
+    %         disp('Estimating cortex boundaries on probe...');
+    %     end
+    %
+    %     % Cortex alignment: assume top of probe out of brain and very
+    %     % correlated, look for big drop in correlation from top-down
+    %     lfp_corr = corrcoef(double(transpose(lfp-nanmedian(lfp,1))));
+    %     lfp_corr_diag = lfp_corr;
+    %     lfp_corr_diag(triu(true(size(lfp_corr)),1)) = NaN;
+    %     lfp_corr_from_top = nanmean(lfp_corr_diag,2)';
+    %
+    %     n_lfp_medfilt = 5;
+    %     ctx_start = lfp_channel_positions( ...
+    %         find(medfilt1(lfp_corr_from_top,n_lfp_medfilt) > ...
+    %         sum(minmax(medfilt1(lfp_corr_from_top,n_lfp_medfilt)))*0.9,1,'last'));
+    %     disp(ctx_start)
+    % % [c,b]=histcounts(template_depths,20);
+    % % ctx_startJF = b(find(c(3:end)>max(c)*0.1, 1,'first')+2);
+    % % figure();
+    % % plot(b(1:end-1)+10,c)
+    % % hold on;
+    % % line([0 3840],[max(c)*0.1 max(c)*0.1])
+    %     if verbose
+    %         figure;
+    %         imagesc(lfp_channel_positions,lfp_channel_positions,lfp_corr_diag);
+    %         axis image
+    %         colormap(brewermap([],'*RdBu'));
+    %         caxis([-1,1])
+    %         xlabel('Depth (\mum)');
+    %         ylabel('Depth (\mum)');
+    %         c = colorbar;
+    %         ylabel(c,'Med. sub. correlation');
+    %         line(xlim,[ctx_start,ctx_start],'color','k','linewidth',2);
+    %         line([ctx_start,ctx_start],ylim,'color','k','linewidth',2);
+    %         title(sprintf('%s %s: LFP correlation and cortex start',animal,day));
+    %     end
+    %
+    %     % (if the detected cortex start is after the first unit, debug)
+    %     ctx_lfp_spike_diff = ctx_start-min(template_depths);
+    % %     if ctx_lfp_spike_diff > 100 % 100um leeway
+    % %         error('%s %s: LFP-estimated cortex start is after first unit %.0f um', ...
+    % %             animal,day,ctx_lfp_spike_diff);
+    % %     end
+    %
+    %
+    %     %%% If histology is aligned, get areas by depth
+    %     [probe_ccf_fn,probe_ccf_fn_exists] = AP_cortexlab_filenameJF(animal,[],[],'histo');
+    %     if ~probe_ccf_fn_exists
+    %         if verbose; disp('No histology alignment for probe...'); end
+    %     elseif probe_ccf_fn_exists
+    %         if verbose; disp('Estimating histology-aligned cortical areas on probe...'); end
+    %
+    %         % (load the CCF structure tree)
+    %         myPaths;
+    %         %allen_atlas_path = fileparts(which('template_volume_10um.npy'));
+    %         st = loadStructureTree([allenAtlasPath filesep 'allenCCF' filesep 'structure_tree_safe_2017.csv']);
+    %
+    %         % Load probe CCF alignment
+    %         load(probe_ccf_fn);
+    %
+    %         % Get area names and borders across probe
+    %         [~,dv_sort_idx] = sort(probe_ccf.trajectory_coords(:,2));
+    %         dv_voxel2um = 10*0.945; % CCF DV estimated scaling
+    %         probe_trajectory_depths = ...
+    %             pdist2(probe_ccf.trajectory_coords, ...
+    %             probe_ccf.trajectory_coords((dv_sort_idx == 1),:))*dv_voxel2um;
+    %
+    %         probe_depths = probe_trajectory_depths + ctx_start;
+    %
+    %         % Get recorded areas and boundaries (ignore layer distinctions)
+    %         probe_areas = unique(regexprep( ...
+    %             st(probe_ccf.trajectory_areas(probe_depths > 0 & ...
+    %             probe_depths < max(channel_positions(:,2))),:).safe_name, ...
+    %             ' layer .*',''));
+    %
+    %         probe_area_boundaries = cellfun(@(area) ...
+    %             minmax(probe_depths(contains( ...
+    %             st(probe_ccf.trajectory_areas,:).safe_name,area))), ...
+    %             probe_areas,'uni',false);
+    %     end
+
+    %     % str_align = alignment method ('none', 'depth', or 'kernel')
+    %
+    %     % requires n_aligned_depths for alignment, set default
+    %     if ~exist('n_aligned_depths', 'var')
+    %         n_aligned_depths = 3;
+    %     end
+    %
+    %     % if no alignment specified, default kernel
+    %     if ~exist('str_align', 'var')
+    %         str_align = 'kernel';
+    %     end
+    %     try
+    %         [str_depth, aligned_str_depth_group] = AP_align_striatum_ephysJF;
+    %     catch
+    %     end
 
 end
 

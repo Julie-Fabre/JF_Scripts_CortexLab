@@ -95,13 +95,13 @@ for iOri = 1:size(allOri,1)
 %     if iOri==1
 %         raster_x
 %     end
-if size(conditionsNew,2)==3
-    allOriRows = find(conditionsNew(:, 3) == allOri(iOri));
-else
-    allOriRows = find(conditionsNew == allOri(iOri));
-end
-    
-    sID(ismember(stimIDs, allOriRows)) = iOri;
+% if size(conditionsNew,2)==3
+%     allOriRows = find(conditionsNew(:, 3) == allOri(iOri));
+% else
+%     allOriRows = find(conditionsNew == allOri(iOri));
+% end
+%     
+    sID(ismember(stimIDs, allOri(iOri))) = iOri;
 end
 % B. PSTH
 smooth_size = 51;
