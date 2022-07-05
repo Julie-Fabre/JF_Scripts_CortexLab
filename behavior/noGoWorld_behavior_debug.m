@@ -1,6 +1,6 @@
 %clear all;
 %clc;
-function bhvOut = noGoWorld_behavior(animalsAll)
+function bhvOut = noGoWorld_behavior_debug(animalsAll)
 plotAll = false;
 animalsPhase1 = {[1, 2], [1, 2], [1:4]};
 animalsPhase2 = {[3, 4], [3:5], [5:9]};
@@ -936,15 +936,18 @@ for iAnimal = 1:length(animalsAll)
     end
 end
 figure();
+clf
 clearvars min
 try
-nDays = min(10, length(animalsAll));
+    nDays = min(1, length(animalsAll));
 catch
     
-    nDays = 10;
+    nDays = 1;
 end
+
 for iAnimal = 1:length(animalsAll)
     try
+        an(iAnimal).noGoDay = unique(an(iAnimal).noGoDay);
         subplot(round(length(animalsAll)/2), round(length(animalsAll)/2), iAnimal)
         
         transparencyValues = 0:1 / length(an(iAnimal).noGoDay):1;
@@ -957,26 +960,28 @@ for iAnimal = 1:length(animalsAll)
             p = plot([1, 2, 3], nanmean(an(iAnimal).goLeft(an(iAnimal).noGoDay(end-nDays:end), [1, 3, 2]))./nanmean(an(iAnimal).nTrials(an(iAnimal).noGoDay(end-nDays:end), [1, 3, 2])), 'Color', col1);
            
             hold on;
-            errorbar([1, 2, 3],nanmean(an(iAnimal).goLeft(an(iAnimal).noGoDay(end-nDays:end), [1, 3, 2]))./nanmean(an(iAnimal).nTrials(an(iAnimal).noGoDay(end-nDays:end), [1, 3, 2])),...
-                nanstd(an(iAnimal).goLeft(an(iAnimal).noGoDay(end-nDays:end), [1, 3, 2])./an(iAnimal).nTrials(an(iAnimal).noGoDay(end-nDays:end), [1, 3, 2])), 'Color',col1)
+            %errorbar([1, 2, 3],nanmean(an(iAnimal).goLeft(an(iAnimal).noGoDay(end-nDays:end), [1, 3, 2]))./nanmean(an(iAnimal).nTrials(an(iAnimal).noGoDay(end-nDays:end), [1, 3, 2])),...
+            %    nanstd(an(iAnimal).goLeft(an(iAnimal).noGoDay(end-nDays:end), [1, 3, 2])./an(iAnimal).nTrials(an(iAnimal).noGoDay(end-nDays:end), [1, 3, 2])), 'Color',col1)
             makepretty;
             scatter([1, 2, 3], nanmean(an(iAnimal).noGo(an(iAnimal).noGoDay(end-nDays:end), [1, 3, 2]))./nanmean(an(iAnimal).nTrials(an(iAnimal).noGoDay(end-nDays:end), [1, 3, 2])), [], col2, 'filled')
             p = plot([1, 2, 3], nanmean(an(iAnimal).noGo(an(iAnimal).noGoDay(end-nDays:end), [1, 3, 2]))./nanmean(an(iAnimal).nTrials(an(iAnimal).noGoDay(end-nDays:end), [1, 3, 2])), 'Color', col2);
            
-             errorbar([1, 2, 3],nanmean(an(iAnimal).noGo(an(iAnimal).noGoDay(end-nDays:end), [1, 3, 2]))./nanmean(an(iAnimal).nTrials(an(iAnimal).noGoDay(end-nDays:end), [1, 3, 2])),...
-                nanstd(an(iAnimal).noGo(an(iAnimal).noGoDay(end-nDays:end), [1, 3, 2])./an(iAnimal).nTrials(an(iAnimal).noGoDay(end-nDays:end), [1, 3, 2])), 'Color',col2)
+            % errorbar([1, 2, 3],nanmean(an(iAnimal).noGo(an(iAnimal).noGoDay(end-nDays:end), [1, 3, 2]))./nanmean(an(iAnimal).nTrials(an(iAnimal).noGoDay(end-nDays:end), [1, 3, 2])),...
+            %    nanstd(an(iAnimal).noGo(an(iAnimal).noGoDay(end-nDays:end), [1, 3, 2])./an(iAnimal).nTrials(an(iAnimal).noGoDay(end-nDays:end), [1, 3, 2])), 'Color',col2)
            
             makepretty;
             axis square
         %end
-        if iAnimal == 3
+        if iAnimal == 1
         xlabel('image type')
         ylabel('frac \color[rgb]{0,0,1}go left \color[rgb]{1,0,0} no go')
         end
         xticks([1, 2, 3])
         xticklabels({'Go1', 'NoGo', 'Go2'})
-        ylim([0, 1])
+        title(animalsAll{iAnimal})
         makepretty;
+        ylim([0, 1])
+        
         grid on;
     catch
     end

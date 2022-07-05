@@ -3,7 +3,7 @@
 close all;
 myPaths;
 
-animals={'JF078'};
+animals={'JF070'};
 curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};
@@ -34,7 +34,7 @@ load_parts.cam=false;
 load_parts.imaging=false;
 load_parts.ephys=true;
 
-site = 	3;%1,1; 2,4; 3,7
+site = 	1;%1,1; 2,4; 3,7
 recording = []; 
 experiment = 2;
 loadClusters = 0;
@@ -63,7 +63,10 @@ clearvars unitType
 AP_load_experimentJF;
 curr_shank=NaN;
 
- 
+trial_conditions(~ismember(trial_conditions(:,1), [4,6,7]),1) = 0;
+AP_cellrasterJF({stimOn_times(~isnan(stimOn_times)), stimOn_times(~isnan(stimOn_times)), stimOn_times(~isnan(stimOn_times))}, ...
+    {trial_conditions(~isnan(stimOn_times),1), trial_conditions(~isnan(stimOn_times),2),(trial_conditions(~isnan(stimOn_times),2)+1).*(trial_conditions(~isnan(stimOn_times),1)+1)});
+
 AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))'}, ...
     {trial_conditions(:,1),trial_conditions(:,2), ...
     trial_conditions(:,3)});

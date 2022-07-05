@@ -1,3 +1,4 @@
+%% subsample
 
 for iImg = 1:42
     try
@@ -23,3 +24,14 @@ end
     catch
     end
 end
+
+%% convert 2 to center only 
+iImg = 26
+img1 = imread(['/home/netshare/zserver/pregenerated_textures/JulieF/noGoWorld_Passive/img' num2str(iImg) '.jpeg']);
+imagesc(img1)
+figure();
+im = img1;
+im([1:53, 94:end],:,:) = 128;
+
+imagesc(im)
+imwrite(rgb2gray(im),gray,['/home/julie/Documents/new/img' num2str(iImg) '.jpeg'])

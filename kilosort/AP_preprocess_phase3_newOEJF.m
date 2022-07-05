@@ -13,7 +13,7 @@ function AP_preprocess_phase3_newOEJF(animal,day, thisSite,t_range,chanMap)
 
 [ephys_path,ephys_exists] = AP_cortexlab_filenameJF(animal,day,[],'ephys_dir');
 if ~exist('chanMap','var')%default to 3A probes of no channel map provided. 
-    chanMap = 'C:\Users\Julie\Dropbox\MATLAB\JF_scripts_CortexLab\kilosort\forPRBimecP3opt3.mat';
+    chanMap = '/home/julie/Dropbox/MATLAB/onPaths/JF_Scripts_CortexLab/kilosort/forPRBimecP3opt3.mat';
 end
 if ~ephys_exists
     error([animal ' ' day ': No ephys data found']);
@@ -143,7 +143,7 @@ for curr_site = thisSite
         %% Run kilosort
         
         % Set up local directory and clear out
-        ssd_kilosort_path = 'F:\data_temp\kilosort';
+        ssd_kilosort_path = '/dev/sdb1/data_temp/kilosort';
         
         % Clear out local kilosort directories
         if exist(ssd_kilosort_path,'dir')
@@ -201,7 +201,7 @@ for curr_site = thisSite
         
         %% Copy kilosort results and raw data to phy folder for clustering
         
-        local_phy_path = ['F:\data_temp\phy_staging' filesep animal '_' day];
+        local_phy_path = ['/dev/sdb1/data_temp/phy_staging' filesep animal '_' day];
         mkdir(local_phy_path)
         
         % Move the cleaned data into the phy directory

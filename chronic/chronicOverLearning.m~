@@ -11,7 +11,7 @@ startTrainingDayNum = [NaN, 3, 3];
 startStage4DayNum = [NaN, 12, NaN];
 % depths1 = [2050, 2800];
 % depths2 = [2800, 3500];
-depths = {{[]},{[]},{[0,1200]}, {[2000:3900]}, {[3000,3900]}}; %add 1400:2800: MRN
+depths = {{[0,1200]}, {[2000:3900]}, {[3000,3900]}}; %add 1400:2800: MRN
 thisAnimal = 3;
 allGoogleSheetIDs = {'','','1U7mHq17fvQGeBUtLUz2ShpVfvNo63eyk7XRMop5ueJU'}; %need sharing with link to be enabled, as commenter is fine 
 

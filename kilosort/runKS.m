@@ -71,18 +71,21 @@
 % JF_preprocess_NPX2('JF067', '2022-02-14', 'neuropixPhase3B2_kilosortChanMap.mat', 1, 1, [],1);
 % JF_preprocess_NPX2('JF067', '2022-02-15', 'neuropixPhase3B2_kilosortChanMap.mat', 1, 1, [],1); 
  
- JF_preprocess_NPX2(animal, date, chanMapFile, experiment, site, recording, rerunQM)
- 
-JF_preprocess_NPX2('JF078', '2022-05-29', 'neuropixPhase3B2_kilosortChanMap.mat', 1, 1, 1,1);
-JF_preprocess_NPX2('JF078', '2022-05-29', 'neuropixPhase3B2_kilosortChanMap.mat', 1, 2, 1,1);
-JF_preprocess_NPX2('JF078', '2022-05-29', 'neuropixPhase3B2_kilosortChanMap.mat', 1, 3, 1,1);
-JF_preprocess_NPX2('JF078', '2022-05-29', 'neuropixPhase3B2_kilosortChanMap.mat', 1, 1, 2,1);
-JF_preprocess_NPX2('JF078', '2022-05-29', 'neuropixPhase3B2_kilosortChanMap.mat', 1, 2, 2,1);
-JF_preprocess_NPX2('JF078', '2022-05-29', 'neuropixPhase3B2_kilosortChanMap.mat', 1, 3, 2,1);
+% JF_preprocess_NPX2(animal, date, chanMapFile, experiment, site, recording, rerunQM)
 
-JF_preprocess_NPX2('JF078', '2022-05-30', 'neuropixPhase3B2_kilosortChanMap.mat', 1, 2, [],1);
-JF_preprocess_NPX2('JF078', '2022-05-30', 'neuropixPhase3B2_kilosortChanMap.mat', 1, 3, [],1);
 
-JF_preprocess_NPX2('JF078', '2022-05-31', 'neuropixPhase3B2_kilosortChanMap.mat', 1, 1, [],1);
-JF_preprocess_NPX2('JF078', '2022-05-31', 'neuropixPhase3B2_kilosortChanMap.mat', 1, 2, [],1);
-JF_preprocess_NPX2('JF078', '2022-05-31', 'neuropixPhase3B2_kilosortChanMap.mat', 1, 3, [],1);
+AP_preprocess_phase3_newOEJF('JF070','2022-06-09', 1,[],'neuropixPhase3A_kilosortChanMap.mat');
+
+JF_preprocess_NPX2('JF070', '2022-06-09', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 2, [],1);
+JF_preprocess_NPX2('JF070', '2022-06-10', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 2, [],1);
+JF_preprocess_NPX2('JF070', '2022-06-11', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 2, [],1);
+JF_preprocess_NPX2('JF070', '2022-06-13', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 1, [],1);
+
+JF_preprocess_NPX2('JF070', '2022-06-17', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 1, [],1);
+JF_preprocess_NPX2('JF070', '2022-06-18', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 1, [],1);
+
+
+
+
+AP_preprocess_phase3_newOEJF('JF073','2022-06-29', 1,[],'neuropixPhase3A_kilosortChanMap.mat');
+JF_preprocess_NPX2('JF073', '2022-06-29', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 2, [],1);
