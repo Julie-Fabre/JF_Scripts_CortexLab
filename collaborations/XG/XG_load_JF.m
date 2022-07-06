@@ -34,5 +34,12 @@ JF_loadExperiment_forXin;
 
 %% ~~ plot data in GUI ~~ 
 curr_shank=NaN;
+% Controls: 
+% up/down - switch between units (clicking on unit also selects)
+% left/right - switch between alignments
+% pageup/pagedown - switch between trial groupings
+% m - select depth range to plot multiunit
+% u - go to unit number
+
 AP_cellrasterJF_forXin({laser_on_flip_times,laser_flip_times(1:2:end),laser_on_flip_times}, ...
     {laserParamsAllLaserOn.Amp, laserParamsAllLaserOn.Freq, laserParamsAllLaserOn.Ramp});
