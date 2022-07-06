@@ -259,7 +259,6 @@ if protocol_exists
             
         % for example, amplitude of laser pulse # 2 is laserParamsAllLaserOn.Amp(2)
        
-        laser_on_flip_times = laser_flip_times(1:2:end);
     end
 
 end
@@ -491,8 +490,7 @@ if ephys_exists && load_parts.ephys
 
     % Get the depth of each spike (templates are zero-indexed)
     spike_depths = template_depths(spike_templates_0idx+1);
-    spike_xdepths = template_xdepths(spike_templates_0idx+1); % which shank + site the probe is on 
-    % (distance in um from shank1 site1 , [0,32] is shank1, [200, 232] is shank 2, and so on ) 
+    spike_xdepths = template_xdepths(spike_templates_0idx+1);
 
     % Get trough-to-peak time for each template
     templates_max_signfix = bsxfun(@times, templates_max, ...
@@ -509,7 +507,7 @@ if ephys_exists && load_parts.ephys
 
     % Get sync points for alignment
 
-    % Align spike times to timeline time 
+    % Get experiment index by finding numbered folders
     protocols_list = AP_list_experimentsJF(animal, date);
     experiment_idx = experiment == [protocols_list.experiment];
     ops.recording_software = 'SpikeGLX';
@@ -533,33 +531,46 @@ if ephys_exists && load_parts.ephys
         spike_templates_0idx_unique = unique(spike_templates_0idx);
         if ~all(ismember(spike_templates_0idx_unique, uint32(cluster_groups{1}))) || ...
                 ~all(ismember(cluster_groups{2}, {'good', 'mua', 'noise'}))
+            disp('Removing manually labelled noise units...');
+            good_templates_idx = uint32(cluster_groups{1}( ...
+                strcmp(cluster_groups{2}, 'unsorted') | strcmp(cluster_groups{2}, 'mua') | ...
+                strcmp(cluster_groups{2}, 'good')));
+            template_label_mua = uint32(cluster_groups{1}( ...
+                strcmp(cluster_groups{2}, 'mua')));
+            template_label_good = uint32(cluster_groups{1}( ...
+                strcmp(cluster_groups{2}, 'good')));
+            template_labelM = good_templates_idx(ismember(good_templates_idx, template_label_mua));
+            template_labelG = good_templates_idx(ismember(good_templates_idx, template_label_good));
+
+            [good_templates, ii] = ismember(0:size(templates, 1)-1, good_templates_idx);
+
+            [good_templatesG, ii] = ismember(0:size(templates, 1)-1, template_labelG);
+            [good_templatesM, ii] = ismember(0:size(templates, 1)-1, template_labelM);
+
+
+        else
             disp('Keeping manually labelled good units...');
             good_templates_idx = uint32(cluster_groups{1}( ...
-                strcmp(cluster_groups{2}, 'good'))); 
-%             good_templates_idx = uint32(cluster_groups{1}( ...
-%                 strcmp(cluster_groups{2}, 'unsorted') | strcmp(cluster_groups{2}, 'mua') | ...
-%                 strcmp(cluster_groups{2}, 'good')));
+                strcmp(cluster_groups{2}, 'good') | strcmp(cluster_groups{2}, 'mua')));
+            template_label_mua = uint32(cluster_groups{1}( ...
+                strcmp(cluster_groups{2}, 'mua')));
+            template_label_good = uint32(cluster_groups{1}( ...
+                strcmp(cluster_groups{2}, 'good')));
+            template_labelM = good_templates_idx(ismember(good_templates_idx, template_label_mua));
+            template_labelG = good_templates_idx(ismember(good_templates_idx, template_label_good));
 
-%             template_label_mua = uint32(cluster_groups{1}( ...
-%                 strcmp(cluster_groups{2}, 'mua')));
-%             template_label_good = uint32(cluster_groups{1}( ...
-%                 strcmp(cluster_groups{2}, 'good')));
-%             template_labelM = good_templates_idx(ismember(good_templates_idx, template_label_mua));
-%             template_labelG = good_templates_idx(ismember(good_templates_idx, template_label_good));
+            [good_templates, ii] = ismember(0:size(templates, 1)-1, good_templates_idx);
 
-            [good_templates, ii] = ismember(0:size(templates, 1)-1, good_templates_idx); % keep units labelled as good in phy 
+            [good_templatesG, ii] = ismember(0:size(templates, 1)-1, template_labelG);
+            [good_templatesM, ii] = ismember(0:size(templates, 1)-1, template_labelM);
 
-%             [good_templatesG, ii] = ismember(0:size(templates, 1)-1, template_labelG);
-%             [good_templatesM, ii] = ismember(0:size(templates, 1)-1, template_labelM);
-
-
-       
+            template_label = good_templatesG .* 1 + (good_templatesM) .* 2;
         end
 
 
     elseif exist('unitType', 'var')
         % If no manual but qualityMetrics are available
-        if verbose
+        if verbose;
             disp('Keeping quality metrics good units...');
         end
 
@@ -571,8 +582,8 @@ if ephys_exists && load_parts.ephys
             unitType == 1;
         good_templates_idx = find(unitType == 1) - 1;
 
-        if exist('locationKeep', 'var') % keep eg only striatal units if you have locationKeep = 'CP' 
-            if verbose
+        if exist('locationKeep', 'var')
+            if verbose;
                 disp('Keeping location data...');
             end
             myPaths;
