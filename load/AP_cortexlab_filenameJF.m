@@ -54,10 +54,10 @@ else
 end
 
 % List servers
-server1 = zserverPath;
-server2 = tempServerPath;
+server1 = zinuPath;
+server2 = zaruPath;
 server3 = znasPath;
-
+server4 = zserverPath;
 % Check that servers are accessible (login needed on restart)
 % if ~exist([server1])
 %     error('Zserver not available');
@@ -73,10 +73,9 @@ server3 = znasPath;
 server_location = cell(0);
 server_location{end+1} = [server3 ];
 server_location{end+1} = [server2 ];
-server_location{end+1} = [server1  filesep 'Subjects'];
-server_location{end+1} = [server1  filesep 'expInfo'];
-server_location{end+1} = [server1  filesep 'trodes'];
-server_location{end+1} = [server1  filesep 'EyeCamera'];
+server_location{end+1} = [server1 ];
+server_location{end+1} = [server4 ];
+
 
 switch file
     
@@ -224,12 +223,12 @@ switch file
         %spike glx
         if ~file_exists
             filepattern = [animal filesep date filesep ...
-                'ephys' site_dir filesep recording_dir filesep '*.bin'];
+                'ephys' site_dir filesep recording_dir filesep '*.*bin'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
         if ~file_exists
             filepattern = [animal filesep date filesep ...
-                'ephys' site_dir filesep 'experiment*' filesep '*.bin'];
+                'ephys' site_dir filesep 'experiment*' filesep '*.*bin'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
         if ~file_exists
@@ -239,7 +238,7 @@ switch file
         end
         if ~file_exists
             filepattern = [animal filesep date filesep ...
-                'ephys'  filesep  'recording' num2str(recording)  site_dir filesep '*.bin'];
+                'ephys'  filesep  'recording' num2str(recording)  site_dir filesep '*.*bin'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
     case 'ephys'

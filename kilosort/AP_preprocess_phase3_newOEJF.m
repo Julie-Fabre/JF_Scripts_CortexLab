@@ -143,7 +143,7 @@ for curr_site = thisSite
         %% Run kilosort
         
         % Set up local directory and clear out
-        ssd_kilosort_path = '/dev/sdb1/data_temp/kilosort';
+        ssd_kilosort_path = '/media/julie/ExtraHD/data_temp/kilosort';
         
         % Clear out local kilosort directories
         if exist(ssd_kilosort_path,'dir')
@@ -166,15 +166,15 @@ for curr_site = thisSite
         % Clean AP data of artifacts
         disp('Cleaning AP data...')
         if ephysType==1
-        ap_clean_filename = [ssd_kilosort_path filesep animal '_' day '_' 'ephys_apband_clean.dat'];
+            ap_clean_filename = [ssd_kilosort_path filesep animal '_' day '_' 'ephys_apband_clean.dat'];
         else
             ap_clean_filename = [ssd_kilosort_path filesep animal '_' day '_' 'ephys_apband_clean.bin'];
         end
         
         if ephysType==1
             ttl_path = fileparts(sync_filename);
-        AP_clean_datJF(ap_temp_filename,n_channels,ttl_path,ap_clean_filename);
-        delete(ap_temp_filename);
+            AP_clean_datJF(ap_temp_filename,n_channels,ttl_path,ap_clean_filename);
+            delete(ap_temp_filename);
         end
         % Delete local raw data
         
@@ -188,10 +188,10 @@ for curr_site = thisSite
             t_range = [0,inf];
         end
         if ephysType==1
-        AP_run_kilosort2JF(ap_clean_filename,ap_sample_rate,ssd_kilosort_path,t_range,[],chanMap);
+            AP_run_kilosort2JF(ap_clean_filename,ap_sample_rate,ssd_kilosort_path,t_range,[],chanMap);
         else
             ap_sample_rate = 30000;
-             AP_run_kilosort2JF(ap_temp_filename,ap_sample_rate,ssd_kilosort_path,t_range,[],chanMap);
+            AP_run_kilosort2JF(ap_temp_filename,ap_sample_rate,ssd_kilosort_path,t_range,[],chanMap);
         end
         %% Copy kilosort results to server
         
@@ -201,7 +201,7 @@ for curr_site = thisSite
         
         %% Copy kilosort results and raw data to phy folder for clustering
         
-        local_phy_path = ['/dev/sdb1/data_temp/phy_staging' filesep animal '_' day];
+        local_phy_path = ['//media/julie/ExtraHD/data_temp/phy_staging' filesep animal '_' day];
         mkdir(local_phy_path)
         
         % Move the cleaned data into the phy directory

@@ -121,22 +121,22 @@ if timeline_exists
     photodiode_flip = find(~photodiode_trace_diff(1:end-1) & ...
         photodiode_trace_diff(2:end)) + photodiode_diff_samples + 1;
     photodiode_flip_times = stimScreen_on_t(photodiode_flip)';
-    %
-    %         figure();
-    %         clf;
-    %         valu = 10000;
-    %         title('Photodiode');
-    %         hold on;
-    %         plot(photodiode_trace(1:valu));
-    %         hold on;
-    %         scatter(photodiode_flip(find(photodiode_flip <= valu)), ones(size(find(photodiode_flip <= valu), 1), 1))
-    %         hold on;
-    %         plot(Timeline.rawDAQData(1:valu, photodiode_idx))
-    %         hold on;
-    %         plot(medfilt1(Timeline.rawDAQData(1:valu, ...
-    %             photodiode_idx), 3))
-    %         hold on;
-    %         pp = photodiode_flip(find(photodiode_flip <= valu));
+    
+%             figure();
+%             clf;
+%             valu = 100000;
+%             title('Photodiode');
+%             hold on;
+%             plot(photodiode_trace(1:valu));
+%             hold on;
+%             scatter(photodiode_flip(find(photodiode_flip <= valu)), ones(size(find(photodiode_flip <= valu), 1), 1))
+%             hold on;
+%             plot(Timeline.rawDAQData(1:valu, photodiode_idx))
+%             hold on;
+%             plot(medfilt1(Timeline.rawDAQData(1:valu, ...
+%                 photodiode_idx), 3))
+%             hold on;
+%             pp = photodiode_flip(find(photodiode_flip <= valu));
 
     % Get flipper signal (this was added late, might not be present)
     flipper_name = 'flipper';
@@ -758,7 +758,10 @@ if block_exists
             % signals_events.responseTimes = signals_events.responseTimes(n_trials(1):n_trials(end));
             % trial_outcome = trial_outcome(n_trials(1):n_trials(end));
 
-            conditions = combvec(sides, choices, timings)';
+            [an, bn, cn] = ndgrid(sides, choices, timings); 
+            conditions = [an(:), bn(:), cn(:)];
+
+            %conditions = combvec(sides, choices, timings)';
             n_conditions = size(conditions, 1);
 
             trial_conditions = ...
@@ -1090,13 +1093,13 @@ if block_exists
             % Get stim ID and conditions
 
 
-            conditions = unique([ceil(signals_events.stim_idValues)', block.events.stim_aziValues'], 'rows')';
+            conditions = unique([signals_events.stim_idValues', block.events.stim_aziValues'], 'rows')';
             n_conditions = size(conditions, 1);
 
             trial_conditions = ... ,
                 [ceil(signals_events.stim_idValues)', block.events.stim_aziValues'];
             trial_id = trial_conditions(:, 2);
-            trial_conditions(trial_conditions(:, 1) > 21, 1) = trial_conditions(trial_conditions(:, 1) > 21, 1) - 21;
+            trial_conditions(trial_conditions(:, 1) > 13, 1) = trial_conditions(trial_conditions(:, 1) > 13, 1) - 13;
             stimIDs = trial_conditions(:, 1);
 
 

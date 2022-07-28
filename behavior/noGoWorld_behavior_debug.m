@@ -942,7 +942,7 @@ try
     nDays = min(1, length(animalsAll));
 catch
     
-    nDays = 1;
+    nDays = 15;
 end
 
 for iAnimal = 1:length(animalsAll)

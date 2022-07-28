@@ -1,11 +1,11 @@
 
 %% lab servers 
 
-
+zaruPath = '/home/netshare/zaru/';
 znasPath = '/home/netshare/znas/';
 zserverPath = '/home/netshare/zserver-data/';
 zserverLabPath = '/home/netshare/zserver-lab/';
-tempServerPath = '/home/netshare/zinu/';
+zinuPath = '/home/netshare/zinu/';
 
 %% extra/backup drives 
 

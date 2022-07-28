@@ -9,51 +9,48 @@ ls ~/Dropbox/MATLAB/onPaths/JF_Scripts_CortexLab/scheduledJobs/KSerror.log >> $O
 echo "yo bb" >> ~/Dropbox/MATLAB/onPaths/JF_Scripts_CortexLab/scheduledJobs/KS.log
 
 
-FILEDATE=$(date +'%Y_%m_%d')
+FILEDATE=$(date +'%Y-%m-%d')
 DATE=$(date +'%Y-%m-%d')
-DIRSTART="/home/netshare/zinu/JF067/"
+DIRSTART="/home/netshare/zaru/JF082/"
 SEP="/"
 ASTERIX="*"
 SPIKEGLXNAME=$DIRSTART$DATE$SEP$FILEDATE$ASTERIX
 EPHYSNAME=$DIRSTART$DATE$SEP$"ephys"
-mv $SPIKEGLXNAME $EPHYSNAME
+#mv $SPIKEGLXNAME $EPHYSNAME
 
 SITE1SLX=$EPHYSNAME$SEP$FILEDATE$ASTERIX
 SITE1NAME=$EPHYSNAME$SEP$"site1"
-mv $SITE1SLX $SITE1NAME
+#mv $SITE1SLX $SITE1NAME
 
 DIREND="/ephys/site1/"
 DIRFULL="$DIRSTART$DATE$DIREND"
 #echo "$DIRFULL"
 
-FILEEND="-JF067"
-FILEDATE=$(date +'%Y_%m_%d')
+FILEEND="_JF082"
+FILEDATE=$(date +'%Y-%m-%d')
 FILEFULL="$FILEDATE$FILEEND"
 
 /home/julie/Downloads/CatGTLnxApp/CatGT-linux/runit.sh '-dir=$DIRFULL -run=$FILEFULL -g=0 -t=0,Inf -ap -prb=0 -gblcar -no_run_fld'
 
-FILEDATE=$(date +'%Y_%m_%d')
+FILEDATE=$(date +'%Y-%m-%d')
 DATE=$(date +'%Y-%m-%d')
-DIRSTART="/home/netshare/zinu/JF071/"
+DIRSTART="/home/netshare/zaru/JF082/"
 SPIKEGLXNAME=$DIRSTART$DATE$SEP$FILEDATE$ASTERIX
 EPHYSNAME=$DIRSTART$DATE$SEP$"ephys"
-mv $SPIKEGLXNAME $EPHYSNAME
+#mv $SPIKEGLXNAME $EPHYSNAME
 
 SITE1SLX=$EPHYSNAME$SEP$FILEDATE$ASTERIX
 SITE1NAME=$EPHYSNAME$SEP$"site1"
-mv $SITE1SLX $SITE1NAME
+#mv $SITE1SLX $SITE1NAME
 
-DIREND="/ephys/site1/"
+DIREND="/ephys/site2/"
 DIRFULL="$DIRSTART$DATE$DIREND"
 #echo "$DIRFULL"
 
-FILEEND="-JF071"
-FILEDATE=$(date +'%Y_%m_%d')
+FILEEND="_JF082"
+FILEDATE=$(date +'%Y-%m-%d')
 FILEFULL="$FILEDATE$FILEEND"
 
-/home/julie/Downloads/CatGTLnxApp/CatGT-linux/runit.sh '-dir=$DIRFULL -run=$FILEFULL -g=0 -t=0,Inf -ap -prb=0 -gblcar -no_run_fld'
+/home/julie/Downloads/CatGTLnxApp/CatGT-linux/runit.sh '-dir=$DIRFULL -run=$FILEFULL -g=0 -t=0,Inf -ap -prb=1 -gblcar -no_run_fld'
 
-
-matlab -desktop -r "sendLatestPlotsEmail"
-
-
+#matlab -desktop -r "sendLatestPlotsEmail"

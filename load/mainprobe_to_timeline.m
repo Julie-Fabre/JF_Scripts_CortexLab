@@ -10,8 +10,15 @@ function [co]=mainprobe_to_timeline(KS_folder,Timeline,ops,expInfo)
 % Get flipper flips from timeline 
 inputNames = {Timeline.hw.inputs.name}';
 
+
 flipperTrace = Timeline.rawDAQData(:,strcmp(inputNames, 'flipper')) > 2;
 flipperFlips = sort([strfind(flipperTrace', [0 1]), strfind(flipperTrace', [1 0])])'+1;
+figure();
+valu = 5000;
+plot(Timeline.rawDAQData(1:valu,strcmp(inputNames, 'flipper')))
+hold on; 
+scatter(flipperFlips(flipperFlips<valu), ones(size(find(flipperFlips < valu), 1), 1))
+
 flipperFlipTimesTimeline = Timeline.rawDAQTimestamps(flipperFlips)';
 timelinetime=Timeline.rawDAQTimestamps;
 recording_software=ops.recording_software;
@@ -33,7 +40,9 @@ if contains(recording_software,'OpenEphys')
     acqLiveSyncIdx = 2; flipperSyncIdx = 4;
 
     sync = load([KS_folder '\sync.mat']); sync = sync.sync;
-
+    if find(unique(sync)==0) < 10
+            warning('check is sync is saved properly!')
+    end
     % Get flipper experiment differences by long delays 
     %% this section is to get the times when the timeline sends input to the probes. the recirding is typically longer 
     % so when timeline is stopped there is a signal? (Idk how it comes) 

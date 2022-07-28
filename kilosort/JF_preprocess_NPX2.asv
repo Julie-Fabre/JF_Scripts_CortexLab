@@ -1,6 +1,6 @@
 
 %% preprocess for npx 2.0 probes : run kilosort, extract sync and lfp channels
-function JF_preprocess_NPX2(animal, date, chanMapFile, experiment, site, recording, rerunKS, rerunQM)
+function JF_preprocess_NPX2(animal, date, chanMapFile, experiment, site, recording, rerunQM)
 
 %% kilosort
 
@@ -8,6 +8,11 @@ myPaths;
 [ephysAPfile, ~] = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_ap', site, recording);
 if size(ephysAPfile, 2) > 1 && iscell(ephysAPfile)%keep only ap
     ephysAPfile = ephysAPfile{1};
+end
+if contains(ephysAPfile, '.cbin')% compressed data
+    savePathDecomp = [extraHDPath, animal, date, num2str(site), num2str(recording)];
+    mkdir(savePathDecomp)
+    [~, ephysAPfile] = bc_extractCbinData(ephysAPfile, [], 1:385, 1, savePathDecomp, 0);
 end
 rootZ = fileparts(ephysAPfile);
 rootH = tempPath;
@@ -35,12 +40,10 @@ if isempty(saveDir)
 end
 
 kilosortExists = dir(fullfile(saveFile, 'spike_times.npy'));
-if isempty(kilosortExists) || rerunKS
+if isempty(kilosortExists) || rerunQM
     master_kilosort;
 end
 
-% delete catGT file if catgt 
-% ephysAPfile
 %% extract sync channel
 [ephysAPfile, ~] = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_ap', site, recording);
 syncExists = dir(fullfile(saveFile, 'sync.mat'));
