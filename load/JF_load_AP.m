@@ -3,7 +3,7 @@
 close all;
 myPaths;
 
-animals={'JF082'};
+animals={'JF084'};
 curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};
@@ -34,9 +34,9 @@ load_parts.cam=false;
 load_parts.imaging=false;
 load_parts.ephys=true;
 
-site = 	1;%1,1; 2,4; 3,7
+site = 4;%1,1; 2,4; 3,7
 recording = []; 
-experiment = 1;
+experiment = 3;
 loadClusters = 0;
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys_ap',site,recording);
 if size(ephysAPfile,2) ==2 %keep only ap

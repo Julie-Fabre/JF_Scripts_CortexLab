@@ -15,10 +15,10 @@ function nptype24_imro
 %                   shanks starting from "botRow", valid values = 0-592
 % written by ???, modified by JF 
 
-patternType = 2;
-shankChoice = 2;   % 0-3, needed for patternType 0
-botRow =  0;     
-refElec = 4;     % 0 for external, 1-4 for tip reference on shank 0-3
+patternType = 1;
+shankChoice = 3;   % 0-3, needed for patternType 0
+botRow = 184-48;     
+refElec = 1;     % 0 for external, 1-4 for tip reference on shank 0-3
 elecChoice = 2:3; % 0-3, needed for patternType 2
 
 shank = zeros(384,1,'single');
@@ -137,12 +137,15 @@ function [ chans, chanPos, chanShank ] = PlotElec24( shank, bank, chans, elecInd
     chanShank = shank;
     
     % make a plot of all the electrode positions
-    figure(1)
+    figure();
     shankSep = 250;
     for sI = 0:3
         cc = find(shank == sI);
-        scatter( shankSep*sI + elecPos(:,1), elecPos(:,2), 30, 'k', 'square' ); hold on;
-        scatter( shankSep*sI + chanPos(cc,1), chanPos(cc,2), 20, 'b', 'square', 'filled' ); hold on; 
+        scatter( shankSep*sI + elecPos(:,1), 5000-elecPos(:,2), 30, 'k', 'square' ); hold on;
+        scatter( shankSep*sI + chanPos(cc,1), 5000-chanPos(cc,2), 20, 'b', 'square', 'filled' ); hold on; 
+        ylabel('Distance from tip of probe (um)')
+        ylabel('X distance (um)')
+        grid on;
     end
     xlim([-16,3*shankSep+64]);
     ylim([-10,10000]);

@@ -40,6 +40,11 @@ curr_shank=NaN;
 % pageup/pagedown - switch between trial groupings
 % m - select depth range to plot multiunit
 % u - go to unit number
+plotMe = laserParamsAllLaserOn.Amp == 1400 & laserParamsAllLaserOn.Ramp == 3;
+AP_cellrasterJF_forXin({laser_on_flip_times(plotMe)}, ...
+    {find(plotMe)});
 
-AP_cellrasterJF_forXin({laser_on_flip_times,laser_flip_times(1:2:end),laser_on_flip_times}, ...
-    {laserParamsAllLaserOn.Amp, laserParamsAllLaserOn.Freq, laserParamsAllLaserOn.Ramp});
+
+
+
+

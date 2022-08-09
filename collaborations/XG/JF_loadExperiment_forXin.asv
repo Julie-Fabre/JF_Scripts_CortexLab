@@ -64,7 +64,7 @@ if timeline_exists
     % Get laser times
     laser_name = 'laserCmd';
     timeline_laser_idx = strcmp({Timeline.hw.inputs.name}, laser_name);
-    laser_trace = Timeline.rawDAQData(:, timeline_laser_idx) > 0.05;
+    laser_trace = medfilt1(Timeline.rawDAQData(:, timeline_laser_idx),3) > 0.05;
     laser_diff_t = 5; % time (in ms) to get delayed differential
     laser_diff_samples = round(Timeline.hw.daqSampleRate/1000*laser_diff_t);
     laser_flip = [find(~laser_trace(1:end-1) & ...
@@ -73,12 +73,14 @@ if timeline_exists
     laser_flip_times = Timeline.rawDAQTimestamps(laser_flip)';
 
 
-%                 figure();
-%                 clf;
-%                 valu = 3254000;
-%                 title('Laser');
-%                 hold on;
-%                 plot(Timeline.rawDAQData(1:valu, timeline_laser_idx))
+                figure();
+                clf;
+                valu = 3254000;
+                title('Laser');
+                hold on;
+                plot(Timeline.rawDAQData(1:valu, timeline_laser_idx))
+                hold on;
+                plot(medfilt1(Timeline.rawDAQData(1:valu, timeline_laser_idx),3))
 %                 plot(-laser_trace(1:valu))
 %                 scatter(laser_flip(find(laser_flip <= valu)), ones(size(find(laser_flip <= valu), 1), 1)-1)
 %                 plot(medfilt1(Timeline.rawDAQData(1:valu, ...

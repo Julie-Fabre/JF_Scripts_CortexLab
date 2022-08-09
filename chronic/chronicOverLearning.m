@@ -87,7 +87,8 @@ for iAnimal = thisAnimal %1:size(animalsAll, 2)
                 if isSpikeGlx
                     [ephysKSfile, ~] = AP_cortexlab_filenameJF(animal, thisDay, experiment, 'ephys', site, recording);
                     if isempty(dir([ephysKSfile, filesep, 'sync.mat'])) && plotActivity
-                        sync = syncFT(ephysAPfile, 385, ephysKSfile);
+                        warning(' no sync! ')
+                        %sync = syncFT(ephysAPfile, 385, ephysKSfile);
                     end
                 end
                 ephysDirPath = AP_cortexlab_filenameJF(animal, thisDay, experiment, 'ephys_dir', site);
@@ -99,29 +100,7 @@ for iAnimal = thisAnimal %1:size(animalsAll, 2)
                     ephysap_path = AP_cortexlab_filenameJF(animal, thisDay, experiment, 'ephys_ap', site);
                     chronicParamValue;
                     bc_getQualityUnitType;
-                else
-                    multiUnitCount(curr_day) = NaN;
-                    noiseCount(curr_day) = NaN;
-                    singleUnitCount(curr_day) = NaN;
-                    warning('no quality metrics ')
-
-                    ephysPath = AP_cortexlab_filenameJF(animal, thisDay, experiment, 'ephys', site);
-                    ephysPath = strrep(ephysPath, 'kilosort2', 'kilosort2');
-                    ephysap_path = AP_cortexlab_filenameJF(animal, thisDay, experiment, 'ephys_ap', site);
-                    [spikeTimes, spikeTemplates, ...
-                        templateWaveforms, templateAmplitudes, pcFeatures, pcFeatureIdx, channelPositions] = ...
-                        bc_loadEphysData(ephysPath);
-                    unitType = ones(size(unique(spikeTemplates)))
-                    %                 bc_qualityParamValues;
-                    %                 bc_runAllQualityMetrics(param, spikeTimes, spikeTemplates, ...
-                    %                     templateWaveforms, templateAmplitudes, pcFeatures, pcFeatureIdx, channelPositions, savePath);
-                    %                 load(fullfile(savePath, 'qMetric.mat'))
-                    %                 chronicParamValue;
-                    %                 bc_getQualityUnitType;
-                end
-
-
-                multiUnitCount(curr_day) = length(find(unitType == 2));
+                     multiUnitCount(curr_day) = length(find(unitType == 2));
                 noiseCount(curr_day) = length(find(unitType == 0));
                 singleUnitCount(curr_day) = length(find(unitType == 1));
                 %deadChannels(curr_day) = length(unique(channel_map));
@@ -131,8 +110,32 @@ for iAnimal = thisAnimal %1:size(animalsAll, 2)
                     | qMetric.spatialDecaySlope <= param.minSpatialDecaySlope | qMetric.waveformDuration < param.minWvDuration | ...
                     qMetric.waveformDuration > param.maxWvDuration | qMetric.waveformBaseline >= param.maxWvBaselineFraction) = 0; %NOISE or NON-SOMATIC
                 unitType(isnan(unitType)') = 1; %SINGLE SEXY UNIT
-                loadLFP = 0;
-                if plotActivity && ~isempty(dir([ephys_filename, '/site1/spike_templates.npy']))
+                
+
+                else
+                    multiUnitCount(curr_day) = NaN;
+                    noiseCount(curr_day) = NaN;
+                    singleUnitCount(curr_day) = NaN;
+                    warning('no quality metrics ')
+
+%                     ephysPath = AP_cortexlab_filenameJF(animal, thisDay, experiment, 'ephys', site);
+%                     ephysPath = strrep(ephysPath, 'kilosort2', 'kilosort2');
+%                     ephysap_path = AP_cortexlab_filenameJF(animal, thisDay, experiment, 'ephys_ap', site);
+%                     [spikeTimes, spikeTemplates, ...
+%                         templateWaveforms, templateAmplitudes, pcFeatures, pcFeatureIdx, channelPositions] = ...
+%                         bc_loadEphysData(ephysPath);
+%                     unitType = ones(size(unique(spikeTemplates)))
+                    %                 bc_qualityParamValues;
+                    %                 bc_runAllQualityMetrics(param, spikeTimes, spikeTemplates, ...
+                    %                     templateWaveforms, templateAmplitudes, pcFeatures, pcFeatureIdx, channelPositions, savePath);
+                    %                 load(fullfile(savePath, 'qMetric.mat'))
+                    %                 chronicParamValue;
+                    %                 bc_getQualityUnitType;
+                end
+
+
+               loadLFP = 0;
+                if plotActivity && ~isempty(dir([ephys_filename, '/site' num2str(site) '/spike_templates.npy']))
                     AP_load_experimentJF;
                 end
                 if plotDriftMap
@@ -158,11 +161,11 @@ for iAnimal = thisAnimal %1:size(animalsAll, 2)
                         ylabel('')
                     end
                 end
-                if plotActivity && ~isempty(dir([ephys_filename, '/site1/spike_templates.npy']))
-
+                if plotActivity && ~isempty(dir([ephys_filename, '/site' num2str(site) '/spike_templates.npy']))
+                   
                     %% units: depths * normalized log rate
                     figure(3)
-                    subplot(1, size(experiments, 1), curr_day)
+                    subplot(length(daySites), size(experiments, 1), curr_day + (length(daySites) * (iSite - 1)))
 
                     norm_spike_n = mat2gray(log10(accumarray(spike_templates, 1)+1));
                     unit_dots = plot(norm_spike_n, template_depths, '.k', 'MarkerSize', 20);

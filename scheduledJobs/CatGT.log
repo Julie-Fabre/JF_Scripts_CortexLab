@@ -206,3 +206,201 @@
 [Thd 139794462349120 CPU 0 7/28/22 14:56:14.413] 
 [Thd 140691185387328 CPU 0 7/28/22 14:56:14.434] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-07-28/ephys/site2 -run=2022-07-28_JF082 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
 [Thd 140691185387328 CPU 0 7/28/22 15:35:55.659] 
+[Thd 140700071565120 CPU 0 7/29/22 13:50:07.431] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-07-29/ephys/recording1/site1 -run=2022-07-29_JF082 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140700071565120 CPU 0 7/29/22 13:50:07.435] Meta file not found '/home/netshare/zaru/JF082/2022-07-29/ephys/recording1/site1/2022-07-29_JF082_g0_t0.imec0.ap.meta'.
+[Thd 140700071565120 CPU 0 7/29/22 13:50:07.435] 
+[Thd 139848120817472 CPU 0 7/29/22 13:50:07.450] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-07-29/ephys/recording1/site2 -run=2022-07-29_JF082 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 139848120817472 CPU 0 7/29/22 13:50:07.450] Meta file not found '/home/netshare/zaru/JF082/2022-07-29/ephys/recording1/site2/2022-07-29_JF082_g0_t0.imec1.ap.meta'.
+[Thd 139848120817472 CPU 0 7/29/22 13:50:07.450] 
+[Thd 140217119815488 CPU 0 7/29/22 13:50:07.457] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-07-29/ephys/recording1/site1 -run=2022-07-29_JF082-passive -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140217119815488 CPU 0 7/29/22 13:50:07.457] Meta file not found '/home/netshare/zaru/JF082/2022-07-29/ephys/recording1/site1/2022-07-29_JF082-passive_g0_t0.imec0.ap.meta'.
+[Thd 140217119815488 CPU 0 7/29/22 13:50:07.457] 
+[Thd 139670295033664 CPU 0 7/29/22 13:50:07.464] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-07-29/ephys/recording1/site2 -run=2022-07-29_JF082-passive -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 139670295033664 CPU 0 7/29/22 13:50:07.464] Meta file not found '/home/netshare/zaru/JF082/2022-07-29/ephys/recording1/site2/2022-07-29_JF082-passive_g0_t0.imec1.ap.meta'.
+[Thd 139670295033664 CPU 0 7/29/22 13:50:07.464] 
+[Thd 140465838356288 CPU 0 7/29/22 13:50:48.530] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-07-29/ephys/recording1/site1 -run=2022-07-29_JF082 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140465838356288 CPU 0 7/29/22 14:18:56.655] 
+[Thd 140122891093824 CPU 0 7/29/22 14:18:56.674] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-07-29/ephys/recording1/site2 -run=2022-07-29_JF082 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140122891093824 CPU 0 7/29/22 14:47:05.930] 
+[Thd 140035409590080 CPU 0 7/29/22 14:47:05.949] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-07-29/ephys/recording2/site1 -run=2022-07-29_JF082-passive -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140035409590080 CPU 0 7/29/22 15:02:36.524] 
+[Thd 140589092202304 CPU 0 7/29/22 15:02:36.543] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-07-29/ephys/recording2/site2 -run=2022-07-29_JF082-passive -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140589092202304 CPU 0 7/29/22 15:18:36.050] 
+[Thd 140497987499840 CPU 0 7/30/22 14:31:06.434] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-07-29/ephys/recording1/site1 -run=2022-07-29_JF082 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140497987499840 CPU 0 7/30/22 15:07:01.143] 
+[Thd 139804730242880 CPU 0 7/30/22 15:07:01.163] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-07-29/ephys/recording1/site2 -run=2022-07-29_JF082 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 139804730242880 CPU 0 7/30/22 15:35:14.761] 
+[Thd 139667755452224 CPU 0 7/30/22 15:35:14.781] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-07-29/ephys/recording2/site1 -run=2022-07-29_JF082-passive -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 139667755452224 CPU 0 7/30/22 15:51:24.049] 
+[Thd 139809365219136 CPU 0 7/30/22 15:51:24.069] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-07-29/ephys/recording2/site2 -run=2022-07-29_JF082-passive -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 139809365219136 CPU 0 7/30/22 16:07:21.676] 
+[Thd 139876909369152 CPU 0 8/03/22 10:38:26.801] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-08-01/ephys/site1 -run=2022-08-01_JF082 -g=1 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 139876909369152 CPU 0 8/03/22 11:23:44.733] 
+[Thd 140297407752000 CPU 0 8/03/22 11:23:44.755] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-08-01/ephys/site2 -run=2022-08-01_JF082 -g=1 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140297407752000 CPU 0 8/03/22 12:09:16.640] 
+[Thd 140014660998976 CPU 0 8/03/22 12:09:16.661] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-08-02/ephys/site1 -run=2022-08-02_JF082 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140014660998976 CPU 0 8/03/22 12:49:34.568] 
+[Thd 139901620766528 CPU 0 8/03/22 12:49:34.588] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-08-02/ephys/site2 -run=2022-08-02_JF082 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 139901620766528 CPU 0 8/03/22 13:33:18.738] 
+[Thd 139722696132416 CPU 0 8/03/22 17:00:33.911] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-08-03/ephys/site1 -run=2022-08-03_JF082 -g=1 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 139722696132416 CPU 0 8/03/22 17:00:33.915] Meta file not found '/home/netshare/zaru/JF082/2022-08-03/ephys/site1/2022-08-03_JF082_g1_t0.imec0.ap.meta'.
+[Thd 139722696132416 CPU 0 8/03/22 17:00:33.915] 
+[Thd 140682420574016 CPU 0 8/03/22 17:00:33.924] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-08-03/ephys/site2 -run=2022-08-03_JF082 -g=1 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140682420574016 CPU 0 8/03/22 17:00:33.924] Meta file not found '/home/netshare/zaru/JF082/2022-08-03/ephys/site2/2022-08-03_JF082_g1_t0.imec1.ap.meta'.
+[Thd 140682420574016 CPU 0 8/03/22 17:00:33.924] 
+[Thd 140383986091840 CPU 0 8/03/22 17:00:33.931] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-03/ephys/site1 -run=2022-08-03_JF084-shank0 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140383986091840 CPU 0 8/03/22 17:17:55.276] 
+[Thd 140246610298688 CPU 0 8/03/22 17:17:55.304] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-03/ephys/site2 -run=2022-08-03_JF084-shank0 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140246610298688 CPU 0 8/03/22 17:39:46.376] 
+[Thd 140334779246400 CPU 0 8/03/22 17:39:46.396] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-03/ephys/site3 -run=2022-08-03_JF084-shank1 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140334779246400 CPU 0 8/03/22 17:59:39.758] 
+[Thd 140389075146560 CPU 0 8/03/22 17:59:39.776] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-03/ephys/site4 -run=2022-08-03_JF084-shank1 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140389075146560 CPU 0 8/03/22 18:16:01.491] 
+[Thd 139993829246784 CPU 0 8/03/22 18:16:01.513] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-03/ephys/site5 -run=2022-08-03_JF084-shank3 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 139993829246784 CPU 0 8/03/22 18:36:16.049] 
+[Thd 140316824090432 CPU 0 8/03/22 18:36:16.068] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-03/ephys/site6 -run=2022-08-03_JF084-shank3 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140316824090432 CPU 0 8/03/22 18:57:41.927] 
+[Thd 140689636955968 CPU 0 8/04/22 17:08:05.535] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-08-04/ephys/site1 -run=2022-08-04_JF082 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140689636955968 CPU 0 8/04/22 17:51:29.397] 
+[Thd 140064036312896 CPU 0 8/04/22 17:51:29.420] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-08-04/ephys/site2 -run=2022-08-04_JF082 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140064036312896 CPU 0 8/04/22 18:30:43.489] 
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.516] Error: Bad g- or t-indices.
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.516] 
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.516] *** ERROR: MISSING CRITICAL PARAMETERS ***
+
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.516] ------------------------
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] Purpose:
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] + Optionally join trials with given run_name and index ranges [ga,gb] [ta,tb]...
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] + ...Or run on any individual file.
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] + Optionally apply demultiplexing corrections.
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] + Optionally apply band-pass and global CAR filters.
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] + Optionally edit out saturation artifacts.
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] + Optionally extract tables of sync waveform edge times to drive TPrime.
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] + Optionally extract tables of any other TTL event times to be aligned with spikes.
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] + Optionally join the above outputs across different runs (supercat feature).
+
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] Output:
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] + Results are placed next to source, named like this, with t-index = tcat:
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] +    path/run_name_g5_tcat.imec1.ap.bin.
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] + Errors and run messages are appended to CatGT.log in the current working directory.
+
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] Usage:
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] >CatGT -dir=data_dir -run=run_name -g=ga,gb -t=ta,tb <which streams> [ options ]
+
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] Which streams:
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] -ap                      ;required to process ap streams
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] -lf                      ;required to process lf streams
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] -ni                      ;required to process ni stream
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] -prb_3A                  ;if -ap or -lf process 3A-style probe files, e.g. run_name_g0_t0.imec.ap.bin
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] -prb=0,3:5               ;if -ap or -lf AND !prb_3A process these probes
+
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] Options:
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] -no_run_fld              ;older data, or data files relocated without a run folder
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] -prb_fld                 ;use folder-per-probe organization
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] -prb_miss_ok             ;instead of stopping, silently skip missing probes
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] -gtlist={gj,tja,tjb}     ;override {-g,-t} giving each listed g-index its own t-range
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] -t=cat                   ;extract TTL from CatGT output files (instead of -t=ta,tb)
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] -exported                ;apply FileViewer 'exported' tag to in/output filenames
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] -t_miss_ok               ;instead of stopping, zero-fill if trial missing
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] -zerofillmax=500         ;set a maximum zero-fill span (millisec)
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] -maxsecs=7.5             ;set a maximum output file length (float seconds)
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] -apfilter=Typ,N,Fhi,Flo  ;apply ap band-pass filter of given {type, order, corners(float Hz)}
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.517] -lffilter=Typ,N,Fhi,Flo  ;apply lf band-pass filter of given {type, order, corners(float Hz)}
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.518] -no_tshift               ;DO NOT time-align channels to account for ADC multiplexing
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.518] -loccar=2,8              ;apply ap local CAR annulus (exclude radius, include radius)
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.518] -gblcar                  ;apply ap global CAR filter over all channels
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.518] -gfix=0.40,0.10,0.02     ;rmv ap artifacts: ||amp(mV)||, ||slope(mV/sample)||, ||noise(mV)||
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.518] -chnexcl={prb;chans}     ;this probe, exclude listed chans from ap loccar, gblcar, gfix
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.518] -SY=0,384,6,10           ;extract TTL signal from imec SY (probe,word,bit,millisec)
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.518] -XA=2,3.0,4.5,25         ;extract TTL signal from nidq XA (word,thresh1(v),thresh2(V),millisec)
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.518] -XD=8,0,0                ;extract TTL signal from nidq XD (word,bit,millisec)
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.518] -iSY=0,384,6,10          ;extract inverted TTL signal from imec SY (probe,word,bit,millisec)
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.518] -iXA=2,2.0,1.0,25        ;extract inverted TTL signal from nidq XA (word,thresh1(v),thresh2(V),millisec)
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.518] -iXD=8,0,0               ;extract inverted TTL signal from nidq XD (word,bit,millisec)
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.518] -BF=8,2,4,3              ;extract numeric bit-field from nidq XD (word,startbit,nbits,inarow)
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.518] -inarow=5                ;extractor antibounce stay high/low sample count
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.518] -pass1_force_ni_bin      ;write pass one ni binary tcat file even if not changed
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.518] -supercat={dir,run_ga}   ;concatenate existing output files across runs (see ReadMe)
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.518] -supercat_trim_edges     ;supercat after trimming each stream to matched sync edges
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.518] -supercat_skip_ni_bin    ;do not supercat ni binary files
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.518] -dest=path               ;alternate path for output files (must exist)
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.518] -out_prb_fld             ;if using -dest, create output subfolder per probe
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.518] ------------------------
+
+[Thd 140107815237440 CPU 0 8/04/22 18:30:43.518] 
+[Thd 139647667431232 CPU 0 8/04/22 18:30:43.525] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-04/ephys/site2 -run=2022-08-04_JF084-1 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 139647667431232 CPU 0 8/04/22 18:30:43.528] Meta file not found '/home/netshare/zaru/JF084/2022-08-04/ephys/site2/2022-08-04_JF084-1_g0_t0.imec1.ap.meta'.
+[Thd 139647667431232 CPU 0 8/04/22 18:30:43.529] 
+[Thd 139648860940096 CPU 0 8/04/22 18:30:43.534] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-04/ephys/site3 -run=2022-08-04_JF084-2-2 -g=3 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 139648860940096 CPU 0 8/04/22 18:37:05.224] 
+[Thd 139965300410176 CPU 0 8/04/22 18:37:05.241] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-04/ephys/site4 -run=2022-08-04_JF084-2-2 -g=3 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 139965300410176 CPU 0 8/04/22 18:43:24.530] 
+[Thd 140487474472768 CPU 0 8/04/22 18:43:24.550] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-04/ephys/site5 -run=2022-08-04_JF084-3 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140487474472768 CPU 0 8/04/22 18:58:57.363] 
+[Thd 140270111717184 CPU 0 8/04/22 18:58:57.380] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-04/ephys/site6 -run=2022-08-04_JF084-3 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140270111717184 CPU 0 8/04/22 19:16:35.263] 
+[Thd 140422304331584 CPU 0 8/06/22 14:37:27.940] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-08-05/ephys/site1 -run=2022-08-05_JF082 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140422304331584 CPU 0 8/06/22 15:22:10.515] 
+[Thd 140408102995776 CPU 0 8/06/22 15:22:10.539] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-08-05/ephys/site2 -run=2022-08-05_JF082 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140408102995776 CPU 0 8/06/22 16:07:01.627] 
+[Thd 139797424957248 CPU 0 8/06/22 16:07:01.646] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-05/ephys/site1 -run=2022-08-05_JF084-1 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 139797424957248 CPU 0 8/06/22 16:26:00.964] 
+[Thd 139640273815360 CPU 0 8/06/22 16:26:00.985] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-05/ephys/site2 -run=2022-08-05_JF084-1 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 139640273815360 CPU 0 8/06/22 16:47:06.620] 
+[Thd 140005522966336 CPU 0 8/06/22 16:47:06.645] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-05/ephys/site3 -run=2022-08-05_JF084-2 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140005522966336 CPU 0 8/06/22 17:10:12.451] 
+[Thd 139831031936832 CPU 0 8/06/22 17:10:12.661] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-05/ephys/site4 -run=2022-08-05_JF084-2 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 139831031936832 CPU 0 8/06/22 17:31:18.478] 
+[Thd 140377722738496 CPU 0 8/06/22 17:31:18.495] Cmdline: CatGT -dir=/home/netshare/zaru/JF072/2022-08-05/ephys/site1 -run=2022-08-05_JF072 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140377722738496 CPU 0 8/06/22 17:31:18.499] Meta file not found '/home/netshare/zaru/JF072/2022-08-05/ephys/site1/2022-08-05_JF072_g0_t0.imec0.ap.meta'.
+[Thd 140377722738496 CPU 0 8/06/22 17:31:18.499] 
+[Thd 140284527470400 CPU 0 8/06/22 17:31:18.507] Cmdline: CatGT -dir=/home/netshare/zaru/JF072/2022-08-05/ephys/site2 -run=2022-08-05_JF072 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140284527470400 CPU 0 8/06/22 17:31:18.508] Meta file not found '/home/netshare/zaru/JF072/2022-08-05/ephys/site2/2022-08-05_JF072_g0_t0.imec1.ap.meta'.
+[Thd 140284527470400 CPU 0 8/06/22 17:31:18.509] 
+[Thd 140171697641280 CPU 0 8/06/22 18:19:40.558] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-08-06/ephys/site1 -run=2022-08-06_JF082 -g=1 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140171697641280 CPU 0 8/06/22 19:04:50.725] 
+[Thd 140311377049408 CPU 0 8/06/22 19:04:50.747] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-08-06/ephys/site2 -run=2022-08-06_JF082 -g=1 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140311377049408 CPU 0 8/06/22 19:54:20.951] 
+[Thd 140604098070336 CPU 0 8/06/22 19:54:20.974] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-06/ephys/site1 -run=2022-08-06_JF084-1 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140604098070336 CPU 0 8/06/22 20:29:59.826] 
+[Thd 140684596508480 CPU 0 8/06/22 20:29:59.854] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-06/ephys/site2 -run=2022-08-06_JF084-1 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140684596508480 CPU 0 8/06/22 21:12:05.697] 
+[Thd 140477389829952 CPU 0 8/06/22 21:12:05.733] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-06/ephys/site3 -run=2022-08-06_JF084-2 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140477389829952 CPU 0 8/06/22 21:30:39.069] 
+[Thd 140610342881088 CPU 0 8/06/22 21:30:39.092] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-06/ephys/site4 -run=2022-08-06_JF084-2 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140610342881088 CPU 0 8/06/22 21:48:38.464] 
+[Thd 140568022525760 CPU 0 8/06/22 21:48:38.491] Cmdline: CatGT -dir=/home/netshare/zaru/JF072/2022-08-06/ephys/site1 -run=2022-08-06_JF072 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140568022525760 CPU 0 8/06/22 21:48:38.493] Meta file not found '/home/netshare/zaru/JF072/2022-08-06/ephys/site1/2022-08-06_JF072_g0_t0.imec0.ap.meta'.
+[Thd 140568022525760 CPU 0 8/06/22 21:48:38.493] 
+[Thd 140675600267072 CPU 0 8/06/22 21:48:38.501] Cmdline: CatGT -dir=/home/netshare/zaru/JF072/2022-08-06/ephys/site2 -run=2022-08-06_JF072-1 -g=1 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140675600267072 CPU 0 8/06/22 21:48:38.503] Meta file not found '/home/netshare/zaru/JF072/2022-08-06/ephys/site2/2022-08-06_JF072-1_g1_t0.imec1.ap.meta'.
+[Thd 140675600267072 CPU 0 8/06/22 21:48:38.503] 
+[Thd 140116263003968 CPU 0 8/07/22 20:02:56.145] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-08-07/ephys/site1 -run=2022-08-06_JF082 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140116263003968 CPU 0 8/07/22 20:02:56.150] Meta file not found '/home/netshare/zaru/JF082/2022-08-07/ephys/site1/2022-08-06_JF082_g0_t0.imec0.ap.meta'.
+[Thd 140116263003968 CPU 0 8/07/22 20:02:56.150] 
+[Thd 139630305085248 CPU 0 8/07/22 20:02:56.163] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-08-07/ephys/site2 -run=2022-08-06_JF082 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 139630305085248 CPU 0 8/07/22 20:02:56.164] Meta file not found '/home/netshare/zaru/JF082/2022-08-07/ephys/site2/2022-08-06_JF082_g0_t0.imec1.ap.meta'.
+[Thd 139630305085248 CPU 0 8/07/22 20:02:56.164] 
+[Thd 139869568055104 CPU 0 8/07/22 20:02:56.171] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-07/ephys/site1 -run=2022-08-07_JF084 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 139869568055104 CPU 0 8/07/22 20:39:13.636] 
+[Thd 139827566364480 CPU 0 8/07/22 20:39:13.655] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-07/ephys/site2 -run=2022-08-07_JF084 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 139827566364480 CPU 0 8/07/22 21:20:44.965] 
+[Thd 140248978016064 CPU 0 8/07/22 21:20:44.986] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-07/ephys/site3 -run=2022-08-07_JF084-2-1 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140248978016064 CPU 0 8/07/22 21:38:37.874] 
+[Thd 140503323313984 CPU 0 8/07/22 21:38:37.905] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-07/ephys/site4 -run=2022-08-07_JF084-2-1 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140503323313984 CPU 0 8/07/22 22:01:15.670] 
+[Thd 140030566606656 CPU 0 8/07/22 22:01:15.700] Cmdline: CatGT -dir=/home/netshare/zaru/JF072/2022-08-07/ephys/site1 -run=2022-08-07_JF072 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140030566606656 CPU 0 8/07/22 22:01:15.885] Meta file not found '/home/netshare/zaru/JF072/2022-08-07/ephys/site1/2022-08-07_JF072_g0_t0.imec0.ap.meta'.
+[Thd 140030566606656 CPU 0 8/07/22 22:01:15.885] 
+[Thd 139797351114560 CPU 0 8/08/22 18:26:49.269] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-08-08/ephys/site1 -run=2022-08-08_JF082 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 139797351114560 CPU 0 8/08/22 19:12:45.565] 
+[Thd 140123998672704 CPU 0 8/08/22 19:12:45.584] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-08-08/ephys/site2 -run=2022-08-08_JF082 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140123998672704 CPU 0 8/08/22 19:54:10.947] 
+[Thd 140031994423104 CPU 0 8/08/22 19:54:10.966] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-08/ephys/site1 -run=2022-08-08_JF084 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140031994423104 CPU 0 8/08/22 20:31:57.659] 
+[Thd 140128897636160 CPU 0 8/08/22 20:31:57.679] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-08/ephys/site2 -run=2022-08-08_JF084 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140128897636160 CPU 0 8/08/22 21:09:47.750] 
+[Thd 140190389491520 CPU 0 8/08/22 21:09:47.769] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-08/ephys/site3 -run=2022-08-08_JF084-2-1 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140190389491520 CPU 0 8/08/22 21:29:48.940] 
+[Thd 140607657543488 CPU 0 8/08/22 21:29:48.959] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-08/ephys/site4 -run=2022-08-08_JF084-2-1 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140607657543488 CPU 0 8/08/22 21:50:05.316] 
