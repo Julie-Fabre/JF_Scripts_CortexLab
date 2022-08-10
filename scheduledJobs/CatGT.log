@@ -404,3 +404,4 @@
 [Thd 140190389491520 CPU 0 8/08/22 21:29:48.940] 
 [Thd 140607657543488 CPU 0 8/08/22 21:29:48.959] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-08/ephys/site4 -run=2022-08-08_JF084-2-1 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
 [Thd 140607657543488 CPU 0 8/08/22 21:50:05.316] 
+[Thd 140074124941120 CPU 0 8/10/22 11:26:16.270] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-08-09/ephys/site1 -run=2022-08-09_JF082 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar

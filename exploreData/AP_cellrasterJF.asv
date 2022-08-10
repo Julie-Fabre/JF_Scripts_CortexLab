@@ -273,11 +273,8 @@ if sum(template_use_channels) < 4
     fff = find(abs(ff - max_channel) < 15);
     template_use_channels(ff(fff)) = 1; 
 end
-for iC = 1:size(template_x,1)
-    set(gui_data.waveform_lines(iC), 'XData', nan(82, 1), ...
-            'YData', nan(82, 1));
-end
-arrayfun(@(ch) set(gui_data.waveform_lines(ch),'XData',template_x(ch,:),'YData',template_y(ch,:)),find(template_use_channels));
+NansNans = nan(20,82);
+arrayfun(@(ch) set(gui_data.waveform_lines(ch),'XData',NansNans(ch,:),'YData',NansNans(ch,:),1:20));
 arrayfun(@(ch) set(gui_data.waveform_lines(ch),'XData',template_x(ch,:),'YData',template_y(ch,:)),find(template_use_channels));
 arrayfun(@(ch) set(gui_data.waveform_lines(ch),'Color','r'),find(template_use_channels));
 arrayfun(@(ch) set(gui_data.waveform_lines(ch),'Color','k'),find(~template_use_channels));

@@ -34,9 +34,9 @@ load_parts.cam=false;
 load_parts.imaging=false;
 load_parts.ephys=true;
 
-site = 4;%1,1; 2,4; 3,7
+site = 3;%1,1; 2,4; 3,7
 recording = []; 
-experiment = 3;
+experiment =3;
 loadClusters = 0;
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys_ap',site,recording);
 if size(ephysAPfile,2) ==2 %keep only ap
