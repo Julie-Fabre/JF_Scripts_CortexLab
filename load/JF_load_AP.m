@@ -3,7 +3,7 @@
 close all;
 myPaths;
 
-animals={'JF084'};
+animals={'JF070'};
 curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};
@@ -24,7 +24,7 @@ experiments = experiments([experiments.ephys]);
 
 %% Load data from experiment 
 
-curr_day = 5; % (set which day to use)
+curr_day = 3; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
@@ -34,9 +34,9 @@ load_parts.cam=false;
 load_parts.imaging=false;
 load_parts.ephys=true;
 
-site = 3;%1,1; 2,4; 3,7
+site = 2;%1,1; 2,4; 3,7
 recording = []; 
-experiment =3;
+experiment = 2;
 loadClusters = 0;
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys_ap',site,recording);
 if size(ephysAPfile,2) ==2 %keep only ap
@@ -67,9 +67,9 @@ AP_load_experimentJF;
 curr_shank=NaN;
 
 trial_conditions(~ismember(trial_conditions(:,1), [4,6,7]),1) = 1;
-trial_conditions(ismember(trial_conditions(:,1), [4]),1) = 4;
-trial_conditions(ismember(trial_conditions(:,1), [7]),1) = 7;
-trial_conditions(ismember(trial_conditions(:,1), [6]),1) = 10;
+trial_conditions(ismember(trial_conditions(:,1), [4]),1) = 4; % go 1
+trial_conditions(ismember(trial_conditions(:,1), [7]),1) = 7; % go 2
+trial_conditions(ismember(trial_conditions(:,1), [6]),1) = 10; % no go
 AP_cellrasterJF({stimOn_times(~isnan(stimOn_times)), stimOn_times(~isnan(stimOn_times)), stimOn_times(~isnan(stimOn_times))}, ...
     {trial_conditions(~isnan(stimOn_times),1), trial_conditions(~isnan(stimOn_times),2),...
     (trial_conditions(~isnan(stimOn_times),2)/-90)+(trial_conditions(~isnan(stimOn_times),1))});

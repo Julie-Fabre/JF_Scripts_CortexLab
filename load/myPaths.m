@@ -21,7 +21,7 @@ cortexLabBackup3 = '/media/julie/CortexLabBU3/';
 %% specific paths  
 
 
-brainsawPath = '/media/julieCortexLabBU2/brainsaw/';
+brainsawPath = '/home/netshare/znas-brainsaw/';
 allenAtlasPath = '/home/julie/Dropbox/Atlas/'; 
 regParamsPath = '/home/julie/Dropbox/MATLAB/onPaths/JF_Scripts_CortexLab/histology/'; 
 tempPath = '/home/julie/temp/';

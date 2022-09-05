@@ -93,15 +93,39 @@
 
 % JF_preprocess_NPX2(animal, date, chanMapFile, experiment, site, recording, rerunKS, rerunQM)
 
+% errors: try increasing java heap memory ? 
 
 
-JF_preprocess_NPX2('JF082', '2022-08-07', 'neuropixPhase3B2_kilosortChanMap.mat', 1, 1, [],[],[]);  
-JF_preprocess_NPX2('JF082', '2022-08-07', 'neuropixPhase3B2_kilosortChanMap.mat', 1, 2, [],[],[]);  
+% JF_preprocess_NPX2('JF072', '2022-08-11', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 1, [],[],[]);
+% JF_preprocess_NPX2('JF072', '2022-08-11', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 2, [],[],[]);
 
-JF_preprocess_NPX2('JF084', '2022-08-07', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 1, [],[],[]);
-JF_preprocess_NPX2('JF084', '2022-08-07', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 2, [],[],[]);
-JF_preprocess_NPX2('JF084', '2022-08-07', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 3, [],[],[]);
-JF_preprocess_NPX2('JF084', '2022-08-07', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 4, [],[],[]);
 
-JF_preprocess_NPX2('JF072', '2022-08-07', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 1, [],[],[]);
-%JF_preprocess_NPX2('JF072', '2022-08-06', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 2, [],[],[]);
+%JF_preprocess_NPX2('JF084', '2022-08-10', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 4, [],[],[]);
+
+%JF_preprocess_NPX2('JF084', '2022-08-12', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 1, [],[],[]);
+JF_preprocess_NPX2('JF084', '2022-08-12', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 2, [],[],[]);
+JF_preprocess_NPX2('JF084', '2022-08-12', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 3, [],[],[]);
+JF_preprocess_NPX2('JF084', '2022-08-12', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 4, [],[],[]);
+
+JF_preprocess_NPX2('JF084', '2022-08-15', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 1, [],[],[]);
+JF_preprocess_NPX2('JF084', '2022-08-15', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 2, [],[],[]);
+JF_preprocess_NPX2('JF084', '2022-08-15', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 3, [],[],[]);
+JF_preprocess_NPX2('JF084', '2022-08-15', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 4, [],[],[]);
+
+JF_preprocess_NPX2('JF084', '2022-08-18', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 1, [],[],[]);
+JF_preprocess_NPX2('JF084', '2022-08-18', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 2, [],[],[]);
+JF_preprocess_NPX2('JF084', '2022-08-18', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 3, [],[],[]);
+JF_preprocess_NPX2('JF084', '2022-08-18', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 4, [],[],[]);
+
+JF_preprocess_NPX2('JF082', '2022-08-15', 'neuropixPhase3B2_kilosortChanMap.mat', 1, 1, [],[],[]);  
+JF_preprocess_NPX2('JF082', '2022-08-15', 'neuropixPhase3B2_kilosortChanMap.mat', 1, 2, [],[],[]);  
+
+JF_preprocess_NPX2('JF082', '2022-08-16', 'neuropixPhase3B2_kilosortChanMap.mat', 1, 1, [],[],[]);  
+JF_preprocess_NPX2('JF082', '2022-08-16', 'neuropixPhase3B2_kilosortChanMap.mat', 1, 2, [],[],[]);  
+
+JF_preprocess_NPX2('JF082', '2022-08-18', 'neuropixPhase3B2_kilosortChanMap.mat', 1, 1, [],[],[]);  
+JF_preprocess_NPX2('JF082', '2022-08-18', 'neuropixPhase3B2_kilosortChanMap.mat', 1, 2, [],[],[]);  
+
+JF_preprocess_NPX2('JF072', '2022-08-10', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 1, [],[],[]);
+JF_preprocess_NPX2('JF072', '2022-08-10', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 2, [],[],[]);
+JF_preprocess_NPX2('JF072', '2022-08-11', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 1, [],[],[]);

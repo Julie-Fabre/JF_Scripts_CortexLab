@@ -405,3 +405,34 @@
 [Thd 140607657543488 CPU 0 8/08/22 21:29:48.959] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-08/ephys/site4 -run=2022-08-08_JF084-2-1 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
 [Thd 140607657543488 CPU 0 8/08/22 21:50:05.316] 
 [Thd 140074124941120 CPU 0 8/10/22 11:26:16.270] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-08-09/ephys/site1 -run=2022-08-09_JF082 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140074124941120 CPU 0 8/10/22 12:04:57.171] 
+[Thd 139791716915008 CPU 0 8/10/22 12:04:57.204] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-08-09/ephys/site2 -run=2022-08-09_JF082 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 139791716915008 CPU 0 8/10/22 12:42:42.181] 
+[Thd 139813242320704 CPU 0 8/10/22 12:42:42.200] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-09/ephys/site1 -run=2022-08-09_JF084 -g=1 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 139813242320704 CPU 0 8/10/22 13:30:49.566] 
+[Thd 140382779615040 CPU 0 8/10/22 13:30:49.585] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-09/ephys/site2 -run=2022-08-09_JF084 -g=1 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140382779615040 CPU 0 8/10/22 14:13:14.782] 
+[Thd 140468301555520 CPU 0 8/10/22 14:13:14.815] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-09/ephys/site3 -run=2022-08-09_JF084-2 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140468301555520 CPU 0 8/10/22 14:33:54.261] 
+[Thd 140123207305024 CPU 0 8/10/22 14:33:54.279] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-09/ephys/site4 -run=2022-08-09_JF084-2 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140123207305024 CPU 0 8/10/22 14:50:22.933] 
+[Thd 139800274630464 CPU 0 8/11/22 14:21:26.522] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-08-10/ephys/site1 -run=2022-08-10_JF082 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 139800274630464 CPU 0 8/11/22 15:08:00.672] 
+[Thd 139822928619328 CPU 0 8/11/22 15:08:00.704] Cmdline: CatGT -dir=/home/netshare/zaru/JF082/2022-08-10/ephys/site2 -run=2022-08-10_JF082 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 139822928619328 CPU 0 8/11/22 15:53:21.850] 
+[Thd 140100570289984 CPU 0 8/11/22 15:53:21.869] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-10/ephys/site1 -run=2022-08-10_JF084 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140100570289984 CPU 0 8/11/22 15:53:21.872] Meta file not found '/home/netshare/zaru/JF084/2022-08-10/ephys/site1/2022-08-10_JF084_g0_t0.imec0.ap.meta'.
+[Thd 140100570289984 CPU 0 8/11/22 15:53:21.872] 
+[Thd 140205565421376 CPU 0 8/11/22 15:53:21.881] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-10/ephys/site2 -run=2022-08-10_JF084 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140205565421376 CPU 0 8/11/22 15:53:21.882] Meta file not found '/home/netshare/zaru/JF084/2022-08-10/ephys/site2/2022-08-10_JF084_g0_t0.imec1.ap.meta'.
+[Thd 140205565421376 CPU 0 8/11/22 15:53:21.883] 
+[Thd 140210144720704 CPU 0 8/11/22 15:53:21.890] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-10/ephys/site3 -run=2022-08-10_JF084-2 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 140210144720704 CPU 0 8/11/22 15:53:21.891] Meta file not found '/home/netshare/zaru/JF084/2022-08-10/ephys/site3/2022-08-10_JF084-2_g0_t0.imec0.ap.meta'.
+[Thd 140210144720704 CPU 0 8/11/22 15:53:21.891] 
+[Thd 140614095181632 CPU 0 8/11/22 15:53:21.897] Cmdline: CatGT -dir=/home/netshare/zaru/JF084/2022-08-10/ephys/site4 -run=2022-08-10_JF084-2 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 140614095181632 CPU 0 8/11/22 15:53:21.898] Meta file not found '/home/netshare/zaru/JF084/2022-08-10/ephys/site4/2022-08-10_JF084-2_g0_t0.imec1.ap.meta'.
+[Thd 140614095181632 CPU 0 8/11/22 15:53:21.898] 
+[Thd 139909046081344 CPU 0 8/11/22 15:53:21.903] Cmdline: CatGT -dir=/home/netshare/zaru/JF072/2022-08-10/ephys/site1 -run=2022-08-10_JF072 -g=0 -t=0 -no_run_fld -prb=0 -ap -gblcar
+[Thd 139909046081344 CPU 0 8/11/22 16:27:11.386] 
+[Thd 139626284259136 CPU 0 8/11/22 16:27:11.407] Cmdline: CatGT -dir=/home/netshare/zaru/JF072/2022-08-10/ephys/site2 -run=2022-08-10_JF072 -g=0 -t=0 -no_run_fld -prb=1 -ap -gblcar
+[Thd 139626284259136 CPU 0 8/11/22 17:06:35.052] 

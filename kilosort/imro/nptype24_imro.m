@@ -149,8 +149,8 @@ function [ chans, chanPos, chanShank ] = PlotElec24( shank, bank, chans, elecInd
         ylabel('X distance (um)')
         grid on;
     end
-    xlim([-16,3*shankSep+64]);
-    ylim([-10000,10]);
+    %xlim([-16,3*shankSep+64]);
+    %ylim([-10000,10]);
     title('NP2.0 MS shank view');
     hold off;
     

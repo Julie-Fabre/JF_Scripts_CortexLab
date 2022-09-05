@@ -45,6 +45,13 @@ AP_cellrasterJF_forXin({laser_on_flip_times(plotMe)}, ...
     {find(plotMe)});
 
 
+%% plot data aligned to stim onset 
+AP_cellrasterJF_forXin({stimOn_times}, ...
+    {trial_conditions(:, 2)});
+
+
+
+
 
 
 

@@ -1,7 +1,8 @@
 %% REGISTER ROCKSAW PROCESSED BRAINS TO ALLEN ATLAS 
 % dependancies: 
 % - loadtiff 
-% - matlabelastix 
+% - matlabelastix
+% - uigetfile 
 % JF 2021/06/08
 %% to dos
 % - btter auto brightness contrast scaling
@@ -9,7 +10,7 @@
 
 %% params / loading 
 myPaths; 
-animal = 'JF065';
+animal = 'JF070';
 % get in 'AP' format: histology_ccf.mat with tv_slices, av_slices,
 % plane_ap, plane_ml, plane_dv 
 allen_atlas_path = [allenAtlasPath 'allenCCF'];
@@ -31,15 +32,16 @@ allenAtlas10um = readNPY([allenAtlasPath 'allenCCF' filesep 'template_volume_10u
 allenAtlas10um = flipud(rot90(permute(allenAtlas10um, [3,2,1])));
 
 %% crop template to fit image to register 
-StackSlider(greenChannel);
+StackSlider2(greenChannel,allenAtlas10um);
 StackSlider(allenAtlas10um);
-cropAllenLimits = [231, 1295]; 
-cropImgLimits = [1, 461]; 
+cropAllenLimits = [203, 1317]; 
+cropImgLimits = [1, 465]; 
 allenAtlas10um = allenAtlas10um(:,:,cropAllenLimits(1):cropAllenLimits(2));
 greenChannel = greenChannel(:,:,cropImgLimits(1):cropImgLimits(2));
 redChannel = redChannel(:,:,cropImgLimits(1):cropImgLimits(2));
 
 %% register, get transform, apply
+extraHDPath = '/media/julie/Elements'
 dd=dir([extraHDPath filesep animal '\Substack*']);
 cd(regParamsPath)
 params = {'01_ARA_affine.txt',...

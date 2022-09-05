@@ -114,7 +114,7 @@ elseif contains(recording_software, 'SpikeGLX')
             flipperFlipsAll = sort([strfind(flipperTraceAll', [0, 1]), strfind(flipperTraceAll', [1, 0])])' + 1;
             flipperFlipTimesTimelineAll{iExp, :} = timelineAll.Timeline.rawDAQTimestamps(flipperFlipsAll)';
         end
-        flipperFlipTimesTimeline = flipperFlipTimesTimelineAll{ops.exp, :}
+        flipperFlipTimesTimeline = flipperFlipTimesTimelineAll{ops.exp, :};
         flipThresh = 1;
         if ~isempty(find(diff(flipperFlipTimesPXIE) > flipThresh))
             
@@ -122,6 +122,7 @@ elseif contains(recording_software, 'SpikeGLX')
             experimentDurations = diff(flipperFlipTimesPXIE(flipperStEnIdx), [], 2);
             [~, currExpIdx] = min(abs(experimentDurations-Timeline.rawDAQTimestamps(end)));
             flipperFlipTimesFPGA = flipperFlipTimesPXIE(flipperStEnIdx(currExpIdx, 1):flipperStEnIdx(currExpIdx, 2));
+            flipperFlipTimesPXIE = flipperFlipTimesPXIE(flipperStEnIdx(currExpIdx, 1):flipperStEnIdx(currExpIdx, 2));
         end
     end
 end

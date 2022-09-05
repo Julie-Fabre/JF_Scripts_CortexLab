@@ -268,6 +268,8 @@ else
 end
 
 if sum(template_use_channels) < 4 
+    maxShank = gui_data.channel_positions(max_channel,1);
+   
     ff=find(gui_data.channel_positions(:,1) >= maxShank - 32 ...
         & gui_data.channel_positions(:,1) >= maxShank + 32);
     fff = find(abs(ff - max_channel) < 15);

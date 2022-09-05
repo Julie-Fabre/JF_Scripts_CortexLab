@@ -267,6 +267,78 @@ if protocol_exists
 end
 %find
 
+%% load passive protocol 
+[block_filename, block_exists] = AP_cortexlab_filenameJF(animal, day, experiment, 'block');
+
+if block_exists
+
+    if verbose
+        disp('Loading block file...');
+    end
+
+    load(block_filename);
+
+    signals_events = block.events;
+     expDef = strrep(block.expDef, '\', '/'); % for windows to UNIX paths
+    [~, expDef] = fileparts(expDef);
+    switch expDef
+       case 'JF_choiceworldStimuli_wheel_left_center_all'
+
+            stimOn_times = photodiode_flip_times(2:2:end);
+       
+             % sanity check: times between stim on times in signals
+            signals_photodiode_iti_diff = diff(signals_events.stimOnTimes(2:end)) - diff(stimOn_times)';
+            if any(signals_photodiode_iti_diff > 0.1)
+                error('mismatching signals/photodiode stim ITIs')
+            end
+
+            
+            
+            % Get stim ID and conditions
+            conditions = unique([signals_events.stim_idValues', block.events.stim_aziValues'], 'rows')';
+            n_conditions = size(conditions, 1);
+
+            trial_conditions = ... ,
+                [ceil(signals_events.stim_idValues)', block.events.stim_aziValues'];
+            trial_id = trial_conditions(:, 2);
+            trial_conditions(trial_conditions(:, 1) > 13, 1) = trial_conditions(trial_conditions(:, 1) > 13, 1) - 13;
+            stimIDs = trial_conditions(:, 1);
+
+
+            wheel_time = block.inputs.wheelTimes;
+            wheel = block.inputs.wheelValues;
+            surround_time = [-0.5, 2];
+            surround_sample_rate = 1 / Timeline.hw.samplingInterval; % (match this to framerate)
+            surround_time_points = surround_time(1):1 / surround_sample_rate:surround_time(2);
+            if size(stimOn_times, 2) > 1
+                stimOn_times = permute(stimOn_times, [2, 1]);
+            end
+            pull_times = bsxfun(@plus, stimOn_times, surround_time_points);
+
+            stim_aligned_wheel = interp1(Timeline.rawDAQTimestamps, ...
+                wheel_velocity, pull_times);
+            % (set a threshold in speed and time for wheel movement)
+            thresh_displacement = 0.025;
+            time_over_thresh = 0.05; % ms over velocity threshold to count
+            samples_over_thresh = time_over_thresh .* surround_sample_rate;
+            wheel_over_thresh_fullconv = convn( ...
+                abs(stim_aligned_wheel) > thresh_displacement, ...
+                ones(1, samples_over_thresh)) >= samples_over_thresh;
+            wheel_over_thresh = wheel_over_thresh_fullconv(:, end-size(stim_aligned_wheel, 2)+1:end);
+
+            [move_trial, wheel_move_sample] = max(wheel_over_thresh, [], 2);
+            wheel_move_time = arrayfun(@(x) pull_times(x, wheel_move_sample(x)), 1:size(pull_times, 1))';
+            wheel_move_time(~move_trial) = NaN;
+
+            % Get conditions for all trials
+
+            % (trial_timing)
+
+            stim_to_move = padarray(wheel_move_time-stimOn_times, [length(stimOn_times) - length(stimOn_times), 0], NaN, 'post');
+            no_move_trials = isnan(stim_to_move) | stim_to_move < 0.2 | stim_to_move > 0.2;
+    end
+end
+
 %% Load face/eyecam and processing
 
 % Don't load if no timeline

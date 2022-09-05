@@ -12,6 +12,7 @@ function nptype21_imro
 % patternType = 1 for 192 rows starting from the parameter "botRow"
 %                    which must be a multiple of 32 (0, 32, 64...448)
 % patternType = 2 for checkboard covering two banks
+% written by ???, modified by JF 
 
 patternType = 2;
 bankChoice = 1; % bank for patternType 0
