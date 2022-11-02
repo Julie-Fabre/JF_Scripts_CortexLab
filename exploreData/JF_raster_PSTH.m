@@ -1,15 +1,17 @@
 function [curr_smoothed_psth, curr_psth, raster_x, raster_y, curr_raster] = JF_raster_PSTH(spike_templates, spike_times_timeline, ...
     thisTemplate, raster_window, psth_bin_size, align_times, align_group, sort_by, plot_me)
 % Example:
+% ---------
 % thisTemplate = 1;
 % raster_window = [-0.5, 2];
 % align_times = stimOn_times;
+% align_group = stimIDs;
 % psth_bin_size = 0.001;
 % sort_by = stim_to_move;
+% plot_me = true;
 % [curr_smoothed_psth, curr_psth, raster_x, raster_y, curr_raster] = JF_raster_PSTH(spike_templates, spike_times_timeline, ...
-%     thisTemplate, raster_window, psth_bin_size, align_times, align_group,
-%     sort_by
-
+%     thisTemplate, raster_window, psth_bin_size, align_times, align_group,...
+    sort_by, plot_me)
 % Set default raster times
 t_bins = raster_window(1):psth_bin_size:raster_window(2);
 t = t_bins(1:end-1) + diff(t_bins) ./ 2;
@@ -70,7 +72,7 @@ if ~isempty(align_group)
     smWin = gw ./ sum(gw);
     bin_t = mean(diff(t_bins));
 
-    curr_psth = grpstats(curr_raster, stimGroup(1:size(curr_raster, 1)), @(x) mean(x, 1));
+    curr_psth = grpstats(curr_raster, align_group(1:size(curr_raster, 1)), @(x) mean(x, 1));
     curr_smoothed_psth = conv2(padarray(curr_psth, ...
         [0, floor(length(smWin)/2)], 'replicate', 'both'), ...
         smWin, 'valid') ./ bin_t;
