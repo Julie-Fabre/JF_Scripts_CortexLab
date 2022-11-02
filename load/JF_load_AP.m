@@ -37,7 +37,7 @@ load_parts.ephys=true;
 
 site = 1;%1,1; 2,4; 3,7
 recording = []; 
-experiment = experiments(curr_day).experiment(end);
+experiment = 1;%experiments(curr_day).experiment(end);
 loadClusters = 0;
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys_includingCompressed',site,recording);
 if size(ephysAPfile,2) ==2 %keep only ap
@@ -69,6 +69,7 @@ clearvars unitType
 AP_load_experimentJF;
 curr_shank=NaN;
 
+
 trial_conditions(~ismember(trial_conditions(:,1), [4,6,7]),1) = 1;
 trial_conditions(ismember(trial_conditions(:,1), [4]),1) = 4; % go 1
 trial_conditions(ismember(trial_conditions(:,1), [7]),1) = 7; % go 2
@@ -85,9 +86,9 @@ AP_cellrasterJF({stimOn_times(thisIndex), stimOn_times(thisIndex), stimOn_times(
 % AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))',stimOn_times}, ...
 %     {trial_conditions(:,1),trial_conditions(:,2), ...
 %     trial_conditions(:,3), movement_after200ms_and_type});
-% AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))'}, ...
-%     {trial_conditions(:,1),trial_conditions(:,2), ...
-%     trial_conditions(:,3)});
+AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))'}, ...
+    {trial_conditions(:,1),trial_conditions(:,2), ...
+    trial_conditions(:,3)});
 
 
 
