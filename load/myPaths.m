@@ -17,6 +17,7 @@ extraHDPath = '/media/julie/ExtraHD/';
 cortexLabBackup1 = '/media/julie/CortexLabBU1/';
 cortexLabBackup2 = '/media/julie/CortexLabBU2/';
 cortexLabBackup3 = '/media/julie/CortexLabBU3/';
+localExtHdPath = '/media/julie/Elements';
 
 %% specific paths  
 

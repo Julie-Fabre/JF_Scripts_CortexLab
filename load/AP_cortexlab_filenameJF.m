@@ -58,6 +58,7 @@ server1 = zinuPath;
 server2 = zaruPath;
 server3 = znasPath;
 server4 = zserverPath;
+server5 = localExtHdPath;
 % Check that servers are accessible (login needed on restart)
 % if ~exist([server1])
 %     error('Zserver not available');
@@ -75,6 +76,7 @@ server_location{end+1} = [server3 ];
 server_location{end+1} = [server2 ];
 server_location{end+1} = [server1 ];
 server_location{end+1} = [server4 ];
+server_location{end+1} = [server5 ];
 
 
 switch file
@@ -191,6 +193,14 @@ switch file
         if file_exists
             filename = fileparts(filename{1});
         end
+    case 'ephys_parentDir'
+        % (the path where the ephys data is kept)
+        filepattern = [animal filesep date filesep 'ephys'];
+        [filename,file_exists] = check_locations(filepattern,server_location);
+       
+        if file_exists
+            filename = fileparts(filename{1});
+        end
         
         
         
@@ -223,22 +233,76 @@ switch file
         %spike glx
         if ~file_exists
             filepattern = [animal filesep date filesep ...
-                'ephys' site_dir filesep recording_dir filesep '*.*bin'];
+                'ephys' site_dir filesep recording_dir filesep '*ap.bin'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
         if ~file_exists
             filepattern = [animal filesep date filesep ...
-                'ephys' site_dir filesep 'experiment*' filesep '*.*bin'];
+                'ephys' site_dir filesep 'experiment*' filesep '*ap.bin'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
         if ~file_exists
             filepattern = [animal filesep date filesep ...
-                'ephys' site_dir filesep 'experiment*' filesep 'recording' num2str(recording) filesep '*.bin'];
+                'ephys' site_dir filesep 'experiment*' filesep 'recording' num2str(recording) filesep '*ap.bin'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
         if ~file_exists
             filepattern = [animal filesep date filesep ...
-                'ephys'  filesep  'recording' num2str(recording)  site_dir filesep '*.*bin'];
+                'ephys'  filesep  'recording' num2str(recording)  site_dir filesep '*ap.bin'];
+            [filename,file_exists] = check_locations(filepattern,server_location);
+        end
+        %spike_glx local 
+        if ~file_exists
+            filepattern = [animal filesep date filesep ...
+                 site_dir filesep '*ap.bin'];
+            [filename,file_exists] = check_locations(filepattern,server_location);
+        end
+    case 'ephys_includingCompressed'
+         % New open ephys
+        
+            filepattern = [animal filesep date filesep ...
+                'ephys' site_dir filesep 'experiment*' filesep 'recording*' ...
+                filesep 'continuous'  filesep 'Neuropix-3a-100.0' filesep 'continuous.dat'];
+            [filename,file_exists] = check_locations(filepattern,server_location);
+        
+        if ~file_exists
+            filepattern = [animal filesep date filesep ...
+                'ephys' site_dir filesep 'recording*' ...
+                filesep 'continuous'  filesep 'Neuropix-3a-100.0' filesep 'continuous.dat'];
+            [filename,file_exists] = check_locations(filepattern,server_location);
+        end
+        if ~file_exists
+            filepattern = [animal filesep date filesep ...
+                'ephys' site_dir  ...
+                filesep 'continuous'  filesep 'Neuropix-3a-100.0' filesep 'continuous.dat'];
+            [filename,file_exists] = check_locations(filepattern,server_location);
+        end
+
+        %spike glx
+     if ~file_exists
+            filepattern = [animal filesep date filesep ...
+                'ephys' site_dir filesep recording_dir filesep '*ap.*bin'];
+            [filename,file_exists] = check_locations(filepattern,server_location);
+     end
+        if ~file_exists
+            filepattern = [animal filesep date filesep ...
+                'ephys' site_dir filesep 'experiment*' filesep '*ap.*bin'];
+            [filename,file_exists] = check_locations(filepattern,server_location);
+        end
+        if ~file_exists
+            filepattern = [animal filesep date filesep ...
+                'ephys' site_dir filesep 'experiment*' filesep 'recording' num2str(recording) filesep '*ap.bin'];
+            [filename,file_exists] = check_locations(filepattern,server_location);
+        end
+        if ~file_exists
+            filepattern = [animal filesep date filesep ...
+                'ephys'  filesep  'recording' num2str(recording)  site_dir filesep '*ap.*bin'];
+            [filename,file_exists] = check_locations(filepattern,server_location);
+        end
+        %spike_glx local 
+        if ~file_exists
+            filepattern = [animal filesep date filesep ...
+                 site_dir filesep '*ap.*bin'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
     case 'ephys'
@@ -272,8 +336,10 @@ switch file
         
          end
          
+
+
           if ~file_exists
-             filepattern = [animal filesep date filesep 'ephys'  filesep 'kilosort2'   ];
+             filepattern = [animal filesep date filesep 'ephys'  filesep 'pykilosort' filesep site_dir filesep 'output' ];
         [filename,file_exists] = check_locations(filepattern,server_location);
         
           end
@@ -281,7 +347,7 @@ switch file
 
         
         if file_exists
-            filename = fileparts(filename{3});
+            filename = fileparts(filename{end});
         end
        
         

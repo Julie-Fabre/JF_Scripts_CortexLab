@@ -146,6 +146,7 @@ psth_axes = subplot(5,5,[3,4,5],'YAxisLocation','right');
 hold on;
 max_n_groups = max(cell2mat(cellfun(@(x) 1+sum(diff(sort(x,1),[],1) ~= 0),align_groups,'uni',false)));
 psth_lines = arrayfun(@(x) plot(NaN,NaN,'linewidth',2,'color','k'),1:max_n_groups);
+xlim([-0.25,0.5]);
 xlabel('Time from event (s)');
 ylabel('Spikes/s/trial');
 
@@ -159,14 +160,14 @@ ylabel('Trial');
 
 % (spike amplitude across the recording)
 amplitude_axes = subplot(5,5,21:25); hold on;
-amplitude_plot = plot(NaN,NaN,'.k');
+amplitude_plot = plot(NaN,NaN,'.k','MarkerSize',2);
 amplitude_lines = arrayfun(@(x) line([0,0],ylim,'linewidth',2),1:2);
 xlabel('Experiment time (s)');
 ylabel('Template amplitude');
 axis tight
 
 % Set default raster times
-raster_window = [-0.5,2];
+raster_window = [-0.25,0.5];
 psth_bin_size = 0.001;
 t_bins = raster_window(1):psth_bin_size:raster_window(2);
 t = t_bins(1:end-1) + diff(t_bins)./2;
@@ -339,6 +340,7 @@ end
 smooth_size = 51;
 gw = gausswin(smooth_size,3)';
 smWin = gw./sum(gw);
+%smWin(1:50) = 0; %make causal 
 bin_t = mean(diff(gui_data.t));
 
 curr_psth = grpstats(curr_raster,curr_group,@(x) mean(x,1));

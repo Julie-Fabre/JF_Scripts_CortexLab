@@ -17,7 +17,7 @@ function nptype24_imro
 
 patternType = 1;
 shankChoice = 3;   % 0-3, needed for patternType 0
-botRow = 48+48;     
+botRow = 50;     
 refElec = 1;     % 0 for external, 1-4 for tip reference on shank 0-3
 elecChoice = 2:3; % 0-3, needed for patternType 2
 

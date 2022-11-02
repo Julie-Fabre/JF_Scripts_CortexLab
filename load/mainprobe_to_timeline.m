@@ -11,13 +11,13 @@ function [co] = mainprobe_to_timeline(KS_folder, Timeline, ops, expInfo)
 inputNames = {Timeline.hw.inputs.name}';
 
 
-flipperTrace = Timeline.rawDAQData(:, strcmp(inputNames, 'flipper')) > 2;
+flipperTrace = Timeline.rawDAQData(:, strcmp(inputNames, 'flipper')) > 2; % timeline flipper 
 flipperFlips = sort([strfind(flipperTrace', [0, 1]), strfind(flipperTrace', [1, 0])])' + 1;
-figure();
-valu = 5000;
-plot(Timeline.rawDAQData(1:valu, strcmp(inputNames, 'flipper')))
-hold on;
-scatter(flipperFlips(flipperFlips < valu), ones(size(find(flipperFlips < valu), 1), 1))
+% figure();
+% valu = 5000;
+% plot(Timeline.rawDAQData(1:valu, strcmp(inputNames, 'flipper')))
+% hold on;
+% scatter(flipperFlips(flipperFlips < valu), ones(size(find(flipperFlips < valu), 1), 1))
 
 flipperFlipTimesTimeline = Timeline.rawDAQTimestamps(flipperFlips)';
 timelinetime = Timeline.rawDAQTimestamps;
@@ -49,9 +49,9 @@ if contains(recording_software, 'OpenEphys')
     % Get flipper experiment differences by long delays
 
     %% this section is to get the times when the timeline sends input to the probes. the recirding is typically longer
-    % so when timeline is stopped there is a signal? (Idk how it comes)
+    % so when timeline is stopped there is a signal
     % and I need to find this signal (as the signal to the end of
-    % experiemnt so that I can extract the flipper times from the probe
+    % experiemnt) so that I can extract the flipper times from the probe
     % that are corresponding to times in timeline.
 
     flipThresh = 1; % time between flips to define experiment gap (s)
@@ -59,7 +59,6 @@ if contains(recording_software, 'OpenEphys')
     flipperStEnIdx = [[1; find(diff(flipTimes) > flipThresh) + 1], [find(diff(flipTimes) > flipThresh); length(flipTimes)]];
     experimentDurations = diff(flipTimes(flipperStEnIdx), [], 2);
     [~, currExpIdx] = min(abs(experimentDurations-Timeline.rawDAQTimestamps(end))); % as you should start the recroding first
-    %     currExpIdx = 4;
     flipperFlipTimesFPGA = flipTimes(flipperStEnIdx(currExpIdx, 1):flipperStEnIdx(currExpIdx, 2));
 
 
@@ -81,9 +80,9 @@ elseif contains(recording_software, 'SpikeGLX')
         % flipper at PXIE
         flipper = mmf.Data.x(fippersyncidx, :) * dat_to_voltage_converter;
     catch
-        load(sprintf('%s//sync.mat', KS_folder));
-        if sum(sync == 0) < 100
-            warning('check is sync is saved properly!')
+        load(sprintf('%s//sync.mat', KS_folder));% ephys flipper
+        if length(unique(sync)) == 1
+            warning('check sync is saved properly!')
         end
 
         flipper = sync * (5 / 64); %  this is hardcoded because the ranges are not what we expect
@@ -137,9 +136,9 @@ end
 % apply a bunch of corrections if not
 numFlipsDiff = abs(diff([length(flipperFlipTimesFPGA), length(flipperFlipTimesTimeline)]));
 if numFlipsDiff > 0 && numFlipsDiff < 20
-    disp('WARNING = Flipper flip times different in timeline/ephys');
+    disp('WARNING = Flipper flip times different in timeline/ephys \n');
     if diff([length(flipperFlipTimesFPGA), length(flipperFlipTimesTimeline)]) < 20 && length(flipperFlipTimesFPGA) > 500
-        disp('Trying to account for missing flips...');
+        disp('Trying to account for missing flips... \n');
         while length(flipperFlipTimesTimeline) > length(flipperFlipTimesFPGA)
             compareVect = [flipperFlipTimesFPGA - (flipperFlipTimesFPGA(1)), flipperFlipTimesTimeline(1:length(flipperFlipTimesFPGA)) - flipperFlipTimesTimeline(1)];
             errPoint = find(abs(diff(diff(compareVect, [], 2))) > 0.005, 1);
@@ -162,7 +161,7 @@ if numFlipsDiff > 0 && numFlipsDiff < 20
         compareVect = [flipperFlipTimesFPGA - (flipperFlipTimesFPGA(1)), flipperFlipTimesTimeline - flipperFlipTimesTimeline(1)];
 
 
-        if isempty(find(abs(diff(diff(compareVect, [], 2))) > 0.005, 1));
+        if isempty(find(abs(diff(diff(compareVect, [], 2))) > 0.005, 1))
             fprintf('Success! \n');
             co = robustfit(flipperFlipTimesFPGA, flipperFlipTimesTimeline);
         end

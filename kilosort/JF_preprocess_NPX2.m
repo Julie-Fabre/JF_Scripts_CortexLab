@@ -2,14 +2,22 @@
 %% preprocess for npx 2.0 probes : run kilosort, extract sync and lfp channels
 function JF_preprocess_NPX2(animal, date, chanMapFile, experiment, site, recording, rerunKS, rerunQM)
 
-%% kilosort
-
+%% convert raw data from .cbin to .bin 
 myPaths;
 [ephysAPfile, ~] = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_ap', site, recording);
 if size(ephysAPfile, 2) > 1 && iscell(ephysAPfile)%keep only ap
     ephysAPfile = ephysAPfile{1};
 end
-rootZ = fileparts(ephysAPfile);
+if contains(ephysAPfile, '.cbin')
+    saveFileFolder = fullfile('/media/julie/Elements', animal, date, ['site', num2str(site)]);
+    bc_extractCbinData(ephysAPfile, [], [], [], saveFileFolder, []);
+else
+    rootZ = fileparts(ephysAPfile);
+
+end
+%% kilosort
+
+
 rootH = tempPath;
 pathToYourConfigFile = [dropboxPath, 'MATLAB/onPaths/Kilosort2/configFiles'];
 chanMapFilePath = [dropboxPath, 'MATLAB/onPaths/Kilosort2/configFiles', chanMapFile];

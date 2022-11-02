@@ -60,7 +60,12 @@ for curr_site = thisSite
         % Get OE filenames (check for multiple experiments, do separately)
         if ephysType == 2
                 exp_rec_dir = [ ephys_exp_paths(curr_exp).name];
-        ap_data_filename = dir([curr_data_path filesep exp_rec_dir filesep '*.bin']);
+        if ~isempty(t_range)
+            ap_data_filename = dir([curr_data_path filesep exp_rec_dir filesep '*tRange*.bin']);
+
+        else
+             ap_data_filename = dir([curr_data_path filesep exp_rec_dir filesep '*.bin']);
+        end
         lfp_data_filename =  dir([curr_data_path filesep exp_rec_dir filesep '*.bin']);
        % sync_filename = [curr_data_path filesep filesep exp_rec_dir filesep 'events' filesep 'Neuropix-3a-100.0' filesep 'TTL_1' filesep 'channel_states.npy' ];
        % sync_timestamps_filename = [curr_data_path filesep exp_rec_dir filesep 'events' filesep 'Neuropix-3a-100.0' filesep 'TTL_1' filesep 'timestamps.npy' ];
@@ -70,7 +75,15 @@ for curr_site = thisSite
         else
             
         exp_rec_dir = [ ephys_exp_paths(curr_exp).name filesep 'recording1'];
-        ap_data_filename = [curr_data_path filesep exp_rec_dir filesep 'continuous' filesep 'Neuropix-3a-100.0' filesep 'continuous.dat'];
+        if ~isempty(t_range)
+
+                ap_data_filename = [curr_data_path filesep exp_rec_dir filesep 'continuous' filesep 'Neuropix-3a-100.0' filesep 'continuous*tRange*.dat'];
+        
+  
+        else
+             ap_data_filename = [curr_data_path filesep exp_rec_dir filesep 'continuous' filesep 'Neuropix-3a-100.0' filesep 'continuous.dat'];
+        
+        end
         lfp_data_filename = [curr_data_path filesep exp_rec_dir filesep 'continuous' filesep 'Neuropix-3a-100.1' filesep 'continuous.dat'];
         sync_filename = [curr_data_path filesep filesep exp_rec_dir filesep 'events' filesep 'Neuropix-3a-100.0' filesep 'TTL_1' filesep 'channel_states.npy' ];
         sync_timestamps_filename = [curr_data_path filesep exp_rec_dir filesep 'events' filesep 'Neuropix-3a-100.0' filesep 'TTL_1' filesep 'timestamps.npy' ];
@@ -160,7 +173,7 @@ for curr_site = thisSite
               ap_temp_filename = [ssd_kilosort_path filesep animal '_' day  '_' 'ephys_apband.bin'];
                 ap_data_filename = [curr_data_path filesep exp_rec_dir filesep ap_data_filename.name];
         end
-        copyfile(ap_data_filename,ap_temp_filename);
+        %copyfile(ap_data_filename,ap_temp_filename);
         disp('Done');
         
         % Clean AP data of artifacts
@@ -173,8 +186,8 @@ for curr_site = thisSite
         
         if ephysType==1
             ttl_path = fileparts(sync_filename);
-            AP_clean_datJF(ap_temp_filename,n_channels,ttl_path,ap_clean_filename);
-            delete(ap_temp_filename);
+            %AP_clean_datJF(ap_temp_filename,n_channels,ttl_path,ap_clean_filename);
+            %delete(ap_temp_filename);
         end
         % Delete local raw data
         
@@ -188,10 +201,11 @@ for curr_site = thisSite
             t_range = [0,inf];
         end
         if ephysType==1
-            AP_run_kilosort2JF(ap_clean_filename,ap_sample_rate,ssd_kilosort_path,t_range,[],chanMap);
+            dirAP = dir(ap_data_filename);
+            AP_run_kilosort2JF([dirAP.folder, filesep, dirAP.name],ap_sample_rate,dirAP.folder,[],[],chanMap);
         else
             ap_sample_rate = 30000;
-            AP_run_kilosort2JF(ap_temp_filename,ap_sample_rate,ssd_kilosort_path,t_range,[],chanMap);
+            AP_run_kilosort2JF(ap_temp_filename,ap_sample_rate,ssd_kilosort_path,[],[],chanMap);
         end
         %% Copy kilosort results to server
         

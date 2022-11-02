@@ -210,16 +210,16 @@ if protocol_exists
         end
 
 
-        figure();
-        title('Photodiode channel');
-        hold on;
-        plot(photodiode_trace(1:120000));
-        hold on;
-        scatter(photodiode_flip(find(photodiode_flip <= 120000)), ones(size(find(photodiode_flip <= 120000), 1), 1))
-        hold on;
-        plot(Timeline.rawDAQData(1:120000, photodiode_idx))
-        hold on;
-        plot(photodiode_onsets);
+%         figure();
+%         title('Photodiode channel');
+%         hold on;
+%         plot(photodiode_trace(1:120000));
+%         hold on;
+%         scatter(photodiode_flip(find(photodiode_flip <= 120000)), ones(size(find(photodiode_flip <= 120000), 1), 1))
+%         hold on;
+%         plot(Timeline.rawDAQData(1:120000, photodiode_idx))
+%         hold on;
+%         plot(photodiode_onsets);
 
     end
 
@@ -553,7 +553,7 @@ if block_exists
             %                                 wheel_starts(find(wheel_starts > block.events.stimulusOnTimes(x), 1)), ...
             %                                 response_trials);
 
-            trial_move_t = stim_to_move >= 0.3; %trial_wheel_starts - block.events.stimulusOnTimes(response_trials);
+            trial_move_t = stim_to_move >= 0.35; %trial_wheel_starts - block.events.stimulusOnTimes(response_trials);
 
 
             movement_after200ms_and_type = signals_events.stimulusTypeValues(n_trials(1):n_trials(end))';
@@ -1030,7 +1030,8 @@ if block_exists
             else
                 warning('Azimuth not saved in the choiceworld stim version')
                 conditions = unique(ceil(signals_events.stim_idValues/3))';
-                tentativeAzi = zeros(size(conditions, 1), 1);
+                tentativeAzi = zeros(size(signals_events.stim_idValues, 2), 1);
+                %maxS_id=max(signals_events.stim_idValues);
                 tentativeAzi(signals_events.stim_idValues <= 22) = -90;
                 tentativeAzi(signals_events.stim_idValues > 44) = 90;
                 n_conditions = size(conditions, 1);
@@ -1747,6 +1748,8 @@ if ephys_exists && load_parts.ephys
         dontAnalyze = 0;
         % Get spike times in timeline time
         spike_times_timeline = interp1(sync_ephys, sync_timeline, spike_times, 'linear', 'extrap');
+%         co = robustfit(sync_ephys, sync_timeline);
+%          spike_times_timeline = spike_times * co(2) + co(1);
     end
     % Get "good" templates from labels
     if exist('cluster_groups', 'var') && loadClusters

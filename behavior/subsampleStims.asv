@@ -79,19 +79,34 @@ imwrite(rgb2gray(im),gray,['/home/julie/Documents/new/img' num2str(iImg) '.jpeg'
 
 for iImg = 1:30
   % iImg= iImg +1
-load(['/home/netshare/zserver-data/pregenerated_textures/JulieF/naturalImages/img' num2str(iImg) '.mat']);
+load(['/home/netshare/zserver-data/pregenerated_textures/JulieF/backup/naturalImages/img' num2str(iImg) '.mat']);
 % figure(1);
 % imagesc(img)
+% sz = size(img);
+% xg = 1:sz(1);
+% yg = 1:sz(2);
+% F = griddedInterpolant({xg,yg},double(img));
+% 
+% xq = (0:640/500:sz(1))';
+% yq = (0:512/375:sz(2))';
+% vq = uint8(F({xq,yq}));
+% imagesc(vq)
+% colormap(gray)
+img = img(124:375-124, 11:500-10);
 
+%img(:,501: 500+13) = img(:,500-12:500);
 sz = size(img);
 sc(1) = sz(1)/1024;
 sc(2) = sz(2)/3840;
 pxSt = sc * 100;
-img(sz(1)- ceil(pxSt(1)*2): sz(1)- floor(pxSt(1)), sz(2)- ceil(pxSt(2)*2) : sz(2)- floor(pxSt(2))) = min(min(img));
+%img(sz(1)- ceil(pxSt(1)*2): sz(1)- floor(pxSt(1)), :) = -1.85;
+img(sz(1)- ceil(pxSt(1)*2): sz(1)- floor(pxSt(1)),:) = -1.85;
+img(:, sz(2)- ceil(pxSt(2)*2) : sz(2)- floor(pxSt(2))) = -1.85;
+figure(2)
 imagesc(img)
-disp(nanmean(img(sz(1)- ceil(pxSt(1)*2): sz(1)- floor(pxSt(1)), sz(2)- ceil(pxSt(2)*2) : sz(2)- floor(pxSt(2)))))
+%disp(nanmean(nanmean(img(sz(1)- ceil(pxSt(1)*2): sz(1)- floor(pxSt(1)), sz(2)- ceil(pxSt(2)*2) : sz(2)- floor(pxSt(2))))))
 
-%save(['/home/julie/Documents/new/img' num2str(iImg) '.mat'],'img')
+save(['/home/julie/Documents/new/natIm/img' num2str(iImg) '.mat'],'img')
 
 
 end
