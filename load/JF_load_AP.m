@@ -37,7 +37,7 @@ load_parts.ephys=true;
 
 site = 1;%1,1; 2,4; 3,7
 recording = []; 
-experiment = 1;%experiments(curr_day).experiment(end);
+experiment = experiments(curr_day).experiment(end);
 loadClusters = 0;
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys_includingCompressed',site,recording);
 if size(ephysAPfile,2) ==2 %keep only ap

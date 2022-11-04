@@ -18,7 +18,7 @@ end
 %% kilosort
 
 
-rootH = tempPath;
+rootH = [extraHDPath, '/data_temp/'];
 pathToYourConfigFile = [dropboxPath, 'MATLAB/onPaths/Kilosort2/configFiles'];
 chanMapFilePath = [dropboxPath, 'MATLAB/onPaths/Kilosort2/configFiles', chanMapFile];
 if contains(rootZ, 'experiment')

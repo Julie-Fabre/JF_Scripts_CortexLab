@@ -11,7 +11,7 @@ function [curr_smoothed_psth, curr_psth, raster_x, raster_y, curr_raster] = JF_r
 % plot_me = true;
 % [curr_smoothed_psth, curr_psth, raster_x, raster_y, curr_raster] = JF_raster_PSTH(spike_templates, spike_times_timeline, ...
 %     thisTemplate, raster_window, psth_bin_size, align_times, align_group,...
-    sort_by, plot_me)
+%    sort_by, plot_me)
 % Set default raster times
 t_bins = raster_window(1):psth_bin_size:raster_window(2);
 t = t_bins(1:end-1) + diff(t_bins) ./ 2;

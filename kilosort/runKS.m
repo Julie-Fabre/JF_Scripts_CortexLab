@@ -88,6 +88,11 @@
 % 
 % JF_preprocess_NPX2('JF073', '2022-06-29', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 2, [],1); % try with pykilosort 
 AP_preprocess_phase3_newOEJF('JF070','2022-06-11', 1,[],'neuropixPhase3A_kilosortChanMap.mat');
+
+
+JF_preprocess_NPX2('JF086', '2022-11-02', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 1, [],1); % try with pykilosort 
+
+
 AP_preprocess_phase3_newOEJF('JF070','2022-06-12', 1,[],'neuropixPhase3A_kilosortChanMap.mat');
 
 

@@ -125,3 +125,30 @@ img = img1(:,:);
 img(1:267,:) = img1(268:534,:);
 img(268:801,:) = 127; %gray background on middle and bottom
 imwrite(img, '\\zserver.cortexlab.net\Data\pregenerated_textures\JulieF\choiceWorld_7Stims\img2.jpeg', 'JPEG')
+
+
+%% spatial x orientation 
+% 480, 128
+img1= imread('/home/julie/Downloads/Capturegrat.JPG'); %fullscreen grating 
+
+imagesc(img1)
+stim = single(zeros(160,128)); %grey
+
+wDeg = 1;  %size of image (in degrees)
+nPix = 500;  %resolution of image (pixels);
+
+[x,y] = meshgrid(linspace(-wDeg/2,wDeg/2,nPix+1));
+x = x(1:end-1,1:end-1);
+y = y(1:end-1,1:end-1);
+
+orientation = 90;  %deg (counter-clockwise from horizontal)
+sf = 5; %spatial frequency (cycles/deg)
+
+ramp = sin(orientation*pi/180)*x-cos(orientation*pi/180)*y;
+
+grating = single(4*mat2gray(sin(2*pi*sf*ramp)))+1;
+imagesc(grating);
+
+img = stim;
+img(:,:)=grating(1:375,1:500)-2;
+

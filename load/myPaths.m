@@ -1,10 +1,10 @@
 
 %% lab servers 
 
-zaruPath = '/home/netshare/zaru/';
+zaruPath = '/home/netshare/zaru/'; %\\zaru.cortexlab.net\
 znasPath = '/home/netshare/znas/';
-zserverPath = '/home/netshare/zserver-data/';
-zserverLabPath = '/home/netshare/zserver-lab/';
+zserverPath = '/home/netshare/zserver-data/'; %
+zserverLabPath = '/home/netshare/zserver-lab/'; %
 zinuPath = '/home/netshare/zinu/';
 
 %% extra/backup drives 

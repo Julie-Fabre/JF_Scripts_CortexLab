@@ -17,6 +17,11 @@ if ~exist('verbose', 'var')
     verbose = false;
 end
 
+%% Display progress or not
+if ~exist('verbose', 'var')
+    verbose = false;
+end
+
 %% Define what to load
 
 % Site (multiple probes) is optional
@@ -32,15 +37,11 @@ end
 % If nothing specified, load everything (but not LFP)
 if ~exist('load_parts', 'var')
     load_parts.cam = true;
-    load_parts.imaging = true;
     load_parts.ephys = true;
 else
     % If only some things specified, don't load others
     if ~isfield(load_parts, 'cam')
         load_parts.cam = false;
-    end
-    if ~isfield(load_parts, 'imaging')
-        load_parts.imaging = false;
     end
     if ~isfield(load_parts, 'ephys')
         load_parts.ephys = false;
@@ -96,7 +97,8 @@ if timeline_exists
     wheel_velocity = interp1(conv(Timeline.rawDAQTimestamps, [1, 1]/2, 'valid'), ...
         diff(smooth(wheel_position, wheel_smooth_samples)), Timeline.rawDAQTimestamps)';
 
-    % Get whether stim was flickering
+    % Get whether stim was flickering - this is only for when widefiled is
+    % combined 
     stimScreen_idx = strcmp({Timeline.hw.inputs.name}, 'stimScreen');
     if any(stimScreen_idx)
         stimScreen_flicker = max(Timeline.rawDAQData(:, stimScreen_idx)) - ...

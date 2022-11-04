@@ -1,7 +1,7 @@
 
 %% JF_extract_sync(mouse)
 %function JF_extract_sync(animal)
-animal = 'JF078';
+animal = 'JF086';
 myPaths;
 protocol = []; % (this is the name of the Signals protocol)
 experiments = AP_find_experimentsJF(animal, protocol, true);
