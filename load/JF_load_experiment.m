@@ -2,24 +2,23 @@
 %
 % Settings:
 % (what to load)
-% load_parts.(cam/imaging/ephys)
+% load_parts.(cam/ephys)
 %
 % (ephys)
 % site (if multiple probes)
 % recording (if multiple on/off recordings within probe)
 
-% Turn warnings off
+%% Initialize paths
 myPaths;
-warning on
 
 %% Display progress or not
 if ~exist('verbose', 'var')
     verbose = false;
 end
 
-%% Display progress or not
-if ~exist('verbose', 'var')
-    verbose = false;
+%% Debug mode: plot a buc=nch of useful stuff 
+if ~exist('debug', 'var')
+    debug = false;
 end
 
 %% Define what to load
@@ -123,22 +122,7 @@ if timeline_exists
     photodiode_flip = find(~photodiode_trace_diff(1:end-1) & ...
         photodiode_trace_diff(2:end)) + photodiode_diff_samples + 1;
     photodiode_flip_times = stimScreen_on_t(photodiode_flip)';
-    
-%             figure();
-%             clf;
-%             valu = 100000;
-%             title('Photodiode');
-%             hold on;
-%             plot(photodiode_trace(1:valu));
-%             hold on;
-%             scatter(photodiode_flip(find(photodiode_flip <= valu)), ones(size(find(photodiode_flip <= valu), 1), 1))
-%             hold on;
-%             plot(Timeline.rawDAQData(1:valu, photodiode_idx))
-%             hold on;
-%             plot(medfilt1(Timeline.rawDAQData(1:valu, ...
-%                 photodiode_idx), 3))
-%             hold on;
-%             pp = photodiode_flip(find(photodiode_flip <= valu));
+ 
 
     % Get flipper signal (this was added late, might not be present)
     flipper_name = 'flipper';
@@ -149,84 +133,30 @@ if timeline_exists
         (flipper_trace(1:end-1) & ~flipper_trace(2:end))) + 1;
     flipper_flip_times_timeline = Timeline.rawDAQTimestamps(flipper_flip)';
 
-    %     figure();
-    %     title('Flipper channel');
-    %     hold on;
-    %     plot(flipper_trace(1:5000));
-    %     hold on;
-    %     scatter(flipper_flip(find(flipper_flip <= 5000)), ones(size(find(flipper_flip <= 5000), 1), 1))
-    %     hold on;
-    %     plot(Timeline.rawDAQData(1:5000, flipper_idx))
-end
-
-%% Load mpep protocol
-
-[protocol_filename, protocol_exists] = AP_cortexlab_filenameJF(animal, day, experiment, 'protocol');
-
-if protocol_exists
-
-    if verbose
-        disp('Loading mpep protocol...');
-    end
-
-    load(protocol_filename);
-
-    % Load in hardware info
-    hwinfo_filename = AP_cortexlab_filenameJF(animal, day, experiment, 'hardware');
-    load(hwinfo_filename);
-
-    % Stim times should just be odd (on) and even (off)
-    if mod(length(photodiode_flip_times), 2) == 0
-        photodiode_onsets = photodiode_flip_times(1:2:end);
-        photodiode_offsets = photodiode_flip_times(2:2:end);
-    else
-        error('Odd number of photodiode flips')
-    end
-
-    % Get flicker/steady photodiode mode
-    photodiode_type = lower(myScreenInfo.SyncSquare.Type);
-
-    % Get stim on times
-    if strcmp(Protocol.xfile, 'stimSparseNoiseUncorrAsync.x')
-        % Sparse noise
-        % (at the moment this is in a sparse noise-specific script)
-    else
-        % Anything else
-        if length(photodiode_onsets) == numel(Protocol.seqnums)
-            % If photodiode onsets matches number of stimuli, use those
-            stimOn_times = photodiode_onsets;
-        else
-            % Get specific stim onsets by time between last offset and new onset
-            % (occasionally there a bad frame so flip but not new stim)
-            refresh_rate_cutoff = 1 / 5;
-            stimOn_times = photodiode_onsets( ...
-                [1; find(photodiode_onsets(2:end)-photodiode_offsets(1:end-1) > refresh_rate_cutoff) + 1]);
-
-            if length(stimOn_times) ~= numel(Protocol.seqnums)
-                error('MPEP/Photodiode error: photodiode doesn''t match stim')
-            end
-        end
-        stimIDs = zeros(size(stimOn_times));
-        for q = 1:size(Protocol.seqnums, 1)
-            stimIDs(Protocol.seqnums(q, :)) = q;
-        end
+    if debug 
+        samples_to_plot = 50000;
+        figure('Color', 'white');
+        clf
+        subplot(211)
+        title('photodiode')
+        hold on;
+        scatter(photodiode_flip(find(photodiode_flip <= samples_to_plot)), ones(size(find(photodiode_flip <= samples_to_plot), 1), 1), 8, 'filled')
+        plot(Timeline.rawDAQData(1:samples_to_plot, photodiode_idx))
+        xlabel('time (in samples)')
+        %plot(photodiode_trace_medfilt(1:samples_to_plot))
 
 
-%         figure();
-%         title('Photodiode channel');
-%         hold on;
-%         plot(photodiode_trace(1:120000));
-%         hold on;
-%         scatter(photodiode_flip(find(photodiode_flip <= 120000)), ones(size(find(photodiode_flip <= 120000), 1), 1))
-%         hold on;
-%         plot(Timeline.rawDAQData(1:120000, photodiode_idx))
-%         hold on;
-%         plot(photodiode_onsets);
-
+        subplot(212)
+        title('timeline flipper')
+        hold on;
+        plot(Timeline.rawDAQData(1:samples_to_plot/5, flipper_idx))
+        scatter(flipper_flip(find(flipper_flip <= samples_to_plot/5)), ones(size(find(flipper_flip <= samples_to_plot/5), 1), 1), 8, 'filled')
+        plot(flipper_trace(1:samples_to_plot/5))
+        xlabel('time (in samples)')
     end
 
 end
-%find
+
 
 %% Load task/behavior
 
@@ -1313,180 +1243,6 @@ if exist('Timeline', 'var') && load_parts.cam
 
 end
 
-%% Load imaging data
-
-[data_path, data_path_exists] = AP_cortexlab_filenameJF(animal, day, experiment, 'imaging');
-experiment_path = [data_path, filesep, num2str(experiment)];
-
-% (check for specific imaging file since data path is just root)
-spatialComponents_fns = dir([data_path, filesep, 'svdSpatialComponents*']);
-imaging_exists = ~isempty(spatialComponents_fns);
-
-if imaging_exists && load_parts.imaging
-    if verbose;
-        disp('Loading imaging data...');
-    end
-
-    % Get the imaging file locations
-    spatialComponents_dir = dir([data_path, filesep, 'svdSpatialComponents*']);
-    meanImage_dir = dir([data_path, filesep, 'meanImage*']);
-
-    cam_color_n = length(spatialComponents_dir);
-    cam_color_signal = 'blue';
-    cam_color_hemo = 'purple';
-
-    if cam_color_n == 1
-
-        U = readUfromNPY([data_path, filesep, spatialComponents_dir.name]);
-        V = readVfromNPY([experiment_path, filesep, strrep(spatialComponents_dir.name, 'Spatial', 'Temporal')]);
-        frame_t = cam_time;
-
-        % Get average framerate (nearest interger to prevent minor errors)
-        framerate = round(1./nanmean(diff(frame_t)));
-
-        % Detrend and high-pass filter
-        highpassCutoff = 0.01; % Hz
-        [b100s, a100s] = butter(2, highpassCutoff/(framerate / 2), 'high');
-        dV = detrend(V', 'linear')';
-        fV = single(filter(b100s, a100s, double(dV)')');
-
-        avg_im = readNPY([data_path, filesep, meanImage_dir.name]);
-
-    elseif cam_color_n == 2
-
-        % Load in all things as neural (n) or hemodynamic (h)
-        Un = readUfromNPY([data_path, filesep, 'svdSpatialComponents_', cam_color_signal, '.npy']);
-        Vn = readVfromNPY([experiment_path, filesep, 'svdTemporalComponents_', cam_color_signal, '.npy']);
-        dataSummary_n = load([data_path, filesep, 'dataSummary_', cam_color_signal, '.mat']);
-        avg_im_n = readNPY([data_path, filesep, 'meanImage_', cam_color_signal, '.npy']);
-
-        Uh = readUfromNPY([data_path, filesep, 'svdSpatialComponents_', cam_color_hemo, '.npy']);
-        Vh = readVfromNPY([experiment_path, filesep, 'svdTemporalComponents_', cam_color_hemo, '.npy']);
-        dataSummary_h = load([data_path, filesep, 'dataSummary_', cam_color_signal, '.mat']);
-        avg_im_h = readNPY([data_path, filesep, 'meanImage_', cam_color_hemo, '.npy']);
-
-        % Get frame timestamps (assume odd = blue, even = purple for now)
-        tn = cam_time(1:2:end);
-        th = cam_time(2:2:end);
-
-        % Get average framerate (nearest interger to prevent minor errors)
-        framerate = round(1./nanmean(diff(tn)));
-
-        % Correct hemodynamic signal in blue from green
-        % First need to shift alternating signals to be temporally aligned
-        % (shifts neural to hemo)
-        if verbose;
-            disp('Correcting hemodynamics...');
-        end
-
-        % Check if number of timeline frames matches imaged frames
-        cam_tl_imaged_diff = length(cam_time) - (size(Vn, 2) + size(Vh, 2));
-        if cam_tl_imaged_diff ~= 0
-            warning(sprintf( ...
-                '\n %s %s: %d timeline-imaged frames, assuming dropped at end', ...
-                animal, day, cam_tl_imaged_diff));
-        end
-
-        % Eliminate odd frames out (unpaired colors)
-        min_frames = min(size(Vn, 2), size(Vh, 2));
-        Vn = Vn(:, 1:min_frames);
-        tn = tn(1:min_frames);
-
-        Vh = Vh(:, 1:min_frames);
-        th = th(1:min_frames);
-
-        % This was to get rid of bad exposures: not sure I want this though
-        %         cam_expose_time_reshape = ...
-        %             reshape(cam_expose_times(1:end-mod(length(cam_expose_times),2)),2,[]);
-        %         bad_cam_expose = any(cam_expose_time_reshape > ...
-        %             median(cam_expose_time_reshape(:))*2,1);
-        %
-        %         if any(bad_cam_expose)
-        %             warning(['Bad cam expose time: ' num2str(find(bad_cam_expose)) '/' num2str(min_frames)]);
-        %             Vn = Vn(:,~bad_cam_expose);
-        %             tn = tn(~bad_cam_expose);
-        %
-        %             Vh = Vh(:,~bad_cam_expose);
-        %             th = th(~bad_cam_expose);
-        %         end
-
-        Vn_th = SubSampleShift(Vn, 1, 2);
-
-        Vh_Un = ChangeU(Uh, Vh, Un);
-
-        % Make/load hemo tform
-        hemo_tform_fn = [experiment_path, filesep, 'hemo_tform.mat'];
-        if exist(hemo_tform_fn, 'file')
-            % If the hemo tform matrix has been computed, load and fix
-            if verbose;
-                disp('Using old hemo tform...');
-            end
-            load(hemo_tform_fn)
-            zVh_Un = bsxfun(@minus, Vh_Un, nanmean(Vh_Un, 2));
-            Vn_hemo = transpose(Vn_th'-zVh_Un'*hemo_tform');
-        else
-            % If no hemo tform matrix, compute and save
-            if verbose;
-                disp('Computing hemo tform...');
-            end
-            hemo_freq = [5, 15];
-            skip_seconds = 20; % the beginning and end can be wonky
-            skip_frames = 1 + round(skip_seconds*framerate);
-            [~, hemo_tform] = HemoCorrectLocal(Un, ...
-                Vn_th(:, skip_frames:end-skip_frames-1), ...
-                Vh_Un(:, skip_frames:end-skip_frames-1), ...
-                framerate, hemo_freq, 3);
-
-            zVh_Un = bsxfun(@minus, Vh_Un, nanmean(Vh_Un, 2));
-            Vn_hemo = transpose(Vn_th'-zVh_Un'*hemo_tform');
-
-            save(hemo_tform_fn, 'hemo_tform');
-            % Close the figures (hacky - but function isn't mine)
-            close(gcf)
-            close(gcf)
-        end
-
-        if verbose;
-            disp('Filtering...');
-        end
-        % Don't bother filtering heartbeat, just detrend and highpass
-        % fVn_hemo = detrendAndFilt(Vn_hemo, framerate);
-        highpassCutoff = 0.01; % Hz
-        [b100s, a100s] = butter(2, highpassCutoff/(framerate / 2), 'high');
-
-        dVn_hemo = detrend(Vn_hemo', 'linear')';
-
-        % non-zero-lag filter, but causal (only moves forwards in time)
-        fVn_hemo = filter(b100s, a100s, dVn_hemo, [], 2);
-        % non-causal but zero-lag filter: changed because can introduce
-        % artifacts with single wonky points, also big changes propogate
-        % backwards in time which potentially gives bad causality
-        %fVn_hemo = single(filtfilt(b100s,a100s,double(dVn_hemo)')');
-
-        % Do this for the colors individually, in case they're used
-        dVn = detrend(Vn', 'linear')';
-        fVn = single(filter(b100s, a100s, double(dVn)')');
-
-        dVh = detrend(Vh', 'linear')';
-        fVh = single(filter(b100s, a100s, double(dVh)')');
-
-        % set final U/V to use
-        fV = fVn_hemo;
-        U = Un;
-        avg_im = avg_im_n;
-        frame_t = th; % shifted to use hemo color times
-
-    end
-    if verbose;
-        disp('Done.');
-    end
-
-    % Make dF/F
-    [Udf, fVdf] = dffFromSVD(U, fV, avg_im);
-    % zero out NaNs in the Udfs (from saturated pixels?)
-    Udf(isnan(Udf)) = 0;
-end
-
 %% Load ephys data (single long recording)
 
 % Pick kilosort version (2 by default, 1 old if selected)
@@ -2136,305 +1892,7 @@ if ephys_exists && load_parts.ephys && exist('lfp_channel', 'var')
     end
 end
 
-%% Estimate striatal boundaries on probe
 
-if ephys_exists && load_parts.ephys
-    %     if verbose;
-    %         disp('Estimating cortex boundaries on probe...');
-    %     end
-    %
-    %     % Cortex alignment: assume top of probe out of brain and very
-    %     % correlated, look for big drop in correlation from top-down
-    %     lfp_corr = corrcoef(double(transpose(lfp-nanmedian(lfp,1))));
-    %     lfp_corr_diag = lfp_corr;
-    %     lfp_corr_diag(triu(true(size(lfp_corr)),1)) = NaN;
-    %     lfp_corr_from_top = nanmean(lfp_corr_diag,2)';
-    %
-    %     n_lfp_medfilt = 5;
-    %     ctx_start = lfp_channel_positions( ...
-    %         find(medfilt1(lfp_corr_from_top,n_lfp_medfilt) > ...
-    %         sum(minmax(medfilt1(lfp_corr_from_top,n_lfp_medfilt)))*0.9,1,'last'));
-    %     disp(ctx_start)
-    % % [c,b]=histcounts(template_depths,20);
-    % % ctx_startJF = b(find(c(3:end)>max(c)*0.1, 1,'first')+2);
-    % % figure();
-    % % plot(b(1:end-1)+10,c)
-    % % hold on;
-    % % line([0 3840],[max(c)*0.1 max(c)*0.1])
-    %     if verbose
-    %         figure;
-    %         imagesc(lfp_channel_positions,lfp_channel_positions,lfp_corr_diag);
-    %         axis image
-    %         colormap(brewermap([],'*RdBu'));
-    %         caxis([-1,1])
-    %         xlabel('Depth (\mum)');
-    %         ylabel('Depth (\mum)');
-    %         c = colorbar;
-    %         ylabel(c,'Med. sub. correlation');
-    %         line(xlim,[ctx_start,ctx_start],'color','k','linewidth',2);
-    %         line([ctx_start,ctx_start],ylim,'color','k','linewidth',2);
-    %         title(sprintf('%s %s: LFP correlation and cortex start',animal,day));
-    %     end
-    %
-    %     % (if the detected cortex start is after the first unit, debug)
-    %     ctx_lfp_spike_diff = ctx_start-min(template_depths);
-    % %     if ctx_lfp_spike_diff > 100 % 100um leeway
-    % %         error('%s %s: LFP-estimated cortex start is after first unit %.0f um', ...
-    % %             animal,day,ctx_lfp_spike_diff);
-    % %     end
-    %
-    %
-    %     %%% If histology is aligned, get areas by depth
-    %     [probe_ccf_fn,probe_ccf_fn_exists] = AP_cortexlab_filenameJF(animal,[],[],'histo');
-    %     if ~probe_ccf_fn_exists
-    %         if verbose; disp('No histology alignment for probe...'); end
-    %     elseif probe_ccf_fn_exists
-    %         if verbose; disp('Estimating histology-aligned cortical areas on probe...'); end
-    %
-    %         % (load the CCF structure tree)
-    %         myPaths;
-    %         %allen_atlas_path = fileparts(which('template_volume_10um.npy'));
-    %         st = loadStructureTree([allenAtlasPath filesep 'allenCCF' filesep 'structure_tree_safe_2017.csv']);
-    %
-    %         % Load probe CCF alignment
-    %         load(probe_ccf_fn);
-    %
-    %         % Get area names and borders across probe
-    %         [~,dv_sort_idx] = sort(probe_ccf.trajectory_coords(:,2));
-    %         dv_voxel2um = 10*0.945; % CCF DV estimated scaling
-    %         probe_trajectory_depths = ...
-    %             pdist2(probe_ccf.trajectory_coords, ...
-    %             probe_ccf.trajectory_coords((dv_sort_idx == 1),:))*dv_voxel2um;
-    %
-    %         probe_depths = probe_trajectory_depths + ctx_start;
-    %
-    %         % Get recorded areas and boundaries (ignore layer distinctions)
-    %         probe_areas = unique(regexprep( ...
-    %             st(probe_ccf.trajectory_areas(probe_depths > 0 & ...
-    %             probe_depths < max(channel_positions(:,2))),:).safe_name, ...
-    %             ' layer .*',''));
-    %
-    %         probe_area_boundaries = cellfun(@(area) ...
-    %             minmax(probe_depths(contains( ...
-    %             st(probe_ccf.trajectory_areas,:).safe_name,area))), ...
-    %             probe_areas,'uni',false);
-    %     end
-
-    %     % str_align = alignment method ('none', 'depth', or 'kernel')
-    %
-    %     % requires n_aligned_depths for alignment, set default
-    %     if ~exist('n_aligned_depths', 'var')
-    %         n_aligned_depths = 3;
-    %     end
-    %
-    %     % if no alignment specified, default kernel
-    %     if ~exist('str_align', 'var')
-    %         str_align = 'kernel';
-    %     end
-    %     try
-    %         [str_depth, aligned_str_depth_group] = AP_align_striatum_ephysJF;
-    %     catch
-    %     end
-
-end
-
-%% Classify spikes
-
-%if ephys_exists && load_parts.ephys && exist('str_depth')
-%     if verbose;
-%         disp('Classifying spikes...');
-%     end
-%
-%     str_templates = template_depths >= str_depth(1) & template_depths <= str_depth(2);
-%     non_str_templates = ~str_templates;
-%
-%     % Define the window to look for spiking statistics in (spikes go in and
-%     % out, so take the bin with the largest firing rate for each cell and work
-%     % with that one)
-%     % spiking_stat_window = 60*5; % seconds
-%     % spiking_stat_bins = min(spike_times_timeline):spiking_stat_window: ...
-%     %     max(spike_times_timeline);
-%
-%     % % (for whole session)
-%     spiking_stat_window = max(spike_times_timeline) - min(spike_times_timeline);
-%     spiking_stat_bins = [min(spike_times_timeline), max(spike_times_timeline)];
-%
-%     % Get firing rate across the session
-%     bin_spikes = nan(size(templates, 1), ...
-%         length(spiking_stat_bins)-1);
-%     for curr_template = unique(spike_templates)'
-%         bin_spikes(curr_template, :) = ...
-%             histcounts(spike_times_timeline(spike_templates == curr_template), ...
-%             spiking_stat_bins);
-%     end
-%     min_spikes = 10;
-%     use_spiking_stat_bins = bsxfun(@ge, bin_spikes, prctile(bin_spikes, 80, 2)) & bin_spikes > min_spikes;
-%     spike_rate = sum(bin_spikes.*use_spiking_stat_bins, 2) ./ ...
-%         (sum(use_spiking_stat_bins, 2) * spiking_stat_window);
-%
-%     % Get proportion of ISI > 2s (Yamin/Cohen 2013) and CV2 (Stalnaker/Schoenbaum 2016)
-%     prop_long_isi = nan(size(templates, 1), 1);
-%     cv2 = nan(size(templates, 1), 1);
-%     for curr_template = unique(spike_templates)'
-%
-%         long_isi_total = 0;
-%         isi_ratios = [];
-%         for curr_bin = find(use_spiking_stat_bins(curr_template, :))
-%             curr_spike_times = spike_times_timeline( ...
-%                 spike_times_timeline > spiking_stat_bins(curr_bin) & ...
-%                 spike_times_timeline < spiking_stat_bins(curr_bin+1) & ...
-%                 spike_templates == curr_template);
-%             curr_isi = diff(curr_spike_times);
-%
-%             long_isi_total = long_isi_total + sum(curr_isi(curr_isi > 2));
-%
-%             isi_ratios = [isi_ratios; (2 * abs(curr_isi(2:end)-curr_isi(1:end-1))) ./ ...
-%                 (curr_isi(2:end) + curr_isi(1:end-1))];
-%         end
-%
-%         prop_long_isi(curr_template) = long_isi_total / ...
-%             (sum(use_spiking_stat_bins(curr_template, :)) * spiking_stat_window);
-%         cv2(curr_template) = nanmean(isi_ratios);
-%
-%     end
-%
-%     % Cortical classification (like Bartho JNeurophys 2004)
-%     waveform_duration_cutoff = 400;
-%     narrow = non_str_templates & templateDuration_us <= waveform_duration_cutoff;
-%     wide = non_str_templates & templateDuration_us > waveform_duration_cutoff;
-%
-%     % Striatum classification
-%     prop_long_isi_cutoff = 0.35;
-%     cv2_cutoff = 0.8;
-%
-%     msn = str_templates & ...
-%         templateDuration_us > waveform_duration_cutoff & ...
-%         prop_long_isi >= prop_long_isi_cutoff;
-%
-%     fsi = str_templates & ...
-%         templateDuration_us <= waveform_duration_cutoff & ...
-%         prop_long_isi < prop_long_isi_cutoff;
-%
-%     tan = str_templates & ...
-%         templateDuration_us > waveform_duration_cutoff & ...
-%         prop_long_isi < prop_long_isi_cutoff;
-%
-%     uin = str_templates & ~msn & ~fsi & ~tan;
-%
-%     waveform_t = 1e3 * ((0:size(templates, 2) - 1) / ephys_sample_rate);
-%
-%     if verbose
-%
-%         % Plot the waveforms and spike statistics
-%         figure;
-%
-%         if any(non_str_templates)
-%             subplot(2, 2, 1);
-%             hold on;
-%             p = plot(waveform_t, waveforms(non_str_templates, :)');
-%             set(p(wide(non_str_templates)), 'color', 'k')
-%             set(p(narrow(non_str_templates)), 'color', 'r')
-%             xlabel('Time (ms)')
-%             title('Not striatum');
-%             legend([p(find(wide(non_str_templates), 1)), p(find(narrow(non_str_templates), 1))], {'Wide', 'Narrow'})
-%         end
-%
-%         subplot(2, 2, 2);
-%         hold on;
-%         p = plot(waveform_t, waveforms(str_templates, :)');
-%         set(p(msn(str_templates)), 'color', 'm')
-%         set(p(fsi(str_templates)), 'color', 'b')
-%         set(p(tan(str_templates)), 'color', 'g')
-%         set(p(uin(str_templates)), 'color', 'c')
-%         xlabel('Time (ms)')
-%         title('Striatum');
-%         legend([p(find(msn(str_templates), 1)), p(find(fsi(str_templates), 1)), ...
-%             p(find(tan(str_templates), 1)), p(find(uin(str_templates), 1))], {'MSN', 'FSI', 'TAN', 'UIN'});
-%
-%         subplot(2, 2, 3);
-%         hold on;
-%
-%         stem3( ...
-%             templateDuration_us(wide)/1000, ...
-%             prop_long_isi(wide), ...
-%             spike_rate(wide), 'k');
-%
-%         stem3( ...
-%             templateDuration_us(narrow)/1000, ...
-%             prop_long_isi(narrow), ...
-%             spike_rate(narrow), 'r');
-%
-%         xlabel('waveform duration (ms)')
-%         ylabel('frac long ISI')
-%         zlabel('spike rate')
-%
-%         set(gca, 'YDir', 'reverse')
-%         set(gca, 'XDir', 'reverse')
-%         view(3);
-%         grid on;
-%         axis vis3d;
-%
-%         subplot(2, 2, 4);
-%         hold on;
-%         stem3( ...
-%             templateDuration_us(msn)/1000, ...
-%             prop_long_isi(msn), ...
-%             spike_rate(msn), 'm');
-%
-%         stem3( ...
-%             templateDuration_us(fsi)/1000, ...
-%             prop_long_isi(fsi), ...
-%             spike_rate(fsi), 'b');
-%
-%         stem3( ...
-%             templateDuration_us(tan)/1000, ...
-%             prop_long_isi(tan), ...
-%             spike_rate(tan), 'g');
-%
-%         stem3( ...
-%             templateDuration_us(uin)/1000, ...
-%             prop_long_isi(uin), ...
-%             spike_rate(uin), 'c');
-%
-%         xlabel('waveform duration (ms)')
-%         ylabel('frac long ISI')
-%         zlabel('spike rate')
-%
-%         set(gca, 'YDir', 'reverse')
-%         set(gca, 'XDir', 'reverse')
-%         view(3);
-%         grid on;
-%         axis vis3d;
-%
-%         % Plot depth vs. firing rate colored by cell type
-%         celltype_labels = {'Wide', 'Narrow', 'MSN', 'FSI', 'TAN', 'UIN'};
-%         celltypes = wide .* 1 + narrow .* 2 + msn .* 3 + fsi .* 4 + tan .* 5 + uin .* 6;
-%         use_colors = ...
-%             [0, 0, 0; ...
-%             1, 0, 0; ...
-%             1, 0, 1; ...
-%             0, 0, 1; ...
-%             0, 1, 0; ...
-%             0, 1, 1];
-%
-%         plot_celltypes = any([wide, narrow, msn, fsi, tan, uin], 1);
-%
-%         norm_spike_n = mat2gray(log10(accumarray(spike_templates, 1)+1));
-%
-%         figure('Position', [94, 122, 230, 820]);
-%         gscatter(norm_spike_n, template_depths, celltypes, use_colors, [], 10);
-%         xlim([0, 1])
-%         set(gca, 'YDir', 'reverse');
-%         xlabel('Norm log_{10} spike rate');
-%         ylabel('Depth (\mum)');
-%         legend(celltype_labels(plot_celltypes), 'location', 'NW');
-%         ylim([0, max(channel_positions(:, 2))])
-%
-%         drawnow;
-%
-%     end
-
-%end
 
 %% Finished
 if verbose
