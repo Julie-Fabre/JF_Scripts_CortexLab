@@ -8,7 +8,7 @@ import scipy as sp
 import numpy as np
 
 add_default_handler(level='INFO') # print output as the algorithm runs
-probe_dir = {'1':np1_probe(), '2':np2_probe()}
+#probe_dir = {'1':np1_probe(), '2':np2_probe()}
 
 
 mouse_date = [
@@ -48,12 +48,12 @@ for mat in chanmap_path_mat:
     except:
         raise ValueError(f"Impossible to load {chanmap_path / mat} for some reason.")
 
-    if len(mat_file['xcoords']) == 385:
+    if len(mat_file['xcoords']) == 385: # remove flipper (sync) channel
         channel_maps[mat] = {
         "xcoords":mat_file['xcoords'].squeeze()[:-1],
         "ycoords":mat_file['ycoords'].squeeze()[:-1],
         }
-    else:
+    else: # flipper not recorded in old open ephys 3a data
         channel_maps[mat] = {
         "xcoords":mat_file['xcoords'].squeeze(),
         "ycoords":mat_file['ycoords'].squeeze(),
@@ -63,7 +63,7 @@ for mat in chanmap_path_mat:
 def read_metafile(datapath):
 
     metafile = [f for f in Path(datapath).iterdir() if ".ap.meta" in f.name and "tcat" not in f.name]
-    isOpenEphys3A = False
+    #   isOpenEphys3A = False
 
     # if len(metafile) == 1: #check if data is in open ephys format
     #     datapath = Path(datapath / "experiment1")
@@ -74,7 +74,7 @@ def read_metafile(datapath):
     #     else:
     #         print("no")
 
-    assert len(metafile) == 1 and not isOpenEphys3A, f".ap.meta file not found or too many .ap.meta at {datapath}!"
+    assert len(metafile) == 1, f".ap.meta file not found or too many .ap.meta at {datapath}!"
 
     meta_glx = {}
 
@@ -119,8 +119,7 @@ for p in mouse_paths:
             assert('pykilosort can''t handle open ephys 3A data')
         else:
             isOpenEphys3A = False
-        # meta = read_metafile(input_path)
-        # imro_table = meta["~imroTbl"]
+
         if not isOpenEphys3A:
             meta_glx = read_metafile(input_path)
             imro_name = meta_glx["imRoFile"]
@@ -158,15 +157,13 @@ for p in mouse_paths:
             chanmap = "chanMapNP2_4Shank_bottRow_shank3_flipper0x2Emat_kilosortChanMap.mat"
         elif "NPtype3B_" in imro_name:
             chanmap = "chanMapNP1_bottRow_flipper.mat"
-        elif "NPtype3A" in imro_name:#doesn't work, returns error
+        elif "NPtype3A" in imro_name:
             chanmap = "chanMapNP1_bottRow.mat"
             input_path = openEphys_path
         else:
             print(f"No pattern found in {imro_name}!")
 
-        #print(f"- chan map: {chanmap}")
 
-        #print(channel_maps[chanmap])
         xc = channel_maps[chanmap]["xcoords"]
         yc = channel_maps[chanmap]["ycoords"]
         if not isOpenEphys3A:

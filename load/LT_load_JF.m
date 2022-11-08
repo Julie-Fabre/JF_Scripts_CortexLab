@@ -41,7 +41,7 @@ ephysDirPath = AP_cortexlab_filenameJF(animal, day, experiment, 'ephys_dir', sit
 savePath = fullfile(ephysDirPath, 'qMetrics');
 qMetricsExist = dir(fullfile(savePath, 'qMetric*.mat'));
 
-AP_load_experimentJF;
+JF_load_experiment;
 curr_shank=NaN;
 
 AP_cellrasterJF({stimOn_times, stimOn_times, stimOn_times}, ...

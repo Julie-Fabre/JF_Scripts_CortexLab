@@ -668,7 +668,7 @@ if ephys_exists && load_parts.ephys
             template_labelM = good_templates_idx(ismember(good_templates_idx, template_label_mua));
             template_labelG = good_templates_idx(ismember(good_templates_idx, template_label_good));
 
-            [good_templates, ~] = ismember(0:size(templates, 1)-1, good_templates_idx);
+            [good_templates, ~ = ismember(0:size(templates, 1)-1, good_templates_idx);
             [good_templatesG, ~] = ismember(0:size(templates, 1)-1, template_labelG);
             [good_templatesM, ~] = ismember(0:size(templates, 1)-1, template_labelM);
 
