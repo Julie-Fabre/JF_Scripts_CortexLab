@@ -10,7 +10,7 @@ if length(signals_events.stimOnTimes) < length(stimOn_times) % too many photodio
     iti_violations = diff(photodiode_flip_times(2:2:end)) < (min_ITI * timeline_sample_rate - buffer_samples);
     if any(iti_violations)
         stimOn_times(logical([0; iti_violations])) = []; % remove culprit
-        stimOn_times(logical([iti_violations])) = NaN; % NaN-out the time of closest culprit too- this time can't be trusted
+        stimOn_times(logical(iti_violations)) = NaN; % NaN-out the time of closest culprit too- this time can't be trusted
     end
     if length(signals_events.stimOnTimes) < length(stimOn_times) % if no violation or correction didn't work
         % else, use x first photodiode flips
@@ -47,7 +47,9 @@ signals_photodiode_iti_diff = diff(signals_events.stimOnTimes(2:end)) - diff(sti
 if any(signals_photodiode_iti_diff > 0.1)
     warning('mismatching signals/photodiode stim ITIs')
 end
-% - ITI s makes sense 
+% - ITI s makes sense % QQ implement correction for this - happens sometimes 
+% "fast flips" of photodiode - especially present with short stimon times
+% and short itis
 timeline_sample_rate = 0.001;
 buffer_samples = 200;
 min_ITI = min(signals_events.stimITIsValues);
@@ -55,5 +57,5 @@ max_ITI = max(signals_events.stimITIsValues);
 photodiode_iti = diff(stimOn_times);
 if any(photodiode_iti < (min_ITI * timeline_sample_rate - buffer_samples)) ||...
         any(photodiode_iti > (min_ITI * timeline_sample_rate + buffer_samples))
-    warning('unusual ITIs')
+    warning('unusual ITIs - not correcting this yet')
 end

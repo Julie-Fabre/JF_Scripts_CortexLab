@@ -2,25 +2,6 @@
 % (once I saw some weird extra flip at the end of an
 % experiment? so added case to only use first n flips)
 
-% sanity checks
-% - times between stim on times in signals
-signals_photodiode_iti_diff = diff(signals_events.stimOnTimes(2:end)) - diff(stimOn_times) - 0.5';
-if any(signals_photodiode_iti_diff > 0.1)
-    warning('mismatching signals/photodiode stim ITIs')
-end
-% - ITI s makes sense 
-timeline_sample_rate = 0.001;
-buffer_samples = 200;
-min_ITI = min(signals_events.stimITIsValues);
-max_ITI = max(signals_events.stimITIsValues);
-photodiode_iti = diff(stimOn_times);
-if any(photodiode_iti < (min_ITI * timeline_sample_rate - buffer_samples)) ||...
-        any(photodiode_iti > (min_ITI * timeline_sample_rate + buffer_samples))
-    warning('mismatching signals/photodiode stim ITIs')
-end
-% - stim on duration makes sense 
-
-
 % correct for incorrect photodiode flip number 
 if length(signals_events.stimOnTimes) < length(stimOn_times) % too many photodiode flips
     warning([animal, ' ', day, ': different stim number signals and photodiode']);
@@ -58,4 +39,22 @@ elseif length(signals_events.stimOnTimes) > length(stimOn_times) % some photodio
         stimOn_times = stimOn_times(1:length(signals_events.stimOnTimes));
     end
 
+end
+
+% sanity checks
+% - times between stim on times in signals
+signals_photodiode_iti_diff = diff(signals_events.stimOnTimes(2:end)) - diff(stimOn_times) - 0.5';
+if any(signals_photodiode_iti_diff > 0.1)
+    warning('mismatching signals/photodiode stim ITIs')
+end
+% - ITI s makes sense % QQ implement correction for this - happens sometimes 
+% "fast flips" of photodiode - e
+timeline_sample_rate = 0.001;
+buffer_samples = 200;
+min_ITI = min(signals_events.stimITIsValues);
+max_ITI = max(signals_events.stimITIsValues);
+photodiode_iti = diff(stimOn_times);
+if any(photodiode_iti < (min_ITI * timeline_sample_rate - buffer_samples)) ||...
+        any(photodiode_iti > (min_ITI * timeline_sample_rate + buffer_samples))
+    warning('unusual ITIs')
 end

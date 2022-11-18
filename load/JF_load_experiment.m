@@ -16,7 +16,7 @@ if ~exist('verbose', 'var')
     verbose = false;
 end
 
-%% Debug mode: plot a buc=nch of useful stuff 
+%% Debug mode: plot a buc=nch of useful stuff
 if ~exist('debug', 'var')
     debug = false;
 end
@@ -97,7 +97,7 @@ if timeline_exists
         diff(smooth(wheel_position, wheel_smooth_samples)), Timeline.rawDAQTimestamps)';
 
     % Get whether stim was flickering - this is only for when widefiled is
-    % combined 
+    % combined
     stimScreen_idx = strcmp({Timeline.hw.inputs.name}, 'stimScreen');
     if any(stimScreen_idx)
         stimScreen_flicker = max(Timeline.rawDAQData(:, stimScreen_idx)) - ...
@@ -122,7 +122,7 @@ if timeline_exists
     photodiode_flip = find(~photodiode_trace_diff(1:end-1) & ...
         photodiode_trace_diff(2:end)) + photodiode_diff_samples + 1;
     photodiode_flip_times = stimScreen_on_t(photodiode_flip)';
- 
+
 
     % Get flipper signal (this was added late, might not be present)
     flipper_name = 'flipper';
@@ -133,7 +133,7 @@ if timeline_exists
         (flipper_trace(1:end-1) & ~flipper_trace(2:end))) + 1;
     flipper_flip_times_timeline = Timeline.rawDAQTimestamps(flipper_flip)';
 
-    if debug 
+    if debug
         samples_to_plot = 105000;
         figure('Color', 'white');
         clf
@@ -157,7 +157,6 @@ if timeline_exists
 
 end
 
-
 %% Load task/behavior
 
 % Load the block
@@ -173,7 +172,7 @@ if block_exists
 
     signals_events = block.events;
 
-    % If reward information exists, use that to align signals/timeline
+    % For task behavior data, if reward information exists, use that to align signals/timeline
     % (bad now because manual reward possible - use flipper in future)
     if exist('Timeline', 'var') && isfield(block.outputs, 'rewardTimes')
         reward_t_block = block.outputs.rewardTimes(block.outputs.rewardValues > 0);
@@ -183,9 +182,16 @@ if block_exists
         reward_trace = Timeline.rawDAQData(:, timeline_reward_idx) > reward_thresh;
         reward_t_timeline = Timeline.rawDAQTimestamps(find(reward_trace(2:end) & ~reward_trace(1:end-1))+1);
 
-        % If there's a different number of block and timeline rewards (aka
-        % manual rewards were given), try to fix this
-        if length(reward_t_block) ~= length(reward_t_timeline)
+        if length(reward_t_block) == length(reward_t_timeline) && ...
+                ~isempty(reward_t_block)
+            % If same number of timeline/block rewards, use those for sync
+            timeline2block = reward_t_timeline;
+            block2timeline = reward_t_block;
+
+        elseif length(reward_t_block) ~= length(reward_t_timeline) && ...
+                ~isempty(reward_t_block)
+            % If there's a different number of block and timeline rewards (aka
+            % manual rewards were given), try to fix this
             % (this is really inelegant but I think works - find the most
             % common offset between block/timeline rewards)
             reward_t_offset = bsxfun(@minus, reward_t_block', reward_t_timeline);
@@ -199,11 +205,35 @@ if block_exists
                 manual_timeline_rewards = sum(reward_t_offset_binary, 1) == 0;
                 reward_t_timeline(manual_timeline_rewards) = [];
                 warning('Manual rewards included - removed successfully');
+
+                timeline2block = reward_t_timeline;
+                block2timeline = reward_t_block;
             else
                 % otherwise, you're in trouble
                 error('Manual rewards included - couldn''t match to block');
             end
         end
+    elseif isempty(reward_t_block)
+        % If no rewards: probably much less robust, but use stim on
+        % times and photodiode flips
+        warning('No rewards, aligning block with estimated stimOn times');
+        stim_t_offset = block.events.stimOnTimes' - photodiode_flip_times';
+        blunt_stim_offset = mode(round(stim_t_offset(:)*10)) / 10;
+        stim_t_offset_shift = stim_t_offset - blunt_stim_offset;
+        t_offset_tolerance = 0.05;
+        stim_t_offset_binary = abs(stim_t_offset_shift) < t_offset_tolerance;
+        stim_tl_block_matched = sum(stim_t_offset_binary, 2) == 1;
+        if nanmean(stim_tl_block_matched) > 0.9
+            % (if 90% stim matched, use this)
+            [~, estimated_stimOn_idx] = max(stim_t_offset_binary, [], 2);
+
+            timeline2block = photodiode_flip_times(estimated_stimOn_idx(stim_tl_block_matched));
+            block2timeline = block.events.stimOnTimes(stim_tl_block_matched);
+        else
+            % (if >10% unmatched, don't use)
+            error('Attempted stim on alignment - bad match');
+        end
+
 
         % Go through all block events and convert to timeline time
         % (uses reward as reference)
@@ -216,17 +246,14 @@ if block_exists
                 continue
             end
             signals_events.(block_fieldnames{curr_times}) = ...
-                interp1(reward_t_block, reward_t_timeline, block.events.(block_fieldnames{curr_times}), 'linear', 'extrap');
+                interp1(block2timeline, timeline2block, block.events.(block_fieldnames{curr_times}), 'linear', 'extrap');
         end
     end
-    
+
     % SPECIFIC TO PROTOCOL
-    JF_pull_signals; 
-    if debug 
+    JF_pull_signals;
+    if debug
     end
-
-   
-
 end
 
 %% Load face/eyecam and processing
@@ -400,6 +427,9 @@ if ephys_exists && load_parts.ephys
     end
 
     % Load sync/photodiode
+    if isempty(dir([ephys_path, filesep, 'sync.mat']))
+        error('No SYNC - extract sync before continuing')
+    end
     load(([ephys_path, filesep, 'sync.mat']));
 
     % Read header information
@@ -629,8 +659,8 @@ if ephys_exists && load_parts.ephys
         dontAnalyze = 0;
         % Get spike times in timeline time
         spike_times_timeline = interp1(sync_ephys, sync_timeline, spike_times, 'linear', 'extrap');
-%         co = robustfit(sync_ephys, sync_timeline);
-%          spike_times_timeline = spike_times * co(2) + co(1);
+        %         co = robustfit(sync_ephys, sync_timeline);
+        %          spike_times_timeline = spike_times * co(2) + co(1);
     end
     % Get "good" templates from labels
     if exist('cluster_groups', 'var') && loadClusters
@@ -1012,8 +1042,6 @@ if ephys_exists && load_parts.ephys && exist('lfp_channel', 'var')
         end
     end
 end
-
-
 
 %% Finished
 if verbose
