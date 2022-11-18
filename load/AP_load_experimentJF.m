@@ -122,21 +122,6 @@ if timeline_exists
         photodiode_trace_diff(2:end)) + photodiode_diff_samples + 1;
     photodiode_flip_times = stimScreen_on_t(photodiode_flip)';
     
-%             figure();
-%             clf;
-%             valu = 100000;
-%             title('Photodiode');
-%             hold on;
-%             plot(photodiode_trace(1:valu));
-%             hold on;
-%             scatter(photodiode_flip(find(photodiode_flip <= valu)), ones(size(find(photodiode_flip <= valu), 1), 1))
-%             hold on;
-%             plot(Timeline.rawDAQData(1:valu, photodiode_idx))
-%             hold on;
-%             plot(medfilt1(Timeline.rawDAQData(1:valu, ...
-%                 photodiode_idx), 3))
-%             hold on;
-%             pp = photodiode_flip(find(photodiode_flip <= valu));
 
     % Get flipper signal (this was added late, might not be present)
     flipper_name = 'flipper';

@@ -25,7 +25,7 @@ experiments = experiments([experiments.ephys]);
 
 %% Load data from experiment 
 
-curr_day = 3; % (set which day to use)
+curr_day = 1; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
@@ -35,7 +35,7 @@ load_parts.cam=false;
 load_parts.imaging=false;
 load_parts.ephys=true;
 
-site = 2;%1,1; 2,4; 3,7
+site = 1;%1,1; 2,4; 3,7
 recording = []; 
 experiment = experiments(curr_day).experiment(end);
 loadClusters = 0;
@@ -66,7 +66,7 @@ qMetricsExist = dir(fullfile(savePath, 'qMetric*.mat'));
 % end
 clearvars unitType 
 %load_parts.cam = true;
-AP_load_experimentJF;
+JF_load_experiment;
 curr_shank=NaN;
 
 trial_conditions(ismember(trial_conditions(:,1), [4]),1) = 4; % go 1
