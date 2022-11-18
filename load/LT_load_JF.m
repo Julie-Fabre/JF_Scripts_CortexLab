@@ -17,7 +17,7 @@ load_parts.imaging=false; % this is if we had widefield data
 load_parts.ephys=true; % load kilosorted data
 
 site = 1;
-recording = []; 
+recording = []; % if we had several recordings of the same site 
 experiment = experiments(curr_day).experiment(site);
 
 loadClusters = 0; % whether to load keep 'good units' as defined by quality metrics or manual curation, if those exist
