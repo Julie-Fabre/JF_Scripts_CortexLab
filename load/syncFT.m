@@ -16,8 +16,15 @@ try
 catch 
     try
         warning('saving to local disk')
-        mkdir(['/media/experiment/HDD/' AP_filename '/'])
-        save(sprintf('%s//sync.mat',['/media/experiment/HDD/' AP_filename '/']),'sync');
+        if ~isempty(outputDir)
+            folderHierarchy = strsplit(outputDir, filesep);
+            mkdir(fullfile('/media/julie/ExtraHD/', folderHierarchy{5:end}))
+            save(sprintf('%s//sync.mat',fullfile('/media/julie/ExtraHD/', folderHierarchy{5:end})),'sync');
+        else
+            folderHierarchy = strsplit(AP_filename, filesep);
+            mkdir(fullfile('/media/julie/ExtraHD/', folderHierarchy{5:end-1}))
+            save(sprintf('%s//sync.mat',fullfile('/media/julie/ExtraHD/', folderHierarchy{5:end-1})),'sync');
+        end
     catch
         warning('saving error')
     end

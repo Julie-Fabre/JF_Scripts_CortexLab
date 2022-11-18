@@ -1,7 +1,7 @@
 
 %% Find experiments with the task + cortical widefield + striatal ephys
 %close all;
-clear all;
+%clear all;
 myPaths;
 
 animals={'JF070'};
@@ -9,7 +9,7 @@ curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};
 
-protocol = 'choiceworld'; % (this is the name of the Signals protocol)
+protocol = ''; % (this is the name of the Signals protocol)
 experiments = AP_find_experimentsJF(animal, protocol, true);
 experiments = experiments([experiments.ephys]);
 
@@ -25,7 +25,7 @@ experiments = experiments([experiments.ephys]);
 
 %% Load data from experiment 
 
-curr_day = 2; % (set which day to use)
+curr_day = 3; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
@@ -35,7 +35,7 @@ load_parts.cam=false;
 load_parts.imaging=false;
 load_parts.ephys=true;
 
-site = 1;%1,1; 2,4; 3,7
+site = 2;%1,1; 2,4; 3,7
 recording = []; 
 experiment = experiments(curr_day).experiment(end);
 loadClusters = 0;
@@ -69,13 +69,12 @@ clearvars unitType
 AP_load_experimentJF;
 curr_shank=NaN;
 
-
-trial_conditions(~ismember(trial_conditions(:,1), [4,6,7]),1) = 1;
 trial_conditions(ismember(trial_conditions(:,1), [4]),1) = 4; % go 1
 trial_conditions(ismember(trial_conditions(:,1), [7]),1) = 7; % go 2
 trial_conditions(ismember(trial_conditions(:,1), [6]),1) = 10; % no go
+trial_conditions(~ismember(trial_conditions(:,1), [4,7,10]),1) = 1;
 %thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions, [4,7,10]) & trial_conditions(:,2)~=90;
-thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions, [4,7,10]) & trial_conditions(:,2)~=90;
+thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions, [4,7,10]);
 
 
 

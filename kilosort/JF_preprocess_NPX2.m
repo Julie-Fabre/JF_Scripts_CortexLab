@@ -41,8 +41,8 @@ saveDir = dir(saveFile);
 if isempty(saveDir)
     mkdir(saveFile)
 end
-
-kilosortExists = dir(fullfile(saveFile, 'spike_times.npy'));
+pyKS_saveFile = [toot, filesep, 'pykilosort' filesep, 'site', num2str(site), filesep, 'output', filesep];
+kilosortExists = dir(fullfile(saveFile, 'spike_times.npy')) || dir(fullfile(pyKS_saveFile, 'spike_times.npy'));
 if isempty(kilosortExists) || rerunKS
     master_kilosort;
 end
@@ -81,7 +81,7 @@ end
 
 %% run quality metrics
 ephysPath = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys', site, recording);
-ephysPath = strrep(ephysPath, 'kilosort2', 'kilosort2');
+%ephysPath = strrep(ephysPath, 'kilosort2', 'kilosort2');
 ephysap_path = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_ap', site, recording);
 ephysDirPath = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_dir',site, recording);
 savePath = fullfile(ephysDirPath, 'qMetrics');

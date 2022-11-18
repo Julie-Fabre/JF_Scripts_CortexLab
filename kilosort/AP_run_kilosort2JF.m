@@ -14,7 +14,7 @@ function AP_run_kilosort2JF(data_filename,sample_rate,save_path,t_range,ephysTyp
 %% Run Kilosort
 
 % Run config script to get options
-AP_kilosort2_config_IMEC_P3O2JF
+AP_kilosort2_config_IMEC_P3O2JF;
 
 tic;
 if ops.GPU     

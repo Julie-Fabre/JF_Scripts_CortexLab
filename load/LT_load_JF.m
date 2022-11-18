@@ -2,14 +2,14 @@
 %% Find experiments with the task
 myPaths;
 animal = 'JF086'; % mouse 
-protocol = 'Grating'; % (this is the name of the Signals protocol) protcols live here: zserver/Code/Rigging/ExpDefinitions/JulieF/passiveWorld/visualResponsesNaiveBgg
+protocol = 'rating'; % (this is the name of the Signals protocol) protcols live here: zserver/Code/Rigging/ExpDefinitions/JulieF/passiveWorld/visualResponsesNaiveBgg
 %protocol = ''; % find all experiments, regardless of expdef name 
 experiments = AP_find_experimentsJF(animal, protocol, true); % find experiments that contain protocol string 
 experiments = experiments([experiments.ephys]); % QQ uncomment me  % only keep ephys experiments 
 
 %% Load data from experiment 
 
-curr_day = 2; % (set which day to use)
+curr_day = 1; % (set which day to use)
 day = experiments(curr_day).day; % date
 verbose = false; % display load progress and some info figures
 load_parts.cam=false;
@@ -18,7 +18,7 @@ load_parts.ephys=true; % QQ change me
 
 site = 1;%1,1; 2,4; 3,7
 recording = []; 
-experiment = experiments(curr_day).experiment(1);
+experiment = experiments(curr_day).experiment(site);
 
 loadClusters = 0; % whether to load keep 'good units' as defined by quality metrics or manual curation, if those exist
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,day,experiment,'ephys_includingCompressed',site,recording);

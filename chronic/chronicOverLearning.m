@@ -6,10 +6,10 @@ animalsAll = {'JF051', 'JF067', 'JF078', 'JF082', 'JF084'};
 % DMS, DMS, DMS + SNr, 
 implantDays = {'2021-08-27', '2022-01-24', '2021-05-20', '2021-07-20'};
 plotDriftMap = 0;
-plotActivity = 1;
+plotActivity = 0;
 ex = [];
 depths = {{[]}, {[]}, {[0, 1200]}, {[2000,3900]}}; %add 1400:2800: MRN
-thisAnimal = 3;
+thisAnimal = 4;
 allGoogleSheetIDs = {'', '', '1U7mHq17fvQGeBUtLUz2ShpVfvNo63eyk7XRMop5ueJU', '1r72NLuMsqaN-Hs1pBd_-bpVl7d0nvT-MUbqVbhmWBwg'}; %need sharing with link to be enabled, as commenter is fine
 
 %% chronic plots

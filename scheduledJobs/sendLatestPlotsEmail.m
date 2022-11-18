@@ -1,22 +1,23 @@
 
 %For this to work in Gmail you must allow less secure connections in gmail.
-
+mice = {'JF089', 'JF090'};
+ephys = [1, 1];
+behav = [0, 0];
 %% generate plots 
 close all;
 errors = '';
 thisDate = datestr(datetime('today', 'Format', 'yyyy-MM-dd'), 'yyyy-mm-dd');
 % run KS
 try
-    JF_preprocess_NPX2('JF082', thisDate, 'neuropixPhase3B1_kilosortChanMap.mat', 1, 1, [],1);
-    JF_preprocess_NPX2('JF082', thisDate, 'neuropixPhase3B1_kilosortChanMap.mat', 1, 2, [],1);
-
-    JF_preprocess_NPX2('JF082', thisDate, 'neuropixPhase3B1_kilosortChanMap.mat', 1, 3, [],1);
-    JF_preprocess_NPX2('JF082', thisDate, 'neuropixPhase3B1_kilosortChanMap.mat', 1, 4, [],1);
+    JF_preprocess_NPX2('JF089', thisDate, '', 1, 1, [],1);
+    JF_preprocess_NPX2('JF090', thisDate, '', 1, 1, [],1);
+    JF_preprocess_NPX2('JF089', thisDate, '', 1, 1, [],2);
 catch
     errors = [errors, 'error KSing '];
 end
 % get behavior + save plots
 try
+    if behav(1)
     close all;
     if thisDate > datetime(2022,02,26) %Laura starts training 
         bhvData = noGoWorld_behavior({'JF072', 'JF075', 'JF076', 'JF077'}); %behavior plots
@@ -52,12 +53,14 @@ try
         websave(['~/Documents/cronJobPlots/', thisDate, '_JF067_weight.html'],'https://alyx.cortexlab.net/admin-actions/water-history/83c1549c-8ad4-42d5-adf7-0ca9280a5070');
   
     end
-    
+    end
 catch
     errors = [errors, 'error behavior '];
+    
 end
 % get PSTH
 try
+    if behav(1)
     chronicOverLearning;% get chronic over learning plots 
     saveas(figure(3), ['~/Documents/cronJobPlots/', thisDate, '_JF067_driftMap.png'])%save behavior plots 
     saveas(figure(2), ['~/Documents/cronJobPlots/', thisDate, '_JF067_unitNumbers.png'])%save behavior plots 
@@ -66,6 +69,7 @@ try
     pause(30)
     saveas(figure(4), ['~/Documents/cronJobPlots/', thisDate, '_JF067_PSTH.png'])%save behavior plots 
     close all;
+    end
 catch
     errors = [errors, 'error PSTH '];
 end

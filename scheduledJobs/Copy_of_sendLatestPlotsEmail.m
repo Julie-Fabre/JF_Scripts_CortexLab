@@ -1,6 +1,8 @@
 
 %For this to work in Gmail you must allow less secure connections in gmail.
-
+mice = {'JF089', 'JF090'};
+ephys = [1, 1];
+behav = [0, 0];
 %% generate plots 
 close all;
 errors = '';
@@ -120,7 +122,7 @@ end
 %% send plots by email 
 message = ['Hey Julie, ' newline joke newline 'Here are your behavior and PSTH plots for ', thisDate '.' newline errors newline 'Cheers,' newline 'Automated Julie'];
 message2 = ['Hey Julie, ' newline joke2 newline 'Here are your behavior plots for ', thisDate '.' newline errors newline 'Cheers,' newline 'Automated Julie'];
-sendmail(credentials.mailto{:}, [thisDate ' JF067 plots '], message, theseAttachedPlots)
+sendmail(credentials.mailto{:}, [thisDate ' JF082 plots '], message, theseAttachedPlots)
 sendmail(credentials.mailto{:}, [thisDate ' acute mice training plots '], message2, theseAttachedAcutePlots)
 
 %%

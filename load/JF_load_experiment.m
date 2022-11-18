@@ -134,7 +134,7 @@ if timeline_exists
     flipper_flip_times_timeline = Timeline.rawDAQTimestamps(flipper_flip)';
 
     if debug 
-        samples_to_plot = 50000;
+        samples_to_plot = 105000;
         figure('Color', 'white');
         clf
         subplot(211)
