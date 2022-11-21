@@ -8,7 +8,22 @@ if isSpikeGLX
     if unique(sync) < 2
         error('check flipper was inputed in correct IMEC card')
     end
-    sample_rate = 30000; % IMEC sample rate.
+    ephys_sample_rate = 30000; % IMEC sample rate.
+
+    % construct timestamps for flipper
+    ephys_timestamps = [0:size(sync, 2) - 1] / ephys_sample_rate;
+
+    % binarise flipper
+    flip_threshold = range(sync) / 2;
+    ephys_binary_values = sync > flip_threshold;
+
+    % get ephys flipper flip values and times
+    ephys_sync_values = find((~ephys_binary_values(1:end-1) & ephys_binary_values(2:end)) | ...
+        (ephys_binary_values(1:end-1) & ~ephys_binary_values(2:end))) + 1;
+    ephys_sync_timestamps = ephys_timestamps(ephys_sync_values)';
+    
+    bad_flipper = false;
+
 else
     load([ephys_sync_folder, filesep, 'sync.mat']);
     if length(sync) >= flipper_sync_idx
@@ -51,8 +66,11 @@ elseif length(flipper_flip_times_ephys) ~= length(flipper_flip_times_timeline) .
 elseif length(flipper_flip_times_ephys) ~= length(flipper_flip_times_timeline)
     % If different number of flips in ephys/timeline, best
     % contiguous set via xcorr of diff
-    warning([animal, ' ', day, ':Flipper flip times different in timeline/ephys. /n' ...
+    warning([animal, ' ', day, ':Flipper flip times different in timeline/ephys. /n', ...
         'The fix for this is probably not robust: always check'])
+    figure();
+    plot(ephys_binary_values(1:5000:end))
+
     [flipper_xcorr, flipper_lags] = ...
         xcorr(diff(flipper_flip_times_timeline), diff(flipper_flip_times_ephys));
     [~, flipper_lag_idx] = max(flipper_xcorr);
@@ -73,7 +91,7 @@ elseif length(flipper_flip_times_ephys) ~= length(flipper_flip_times_timeline)
             flipper_expt_idx(idx):flipper_expt_idx(idx+1)-1);
         % If different number of flips in ephys/timeline, best
         % contiguous set via xcorr of diff
-        warning([animal, ' ', day, ':Flipper flip times different in timeline/ephys. /n ' ...
+        warning([animal, ' ', day, ':Flipper flip times different in timeline/ephys. /n ', ...
             'The fix for this is probably not robust: always check'])
         [flipper_xcorr, flipper_lags] = ...
             xcorr(diff(flipper_flip_times_timeline), diff(flipper_flip_times_ephys));
@@ -99,7 +117,7 @@ elseif length(flipper_flip_times_ephys) ~= length(flipper_flip_times_timeline)
     bad_flipper = true;
 end
 
-%% if bad flipper, use acq live 
+%% if bad flipper, use acq live
 if bad_flipper
     % (if no flipper or flipper problem, use acqLive)
     if isSpikeGLX
@@ -108,7 +126,7 @@ if bad_flipper
             bad_flipper = false;
             ephys_sync_timestamps = sync(acqLive_sync_idx).timestamps;
             ephys_sync_values = sync(acqLive_sync_idx).values;
-            
+
         else
             error([animal, ' ', day, ': bad flipper and acq live signal'])
         end

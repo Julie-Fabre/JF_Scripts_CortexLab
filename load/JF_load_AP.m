@@ -37,7 +37,20 @@ load_parts.ephys=true;
 
 site = 1;%1,1; 2,4; 3,7
 recording = []; 
-experiment = experiments(curr_day).experiment(end);
+% keep experiment with max n trials (= most likely not aborted error or end
+% shank mapping) QQ change this in the future 
+n_trials = zeros(size(experiments(curr_day).experiment,2), 1);
+for iExperiment = experiments(curr_day).experiment
+    [block_filename, block_exists] = AP_cortexlab_filenameJF(animal, day, experiments(curr_day).experiment(iExperiment), 'block');
+    load(block_filename)
+    if isfield(block.events, 'stim_idValues')
+        n_trials(iExperiment) = length(block.events.stim_idValues);
+    elseif isfield(block.events, 'stimulusOnTimes')
+        n_trials(iExperiment) = length(block.events.stimulusOnTimes);
+    end
+end 
+
+experiment = experiments(curr_day).experiment(find(n_trials == max(n_trials)));
 loadClusters = 0;
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys_includingCompressed',site,recording);
 if size(ephysAPfile,2) ==2 %keep only ap
