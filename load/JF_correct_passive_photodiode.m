@@ -3,13 +3,13 @@
 % experiment? so added case to only use first n flips)
 timeline_sample_rate = 0.001;
 buffer_samples = 200;
-min_ITI = min(signals_events.stimITIsValues);
-max_ITI = max(signals_events.stimITIsValues);
+min_ITI = min(signals_events.stim_idValues);
+max_ITI = max(signals_events.stim_idValues);
 
 % correct for incorrect photodiode flip number
 flip_problem = 0;
-if length(signals_events.stimOnTimes) < length(stimOn_times) % too many photodiode flips
-    warning([animal, ' ', day, ': different stim number signals and photodiode']);
+if length(signals_events.stim_idValues) < length(stimOn_times) % too many photodiode flips
+    warning([animal, ' ', day, ': less stim on times than photodiode flips']);
     flip_problem = 1;
     
 
@@ -20,12 +20,13 @@ if length(signals_events.stimOnTimes) < length(stimOn_times) % too many photodio
         stimOn_times(logical([0; iti_violations])) = []; % remove culprit
         stimOn_times(logical(iti_violations)) = NaN; % NaN-out the time of closest culprit too- this time can't be trusted
     end
-    if length(signals_events.stimOnTimes) < length(stimOn_times) % if no violation or correction didn't work
+    if length(signals_events.stim_idValues) < length(stimOn_times) % if no violation or correction didn't work
         % else, use x first photodiode flips
-        stimOn_times = stimOn_times(1:length(signals_events.stimOnTimes));
+        stimOn_times = stimOn_times(1:length(signals_events.stim_idValues));
     end
-elseif length(signals_events.stimOnTimes) > length(stimOn_times) % some photodiode flips missing
-    warning([animal, ' ', day, ': different stim number signals and photodiode']);
+
+elseif length(signals_events.stim_idValues) > length(stimOn_times) % some photodiode flips missing
+    warning([animal, ' ', day, ': more stim on times than photodiode flips, attempting to correct ...']);
     flip_problem = 2;
     
     % do any of them violate min ITI / stim on time - if so, pad with NaNs at missing spots  
@@ -68,19 +69,24 @@ elseif length(signals_events.stimOnTimes) > length(stimOn_times) % some photodio
     stimOn_times = photodiode_flip_added_stim_off(2:2:end);
     stimOn_times(~isnan(stimOn_times))= stimScreen_on_t(stimOn_times(~isnan(stimOn_times)));
     
-    % attempt to get missing stimOn_times ? 
+    % attempt to get missing stimOn_times ? -> nah, low pass filter or
+    % causal gaussian necessary for that, and then we can't get exact on
+    % times. better to just trash these stim on times. 
     
 
     % else, use x first photodiode flips
-    if length(signals_events.stimOnTimes) > length(stimOn_times) % if no violation or correction didn't work
-        stimOn_times = stimOn_times(1:length(signals_events.stimOnTimes));
+    if length(signals_events.stim_idValues) == length(stimOn_times) 
+        disp('corrected')
+    else
+        warning('correction failed, keeping x first stim on times')
+        stimOn_times = stimOn_times(1:length(signals_events.stim_idValues));
     end
 
 end
 
 % sanity checks
 % - times between stim on times in signals
-signals_photodiode_iti_diff = diff(signals_events.stimOnTimes(2:end)) - diff(stimOn_times) - 0.5';
+signals_photodiode_iti_diff = diff(signals_events.stim_idValues(2:end)) - diff(stimOn_times) - 0.5';
 if any(signals_photodiode_iti_diff > 0.1)
     warning('mismatching signals/photodiode stim ITIs')
 end

@@ -117,7 +117,8 @@ if timeline_exists
     photodiode_diff_t = 20; % time (in ms) to get delayed differential
     photodiode_diff_samples = round(Timeline.hw.daqSampleRate/1000*photodiode_diff_t);
     photodiode_diff_filt = [1, zeros(1, photodiode_diff_samples), -1];
-    photodiode_trace_diff = abs(conv(photodiode_trace_medfilt, photodiode_diff_filt, 'valid')) > ...
+    photodiode_diff_conv = abs(conv(photodiode_trace_medfilt, photodiode_diff_filt, 'valid'));
+    photodiode_trace_diff = photodiode_diff_conv > ...
         photodiode_diff_thresh;
     photodiode_flip = find(~photodiode_trace_diff(1:end-1) & ...
         photodiode_trace_diff(2:end)) + photodiode_diff_samples + 1;
@@ -134,24 +135,31 @@ if timeline_exists
     flipper_flip_times_timeline = Timeline.rawDAQTimestamps(flipper_flip)';
 
     if debug
-        samples_to_plot = 607000;
+        %size(Timeline.rawDAQData)
+        samples_to_plot = 29000  ;
         figure('Color', 'white');
         clf
-        subplot(211)
+        subplot(311)
         title('photodiode')
         hold on;
         scatter(photodiode_flip(find(photodiode_flip <= samples_to_plot)), ones(size(find(photodiode_flip <= samples_to_plot), 1), 1), 8, 'filled')
         plot(Timeline.rawDAQData(1:samples_to_plot, photodiode_idx))
-        plot(photodiode_trace_diff(1:samples_to_plot))
+        plot(photodiode_diff_conv(1:samples_to_plot))
         xlabel('time (in samples)')
 
 
-        subplot(212)
+        subplot(312)
         title('timeline flipper')
         hold on;
-        plot(Timeline.rawDAQData(1:samples_to_plot/5, flipper_idx))
-        scatter(flipper_flip(find(flipper_flip <= samples_to_plot/5)), ones(size(find(flipper_flip <= samples_to_plot/5), 1), 1), 8, 'filled')
-        plot(flipper_trace(1:samples_to_plot/5))
+        plot(Timeline.rawDAQData(1:samples_to_plot, flipper_idx))
+        scatter(flipper_flip(find(flipper_flip <= samples_to_plot)), ones(size(find(flipper_flip <= samples_to_plot), 1), 1), 8, 'filled')
+        plot(flipper_trace(1:samples_to_plot))
+        xlabel('time (in samples)')
+
+        subplot(313)   
+        title('acq live')
+        hold on;
+        plot(Timeline.rawDAQData(1:samples_to_plot, acqLive_idx))
         xlabel('time (in samples)')
     end
 
@@ -212,7 +220,7 @@ if block_exists
                 % otherwise, you're in trouble
                 error('Manual rewards included - couldn''t match to block');
             end
-        end
+        
     elseif isempty(reward_t_block)
         % If no rewards: probably much less robust, but use stim on
         % times and photodiode flips
@@ -247,6 +255,7 @@ if block_exists
             end
             signals_events.(block_fieldnames{curr_times}) = ...
                 interp1(block2timeline, timeline2block, block.events.(block_fieldnames{curr_times}), 'linear', 'extrap');
+        end
         end
     end
 
@@ -432,6 +441,9 @@ if ephys_exists && load_parts.ephys
     end
     load(([ephys_path, filesep, 'sync.mat']));
 
+    if debug
+    end
+
     % Read header information
     if ~isSpikeGlx
         header_path = [ephys_path, filesep, 'dat_params.txt'];
@@ -530,138 +542,15 @@ if ephys_exists && load_parts.ephys
     % Get experiment index by finding numbered folders
     protocols_list = AP_list_experimentsJF(animal, day);
     experiment_idx = experiment == [protocols_list.experiment];
-    if isSpikeGlx
-        ops.recording_software = 'SpikeGLX';
-        ops.ephys_folder = [ephysAPfile, '/..'];
-        ops.exp = experiment;
-        [expInfo, ~] = AP_cortexlab_filenameJF(animal, day, experiment, 'expInfo', site);
-        try
-            [co] = mainprobe_to_timeline(ephys_path, ...
-                Timeline, ops, expInfo);
-            spike_times_timeline = spike_times * co(2) + co(1);
-        catch
-            warning('mainprobe probe aligning gone wrong')
-            spike_times_timeline = spike_times;
-        end
-    else
-        if exist('flipper_flip_times_timeline', 'var') && length(sync) >= flipper_sync_idx
-            % (if flipper, use that)
-            % (at least one experiment the acqLive connection to ephys was bad
-            % so it was delayed - ideally check consistency since it's
-            % redundant)
-            bad_flipper = false;
 
-            % Get flipper experiment differences by long delays
-            % (note: this is absolute difference, if recording stopped and
-            % started then the clock starts over again, although I thought it
-            % wasn't supposed to when I grab the concatenated sync, so
-            % something might be wrong)
-            flip_diff_thresh = 1; % time between flips to define experiment gap (s)
-            flipper_expt_idx = [1; find(abs(diff(sync(flipper_sync_idx).timestamps)) > ...
-                flip_diff_thresh) + 1; length(sync(flipper_sync_idx).timestamps) + 1];
-            possibilities = diff(flipper_expt_idx);
-            [val, idx] = min(abs(possibilities-length(flipper_flip_times_timeline)));
-            if length(flipper_expt_idx) < find(experiment_idx) + 1
-                experiment_idx = idx;
-                flipper_flip_times_ephys = sync(flipper_sync_idx).timestamps( ...
-                    flipper_expt_idx(find(experiment_idx)):flipper_expt_idx(find(experiment_idx)+1)-1);
-            else
-                flipper_flip_times_ephys = sync(flipper_sync_idx).timestamps( ...
-                    flipper_expt_idx(find(experiment_idx)):flipper_expt_idx(find(experiment_idx)+1)-1);
-            end
-            % Pick flipper times to use for alignment
-            if length(flipper_flip_times_ephys) == length(flipper_flip_times_timeline)
-                % If same number of flips in ephys/timeline, use all
-                sync_timeline = flipper_flip_times_timeline;
-                sync_ephys = flipper_flip_times_ephys;
-            elseif length(flipper_flip_times_ephys) ~= length(flipper_flip_times_timeline) ...
-                    && val == 0
-                experiment_idx = idx;
-                flipper_flip_times_ephys = sync(flipper_sync_idx).timestamps( ...
-                    flipper_expt_idx(experiment_idx):flipper_expt_idx(experiment_idx+1)-1);
-                sync_timeline = flipper_flip_times_timeline;
-                sync_ephys = flipper_flip_times_ephys;
-            elseif length(flipper_flip_times_ephys) ~= length(flipper_flip_times_timeline)
-                % If different number of flips in ephys/timeline, best
-                % contiguous set via xcorr of diff
-                warning([animal, ' ', day, ':Flipper flip times different in timeline/ephys'])
-                warning(['The fix for this is probably not robust: always check'])
-                [flipper_xcorr, flipper_lags] = ...
-                    xcorr(diff(flipper_flip_times_timeline), diff(flipper_flip_times_ephys));
-                [~, flipper_lag_idx] = max(flipper_xcorr);
-                flipper_lag = flipper_lags(flipper_lag_idx);
-                % (at the moment, assuming only dropped from ephys)
-                sync_ephys = flipper_flip_times_ephys;
-                try
-                    sync_timeline = flipper_flip_times_timeline(flipper_lag+1: ...
-                        flipper_lag+1:flipper_lag+length(flipper_flip_times_ephys));
-                catch
-                    sync_timeline = flipper_flip_times_timeline;
-                end
-                if length(diff(sync_ephys)) ~= length(diff(sync_timeline))
-                    experiment_idx = idx;
-                    flipper_flip_times_ephys = sync(flipper_sync_idx).timestamps( ...
-                        flipper_expt_idx(experiment_idx):flipper_expt_idx(experiment_idx+1)-1);
-                    flipper_flip_times_ephys = sync(flipper_sync_idx).timestamps( ...
-                        flipper_expt_idx(idx):flipper_expt_idx(idx+1)-1);
-                    % If different number of flips in ephys/timeline, best
-                    % contiguous set via xcorr of diff
-                    warning([animal, ' ', day, ':Flipper flip times different in timeline/ephys'])
-                    warning(['The fix for this is probably not robust: always check'])
-                    [flipper_xcorr, flipper_lags] = ...
-                        xcorr(diff(flipper_flip_times_timeline), diff(flipper_flip_times_ephys));
-                    [~, flipper_lag_idx] = max(flipper_xcorr);
-                    flipper_lag = flipper_lags(flipper_lag_idx);
-                    % (at the moment, assuming only dropped from ephys)
-                    sync_ephys = flipper_flip_times_ephys;
-                    try
-                        sync_timeline = flipper_flip_times_timeline(flipper_lag+1: ...
-                            flipper_lag+1:flipper_lag+length(flipper_flip_times_ephys));
-                    catch
-                        try
-                            sync_timeline = flipper_flip_times_timeline(1: ...
-                                1:-flipper_lag+length(flipper_flip_times_ephys));
-                        catch
-                            sync_timeline = flipper_flip_times_timeline;
-                        end
-                    end
-                    if length(diff(sync_ephys)) ~= length(diff(sync_timeline))
-                        bad_flipper = true;
-                    end
-                end
-                bad_flipper = true;
-            end
+    % load sync and align 
+    [spike_times_timeline, bad_flipper] = JF_align_ephys_to_timeline(animal, day, isSpikeGlx, flipper_flip_times_timeline, ...
+    ephys_sync_folder, flipper_sync_idx, experiment_idx, acqLive_sync_idx, spike_times);
 
-        else
-            bad_flipper = true;
-        end
 
-        if bad_flipper
-            % (if no flipper or flipper problem, use acqLive)
-
-            % Get acqLive times for current experiment
-            experiment_ephys_starts = sync(acqLive_sync_idx).timestamps(sync(acqLive_sync_idx).values == 1);
-            experiment_ephys_stops = sync(acqLive_sync_idx).timestamps(sync(acqLive_sync_idx).values == 0);
-            acqlive_ephys_currexpt = [experiment_ephys_starts(idx), ...
-                experiment_ephys_stops(idx)];
-
-            sync_timeline = acqLive_timeline;
-            sync_ephys = acqlive_ephys_currexpt;
-
-            % Check that the experiment time is the same within threshold
-            % (it should be almost exactly the same)
-            if abs(diff(acqLive_timeline)-diff(acqlive_ephys_currexpt)) > 1
-                warning([animal, ' ', day, ': acqLive duration different in timeline and ephys']);
-                dontAnalyze = 1;
-                return; %stop function
-            end
-        end
-        dontAnalyze = 0;
-        % Get spike times in timeline time
-        spike_times_timeline = interp1(sync_ephys, sync_timeline, spike_times, 'linear', 'extrap');
         %         co = robustfit(sync_ephys, sync_timeline);
         %          spike_times_timeline = spike_times * co(2) + co(1);
-    end
+    
     % Get "good" templates from labels
     if exist('cluster_groups', 'var') && loadClusters
         % If there's a manual classification

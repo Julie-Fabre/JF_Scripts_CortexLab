@@ -25,7 +25,7 @@ experiments = experiments([experiments.ephys]);
 
 %% Load data from experiment 
 
-curr_day = 1; % (set which day to use)
+curr_day = 5; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
@@ -44,17 +44,6 @@ if size(ephysAPfile,2) ==2 %keep only ap
     ephysAPfile = ephysAPfile{1};
 end
 isSpikeGlx = contains(ephysAPfile, '_g');
-if isSpikeGlx
-     [ephysKSfile,~] = AP_cortexlab_filenameJF(animal,day,experiment,'ephys',site,recording);
-    if isempty(dir([ephysKSfile filesep 'sync.mat']))
-        warning('NO SYNC')
-        %sync = syncFT(ephysAPfile, 385, ephysKSfile);
-        if length(unique(sync)) == 1
-            warning('check is sync is saved properly!')
-        end
-    end
-end
-
 ephysDirPath = AP_cortexlab_filenameJF(animal, day, experiment, 'ephys_dir', site, recording);
 savePath = fullfile(ephysDirPath, 'qMetrics');
 qMetricsExist = dir(fullfile(savePath, 'qMetric*.mat'));
