@@ -134,7 +134,7 @@ if timeline_exists
     flipper_flip_times_timeline = Timeline.rawDAQTimestamps(flipper_flip)';
 
     if debug
-        samples_to_plot = 105000;
+        samples_to_plot = 208000;
         figure('Color', 'white');
         clf
         subplot(211)
@@ -143,7 +143,27 @@ if timeline_exists
         scatter(photodiode_flip(find(photodiode_flip <= samples_to_plot)), ones(size(find(photodiode_flip <= samples_to_plot), 1), 1), 8, 'filled')
         plot(Timeline.rawDAQData(1:samples_to_plot, photodiode_idx))
         xlabel('time (in samples)')
-        %plot(photodiode_trace_medfilt(1:samples_to_plot))
+        plot(photodiode_trace_medfilt(1:samples_to_plot)*0.5)
+        smooth_size = 401;
+        gw = gausswin(smooth_size,3)';
+        smWin = gw./sum(gw);
+        smWin(1:200) = 0; 
+        padded_array = padarray(Timeline.rawDAQData(1:samples_to_plot, photodiode_idx), ...
+    [0,floor(length(smWin)/2)],'replicate', 'both');
+        conv_photodiode= conv(padded_array(:,1), ...
+    smWin,'valid');
+clf;
+        plot(conv_photodiode  ); hold on;
+        %plot(photodiode_trace_diff)
+         photodiode_diff_samples = round(Timeline.hw.daqSampleRate/1000*photodiode_diff_t);
+    photodiode_diff_filt = [1, zeros(1, photodiode_diff_samples), -1];
+   plot(abs(conv(conv_photodiode, photodiode_diff_filt, 'valid')))
+        photodiode_trace_diff = abs(conv(conv_photodiode, photodiode_diff_filt, 'valid')) > ...
+        photodiode_diff_thresh;
+    photodiode_flip = find(~photodiode_trace_diff(1:end-1) & ...
+        photodiode_trace_diff(2:end)) + photodiode_diff_samples + 1;
+hold on; scatter(photodiode_flip(find(photodiode_flip <= samples_to_plot)), ones(size(find(photodiode_flip <= samples_to_plot), 1), 1), 8, 'filled')
+       
 
 
         subplot(212)
@@ -427,6 +447,9 @@ if ephys_exists && load_parts.ephys
     end
 
     % Load sync/photodiode
+    if isempty(dir([ephys_path, filesep, 'sync.mat']))
+        error('No SYNC - extract sync before continuing')
+    end
     load(([ephys_path, filesep, 'sync.mat']));
 
     % Read header information

@@ -623,13 +623,9 @@
         case 'JF_choiceworldStimuli_wheel_left_center_all'
 
 
-            % Check number of stim matches photodiode
-            % (once I saw some weird extra flip at the end of an
-            % experiment? so added case to only use first n flips)
-            if length(signals_events.stimOnTimes) ~= length(stimOn_times)
-                    warning([animal ' ' day ': different stim number signals and photodiode']);
-                    stimOn_times = stimOn_times(1:length(signals_events.stimAzimuthValues));
-            end
+            stimOn_times = photodiode_flip_times(2:2:end);
+            JF_correct_passive_photodiode; 
+
             % sanity check: times between stim on times in signals
             signals_photodiode_iti_diff = diff(signals_events.stimOnTimes(2:end)) - diff(stimOn_times) - 0.5';
             if any(signals_photodiode_iti_diff > 0.1)

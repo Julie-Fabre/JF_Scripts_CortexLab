@@ -134,7 +134,7 @@ if timeline_exists
     flipper_flip_times_timeline = Timeline.rawDAQTimestamps(flipper_flip)';
 
     if debug
-        samples_to_plot = 105000;
+        samples_to_plot = 607000;
         figure('Color', 'white');
         clf
         subplot(211)
@@ -142,8 +142,8 @@ if timeline_exists
         hold on;
         scatter(photodiode_flip(find(photodiode_flip <= samples_to_plot)), ones(size(find(photodiode_flip <= samples_to_plot), 1), 1), 8, 'filled')
         plot(Timeline.rawDAQData(1:samples_to_plot, photodiode_idx))
+        plot(photodiode_trace_diff(1:samples_to_plot))
         xlabel('time (in samples)')
-        %plot(photodiode_trace_medfilt(1:samples_to_plot))
 
 
         subplot(212)

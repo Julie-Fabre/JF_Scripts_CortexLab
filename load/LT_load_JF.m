@@ -33,7 +33,7 @@ qMetricsExist = dir(fullfile(savePath, 'qMetric*.mat'));
 JF_load_experiment;
 curr_shank=NaN;
 
-%% look at data
+%% Look at ephys data
 % This is a raster/PSTH viewer to explore cells, for a given unit it'll
 % plot all spikes aligned to different times (first input) and can split
 % those into different conditions (second input). The lefthand plot shows
@@ -44,8 +44,8 @@ curr_shank=NaN;
 %
 % controls:
 % * left/right arrows switch between stim, move, and outcome aligned
-% * pageup/pagedown combines all trials or splits stim, move directions,
-% and reward/punish, respectively
+% * pageup/pagedown combines all trials or splits spatial frequency, orientations,
+% spatial frequency * orientation
 % * you can press 'm' and define borders by clicking on the lefthand plot
 % to group cells into multiunit
 
