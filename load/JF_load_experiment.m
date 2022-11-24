@@ -138,8 +138,8 @@ if timeline_exists
         %size(Timeline.rawDAQData)
         figure('Color', 'white');
         clf
-        samples_to_plot =max(photodiode_flip);
-       
+        samples_to_plot = max(photodiode_flip);
+
         subplot(311)
         title('photodiode')
         hold on;
@@ -157,7 +157,7 @@ if timeline_exists
         plot(flipper_trace(1:samples_to_plot))
         xlabel('time (in samples)')
 
-        subplot(313)   
+        subplot(313)
         title('acq live')
         hold on;
         plot(Timeline.rawDAQData(1:samples_to_plot, acqLive_idx))
@@ -221,28 +221,28 @@ if block_exists
                 % otherwise, you're in trouble
                 error('Manual rewards included - couldn''t match to block');
             end
-        
-    elseif isempty(reward_t_block)
-        % If no rewards: probably much less robust, but use stim on
-        % times and photodiode flips
-        warning('No rewards, aligning block with estimated stimOn times');
-        stim_t_offset = block.events.stimOnTimes' - photodiode_flip_times';
-        blunt_stim_offset = mode(round(stim_t_offset(:)*10)) / 10;
-        stim_t_offset_shift = stim_t_offset - blunt_stim_offset;
-        t_offset_tolerance = 0.05;
-        stim_t_offset_binary = abs(stim_t_offset_shift) < t_offset_tolerance;
-        stim_tl_block_matched = sum(stim_t_offset_binary, 2) == 1;
-        if nanmean(stim_tl_block_matched) > 0.9
-            % (if 90% stim matched, use this)
-            [~, estimated_stimOn_idx] = max(stim_t_offset_binary, [], 2);
 
-            timeline2block = photodiode_flip_times(estimated_stimOn_idx(stim_tl_block_matched));
-            block2timeline = block.events.stimOnTimes(stim_tl_block_matched);
-        else
-            % (if >10% unmatched, don't use)
-            error('Attempted stim on alignment - bad match');
+        elseif isempty(reward_t_block)
+            % If no rewards: probably much less robust, but use stim on
+            % times and photodiode flips
+            warning('No rewards, aligning block with estimated stimOn times');
+            stim_t_offset = block.events.stimOnTimes' - photodiode_flip_times';
+            blunt_stim_offset = mode(round(stim_t_offset(:)*10)) / 10;
+            stim_t_offset_shift = stim_t_offset - blunt_stim_offset;
+            t_offset_tolerance = 0.05;
+            stim_t_offset_binary = abs(stim_t_offset_shift) < t_offset_tolerance;
+            stim_tl_block_matched = sum(stim_t_offset_binary, 2) == 1;
+            if nanmean(stim_tl_block_matched) > 0.9
+                % (if 90% stim matched, use this)
+                [~, estimated_stimOn_idx] = max(stim_t_offset_binary, [], 2);
+
+                timeline2block = photodiode_flip_times(estimated_stimOn_idx(stim_tl_block_matched));
+                block2timeline = block.events.stimOnTimes(stim_tl_block_matched);
+            else
+                % (if >10% unmatched, don't use)
+                error('Attempted stim on alignment - bad match');
+            end
         end
-
 
         % Go through all block events and convert to timeline time
         % (uses reward as reference)
@@ -257,7 +257,7 @@ if block_exists
             signals_events.(block_fieldnames{curr_times}) = ...
                 interp1(block2timeline, timeline2block, block.events.(block_fieldnames{curr_times}), 'linear', 'extrap');
         end
-        end
+
     end
 
     % SPECIFIC TO PROTOCOL
@@ -544,14 +544,14 @@ if ephys_exists && load_parts.ephys
     protocols_list = AP_list_experimentsJF(animal, day);
     experiment_idx = experiment == [protocols_list.experiment];
 
-    % load sync and align 
+    % load sync and align
     [spike_times_timeline, bad_flipper] = JF_align_ephys_to_timeline(animal, day, isSpikeGlx, flipper_flip_times_timeline, ...
-    ephys_path, flipper_sync_idx, experiment_idx, acqLive_sync_idx, spike_times);
+        ephys_path, flipper_sync_idx, experiment_idx, acqLive_sync_idx, spike_times);
 
 
-        %         co = robustfit(sync_ephys, sync_timeline);
-        %          spike_times_timeline = spike_times * co(2) + co(1);
-    
+    %         co = robustfit(sync_ephys, sync_timeline);
+    %          spike_times_timeline = spike_times * co(2) + co(1);
+
     % Get "good" templates from labels
     if exist('cluster_groups', 'var') && loadClusters
         % If there's a manual classification

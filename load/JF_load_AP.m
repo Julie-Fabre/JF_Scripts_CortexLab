@@ -54,7 +54,7 @@ for iExperiment = experiments(curr_day).experiment
     end
 end 
 
-experiment = 1;experiments(curr_day).experiment(find(n_trials == max(n_trials)));
+experiment = 1;%experiments(curr_day).experiment(find(n_trials == max(n_trials)));
 loadClusters = 0;
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys_includingCompressed',site,recording);
 if size(ephysAPfile,2) ==2 %keep only ap
