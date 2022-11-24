@@ -25,7 +25,7 @@ experiments = experiments([experiments.ephys]);
 
 %% Load data from experiment 
 
-curr_day = 5; % (set which day to use)
+curr_day = 2; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
@@ -42,15 +42,19 @@ recording = [];
 n_trials = zeros(size(experiments(curr_day).experiment,2), 1);
 for iExperiment = experiments(curr_day).experiment
     [block_filename, block_exists] = AP_cortexlab_filenameJF(animal, day, experiments(curr_day).experiment(iExperiment), 'block');
-    load(block_filename)
-    if isfield(block.events, 'stim_idValues')
-        n_trials(iExperiment) = length(block.events.stim_idValues);
-    elseif isfield(block.events, 'stimulusOnTimes')
-        n_trials(iExperiment) = length(block.events.stimulusOnTimes);
+    try
+        load(block_filename)
+        if isfield(block.events, 'stim_idValues')
+            n_trials(iExperiment) = length(block.events.stim_idValues);
+        elseif isfield(block.events, 'stimulusOnTimes')
+            n_trials(iExperiment) = length(block.events.stimulusOnTimes);
+        end
+    catch
+        n_trials(iExperiment) = NaN;
     end
 end 
 
-experiment = experiments(curr_day).experiment(find(n_trials == max(n_trials)));
+experiment = 1;experiments(curr_day).experiment(find(n_trials == max(n_trials)));
 loadClusters = 0;
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys_includingCompressed',site,recording);
 if size(ephysAPfile,2) ==2 %keep only ap
@@ -71,26 +75,69 @@ clearvars unitType
 JF_load_experiment;
 curr_shank=NaN;
 
-trial_conditions(ismember(trial_conditions(:,1), [4]),1) = 4; % go 1
-trial_conditions(ismember(trial_conditions(:,1), [7]),1) = 7; % go 2
-trial_conditions(ismember(trial_conditions(:,1), [6]),1) = 10; % no go
-trial_conditions(~ismember(trial_conditions(:,1), [4,7,10]),1) = 1;
+% go no go passive
+ trial_conditions(ismember(trial_conditions(:,1), [4]),1) = 4; % go 1
+ trial_conditions(ismember(trial_conditions(:,1), [7]),1) = 7; % go 2
+ trial_conditions(ismember(trial_conditions(:,1), [10]),1) = 1; % no go
+ trial_conditions(ismember(trial_conditions(:,1), [6]),1) = 10; % no go
+ trial_conditions(~ismember(trial_conditions(:,1), [4,7,10]),1) = 1;
 %thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions, [4,7,10]) & trial_conditions(:,2)~=90;
-thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions, [4,7,10]);
-
-
+thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions(:,1), [4,7,10]);
 
 AP_cellrasterJF({stimOn_times(thisIndex), stimOn_times(thisIndex), stimOn_times(thisIndex)}, ...
     {trial_conditions(thisIndex,1), trial_conditions(thisIndex,2),...
-    (trial_conditions(thisIndex,2)/-90)+(trial_conditions(thisIndex,1))});
+(trial_conditions(thisIndex,2)/-90)+(trial_conditions(thisIndex,1))});
+
+% imageworld passive
+trial_conditions(ismember(trial_conditions(:,1), [1:3:66]),2) = -90;
+trial_conditions(ismember(trial_conditions(:,1), [2:3:66]),2) = 0;
+trial_conditions(ismember(trial_conditions(:,1), [3:3:66]),2) = 90;
+trial_conditions(ismember(trial_conditions(:,1), [4,26,48])) = 4;
+trial_conditions(ismember(trial_conditions(:,1), [7,29,51])) = 7;
+trial_conditions(ismember(trial_conditions(:,1), [10,32,54])) = 10;
+thisIndex = ismember(trial_conditions(:,1), [4,7,10]) & trial_conditions(:,2)~=-90; %ismember(trial_conditions(:,1), [4,7,10]);
+
+AP_cellrasterJF({stimOn_times(thisIndex), stimOn_times(thisIndex), stimOn_times(thisIndex)}, ...
+    {trial_conditions(thisIndex,1), trial_conditions(thisIndex,2),...
+(trial_conditions(thisIndex,2)/-90)+(trial_conditions(thisIndex,1))});
+
+
+
+% task 
+AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))'}, ...
+    {trial_conditions(:,1),trial_conditions(:,2), ...
+    trial_conditions(:,3)});
 % 
 % AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))',stimOn_times}, ...
 %     {trial_conditions(:,1),trial_conditions(:,2), ...
 %     trial_conditions(:,3), movement_after200ms_and_type});
-AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))'}, ...
-    {trial_conditions(:,1),trial_conditions(:,2), ...
-    trial_conditions(:,3)});
 
 
+% PSTH more in depth 
+figure(1)
+thisTemplate = 79;
+raster_window = [-0.5, 2];
+align_times = stimOn_times(stimIDs==3);
+align_group = [];
+color_by = trial_conditions(stimIDs==3,3);
+psth_bin_size = 0.001;
+sort_by = [];%stim_to_move(stimIDs==3);
+plot_me = true;
+[curr_smoothed_psth, curr_psth, raster_x, raster_y, curr_raster] = JF_raster_PSTH(spike_templates, spike_times_timeline, ...
+    thisTemplate, raster_window, psth_bin_size, align_times, align_group,...
+   sort_by, color_by, plot_me);
+title(['unit' num2str(thisTemplate)])
 
+figure(2)
 
+raster_window = [-0.5, 2];
+align_times = stimOn_times(stimIDs==2);
+align_group = [];
+color_by = trial_conditions(stimIDs==2,3);
+psth_bin_size = 0.001;
+sort_by = [];%stim_to_move(stimIDs==3);
+plot_me = true;
+[curr_smoothed_psth, curr_psth, raster_x, raster_y, curr_raster] = JF_raster_PSTH(spike_templates, spike_times_timeline, ...
+    thisTemplate, raster_window, psth_bin_size, align_times, align_group,...
+   sort_by, color_by, plot_me);
+title(['unit' num2str(thisTemplate)])

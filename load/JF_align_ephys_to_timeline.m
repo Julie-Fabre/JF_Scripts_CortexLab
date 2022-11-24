@@ -32,7 +32,9 @@ else
         ephys_sync_values = sync(flipper_sync_idx).values;
     else
         bad_flipper = true;
+        figure(); plot(ephys_sync_timestamps,ephys_sync_values  )
     end
+
 end
 
 %% find experiment times

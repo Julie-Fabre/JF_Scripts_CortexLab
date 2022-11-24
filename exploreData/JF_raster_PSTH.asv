@@ -86,7 +86,7 @@ if ~isempty(align_group)
 else
     [raster_y, raster_x] = find(curr_raster);
     if plot_me
-        clf;
+        figure();
         subplot(6,1,[2:6])
         if ~isempty(color_by)
             theseCols = unique(color_by);
@@ -107,15 +107,8 @@ else
         curr_smoothed_psth = conv2(padarray(curr_psth, ...
             [0, floor(length(smWin)/2)], 'replicate', 'both'), ...
             smWin, 'valid') ./ bin_t;
-        xlabel('time (s)')
-        ylabel('unsorted trial #')
-        makepretty;
-
         subplot(6,1,1)
         plot(t, curr_smoothed_psth)
-        xlabel('time (s)')
-        ylabel('sp/s')
-        makepretty;
 
         else
             scatter(t(raster_x), raster_y, 2, 'filled')

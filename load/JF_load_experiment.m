@@ -136,9 +136,10 @@ if timeline_exists
 
     if debug
         %size(Timeline.rawDAQData)
-        samples_to_plot = 29000;
         figure('Color', 'white');
         clf
+        samples_to_plot =max(photodiode_flip);
+       
         subplot(311)
         title('photodiode')
         hold on;
@@ -597,7 +598,7 @@ if ephys_exists && load_parts.ephys
 
     elseif exist('unitType', 'var')
         % If no manual but qualityMetrics are available
-        if verbose;
+        if verbose
             disp('Keeping quality metrics good units...');
         end
 
@@ -610,7 +611,7 @@ if ephys_exists && load_parts.ephys
         good_templates_idx = find(unitType == 1) - 1;
 
         if exist('locationKeep', 'var')
-            if verbose;
+            if verbose
                 disp('Keeping location data...');
             end
             myPaths;

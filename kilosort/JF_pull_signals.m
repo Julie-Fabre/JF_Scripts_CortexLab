@@ -173,10 +173,9 @@
             % Hit/miss recorded for last trial, circshift to align
             response_trials = 1:length(block.events.endTrialValues);
             block.events.trialSideValues(response_trials) = 1;
-            ff = block.events.responseValues;
 
-            signals_events.hitValues = ff;
-            signals_events.missValues = 1 - ff;
+            signals_events.hitValues = block.events.responseValues;
+            signals_events.missValues = 1 - block.events.responseValues;
 
             % Get number of completed trials (if uncompleted last trial)
             %keep pones with logged stimN (= not first and repeat on
