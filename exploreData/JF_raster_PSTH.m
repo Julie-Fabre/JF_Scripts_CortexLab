@@ -77,8 +77,10 @@ if ~isempty(align_group)
     end
     smooth_size = 51;
     gw = gausswin(smooth_size, 3)';
-    %gw(1:round(smooth_size/2)) = 0; %half gaussian to preserve onset times
-    %- uncomment this ^ if you want to preserve onset times.
+    if causal_smoothing
+        gw(1:round(smooth_size/2)) = 0; %half gaussian to preserve onset times
+    end
+
 
     smWin = gw ./ sum(gw);
     bin_t = mean(diff(t_bins));
@@ -100,7 +102,11 @@ else
     [raster_y, raster_x] = find(curr_raster);
     smooth_size = 51;
         gw = gausswin(smooth_size, 3)';
-        gw(1:round(smooth_size/2)) = 0;
+        if causal_smoothing
+            gw(1:round(smooth_size/2)) = 0; %half gaussian to preserve onset times
+        end
+
+
         smWin = gw ./ sum(gw);
         bin_t = mean(diff(t_bins));
     
@@ -141,7 +147,11 @@ else
             scatter(t(raster_x), raster_y, 2, 'filled')
             set(gca, 'YDir', 'reverse')
             gw = gausswin(smooth_size, 3)';
-            gw(1:round(smooth_size/2)) = 0;
+            if causal_smoothing
+                gw(1:round(smooth_size/2)) = 0; %half gaussian to preserve onset times
+            end
+
+            
             smWin = gw ./ sum(gw);
             bin_t = mean(diff(t_bins));
         
