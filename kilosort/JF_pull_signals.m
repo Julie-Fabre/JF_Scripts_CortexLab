@@ -295,7 +295,8 @@
             %incorrect)
 
             n_trials = [length(signals_events.stimOnTimes) - ...
-                length(find(signals_events.stimOnTimes > signals_events.stimNTimes(1))), length(signals_events.endTrialTimes)];
+                length(find(signals_events.stimOnTimes > signals_events.stimNTimes(1))),...
+                length(signals_events.endTrialTimes)];
 
             % Get stim on times by closest photodiode flip
             [~, closest_stimOn_photodiode] = ...
@@ -374,7 +375,7 @@
             n_conditions = size(conditions, 1);
 
             trial_conditions = ...
-                [signals_events.stimNValues', signals_events.trialSideValues(n_trials(1):n_trials(end))', ...
+                [signals_events.stimNValues(n_trials(1):n_trials(end))', signals_events.trialSideValues(n_trials(1):n_trials(end))', ...
                 trial_choice, trial_timing];
             [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
 
@@ -544,6 +545,33 @@
                 [signals_events.stim_idValues'];
             [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
             [~, stimIDs] = ismember(trial_conditions, conditions, 'rows');
+            wheel_time = block.inputs.wheelTimes;
+            wheel = block.inputs.wheelValues;
+            surround_time = [-0.5, 2];
+            surround_sample_rate = 1 / Timeline.hw.samplingInterval; % (match this to framerate)
+            surround_time_points = surround_time(1):1 / surround_sample_rate:surround_time(2);
+            if size(stimOn_times, 2) > 1
+                stimOn_times = permute(stimOn_times, [2, 1]);
+            end
+            pull_times = bsxfun(@plus, stimOn_times, surround_time_points);
+
+            stim_aligned_wheel = interp1(Timeline.rawDAQTimestamps, ...
+                wheel_velocity, pull_times);
+            % (set a threshold in speed and time for wheel movement)
+            thresh_displacement = 0.05;
+            time_over_thresh = 0.05; % ms over velocity threshold to count
+            samples_over_thresh = time_over_thresh .* surround_sample_rate;
+            wheel_over_thresh_fullconv = convn( ...
+                abs(stim_aligned_wheel) > thresh_displacement, ...
+                ones(1, samples_over_thresh)) >= samples_over_thresh;
+            wheel_over_thresh = wheel_over_thresh_fullconv(:, end-size(stim_aligned_wheel, 2)+1:end);
+
+            [move_trial, wheel_move_sample] = max(wheel_over_thresh, [], 2);
+            wheel_move_time = arrayfun(@(x) pull_times(x, wheel_move_sample(x)), 1:size(pull_times, 1))';
+            wheel_move_time(~move_trial) = NaN;
+            stim_to_move = padarray(wheel_move_time-stimOn_times, [length(stimOn_times) - length(stimOn_times), 0], NaN, 'post');
+            
+
         case {'JF_choiceworldStimuli', 'JF_choiceworldStimuli_wheel', 'JF_choiceworldStimuli_wheel_left_center', ...
                 'JF_choiceworldStimuli_wheel_left_centerplok', 'JF_choiceworldStimuli_wheel_left_centerpl'}
 

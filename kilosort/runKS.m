@@ -81,7 +81,7 @@
 % JF_preprocess_NPX2('JF070', '2022-06-11', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 2, [],1);
 % JF_preprocess_NPX2('JF070', '2022-06-13', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 1, [],1);
 % 
-% JF_preprocess_NPX2('JF070', '2022-06-17', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 1, [],1);
+JF_preprocess_NPX2('JF070', '2022-06-09', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 2, [],1);
 % JF_preprocess_NPX2('JF070', '2022-06-18', 'chanMapNP2_4Shank_bottRow_flipper0x2Emat_kilosortChanMap.mat', 1, 1, [],1);
 % 
 % 

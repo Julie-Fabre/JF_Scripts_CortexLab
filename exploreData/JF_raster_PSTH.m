@@ -85,6 +85,17 @@ if ~isempty(align_group)
 
 else
     [raster_y, raster_x] = find(curr_raster);
+    smooth_size = 51;
+        gw = gausswin(smooth_size, 3)';
+        gw(1:round(smooth_size/2)) = 0;
+        smWin = gw ./ sum(gw);
+        bin_t = mean(diff(t_bins));
+    
+        curr_psth = grpstats(curr_raster, ones(size(curr_raster, 1),1), @(x) mean(x, 1));
+        curr_smoothed_psth = conv2(padarray(curr_psth, ...
+            [0, floor(length(smWin)/2)], 'replicate', 'both'), ...
+            smWin, 'valid') ./ bin_t;
+
     if plot_me
         clf;
         subplot(6,1,[2:6])
@@ -97,19 +108,15 @@ else
                 scatter(t(raster_x(plot_me)), raster_y(plot_me), 2, these_col_plot(iColor,:), 'filled'); hold on;
             end
             set(gca, 'YDir', 'reverse')
-        smooth_size = 51;
-        gw = gausswin(smooth_size, 3)';
-        gw(1:round(smooth_size/2)) = 0;
-        smWin = gw ./ sum(gw);
-        bin_t = mean(diff(t_bins));
-    
-        curr_psth = grpstats(curr_raster, color_by(1:size(curr_raster, 1)), @(x) mean(x, 1));
-        curr_smoothed_psth = conv2(padarray(curr_psth, ...
-            [0, floor(length(smWin)/2)], 'replicate', 'both'), ...
-            smWin, 'valid') ./ bin_t;
+        
         xlabel('time (s)')
         ylabel('unsorted trial #')
         makepretty;
+        
+         curr_psth = grpstats(curr_raster, color_by(1:size(curr_raster, 1)), @(x) mean(x, 1));
+        curr_smoothed_psth = conv2(padarray(curr_psth, ...
+            [0, floor(length(smWin)/2)], 'replicate', 'both'), ...
+            smWin, 'valid') ./ bin_t;
 
         subplot(6,1,1)
         plot(t, curr_smoothed_psth)

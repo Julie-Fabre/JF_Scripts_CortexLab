@@ -1,5 +1,5 @@
 function [spike_times_timeline, bad_flipper] = JF_align_ephys_to_timeline(animal, day, isSpikeGLX, flipper_flip_times_timeline, ...
-    ephys_sync_folder, flipper_sync_idx, experiment_idx, acqLive_sync_idx, spike_times)
+    ephys_sync_folder, flipper_sync_idx, experiment_idx, acqLive_sync_idx, spike_times, acqLive_timeline)
 %flipper_flip_times_timelinesync(flipper_sync_idx).timestamps
 
 %% load ephys sync (flipper)
@@ -70,8 +70,8 @@ elseif length(flipper_flip_times_ephys) ~= length(flipper_flip_times_timeline)
     % contiguous set via xcorr of diff
     warning([animal, ' ', day, ':Flipper flip times different in timeline/ephys. /n', ...
         'The fix for this is probably not robust: always check'])
-    figure();
-    plot(ephys_binary_values(1:5000:end))
+    %figure();
+    %plot(ephys_binary_values(1:5000:end))
 
     [flipper_xcorr, flipper_lags] = ...
         xcorr(diff(flipper_flip_times_timeline), diff(flipper_flip_times_ephys));

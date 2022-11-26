@@ -16,6 +16,11 @@ if ~exist('verbose', 'var')
     verbose = false;
 end
 
+%% load sync or not
+if ~exist('load_sync', 'var')
+    load_sync = true;
+end
+
 %% Debug mode: plot a buc=nch of useful stuff
 if ~exist('debug', 'var')
     debug = false;
@@ -35,7 +40,7 @@ end
 
 % If nothing specified, load everything (but not LFP)
 if ~exist('load_parts', 'var')
-    load_parts.cam = true;
+    load_parts.cam = false;
     load_parts.ephys = true;
 else
     % If only some things specified, don't load others
@@ -408,6 +413,8 @@ end
 % Pick kilosort version (2 by default, 1 old if selected)
 if ~exist('kilosort_version', 'var') || kilosort_version == 2
     [ephys_path, ephys_exists] = AP_cortexlab_filenameJF(animal, day, experiment, 'ephys', site, recording);
+    [ephysAP_path, ~] = AP_cortexlab_filenameJF(animal, day, experiment, 'ephys_includingCompressed', site, recording);
+    isSpikeGlx = contains(ephysAP_path, '_g');
 elseif exist('kilosort_version', 'var') && kilosort_version == 1
     [ephys_path, ephys_exists] = AP_cortexlab_filenameJF(animal, day, experiment, 'ephys_ks1', site, recording);
 end
@@ -437,15 +444,18 @@ if ephys_exists && load_parts.ephys
     end
 
     % Load sync/photodiode
-    if isempty(dir([ephys_path, filesep, 'sync.mat']))
-        error('No SYNC - extract sync before continuing')
+    if load_sync
+        if isempty(dir([ephys_path, filesep, 'sync.mat']))
+            error('No SYNC - extract sync before continuing')
+        end
     end
-    load(([ephys_path, filesep, 'sync.mat']));
+    %    load(([ephys_path, filesep, 'sync.mat']));
 
     if debug
     end
 
     % Read header information
+
     if ~isSpikeGlx
         header_path = [ephys_path, filesep, 'dat_params.txt'];
         header_fid = fopen(header_path);
@@ -545,14 +555,65 @@ if ephys_exists && load_parts.ephys
     experiment_idx = experiment == [protocols_list.experiment];
 
     % load sync and align
-    [spike_times_timeline, bad_flipper] = JF_align_ephys_to_timeline(animal, day, isSpikeGlx, flipper_flip_times_timeline, ...
-        ephys_path, flipper_sync_idx, experiment_idx, acqLive_sync_idx, spike_times);
-
+    if load_sync
+        [spike_times_timeline, bad_flipper] = JF_align_ephys_to_timeline(animal, day, isSpikeGlx, flipper_flip_times_timeline, ...
+            ephys_path, flipper_sync_idx, experiment_idx, acqLive_sync_idx, spike_times, acqLive_timeline);
+    else
+        spike_times_timeline = spike_times;
+    end
 
     %         co = robustfit(sync_ephys, sync_timeline);
     %          spike_times_timeline = spike_times * co(2) + co(1);
 
     % Get "good" templates from labels
+    if exist('locationKeep', 'var')
+        if verbose
+            disp('Keeping location data...');
+        end
+        if isnumeric(locationKeep)
+            theseDepths = locationKeep;
+        else
+
+            myPaths;
+            [tv, av, st, bregma] = bd_loadAllenAtlas([atlasLocation.folder, filesep, atlasLocation.name]);
+            imgToRegister = dir([brainsawPath, '/*/', animal, '/downsampled_stacks/025_micron/*', channelColToRegister, '*.tif*']);
+            imgToTransform = dir([brainsawPath, '/*/', animal, '/downsampled_stacks/025_micron/*', channelColToTransform, '*.tif*']);
+            outputDir = [imgToRegister.folder, filesep, 'brainReg'];
+
+            load([outputDir, '/probe_ccf.mat']);
+
+            load([outputDir, '/probe2ephys.mat']);
+            if isSpikeGlx
+                probeNumber = find([probe2ephys.day] == curr_day & [probe2ephys.site] == site & [probe2ephys.day] == shank);
+            else
+                probeNumber = find([probe2ephys.day] == curr_day & [probe2ephys.site] == site);
+
+            end
+            all_areas = probe_ccf(probeNumber).trajectory_areas;
+            for iArea = 1:size(all_areas, 1)
+                theseLocations(iArea) = st.acronym(st.id == all_areas(iArea));
+            end
+            theseLocationsInterest = contains(theseLocations, locationKeep);
+            theseDepths = probe_ccf(probeNumber).probe_depths(theseLocationsInterest);
+            template_exists = unique(spike_templates);
+        end
+        theseTemplates = template_depths >= min(theseDepths) & template_depths <= max(theseDepths); %correct depth units
+        good_templates = theseTemplates';
+        good_templates_idx = find(good_templates) - 1;
+
+        %             myPaths;
+        %             allenAt = loadStructureTreeJF([allenAtlasPath, filesep, 'allenCCF/structure_tree_safe_2017.csv']);
+        %             probeccf = AP_cortexlab_filenameJF(animal, [], [], 'histo', [], []);
+        %             load(probeccf)
+        %             this_ccf = probe_ccf(probes(iDataset));
+        %             theseLocations = allenAt.acronym(this_ccf.trajectory_areas);
+        %             theseLocationsInterest = contains(theseLocations, locationKeep);
+        %             theseDepths = this_ccf.probe_depths(theseLocationsInterest);
+        %             template_exists = ismember(1:max(spikeTemplates), unique(spikeTemplates));
+        %             theseTemplates = template_depths(template_exists) >= min(theseDepths) & template_depths(template_exists) <= max(theseDepths); %correct depth units
+        %             good_templates = goodUnits & theseTemplates';
+        %             good_templates_idx = find(good_templates) - 1;
+    end
     if exist('cluster_groups', 'var') && loadClusters
         % If there's a manual classification
 
@@ -615,17 +676,41 @@ if ephys_exists && load_parts.ephys
                 disp('Keeping location data...');
             end
             myPaths;
-            allenAt = loadStructureTreeJF([allenAtlasPath, filesep, 'allenCCF/structure_tree_safe_2017.csv']);
-            probeccf = AP_cortexlab_filenameJF(animal, [], [], 'histo', [], []);
-            load(probeccf)
-            this_ccf = probe_ccf(probes(iDataset));
-            theseLocations = allenAt.acronym(this_ccf.trajectory_areas);
+            [tv, av, st, bregma] = bd_loadAllenAtlas([atlasLocation.folder, filesep, atlasLocation.name]);
+            imgToRegister = dir([brainsawPath, '/*/', animal, '/downsampled_stacks/025_micron/*', channelColToRegister, '*.tif*']);
+            imgToTransform = dir([brainsawPath, '/*/', animal, '/downsampled_stacks/025_micron/*', channelColToTransform, '*.tif*']);
+            outputDir = [imgToRegister.folder, filesep, 'brainReg'];
+
+            load([outputDir, '/probe_ccf.mat']);
+
+            load([outputDir, '/probe2ephys.mat']);
+            if ~isnan(shank)
+                probeNumber = find([probe2ephys.day] == curr_day & [probe2ephys.day] == site & [probe2ephys.day] == shank);
+            else
+                probeNumber = find([probe2ephys.day] == curr_day & [probe2ephys.day] == site);
+
+            end
+
+            theseLocations = st.acronym(this_ccf.trajectory_areas);
             theseLocationsInterest = contains(theseLocations, locationKeep);
             theseDepths = this_ccf.probe_depths(theseLocationsInterest);
             template_exists = ismember(1:max(spikeTemplates), unique(spikeTemplates));
             theseTemplates = template_depths(template_exists) >= min(theseDepths) & template_depths(template_exists) <= max(theseDepths); %correct depth units
             good_templates = goodUnits & theseTemplates';
             good_templates_idx = find(good_templates) - 1;
+
+            %             myPaths;
+            %             allenAt = loadStructureTreeJF([allenAtlasPath, filesep, 'allenCCF/structure_tree_safe_2017.csv']);
+            %             probeccf = AP_cortexlab_filenameJF(animal, [], [], 'histo', [], []);
+            %             load(probeccf)
+            %             this_ccf = probe_ccf(probes(iDataset));
+            %             theseLocations = allenAt.acronym(this_ccf.trajectory_areas);
+            %             theseLocationsInterest = contains(theseLocations, locationKeep);
+            %             theseDepths = this_ccf.probe_depths(theseLocationsInterest);
+            %             template_exists = ismember(1:max(spikeTemplates), unique(spikeTemplates));
+            %             theseTemplates = template_depths(template_exists) >= min(theseDepths) & template_depths(template_exists) <= max(theseDepths); %correct depth units
+            %             good_templates = goodUnits & theseTemplates';
+            %             good_templates_idx = find(good_templates) - 1;
         end
     else
         % If no cluster groups at all, keep all
@@ -633,8 +718,10 @@ if ephys_exists && load_parts.ephys
         if verbose
             disp('No manual labeling, keeping all and re-indexing');
         end
-        good_templates_idx = unique(spike_templates_0idx);
-        good_templates = ismember(0:size(templates, 1)-1, good_templates_idx);
+        if ~exist('locationKeep', 'var')
+            good_templates_idx = unique(spike_templates_0idx);
+            good_templates = ismember(0:size(templates, 1)-1, good_templates_idx);
+        end
     end
     % Throw out all non-good template data
     templates = templates(good_templates, :, :);

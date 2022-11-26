@@ -4,12 +4,12 @@
 %clear all;
 myPaths;
 
-animals={'JF070'};
+animals={'JF067'};
 curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};
 
-protocol = ''; % (this is the name of the Signals protocol)
+protocol = 'oiceworld'; % (this is the name of the Signals protocol)
 experiments = AP_find_experimentsJF(animal, protocol, true);
 experiments = experiments([experiments.ephys]);
 
@@ -25,7 +25,7 @@ experiments = experiments([experiments.ephys]);
 
 %% Load data from experiment 
 
-curr_day = 2; % (set which day to use)
+curr_day = 10; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
@@ -41,7 +41,7 @@ recording = [];
 % shank mapping) QQ change this in the future 
 n_trials = zeros(size(experiments(curr_day).experiment,2), 1);
 for iExperiment = experiments(curr_day).experiment
-    [block_filename, block_exists] = AP_cortexlab_filenameJF(animal, day, experiments(curr_day).experiment(iExperiment), 'block');
+    [block_filename, block_exists] = AP_cortexlab_filenameJF(animal, day, iExperiment, 'block');
     try
         load(block_filename)
         if isfield(block.events, 'stim_idValues')
@@ -54,13 +54,13 @@ for iExperiment = experiments(curr_day).experiment
     end
 end 
 
-experiment = 1;%experiments(curr_day).experiment(find(n_trials == max(n_trials)));
+experiment = find(n_trials == max(n_trials));
 loadClusters = 0;
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys_includingCompressed',site,recording);
 if size(ephysAPfile,2) ==2 %keep only ap
     ephysAPfile = ephysAPfile{1};
 end
-isSpikeGlx = contains(ephysAPfile, '_g');
+
 ephysDirPath = AP_cortexlab_filenameJF(animal, day, experiment, 'ephys_dir', site, recording);
 savePath = fullfile(ephysDirPath, 'qMetrics');
 qMetricsExist = dir(fullfile(savePath, 'qMetric*.mat'));
@@ -76,13 +76,19 @@ JF_load_experiment;
 curr_shank=NaN;
 
 % go no go passive
+
+ trial_conditions(ismember(trial_conditions(:,1), [3]),1) = 4; % go 1
  trial_conditions(ismember(trial_conditions(:,1), [4]),1) = 4; % go 1
+
+
  trial_conditions(ismember(trial_conditions(:,1), [7]),1) = 7; % go 2
+ trial_conditions(ismember(trial_conditions(:,1), [8]),1) = 7; % go 2
  trial_conditions(ismember(trial_conditions(:,1), [10]),1) = 1; % no go
  trial_conditions(ismember(trial_conditions(:,1), [6]),1) = 10; % no go
+ trial_conditions(ismember(trial_conditions(:,1), [5]),1) = 10; % no go
  trial_conditions(~ismember(trial_conditions(:,1), [4,7,10]),1) = 1;
 %thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions, [4,7,10]) & trial_conditions(:,2)~=90;
-thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions(:,1), [4,7,10]);
+thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions(:,1), [1:10]);
 
 AP_cellrasterJF({stimOn_times(thisIndex), stimOn_times(thisIndex), stimOn_times(thisIndex)}, ...
     {trial_conditions(thisIndex,1), trial_conditions(thisIndex,2),...
@@ -102,11 +108,12 @@ AP_cellrasterJF({stimOn_times(thisIndex), stimOn_times(thisIndex), stimOn_times(
 (trial_conditions(thisIndex,2)/-90)+(trial_conditions(thisIndex,1))});
 
 
-
+AP_cellrasterJF({stimOn_times}, {trial_conditions(:,1)})
 % task 
-AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))'}, ...
-    {trial_conditions(:,1),trial_conditions(:,2), ...
-    trial_conditions(:,3)});
+index = trial_conditions(:,1)==1;
+AP_cellrasterJF({stimOn_times(index),wheel_move_time(index),signals_events.responseTimes((index))'}, ...
+    {trial_conditions((index),1),trial_conditions((index),2), ...
+    trial_conditions((index),3)});
 % 
 % AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))',stimOn_times}, ...
 %     {trial_conditions(:,1),trial_conditions(:,2), ...
