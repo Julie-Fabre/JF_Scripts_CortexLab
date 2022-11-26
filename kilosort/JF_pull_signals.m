@@ -415,7 +415,7 @@
             end
 
             % Get first movement time after stim onset
-            surround_time = [-0.5, 2];
+            surround_time = [-0.5, 5];
             surround_sample_rate = 1 / Timeline.hw.samplingInterval; % (match this to framerate)
             surround_time_points = surround_time(1):1 / surround_sample_rate:surround_time(2);
             pull_times = bsxfun(@plus, stimOn_times, surround_time_points);

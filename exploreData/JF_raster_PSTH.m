@@ -40,8 +40,6 @@ end
 
 
 if ~isempty(align_group)
-
-
     if ~isempty(sort_by)
         [~, sortedAlignId] = sort(align_group(1:size(sort_by, 1)));
         % is sortbyThis is not empty, sort by those times
@@ -60,14 +58,22 @@ if ~isempty(align_group)
             makepretty;
         end
     else
-        [~, sortedAlignId] = sort(align_group);
+        groups_unique = unique(align_group);
+        [sortedGroup, sortedAlignId] = sort(align_group);
         [raster_y, raster_x] = find(curr_raster(sortedAlignId, :));
         if plot_me
-            figure();
-            scatter(t(raster_x), raster_y, 2, 'filled')
+            subplot(6,1,[2:6])
+            these_col_plot = lines(length(groups_unique));
+            for iGroup = 1:length(groups_unique)
+                these_grp_rows = find(sortedGroup == groups_unique(iGroup));
+                plot_me = find(ismember(raster_y, these_grp_rows));
+                scatter(t(raster_x(plot_me)), raster_y(plot_me), 2, these_col_plot(iGroup,:), 'filled'); hold on;
+            end
             set(gca, 'YDir', 'reverse')
+            xlabel('time (s)')
+            ylabel('trial # (sorted)')
+            makepretty;
         end
-
     end
     smooth_size = 51;
     gw = gausswin(smooth_size, 3)';
@@ -81,6 +87,13 @@ if ~isempty(align_group)
     curr_smoothed_psth = conv2(padarray(curr_psth, ...
         [0, floor(length(smWin)/2)], 'replicate', 'both'), ...
         smWin, 'valid') ./ bin_t;
+    if plot_me
+        subplot(6,1,1)
+        plot(t, curr_smoothed_psth)
+        %xlabel('time (s)')
+        ylabel('sp/s')
+        makepretty;
+    end
 
 
 else
