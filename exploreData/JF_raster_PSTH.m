@@ -1,5 +1,5 @@
 function [curr_smoothed_psth, curr_psth, raster_x, raster_y, curr_raster] = JF_raster_PSTH(spike_templates, spike_times_timeline, ...
-    thisTemplate, raster_window, psth_bin_size, align_times, align_group, sort_by, color_by, plot_me)
+    thisTemplate, raster_window, psth_bin_size, align_times, align_group, sort_by, color_by, plot_me, causal_smoothing)
 % Example:
 % ---------
 % thisTemplate = 1;
@@ -38,7 +38,6 @@ else
 end
 
 
-
 if ~isempty(align_group)
     if ~isempty(sort_by)
         [~, sortedAlignId] = sort(align_group(1:size(sort_by, 1)));
@@ -48,7 +47,7 @@ if ~isempty(align_group)
         [raster_y, raster_x] = find(curr_raster(sortSecId(sortedAlignId), :));
         if plot_me
             figure();
-            subplot(6,1,[2:6])
+            subplot(3, 1, [2:3])
             scatter(t(raster_x), raster_y, 2, 'filled')
             hold on;
             plot(sortedSecVar(sortedAlignId), 1:length(sortedSecVar))
@@ -62,12 +61,13 @@ if ~isempty(align_group)
         [sortedGroup, sortedAlignId] = sort(align_group);
         [raster_y, raster_x] = find(curr_raster(sortedAlignId, :));
         if plot_me
-            subplot(6,1,[2:6])
+            subplot(3, 1, [2:3])
             these_col_plot = lines(length(groups_unique));
             for iGroup = 1:length(groups_unique)
                 these_grp_rows = find(sortedGroup == groups_unique(iGroup));
                 plot_me = find(ismember(raster_y, these_grp_rows));
-                scatter(t(raster_x(plot_me)), raster_y(plot_me), 2, these_col_plot(iGroup,:), 'filled'); hold on;
+                scatter(t(raster_x(plot_me)), raster_y(plot_me), 2, these_col_plot(iGroup, :), 'filled');
+                hold on;
             end
             set(gca, 'YDir', 'reverse')
             xlabel('time (s)')
@@ -90,7 +90,7 @@ if ~isempty(align_group)
         [0, floor(length(smWin)/2)], 'replicate', 'both'), ...
         smWin, 'valid') ./ bin_t;
     if plot_me
-        subplot(6,1,1)
+        subplot(3, 1, 1)
         plot(t, curr_smoothed_psth)
         %xlabel('time (s)')
         ylabel('sp/s')
@@ -101,68 +101,78 @@ if ~isempty(align_group)
 else
     [raster_y, raster_x] = find(curr_raster);
     smooth_size = 51;
-        gw = gausswin(smooth_size, 3)';
-        if causal_smoothing
-            gw(1:round(smooth_size/2)) = 0; %half gaussian to preserve onset times
-        end
+    gw = gausswin(smooth_size, 3)';
+    if causal_smoothing
+        gw(1:round(smooth_size/2)) = 0; %half gaussian to preserve onset times
+    end
 
 
-        smWin = gw ./ sum(gw);
-        bin_t = mean(diff(t_bins));
-    
-        curr_psth = grpstats(curr_raster, ones(size(curr_raster, 1),1), @(x) mean(x, 1));
-        curr_smoothed_psth = conv2(padarray(curr_psth, ...
-            [0, floor(length(smWin)/2)], 'replicate', 'both'), ...
-            smWin, 'valid') ./ bin_t;
+    smWin = gw ./ sum(gw);
+    bin_t = mean(diff(t_bins));
+
+    curr_psth = grpstats(curr_raster, ones(size(curr_raster, 1), 1), @(x) mean(x, 1));
+    curr_smoothed_psth = conv2(padarray(curr_psth, ...
+        [0, floor(length(smWin)/2)], 'replicate', 'both'), ...
+        smWin, 'valid') ./ bin_t;
 
     if plot_me
         clf;
-        subplot(6,1,[2:6])
+        subplot(3, 1, [2:3])
         if ~isempty(color_by)
             theseCols = unique(color_by);
             these_col_plot = lines(length(theseCols));
             for iColor = 1:length(theseCols)
                 these_col_rows = find(color_by == theseCols(iColor));
                 plot_me = find(ismember(raster_y, these_col_rows));
-                scatter(t(raster_x(plot_me)), raster_y(plot_me), 2, these_col_plot(iColor,:), 'filled'); hold on;
+                scatter(t(raster_x(plot_me)), raster_y(plot_me), 2, these_col_plot(iColor, :), 'filled');
+                hold on;
             end
             set(gca, 'YDir', 'reverse')
-        
-        xlabel('time (s)')
-        ylabel('unsorted trial #')
-        makepretty;
-        
-         curr_psth = grpstats(curr_raster, color_by(1:size(curr_raster, 1)), @(x) mean(x, 1));
-        curr_smoothed_psth = conv2(padarray(curr_psth, ...
-            [0, floor(length(smWin)/2)], 'replicate', 'both'), ...
-            smWin, 'valid') ./ bin_t;
 
-        subplot(6,1,1)
-        plot(t, curr_smoothed_psth)
-        xlabel('time (s)')
-        ylabel('sp/s')
-        makepretty;
+            xlabel('time (s)')
+            ylabel('unsorted trial #')
+            makepretty;
+
+            curr_psth = grpstats(curr_raster, color_by(1:size(curr_raster, 1)), @(x) mean(x, 1));
+            curr_smoothed_psth = conv2(padarray(curr_psth, ...
+                [0, floor(length(smWin)/2)], 'replicate', 'both'), ...
+                smWin, 'valid') ./ bin_t;
+
+            subplot(3, 1, 1)
+            plot(t, curr_smoothed_psth)
+            xlabel('time (s)')
+            ylabel('sp/s')
+            makepretty;
 
         else
-            scatter(t(raster_x), raster_y, 2, 'filled')
+            scatter(t(raster_x), raster_y, 2, rgb('Green'),'filled')
             set(gca, 'YDir', 'reverse')
             gw = gausswin(smooth_size, 3)';
             if causal_smoothing
                 gw(1:round(smooth_size/2)) = 0; %half gaussian to preserve onset times
             end
+            xlabel('time (s)')
+            ylabel('trial (unsorted)')
+            makepretty;
 
-            
+
             smWin = gw ./ sum(gw);
             bin_t = mean(diff(t_bins));
-        
+
             curr_psth = nanmean(curr_raster);
             curr_smoothed_psth = conv2(padarray(curr_psth, ...
                 [0, floor(length(smWin)/2)], 'replicate', 'both'), ...
                 smWin, 'valid') ./ bin_t;
 
+            subplot(3, 1, 1)
+            plot(t, curr_smoothed_psth, 'Color', rgb('Green'))
+            xlabel('time (s)')
+            ylabel('sp/s')
+            makepretty;
+
         end
-        
-        
+
+
     end
 
 

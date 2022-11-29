@@ -25,7 +25,7 @@ experiments = experiments([experiments.ephys]);
 
 %% Load data from experiment 
 
-curr_day = 10; % (set which day to use)
+curr_day = 6; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
@@ -88,7 +88,19 @@ curr_shank=NaN;
  trial_conditions(ismember(trial_conditions(:,1), [5]),1) = 10; % no go
  trial_conditions(~ismember(trial_conditions(:,1), [4,7,10]),1) = 1;
 %thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions, [4,7,10]) & trial_conditions(:,2)~=90;
-thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions(:,1), [1:10]);
+thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions(:,2), [-90,0]) & ismember(trial_conditions(:,1), [4,7,10]);
+
+ trial_conditions(ismember(trial_conditions(:,1), [1,2,3,4,18,19,20,21,22]),1) = 4; % go 1
+ trial_conditions(ismember(trial_conditions(:,1), [5,6,10,11,12,13,14,15,16,17]),1) = 10; % go 1
+  trial_conditions(ismember(trial_conditions(:,1), [7,8,9]),1) = 7; % go 1
+thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions(:,2), [-90,0]) & ismember(trial_conditions(:,1), [4,7,10]);
+
+
+AP_cellrasterJF({stimOn_times(thisIndex), stimOn_times(thisIndex), stimOn_times(thisIndex)}, ...
+    {trial_conditions(thisIndex,1), trial_conditions(thisIndex,2),...
+(trial_conditions(thisIndex,2)/-90)+(trial_conditions(thisIndex,1))});
+
+thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions(:,1), [4,6,7]);
 
 AP_cellrasterJF({stimOn_times(thisIndex), stimOn_times(thisIndex), stimOn_times(thisIndex)}, ...
     {trial_conditions(thisIndex,1), trial_conditions(thisIndex,2),...
@@ -110,10 +122,10 @@ AP_cellrasterJF({stimOn_times(thisIndex), stimOn_times(thisIndex), stimOn_times(
 
 AP_cellrasterJF({stimOn_times}, {trial_conditions(:,1)})
 % task 
-index = trial_conditions(:,1)==1;
-AP_cellrasterJF({stimOn_times(index),wheel_move_time(index),signals_events.responseTimes((index))'}, ...
-    {trial_conditions((index),1),trial_conditions((index),2), ...
-    trial_conditions((index),3)});
+AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes'}, ...
+    {trial_conditions(:,1),trial_conditions(:,2), ...
+    trial_conditions(:,3)});
+
 % 
 % AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))',stimOn_times}, ...
 %     {trial_conditions(:,1),trial_conditions(:,2), ...
