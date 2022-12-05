@@ -7,20 +7,14 @@ for iAnimal = 1:size(animalsAll, 2)
 
 
     animal = animalsAll{1, iAnimal}; %this animal
-    if strcmp(animal, 'JF042') || strcmp(animal, 'JF043') || strcmp(animal, 'JF044')
-        thisSide = -1;
-    else
-        thisSide = 1;
-    end
-    protocol = 'stage'; %'location'; %protocol name contains this name
+    protocol = 'noGo_stage'; %'location'; %protocol name contains this name
     flexible_name = true; %protocol name can be slightly different
     experiments = AP_find_experimentsJF(animal, protocol, flexible_name);
     bhv = struct; %initialize structure
     keep_day = [];
     noGoDay = [];
-    theseD = 1:length(experiments);
 
-    for curr_day = theseD
+    for curr_day = 1:length(experiments)
 
 
         day = experiments(curr_day).day;
@@ -28,21 +22,21 @@ for iAnimal = 1:size(animalsAll, 2)
         trNum = [];
         % If multiple experiments, only use the largest one (usually multiple
         % happens if mess ups first/last one is good)
-        %if curr_day ~= length(experiments)
-        for curr_experiment = 1:length(experiment_num)
+        for curr_day = 1:length(experiment_num)
             try
-                experiment = experiment_num(curr_experiment);
+                experiment = experiment_num(curr_day);
 
                 [block_filename, block_exists] = AP_cortexlab_filenameJF(animal, day, experiment, 'block');
                 if ~isempty(block_filename)
                     load(block_filename)
 
-                    trNum(curr_experiment) = length(block.events.newTrialTimes);
+                    trNum(curr_day) = length(block.events.newTrialTimes);
                 else
-                    trNum(curr_experiment) = 0;
+                    trNum(curr_day) = 0;
                 end
             catch
             end
+            
 
             %
             for curr_experiment = find(trNum == max(trNum))
@@ -73,31 +67,9 @@ for iAnimal = 1:size(animalsAll, 2)
 
                     response_trials = 1:length(block.events.endTrialValues);
                     clearvars correctTrials
-                    iImg = 1;
 
 
-                    if isfield(block.events, 'trialSideValues')
-                        %leftGood = block.events.sessionPerformanceValues(3, find(block.events.sessionPerformanceValues(1, :) == -1));
-                        rightGood = block.events.sessionPerformanceValues(3, find(block.events.sessionPerformanceValues(1, :) == thisSide));
-                        %leftT = block.events.sessionPerformanceValues(2, find(block.events.sessionPerformanceValues(1, :) == -1));
-                        rightT = block.events.sessionPerformanceValues(2, find(block.events.sessionPerformanceValues(1, :) == thisSide));
-                    elseif isfield(block.events, 'noGoQuiescenceTimes')
-                        block.events.trialSideValues(response_trials) = thisSide;
-                        hitTimesPossib = [block.events.feedbackTimes, block.events.noGoQuiescenceTimes];
-                        hitValuesUnsorted = [block.events.feedbackValues, 0 * ones(size(block.events.noGoQuiescenceTimes, 2), thisSide)'];
-                        [sortedV, sortedIdx] = sort(hitTimesPossib);
-                        block.events.hitValues(response_trials) = hitValuesUnsorted(sortedIdx(response_trials));
-                    else
-                        block.events.trialSideValues(response_trials) = thisSide;
-                        ff = block.events.responseValues;
-
-                        block.events.hitValues(response_trials) = ff(response_trials);
-                    end
-                    if contains(block.expDef, 'goNoGo')
-                        go1Trials = block.events.trialTypeValues(response_trials) == 1;
-                        go2Trials = block.events.trialTypeValues(response_trials) == 2;
-                        noGoTrials = block.events.trialTypeValues(response_trials) == 3;
-                    elseif contains(block.expDef, 'Hack') || contains(block.expDef, 'noGo_stage4') || contains(block.expDef, 'noGo_stage5')
+                    if contains(block.expDef, 'noGo_stage4') || contains(block.expDef, 'noGo_stage5')
                         go1Trials = block.events.stimulusTypeValues(response_trials) == 1;
                         go2Trials = block.events.stimulusTypeValues(response_trials) == 2;
                         noGoTrials = block.events.stimulusTypeValues(response_trials) == 3;
@@ -106,97 +78,24 @@ for iAnimal = 1:size(animalsAll, 2)
                         go2Trials = zeros(size(block.events.trialSideValues(response_trials), 2), 1)';
                         noGoTrials = zeros(size(block.events.trialSideValues(response_trials), 2), 1)';
                     end
+                    trialTypes = {go1Trials, go2Trials, noGoTrials};
                     if isfield(block.events, 'repeatTrialValues')
                         repeatOnMisses = block.events.repeatTrialValues(response_trials) > 0;
                     else
                         repeatOnMisses = block.events.repeatNumValues(response_trials) > 1;
                     end
-                    correctTrials((iImg - 1)*3+1) = sum( ...
-                        block.events.hitValues(response_trials) == 1 & go1Trials ...
-                        ); % go 1
-                    correctTrials((iImg - 1)*3+2) = sum( ...
-                        block.events.hitValues(response_trials) == 1 & go2Trials ...
-                        ); % go 2
-                    correctTrials((iImg - 1)*3+3) = sum( ...
-                        block.events.hitValues(response_trials) == 1 & noGoTrials ...
-                        ); % no go
 
-                    nTrials((iImg - 1)*3+1) = sum(~repeatOnMisses(response_trials) & ...
-                        go1Trials ...
-                        );
-                    nTrials((iImg - 1)*3+2) = sum(~repeatOnMisses(response_trials) & ...
-                        go2Trials ...
-                        );
-                    nTrials((iImg - 1)*3+3) = sum(~repeatOnMisses(response_trials) & ...
-                        noGoTrials ...
-                        );
+                    for iStimType = 1:3
+                        correctTrials(iStimType) = sum(block.events.hitValues(response_trials) == 1 & trialTypes{iStimType});
 
-                    conditi = [1, 2, 3];
+                        nTrials(iStimType) = sum(~repeatOnMisses(response_trials) & trialTypes{iStimType});
 
+                        goLeft(iStimType) = sum(~repeatOnMisses(response_trials) & ...
+                            block.events.hitValues(response_trials) == 1 & trialTypes{iStimType});
 
-                    if contains(block.expDef, 'Hack') || contains(block.expDef, 'noGo_stage4') || contains(block.expDef, 'noGo_stage5')
-                        if strcmp(animal, 'JF042') || strcmp(animal, 'JF043') || strcmp(animal, 'JF044')
-                            val = 1;
-                        else
-                            val = -1;
-                        end
-
-                    else
-                        if strcmp(animal, 'JF042') || strcmp(animal, 'JF043') || strcmp(animal, 'JF044')
-                            val = -1;
-                        else
-
-                            val = 1;
-                        end
+                        noGo(iStimType) = sum(~repeatOnMisses(response_trials) & ...
+                            block.events.hitValues(response_trials) == 0 & trialTypes{iStimType});
                     end
-                    goLeft((iImg - 1)*3+1) = sum(~repeatOnMisses(response_trials) & ...
-                        ...
-                        block.events.hitValues(response_trials) == val & go1Trials ...
-                        );
-                    goLeft((iImg - 1)*3+2) = sum(~repeatOnMisses(response_trials) & ...
-                        ...
-                        block.events.hitValues(response_trials) == val & go2Trials ...
-                        );
-                    goLeft((iImg - 1)*3+3) = sum(~repeatOnMisses(response_trials) & ...
-                        ...
-                        block.events.hitValues(response_trials) == val & noGoTrials ...
-                        );
-
-
-                    if contains(block.expDef, 'goNoGo')
-                        allOffs = sort([block.events.goStimOffTimes, block.events.noGoStimOffTimes]);
-                        timeThis = allOffs(response_trials) - block.events.goStimOnTimes(response_trials);
-                    elseif isfield(block.events, 'stimulusOnTimes')
-                        timeThis = block.events.feedbackTimes(response_trials) - block.events.stimulusOnTimes(response_trials);
-                    else
-                        timeThis = block.events.stimOffTimes(response_trials) - block.events.stimOnTimes(response_trials);
-                    end
-                    trialTime((iImg - 1)*3+1) = nanmean(timeThis(~[repeatOnMisses(response_trials(2:end)), 0] & ...
-                        ...
-                        go1Trials ...
-                        ));
-                    trialTime((iImg - 1)*3+2) = nanmean(timeThis(~[repeatOnMisses(response_trials(2:end)), 0] & ...
-                        ...
-                        go2Trials ...
-                        ));
-                    trialTime((iImg - 1)*3+3) = nanmean(timeThis(~[repeatOnMisses(response_trials(2:end)), 0] & ...
-                        ...
-                        noGoTrials ...
-                        ));
-
-
-                    noGo((iImg - 1)*3+1) = sum(~repeatOnMisses(response_trials) & ...
-                        ...
-                        (block.events.hitValues(response_trials) == 0) & go1Trials ...
-                        );
-                    noGo((iImg - 1)*3+2) = sum(~repeatOnMisses(response_trials) & ...
-                        ...
-                        (block.events.hitValues(response_trials) == 0) & go2Trials ...
-                        );
-                    noGo((iImg - 1)*3+3) = sum(~repeatOnMisses(response_trials) & ...
-                        ...
-                        (block.events.hitValues(response_trials) == 0) & noGoTrials ...
-                        );
 
 
                     wheel_resample_rate = 1000;
