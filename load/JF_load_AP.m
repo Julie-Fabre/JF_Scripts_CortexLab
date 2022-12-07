@@ -9,7 +9,7 @@ curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};
 
-protocol = 'oiceworld'; % (this is the name of the Signals protocol)
+protocol = 'stage'; % (this is the name of the Signals protocol)
 experiments = AP_find_experimentsJF(animal, protocol, true);
 experiments = experiments([experiments.ephys]);
 
@@ -25,7 +25,7 @@ experiments = experiments([experiments.ephys]);
 
 %% Load data from experiment 
 
-curr_day = 6; % (set which day to use)
+curr_day = 19; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
@@ -75,7 +75,22 @@ clearvars unitType
 JF_load_experiment;
 curr_shank=NaN;
 
-% go no go passive
+% % go no go passive
+% 
+%  trial_conditions(ismember(trial_conditions(:,1), [4]),1) = 4; % go 1
+% 
+% 
+%  trial_conditions(ismember(trial_conditions(:,1), [7]),1) = 7; % go 2
+%  trial_conditions(ismember(trial_conditions(:,1), [10]),1) = 1; % no go
+%  trial_conditions(ismember(trial_conditions(:,1), [6]),1) = 10; % no go
+%   trial_conditions(~ismember(trial_conditions(:,1), [4,7,10]),1) = 1;
+% %thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions, [4,7,10]) & trial_conditions(:,2)~=90;
+% thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions(:,2), [-90,0]) & ismember(trial_conditions(:,1), [4,7,10]);
+% 
+% 
+% AP_cellrasterJF({stimOn_times(thisIndex), stimOn_times(thisIndex), stimOn_times(thisIndex)}, ...
+%     {trial_conditions(thisIndex,1), trial_conditions(thisIndex,2),...
+% (trial_conditions(thisIndex,2)/-90)+(trial_conditions(thisIndex,1))});
 
  trial_conditions(ismember(trial_conditions(:,1), [3]),1) = 4; % go 1
  trial_conditions(ismember(trial_conditions(:,1), [4]),1) = 4; % go 1
@@ -90,11 +105,11 @@ curr_shank=NaN;
 %thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions, [4,7,10]) & trial_conditions(:,2)~=90;
 thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions(:,2), [-90,0]) & ismember(trial_conditions(:,1), [4,7,10]);
 
- trial_conditions(ismember(trial_conditions(:,1), [1,2,3,4,18,19,20,21,22]),1) = 4; % go 1
- trial_conditions(ismember(trial_conditions(:,1), [5,6,10,11,12,13,14,15,16,17]),1) = 10; % go 1
-  trial_conditions(ismember(trial_conditions(:,1), [7,8,9]),1) = 7; % go 1
-thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions(:,2), [-90,0]) & ismember(trial_conditions(:,1), [4,7,10]);
-
+%  trial_conditions(ismember(trial_conditions(:,1), [1,2,3,4,18,19,20,21,22]),1) = 4; % go 1
+%  trial_conditions(ismember(trial_conditions(:,1), [5,6,10,11,12,13,14,15,16,17]),1) = 10; % go 1
+%   trial_conditions(ismember(trial_conditions(:,1), [7,8,9]),1) = 7; % go 1
+% thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions(:,2), [-90,0]) & ismember(trial_conditions(:,1), [4,7,10]);
+% 
 
 AP_cellrasterJF({stimOn_times(thisIndex), stimOn_times(thisIndex), stimOn_times(thisIndex)}, ...
     {trial_conditions(thisIndex,1), trial_conditions(thisIndex,2),...
@@ -122,7 +137,7 @@ AP_cellrasterJF({stimOn_times(thisIndex), stimOn_times(thisIndex), stimOn_times(
 
 AP_cellrasterJF({stimOn_times}, {trial_conditions(:,1)})
 % task 
-AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes'}, ...
+AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(1:end-1)'}, ...
     {trial_conditions(:,1),trial_conditions(:,2), ...
     trial_conditions(:,3)});
 

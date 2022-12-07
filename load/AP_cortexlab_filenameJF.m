@@ -302,7 +302,7 @@ switch file
         %spike_glx local 
         if ~file_exists
             filepattern = [animal filesep date filesep ...
-                 site_dir filesep '*ap.*bin'];
+                 'ephys' filesep site_dir filesep '*ap.*bin'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
     case 'ephys'

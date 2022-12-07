@@ -55,6 +55,7 @@ if ~isempty(align_group)
             xlabel('time (s)')
             ylabel('trial (sorted)')
             makepretty;
+            xlim([t(1), t(end)])
         end
     else
         groups_unique = unique(align_group);
