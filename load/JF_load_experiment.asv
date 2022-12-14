@@ -698,7 +698,7 @@ if ephys_exists && load_parts.ephys
             theseLocationsInterest = contains(theseLocations, locationKeep);
             theseDepths = this_ccf.probe_depths(theseLocationsInterest);
             end
-            template_exists = ismember(0:max(spike_templates_0idx), unique(spike_templates_0idx));
+            template_exists = ismember(1:max(spike_templates_0idx), unique(spike_templates_0idx));
             theseTemplates = template_depths(template_exists) >= min(theseDepths) & template_depths(template_exists) <= max(theseDepths); %correct depth units
             good_templates = unitType' == 1& theseTemplates';
             good_templates_idx = find(good_templates) -1;

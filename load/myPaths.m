@@ -27,3 +27,4 @@ allenAtlasPath = '/home/julie/Dropbox/Atlas/';
 regParamsPath = '/home/julie/Dropbox/MATLAB/onPaths/JF_Scripts_CortexLab/histology/'; 
 tempPath = '/home/julie/temp/';
 JF_Scripts_CortexLabPath = '/home/julie/Dropbox/MATLAB/onPaths/JF_Scripts_CortexLab/';
+brainglobeLocation = '/home/julie/.brainglobe/'; % where your brainglobe data lives 

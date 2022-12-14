@@ -9,4 +9,5 @@
 % SNr : JF070
 
 %% striatum, chaque bonne cellule, baseline go/no go action 
+allDataStruct = JF_loadAllData({'JF070'}, 'CP', 'stage', 1);
 
