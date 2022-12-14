@@ -1,25 +1,31 @@
 
 %% preprocess for npx 2.0 probes : run kilosort, extract sync and lfp channels
-function JF_preprocess_NPX2(animal, date, experiment, site, recording, rerunKS, rerunQM)
+function JF_runKSandBombcell(animal, date, experiment, site, recording, rerunKS, rerunQM)
 
-%% convert raw data from .cbin to .bin 
+%% convert raw data from .cbin to .bin and get channel map
 myPaths;
-[ephysAPfile, ~] = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_ap', site, recording);
+[ephysAPfile, ~] = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_includingCompressed', site, recording);
 if size(ephysAPfile, 2) > 1 && iscell(ephysAPfile)%keep only ap
     ephysAPfile = ephysAPfile{1};
 end
 if contains(ephysAPfile, '.cbin')
     saveFileFolder = fullfile('/media/julie/Elements', animal, date, ['site', num2str(site)]);
-    bc_extractCbinData(ephysAPfile, [], [], [], [], saveFileFolder);
+    mkdir(saveFileFolder)
+    decompDataFile = bc_extractCbinData(ephysAPfile, [], [], [], saveFileFolder);
+    rootZ = fileparts(decompDataFile);
+    metaFile = strrep(ephysAPfile, '.cbin', '.meta');
+    [~, channelMapIMRO] = bc_readSpikeGLXMetaFile(metaFile);
 else
     rootZ = fileparts(ephysAPfile);
+    metaFile = strrep(ephysAPfile, '.bin', '.meta');
+    [~, channelMapIMRO] = bc_readSpikeGLXMetaFile(metaFile);
 
 end
 
-%% get channel map 
+%% get channel map file
+chanMapFile = JF_imroToChannelMapLoc(channelMapIMRO);
+
 %% kilosort
-
-
 rootH = [extraHDPath, '/data_temp/'];
 pathToYourConfigFile = [dropboxPath, 'MATLAB/onPaths/Kilosort2/configFiles'];
 chanMapFilePath = [dropboxPath, 'MATLAB/onPaths/Kilosort2/configFiles', chanMapFile];

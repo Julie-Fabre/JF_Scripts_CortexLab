@@ -11,7 +11,7 @@ animalsPhase5 = {[13, 14, 16], [16], []};
 bhvOut = struct;
 for iAnimal = 1:size(animalsAll, 2)
 
-
+myPaths;
     animal = animalsAll{1, iAnimal}; %this animal
     if strcmp(animal, 'JF042') || strcmp(animal, 'JF043') || strcmp(animal, 'JF044')
         thisSide = -1;

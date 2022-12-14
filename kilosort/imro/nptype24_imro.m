@@ -11,15 +11,13 @@ function nptype24_imro
 % patternType = 0 all sites on "shankChoice" starting from "botRow", 0-448
 % patternType = 1 horizontal stripe of 96-channel height across all four
 %                   shanks starting from "botRow", valid values = 0-592
-% patternType = 2 horizontal stripe of 192-channel height across two
-%                   shanks starting from "botRow", valid values = 0-592
 % written by ???, modified by JF 
 
-patternType = 1;
-shankChoice = 3;   % 0-3, needed for patternType 0
+patternType = 1; %horizontal stripe 
+%shankChoice = 3;   % 0-3, needed for patternType 0
 botRow = 50;     
 refElec = 1;     % 0 for external, 1-4 for tip reference on shank 0-3
-elecChoice = 2:3; % 0-3, needed for patternType 2
+%elecChoice = 2:3; % 0-3, needed for patternType 2
 
 shank = zeros(384,1,'single');
 bank = zeros(384,1,'single');
@@ -58,23 +56,23 @@ switch patternType
         end   
         
         
-    case 2
-        %horizontal stripe of 2 channel blocks (96 sites) across all four shanks
-        shElecInd = (botRow*2:(botRow*2 + 192)); %these are the electrode indices on each shank
-        nameStr = sprintf( 'NPtype24_hStripe_shanks%d%d_botRow%d_ref%d', elecChoice(1), elecChoice(2),botRow, refElec );
-        %loop over shanks; for each, calculate the channels that correspond
-        %to these electrode indices       
-        nE = 192; %electrodes in pattern per shank
-        SIvals = elecChoice;
-        for sI = SIvals %edit this with values eg 0:1, 2:3 
-            for i = 1:nE
-                gEInd = (sI - SIvals(1))*nE + i; % current electrode index for whole probe, plus one for MATLAB
-                elecInd(gEInd) = shElecInd(i); % electrode index in whole selected set
-                shank(gEInd) = sI;
-                [bank(gEInd), chans(gEInd)] = ElecToChan( sI, elecInd(gEInd) );
-                fprintf("%d,%d,%d\n", bank(gEInd), chans(gEInd), elecInd(gEInd) );
-            end
-        end   
+%     case 2
+%         %horizontal stripe of 2 channel blocks (96 sites) across all four shanks
+%         shElecInd = (botRow*2:(botRow*2 + 192)); %these are the electrode indices on each shank
+%         nameStr = sprintf( 'NPtype24_hStripe_shanks%d%d_botRow%d_ref%d', elecChoice(1), elecChoice(2),botRow, refElec );
+%         %loop over shanks; for each, calculate the channels that correspond
+%         %to these electrode indices       
+%         nE = 192; %electrodes in pattern per shank
+%         SIvals = elecChoice;
+%         for sI = SIvals %edit this with values eg 0:1, 2:3 
+%             for i = 1:nE
+%                 gEInd = (sI - SIvals(1))*nE + i; % current electrode index for whole probe, plus one for MATLAB
+%                 elecInd(gEInd) = shElecInd(i); % electrode index in whole selected set
+%                 shank(gEInd) = sI;
+%                 [bank(gEInd), chans(gEInd)] = ElecToChan( sI, elecInd(gEInd) );
+%                 fprintf("%d,%d,%d\n", bank(gEInd), chans(gEInd), elecInd(gEInd) );
+%             end
+%         end   
     otherwise
         fprintf('unknown pattern type\n');
         return;

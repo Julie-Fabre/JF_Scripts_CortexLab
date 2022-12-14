@@ -146,7 +146,7 @@ psth_axes = subplot(5,5,[3,4,5],'YAxisLocation','right');
 hold on;
 max_n_groups = max(cell2mat(cellfun(@(x) 1+sum(diff(sort(x,1),[],1) ~= 0),align_groups,'uni',false)));
 psth_lines = arrayfun(@(x) plot(NaN,NaN,'linewidth',2,'color','k'),1:max_n_groups);
-xlim([-0.25,0.5]);
+xlim([-0.5,2]);
 xlabel('Time from event (s)');
 ylabel('Spikes/s/trial');
 
@@ -167,7 +167,7 @@ ylabel('Template amplitude');
 axis tight
 
 % Set default raster times
-raster_window = [-0.25,0.5];
+raster_window = [-0.5,2];
 psth_bin_size = 0.001;
 t_bins = raster_window(1):psth_bin_size:raster_window(2);
 t = t_bins(1:end-1) + diff(t_bins)./2;
