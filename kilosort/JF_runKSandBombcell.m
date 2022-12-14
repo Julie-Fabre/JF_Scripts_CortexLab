@@ -1,7 +1,8 @@
 
 %% preprocess for npx 2.0 probes : run kilosort, extract sync and lfp channels
-function JF_runKSandBombcell(animal, date, experiment, site, recording, rerunKS, rerunQM)
+function JF_runKSandBombcell(animal, date, site, recording, rerunKS, rerunQM)
 
+experiment = [];
 %% convert raw data from .cbin to .bin and get channel map
 myPaths;
 [ephysAPfile, ~] = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_includingCompressed', site, recording);
@@ -95,31 +96,5 @@ end
 % end
 
 %% run quality metrics
-ephysPath = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys', site, recording);
-%ephysPath = strrep(ephysPath, 'kilosort2', 'kilosort2');
-ephysap_path = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_ap', site, recording);
-ephysDirPath = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_dir',site, recording);
-savePath = fullfile(ephysDirPath, 'qMetrics');
-qMetricsExist = dir(fullfile(savePath, 'qMetric*.mat'));
-if isempty(qMetricsExist) || rerunQM 
-    disp('getting quality metrics ...')
-    [spikeTimes, spikeTemplates, ...
-        templateWaveforms, templateAmplitudes, pcFeatures, pcFeatureIdx, channelPositions, goodChannels] = bc_loadEphysData(ephysPath);
-
-    bc_qualityParamValues; 
-  
-
-    bc_runAllQualityMetrics(param, spikeTimes, spikeTemplates, ...
-        templateWaveforms, templateAmplitudes, pcFeatures, pcFeatureIdx, channelPositions, goodChannels, savePath);
-end
-try
-    tempFile = dir(fullfile([saveDir(1).folder, 'temp_wh.dat']));
-catch
-    tempFile = dir(fullfile([saveDir.folder, 'temp_wh.dat']));
-end
-try
-    delete(fullfile(tempFile.folder, tempFile.name))
-catch
-    disp('did not delete temp file')
-end
+JF_runBombcell(animal, date, site, recording, rerunQM )
 end
