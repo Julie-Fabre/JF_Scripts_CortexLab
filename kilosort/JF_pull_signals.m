@@ -174,8 +174,6 @@
             response_trials = 1:length(block.events.endTrialValues);
             block.events.trialSideValues(response_trials) = 1;
 
-            signals_events.hitValues = block.events.responseValues;
-            signals_events.missValues = 1 - block.events.responseValues;
 
             % Get number of completed trials (if uncompleted last trial)
             %keep pones with logged stimN (= not first and repeat on
@@ -220,7 +218,7 @@
 
             % (set a threshold in speed and time for wheel movement)
             thresh_displacement = 0.025;
-            time_over_thresh = 0.05; % ms over velocity threshold to count
+            time_over_thresh = 0.2; % ms over velocity threshold to count
             samples_over_thresh = time_over_thresh .* surround_sample_rate;
             wheel_over_thresh_fullconv = convn( ...
                 abs(stim_aligned_wheel) > thresh_displacement, ...
@@ -241,47 +239,22 @@
             trial_timing = 1 + (stim_to_move > 0.5);
 
             % (choice and outcome)
-            go_left = (signals_events.hitValues(n_trials(1):n_trials(end)) == 1 & ...
-                (signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 2 | signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 1)) | ...
-                (signals_events.hitValues(n_trials(1):n_trials(end)) == 0 & (signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 3));
-            no_go = (signals_events.hitValues(n_trials(1):n_trials(end)) == 1 & (signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 3)) | ...
-                (signals_events.hitValues(n_trials(1):n_trials(end)) == 0 & (signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 2 | signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 1));
-            trial_choice = no_go(n_trials(1):n_trials(end))' - go_left(n_trials(1):n_trials(end))';
-            trial_outcome = [signals_events.hitValues(n_trials(1):n_trials(end))', signals_events.missValues(n_trials(1):n_trials(end))'];
-
-            go_left = (signals_events.hitValues(n_trials(1):n_trials(end)) == 1 & ...
-                (signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 2 | signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 1)) | ...
-                (signals_events.hitValues(n_trials(1):n_trials(end)) == 0 & (signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 3));
-            no_go = (signals_events.hitValues(n_trials(1):n_trials(end)) == 1 & (signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 3)) | ...
-                (signals_events.hitValues(n_trials(1):n_trials(end)) == 0 & (signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 2 | signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 1));
-
-
-
-            trial_move_t = stim_to_move >= 0.35; %trial_wheel_starts - block.events.stimulusOnTimes(response_trials);
-
-
-            movement_after200ms_and_type = signals_events.stimulusTypeValues(n_trials(1):n_trials(end))';
-            movement_after200ms_and_type(trial_move_t == 1) = movement_after200ms_and_type(trial_move_t == 1) - 3; % now -2 = go1 late move, -1 = go2 late move, 0 = no go late move
-            movement_after200ms_and_type(trial_move_t == 0) = 1; % 1= all early moves
-            imageN = unique(signals_events.stimulusTypeValues);
-            sides = [1];
-            choices = [-1, 1];
-            timings = [1, 2];
-            outcomes = [0, 1];
-
-
-            conditions = combvec(imageN, choices, outcomes)';
-            n_conditions = size(conditions, 1);
+            trial_choice = signals_events.responseValues(n_trials(1):n_trials(end));
             correctResp = nan(size(signals_events.stimulusTypeValues(n_trials(1):n_trials(end)), 2), 1);
             correctResp(signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 1) = 1;
             correctResp(signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 2) = 1;
             correctResp(signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 3) = 0;
+            trial_outcome =  block.events.responseValues(n_trials(1):n_trials(end))'== correctResp;
+
+            imageN = unique(signals_events.stimulusTypeValues);
+            choices = [-1, 0, 1];
+            outcomes = [0, 1];
+            conditions = combvec(imageN, choices, outcomes)';
+            
             trial_conditions = ...
                 [signals_events.stimulusTypeValues(n_trials(1):n_trials(end))', ...
-                trial_choice, block.events.responseValues(n_trials(1):n_trials(end))'== correctResp];
+                trial_choice', trial_outcome];
             [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
-            wheel_time = block.inputs.wheelTimes;
-            wheel = block.inputs.wheelValues;
             stimIDs = signals_events.stimulusTypeValues;
 
 

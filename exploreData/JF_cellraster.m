@@ -1,4 +1,4 @@
-function AP_cellrasterJF(align_times,align_groups,unit_sort)
+function JF_cellraster(align_times,align_groups,sort_groups,unit_sort,amplitudeOverlay)
 % AP_cellraster(align_times,align_groups,unit_sort)
 %
 % Raster viewer for Neuropixels
@@ -115,6 +115,8 @@ end
 % Sort the units by depth if not specified
 if ~exist('unit_sort','var')
    [~,unit_sort] = sort(template_depths); 
+elseif isempty(unit_sort)
+   [~,unit_sort] = sort(template_depths); 
 end
 
 % Initialize figure and axes
@@ -156,6 +158,7 @@ raster_axes = subplot(5,5,[8,9,10,13,14,15,18,19,20],'YDir','reverse','YAxisLoca
 hold on;
 raster_dots = scatter(NaN,NaN,5,'k','filled');
 raster_image = imagesc(NaN,'visible','off'); colormap(raster_axes,hot);
+raster_sortLine = plot(NaN,NaN, 'LineWidth',2);
 xlabel('Time from event (s)');
 ylabel('Trial');
 
@@ -163,6 +166,11 @@ ylabel('Trial');
 amplitude_axes = subplot(5,5,21:25); hold on;
 amplitude_plot = plot(NaN,NaN,'.k','MarkerSize',2);
 amplitude_lines = arrayfun(@(x) line([0,0],ylim,'linewidth',2),1:2);
+%amplitude_axes_overlay = yyaxis(amplitude_axes,'left');
+yyaxis left
+amplitude_left_axes = gca;
+amplitude_CRline =  plot(amplitude_left_axes,NaN,NaN);
+amplitude_Hitline = plot(amplitude_left_axes,NaN,NaN);
 xlabel('Experiment time (s)');
 ylabel('Template amplitude');
 axis tight
@@ -191,9 +199,12 @@ gui_data.waveform_lines = waveform_lines;
 gui_data.psth_lines = psth_lines;
 gui_data.raster_dots = raster_dots;
 gui_data.raster_image = raster_image;
+gui_data.raster_sortLine = raster_sortLine;
 gui_data.amplitude_plot = amplitude_plot;
 gui_data.amplitude_lines = amplitude_lines; 
-
+gui_data.amplitude_CRline = amplitude_CRline;
+gui_data.amplitude_Hitline = amplitude_Hitline;
+gui_data.amplitude_left_axes = amplitude_left_axes;
 % (raster times)
 gui_data.t = t;
 gui_data.t_bins = t_bins;
@@ -203,6 +214,8 @@ gui_data.t_peri_event = t_peri_event;
 gui_data.align_times = align_times;
 gui_data.align_groups = align_groups;
 gui_data.unit_sort = unit_sort;
+gui_data.sort_groups = sort_groups;
+gui_data.amplitudeOverlay = amplitudeOverlay;
 
 % (spike data)
 gui_data.templates = templates;
@@ -375,7 +388,8 @@ if length(gui_data.curr_unit) == 1
     
     % (sort raster by group)
      [~,trial_sort] = sort(curr_group);
-    curr_raster_sorted = curr_raster(trial_sort,:);
+     [sorted_group_final ,trial_sort_final] = sort(gui_data.sort_groups{gui_data.curr_align}(trial_sort));
+    curr_raster_sorted = curr_raster(trial_sort_final(trial_sort),:);
     
     % (plot raster matrix as x,y)
     [raster_y,raster_x] = find(curr_raster_sorted);
@@ -386,11 +400,12 @@ if length(gui_data.curr_unit) == 1
     % (set dot color by group)
     % (this was for unsorted trials)
 %     [~,~,row_group] = unique(curr_group,'sorted');
-    [~,~,row_group] = unique(curr_group(trial_sort),'sorted');
+    [~,~,row_group] = unique(curr_group(trial_sort_final(trial_sort)),'sorted');
     psth_colors = get(gui_data.psth_lines,'color');
     if iscell(psth_colors); psth_colors = cell2mat(psth_colors); end
     raster_dot_color = psth_colors(row_group(raster_y),:);
     set(gui_data.raster_dots,'CData',raster_dot_color);
+    set(gui_data.raster_sortLine,'XData',sorted_group_final,'YData',1:size(curr_raster_sorted,1));
 %     subplot(5,5,[8,9,10,13,14,15,18,19,20],'YDir','reverse','YAxisLocation','right')
 %     scatter(stim_to_move(trial_sort),1:length(trial_sort))
     
@@ -410,6 +425,7 @@ elseif length(gui_data.curr_unit) > 1
 end
 
 % Plot template amplitude over whole experiment
+
 if length(gui_data.curr_unit) == 1
     set(gui_data.amplitude_plot,'XData', ...
         gui_data.spike_times(curr_spikes_idx), ...
@@ -423,10 +439,21 @@ elseif length(gui_data.curr_unit) > 1
         gui_data.template_amplitudes(curr_spikes_idx & ~isnan(long_spikes_binned)),size(long_bins_t'),@nansum,NaN);
     set(gui_data.amplitude_plot,'XData',long_bins_t,'YData',amplitude_binned,'linestyle','-');
 end
-
+[xmin,xmax] = bounds(get(gui_data.amplitude_plot,'XData'));
 [ymin,ymax] = bounds(get(gui_data.amplitude_plot,'YData'));
 set(gui_data.amplitude_lines(1),'XData',repmat(min(gui_data.t_peri_event(:)),2,1),'YData',[ymin,ymax]);
 set(gui_data.amplitude_lines(2),'XData',repmat(max(gui_data.t_peri_event(:)),2,1),'YData',[ymin,ymax]);
+
+
+set(gui_data.amplitude_left_axes, 'YLim', [min([gui_data.amplitudeOverlay{1},
+gui_data.amplitudeOverlay{2}]), max([gui_data.amplitudeOverlay{1},
+gui_data.amplitudeOverlay{2}])])
+step1=[xmax-xmin]/size(gui_data.amplitudeOverlay{1},1);
+set(gui_data.amplitude_CRline, 'XData',xmin:step1:xmax-step1,...
+    'YData',gui_data.amplitudeOverlay{1}');
+step2=[xmax-xmin]/size(gui_data.amplitudeOverlay{2},1);
+set(gui_data.amplitude_Hitline,'XData',xmin:step2:xmax-step2,...
+    'YData',gui_data.amplitudeOverlay{2});
 
 end
 

@@ -25,7 +25,7 @@ experiments = experiments([experiments.ephys]);
 
 %% Load data from experiment 
 
-curr_day = 4; % (set which day to use)
+curr_day = 1; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
@@ -75,9 +75,20 @@ clearvars unitType
 JF_load_experiment;
 curr_shank=NaN;
 
-AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials)'}, ...
-    {trial_conditions(:,1),trial_conditions(:,2), ...
-    trial_conditions(:,3)});
+instHit_rate = movmean(double(~isnan(stim_to_move(ismember(stimIDs(1:length(n_trials)), [1, 2])))), 20);
+instCR_rate = movmean(double(isnan(stim_to_move(ismember(stimIDs(1:length(n_trials)), [3])))), 20);
+
+GoTrials = trial_conditions(:,1) ==1;
+JF_cellraster({stimOn_times(GoTrials),wheel_move_time,signals_events.responseTimes(n_trials)'}, ...
+    {trial_conditions(GoTrials,2),trial_conditions(:,2), ...
+    trial_conditions(:,3)}, {stim_to_move, stim_to_feedback-stim_to_move, -stim_to_feedback+stim_to_move},...
+    [],{instHit_rate, instCR_rate});
+
+noGoTrials = trial_conditions(:,1) ==3;
+JF_cellraster({stimOn_times(noGoTrials),wheel_move_time,signals_events.responseTimes(n_trials)'}, ...
+    {trial_conditions(noGoTrials,1),trial_conditions(:,2), ...
+    trial_conditions(:,3)}, {stim_to_move, stim_to_feedback-stim_to_move, -stim_to_feedback+stim_to_move},...
+    [],{instHit_rate, instCR_rate});
 % 
 % % % go no go passive
 % % 

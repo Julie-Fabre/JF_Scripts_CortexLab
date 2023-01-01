@@ -1,2 +1,0 @@
-fid = py.open('/home/netshare/zaru/JF082/2022-07-25/ephys/kilosort2/site1/.phy/memcache/qMetricsPlugin.percentSpikesMissing.pkl','rb');
-data = py.pickle.load(fid);

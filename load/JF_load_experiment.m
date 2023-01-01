@@ -566,7 +566,7 @@ if ephys_exists && load_parts.ephys
     %          spike_times_timeline = spike_times * co(2) + co(1);
 
     % Get "good" templates from labels
-    if exist('locationKeep', 'var')
+    if exist('locationKeep', 'var') && ~isempty(locationKeep)
         if verbose
             disp('Keeping location data...');
         end
@@ -671,7 +671,7 @@ if ephys_exists && load_parts.ephys
             unitType == 1;
         good_templates_idx = find(unitType == 1) - 1;
 
-        if exist('locationKeep', 'var')
+        if exist('locationKeep', 'var') && ~isempty(locationKeep)
             if isnumeric(locationKeep)
                 theseDepths = locationKeep;
             else
@@ -722,7 +722,7 @@ if ephys_exists && load_parts.ephys
         if verbose
             disp('No manual labeling, keeping all and re-indexing');
         end
-        if ~exist('locationKeep', 'var')
+        if ~exist('locationKeep', 'var') || isempty(locationKeep)
             good_templates_idx = unique(spike_templates_0idx);
             good_templates = ismember(0:size(templates, 1)-1, good_templates_idx);
         end

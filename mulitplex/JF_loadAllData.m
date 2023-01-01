@@ -120,9 +120,11 @@ for iAnimal = 1:size(animals)
         %allDataStruct(iRecording).spike_waveforms = templates
         %allDataStruct(iRecording).spike_locations
         %allDataStruct(iRecording).stimIDs 
-        allDataStruct(iRecording).protocol = expDef
-        allDataStruct(iRecording).recording
+        allDataStruct(iRecording).protocol = expDef;
+        allDataStruct(iRecording).recording = iRecording;
         allDataStruct(iRecording).trial_conditions = trial_conditions;
+        allDataStruct(iRecording).stimOn_times = stimOn_times;
+        allDataStruct(iRecording).stim_to_move = stim_to_move;
 
 
     end

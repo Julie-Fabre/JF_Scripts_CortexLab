@@ -68,29 +68,6 @@ if ~isempty(align_group)
             makepretty;
             xlim([t(1), t(end)])
         end
-
-    smooth_size = 51;
-    gw = gausswin(smooth_size, 3)';
-    if causal_smoothing
-        gw(1:round(smooth_size/2)) = 0; %half gaussian to preserve onset times
-    end
-
-
-    smWin = gw ./ sum(gw);
-    bin_t = mean(diff(t_bins));
-
-    curr_psth = grpstats(curr_raster, align_group(1:size(curr_raster, 1)), @(x) mean(x, 1));
-    curr_smoothed_psth = conv2(padarray(curr_psth, ...
-        [0, floor(length(smWin)/2)], 'replicate', 'both'), ...
-        smWin, 'valid') ./ bin_t;
-    if plot_me
-        subplot(3, 1, 1)
-        plot(t, curr_smoothed_psth)
-        %xlabel('time (s)')
-        ylabel('sp/s')
-        makepretty;
-    end
-    
     else
         groups_unique = unique(align_group);
         [sortedGroup, sortedAlignId] = sort(align_group);
