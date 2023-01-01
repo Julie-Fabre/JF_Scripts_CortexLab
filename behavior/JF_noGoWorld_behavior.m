@@ -10,7 +10,7 @@ animalsPhase5 = {[13, 14, 16], [16], []};
 %animalsAll = {'JF067'};
 bhvOut = struct;
 for iAnimal = 1:size(animalsAll, 2)
-
+%bhv
 myPaths;
     animal = animalsAll{1, iAnimal}; %this animal
     if strcmp(animal, 'JF042') || strcmp(animal, 'JF043') || strcmp(animal, 'JF044')
@@ -376,6 +376,16 @@ myPaths;
                     trial_move_t = trial_wheel_starts - block.events.stimOnTimes(response_trials);
                     stim_rxn_time = nanmedian(trial_move_t);
                     stim_rxn_timeSEM = nanstd(trial_move_t) ./ sqrt(numel(trial_move_t));
+
+%                     stim_leeway = 0.1;
+%             wheel_move_alt_stim_idx = ...
+%                 arrayfun(@(stim) find(wheel_starts > stim-stim_leeway,1,'first'), ...
+%                 cell2mat(alt_stimOn_times));
+%             
+%             alt_stim_to_move = ...
+%                 mat2cell(wheel_starts(wheel_move_alt_stim_idx) - cell2mat(alt_stimOn_times), ...
+%                 cellfun(@length,alt_stimOn_times));
+
                 else
                     try
                         stim_to_move = padarray(wheel_move_time'-block.events.stimulusOnTimes, ...
@@ -752,9 +762,15 @@ myPaths;
     caxis([0, 1.8])
     makepretty;
     try
+        day_idx_go1 = [];
     subplot(236) % last day histogram of reaction times per condition 
+    clearvars h1
     for iDay = 1:size(bhv.stim_to_move,1)
     [h1(iDay,1,:), bins1(iDay,1,:) ]= hist(bhv.stim_to_move{iDay,1}, 0:0.05:1.8);
+    %day_idx_go1=[day_idx_go1; ones(size(bhv.stim_to_move{iDay,1},2),1)*iDay];
+    n_rxn_altsample = 1000;
+    rxn_measured_med(iDay,1) = nanmedian(bhv.stim_to_move{iDay,1});
+    rxn_alt_med(iDay,1) = nanmedian(datasample(bhv.stim_to_move{iDay,1},n_rxn_altsample));
     [h1(iDay,2,:), bins1(iDay,2,:) ]= hist(bhv.stim_to_move{iDay,2}, 0:0.05:1.8);
     if ~any(h1(iDay,2,:))
         h1(iDay,2,:) = nan(1,37);
@@ -773,18 +789,51 @@ myPaths;
          xticklabels(strtrim(cellstr(num2str([0:0.9:1.8*3]'))'))
          
     else
-        imagesc(squeeze(bins1(iDay,1,:))', [],squeeze(h1(:,1,:))')
+        imagesc(squeeze(bins1(iDay,1,:))', [],squeeze(h1(:,1,:)))
     end
-    
+
+    colormap(brewermap([],'*RdBu'));
+    caxis([- max(abs(max(max(im.CData)))),  max(abs(max(max(im.CData))))])
     catch
     end
     subplot(235)
+%     plot(rxn_measured_med(:,1)); hold on;
+%     plot(rxn_alt_med(:,1))
+%     rxn_measured_allcat=[bhv.stim_to_move{:,1}];
+%     
+%     rxn_measured_med = accumarray([day_idx_go1'], ...
+%     rxn_measured_allcat.*AP_nanout(rxn_measured_allcat < 0.1), ...
+%     [size(h1,1)],@(x) nanmedian(x),NaN);
+%     % nanmedian for each day ? 
+    % permute 
+%     n_rxn_altsample = 1000;
+% rxn_alt = cellfun(@(rxn,use_days,use_trials) ...
+%     cellfun(@(rxn,use_trials) ...
+%     cell2mat(cellfun(@(x) datasample(x,n_rxn_altsample)',rxn(use_trials),'uni',false)), ...
+%     rxn(use_days),use_trials(use_days),'uni',false), ...
+%     {bhv.alt_stim_move_t},use_days,use_rxn,'uni',false)';
+
+%     rxn_alt_med = cell2mat(permute(arrayfun(@(x) ...
+%     accumarray([day_idx,animal_idx], ...
+%     rxn_alt_allcat(:,x).*AP_nanout(rxn_alt_allcat(:,x) < 0.1), ...
+%     [max_days,length(bhv)],@(x) nanmedian(x),NaN), ...
+%     1:n_rxn_altsample,'uni',false),[1,3,2]));
+% % 
+%     rxn_measured_med = accumarray([day_idx,animal_idx], ...
+%     rxn_measured_allcat.*AP_nanout(rxn_measured_allcat < 0.1), ...
+%     [max_days,length(bhv)],@(x) nanmedian(x),NaN);
+% rxn_alt_med = cell2mat(permute(arrayfun(@(x) ...
+%     accumarray([day_idx,animal_idx], ...
+%     rxn_alt_allcat(:,x).*AP_nanout(rxn_alt_allcat(:,x) < 0.1), ...
+%     [max_days,length(bhv)],@(x) nanmedian(x),NaN), ...
+%     1:n_rxn_altsample,'uni',false),[1,3,2]));
+
 
     transparencyValues = 0:1 / length(noGoDay):1;
     bhvOut(iAnimal).protocol_idx = protocol_idx;
     bhvOut(iAnimal).day_labels = day_labels;
     bhvOut(iAnimal).binBorders = binBorders;
-    bhvOut(iAnimal).movingFracGo1 = bhv.movingFrac;
+%    bhvOut(iAnimal).movingFracGo1 = bhv.movingFrac;
     bhvOut(iAnimal).goLeft = bhv.goLeft(:, :);
     bhvOut(iAnimal).nTrials = bhv.nTrials(:, :);
     bhvOut(iAnimal).noGo = bhv.noGo(:, :);
@@ -812,72 +861,7 @@ myPaths;
     bhvOut(iAnimal).noGotrials = bhv.noGotrials;
     bhvOut(iAnimal).stim_to_move = bhv.stim_to_move;
 
-    if length(noGoDay) >= 1
-        bhvOut(iAnimal).movingFracGo1(noGoDay, :) = bhv.movingFracGo1(noGoDay, :);
-        bhvOut(iAnimal).movingFracNoGo = bhv.movingFracNoGo;
-    else
-        bhvOut(iAnimal).movingFracNoGo = zeros(size(bhv.movingFrac, 1), size(bhv.movingFrac, 2));
-    end
 
-    if length(noGoDay) == 0
-
-
-        transparencyValues = 0:1 / length(keep_day):1;
-        cla;
-        for iDay = length(keep_day)
-            p1 = plot(binBorders(1:end-1), bhv.movingFrac(keep_day(iDay), :), 'b');
-            p1.Color(4) = transparencyValues(iDay+1);
-            makepretty;
-            hold on;
-        end
-        ylim([0, 1])
-    else
-        for iDay = length(noGoDay)
-            p1 = plot(binBorders(1:end-1), bhv.movingFracGo1(noGoDay(iDay), :), 'b');
-            p1.Color(4) = transparencyValues(iDay+1);
-            makepretty;
-            hold on;
-            ylim([0, 1])
-
-        end
-        if isfield(bhv, 'movingFracGo2')
-            try
-            p2 = plot(binBorders(1:end-1), bhv.movingFracGo2(noGoDay(iDay), :), 'r');
-            p2.Color(4) = transparencyValues(iDay+1);
-            makepretty;
-            hold on;
-            legend([p1, p2], {'Go1', 'Go2'})
-            catch
-            end
-        end
-        ylim([0, 1])
-    end
-    xlim([binBorders(1), binBorders(end)])
-
-    xlabel('time from stim onset (s)')
-    ylabel('fraction moving')
-    makepretty;
-
-    %subplot(336)
-    if length(noGoDay) == 0
-    else
-        transparencyValues = 0:1 / length(noGoDay):1;
-        for iDay = length(noGoDay)
-
-            p3 = plot(binBorders(1:end-1), bhv.movingFracNoGo(noGoDay(iDay), :), 'k');
-            p3.Color(4) = transparencyValues(iDay+1);
-            makepretty;
-            hold on;
-            ylim([0, 1])
-        end
-        ylim([0, 1])
-        xlim([binBorders(1), binBorders(end)])
-        legend([p3], {'NoGo'})
-        xlabel('time from stim onset (s)')
-        ylabel('fraction moving')
-        makepretty;
-        ylim([0, 1])
-    end
     
     for iNoGoday = 1:size(noGoDay, 2)
         try
@@ -909,7 +893,7 @@ myPaths;
     an(iAnimal).noGoDay = noGoDay;
 
     an(iAnimal).stim_rxn_time = bhv.stim_rxn_time;
-    an(iAnimal).movingFrac = bhv.movingFrac;
+%    an(iAnimal).movingFrac = bhv.movingFrac;
     an(iAnimal).n_trials_all = bhv.n_trials;
     clearvars bhv
 
