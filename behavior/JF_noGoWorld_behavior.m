@@ -589,15 +589,20 @@ myPaths;
                     end
                     bhv.stim_to_moveMean(curr_day,1) = nanmean(stim_to_move(go1Trials(1:end))); 
                     if any(go2Trials)
-                        bhv.stim_to_moveMean(curr_day,2) = nanmean(stim_to_move(go2Trials(1:end) ));
+                        bhv.stim_to_move{curr_day,2} = stim_to_move(go2Trials(1:end) );
+                         bhv.stim_to_move{curr_day,3} = stim_to_move(noGoTrials(1:end) ); 
+                    elseif any(noGoTrials)
+                         bhv.stim_to_move{curr_day,2} =  nan(size( movingFrac,2),1)';
+                         bhv.stim_to_move{curr_day,3} = stim_to_move(noGoTrials(1:end) ); 
                     else
-                        bhv.stim_to_move{curr_day,2} = nan(size( movingFrac,2),1);
+                        bhv.stim_to_move{curr_day,2} =  nan(size( movingFrac,2),1)';
+                        bhv.stim_to_move{curr_day,3} = nan(size( movingFrac,2),1)';
                     end
                     bhv.stim_to_moveMean(curr_day,3) = nanmean(stim_to_move(noGoTrials(1:end))); 
                     
                     bhv.stim_to_move{curr_day,1} = stim_to_move(go1Trials(1:end) ); 
-                    bhv.stim_to_move{curr_day,2} = stim_to_move(go2Trials(1:end) ); 
-                    bhv.stim_to_move{curr_day,3} = stim_to_move(noGoTrials(1:end) ); 
+                   % bhv.stim_to_move{curr_day,2} = stim_to_move(go2Trials(1:end) ); 
+                   % bhv.stim_to_move{curr_day,3} = stim_to_move(noGoTrials(1:end) ); 
                     
                     
                     bhv.movingFracGo1(curr_day, :) = movingFracGo1;
@@ -609,9 +614,10 @@ myPaths;
                     bhv.trialMoveGo1Incorrect{curr_day, :, :} = trial_wheel_move(go1Trials(1:end) & (block.events.hitValues(response_trials(1:end)) == 0), :);
                     bhv.trialMoveGo2Incorrect{curr_day, :, :} = trial_wheel_move(go2Trials(1:end) & (block.events.hitValues(response_trials(1:end)) == 0), :);
                 else
-                    bhv.movingFrac(curr_day, 1) = movingFrac;
-                    bhv.stim_to_move{curr_day,2} = nan(size( movingFrac,2),1);
-                    bhv.stim_to_move{curr_day,3} = nan(size( movingFrac,2),1);
+                    %bhv.movingFrac(curr_day, 1) = movingFrac;
+                    bhv.stim_to_move{curr_day,1} = stim_to_move;
+                    bhv.stim_to_move{curr_day,2} = nan(size( movingFrac,2),1)';
+                    bhv.stim_to_move{curr_day,3} = nan(size( movingFrac,2),1)';
 
 
                 end
@@ -750,27 +756,25 @@ myPaths;
     for iDay = 1:size(bhv.stim_to_move,1)
     [h1(iDay,1,:), bins1(iDay,1,:) ]= hist(bhv.stim_to_move{iDay,1}, 0:0.05:1.8);
     [h1(iDay,2,:), bins1(iDay,2,:) ]= hist(bhv.stim_to_move{iDay,2}, 0:0.05:1.8);
-    [h1(iDay,3,:), bins1(iDay,3,:) ]= hist(bhv.stim_to_move{iDay,3}, 0:0.05:1.8);
+    if ~any(h1(iDay,2,:))
+        h1(iDay,2,:) = nan(1,37);
     end
-    if any(h1(end,3,:)) && any(h1(end,2,:))
+    [h1(iDay,3,:), bins1(iDay,3,:) ]= hist(bhv.stim_to_move{iDay,3}, 0:0.05:1.8);
+    if ~any(h1(iDay,3,:))
+        h1(iDay,3,:) = nan(1,37);
+    end
+    end
+    if any(h1(end,3,:)) 
         
-         imagesc([squeeze(h1(:,1,:))', squeeze(h1(:,2,:))',squeeze(h1(:,3,:))'])
+         im = imagesc([squeeze(h1(:,1,:)), squeeze(h1(:,2,:)),squeeze(h1(:,3,:))])
          set(im, 'AlphaData', ~isnan(get(im, 'CData')));
          set(gca, 'color', [0.5, 0.5, 0.5]);
-         xticks([])
-    elseif any(h1(end,3,:))
-         imagesc([squeeze(h1(:,1,:))', squeeze(h1(:,3,:))'])
+         xticks([1:18.5:37*3+1])
+         xticklabels(strtrim(cellstr(num2str([0:0.9:1.8*3]'))'))
+         
     else
         imagesc(squeeze(bins1(iDay,1,:))', [],squeeze(h1(:,1,:))')
     end
-
-    yy=ylim;
-    line([0.25, 0.25], [yy(1) yy(2)], 'Color', rgb('Green'));
-    ylim([yy(1) yy(2)])
-    xlim([0 1.8])
-    legend({['fraction > 0.25 =' num2str(sum(h1(find(bins1>=0.25, 1, 'first'):end))./sum(h1))],...
-        ['fraction > 0.25 =' num2str(sum(h2(find(bins2>=0.25, 1, 'first'):end))./sum(h2))],...
-        ['fraction > 0.25 =' num2str(sum(h3(find(bins3>=0.25, 1, 'first'):end))./sum(h3))]})
     
     catch
     end

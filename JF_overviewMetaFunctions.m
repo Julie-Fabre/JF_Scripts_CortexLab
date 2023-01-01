@@ -17,6 +17,7 @@ JF_singleCellPSTH_flip_allData(allDataStruct,trialGroups, alignTo, raster_window
 
 % behavior 
 bhvOut = JF_noGoWorld_behavior(animalsAll);
+% false alarm, hit, correct rates
 
 % pupil/movement tracking
 
