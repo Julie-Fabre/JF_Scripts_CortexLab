@@ -782,15 +782,15 @@ myPaths;
     end
     if any(h1(end,3,:)) 
         
-         im = imagesc([squeeze(h1(:,1,:)), squeeze(h1(:,2,:)),squeeze(h1(:,3,:))])
+         im = imagesc([squeeze(h1(:,1,:)), squeeze(h1(:,2,:)),squeeze(h1(:,3,:))]);
          set(im, 'AlphaData', ~isnan(get(im, 'CData')));
          set(gca, 'color', [0.5, 0.5, 0.5]);
          xticks([1:18.5:37*3+1])
          xticklabels(strtrim(cellstr(num2str([0:0.9:1.8*3]'))'))
          
     else
-        imagesc(squeeze(bins1(iDay,1,:))', [],squeeze(h1(:,1,:)))
-    end
+        im = imagesc(squeeze(bins1(iDay,1,:))', [],squeeze(h1(:,1,:)))
+    end;
 
     colormap(brewermap([],'*RdBu'));
     caxis([- max(abs(max(max(im.CData)))),  max(abs(max(max(im.CData))))])

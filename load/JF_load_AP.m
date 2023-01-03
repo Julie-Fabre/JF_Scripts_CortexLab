@@ -72,11 +72,15 @@ qMetricsExist = dir(fullfile(savePath, 'qMetric*.mat'));
 % end
 clearvars unitType 
 %load_parts.cam = true;
+load_parts.cam = true;
 JF_load_experiment;
 curr_shank=NaN;
 
-instHit_rate = movmean(double(~isnan(stim_to_move(ismember(stimIDs(1:length(n_trials)), [1, 2])))), 20);
-instCR_rate = movmean(double(isnan(stim_to_move(ismember(stimIDs(1:length(n_trials)), [3])))), 20);
+
+% get behav measures, get pupil 
+[instHit_rate, instCR_rate ] = JF_getBehavArousalMeasures(stimIDs, trial_choice, stimOn_times);
+% instHit_rate = movmean(double(~isnan(stim_to_move(ismember(stimIDs(1:length(n_trials)), [1, 2])))), 20);
+% instCR_rate = movmean(double(isnan(stim_to_move(ismember(stimIDs(1:length(n_trials)), [3])))), 20);
 
 GoTrials = trial_conditions(:,1) ==1;
 JF_cellraster({stimOn_times(GoTrials),wheel_move_time,signals_events.responseTimes(n_trials)'}, ...

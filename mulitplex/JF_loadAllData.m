@@ -43,12 +43,17 @@ for iAnimal = 1:size(animals)
         % check region of interest is in this experiment
 
         ephysDir = AP_cortexlab_filenameJF(animal, day, [], 'ephys', site, recording);
+        if ~isempty(ephysDir)
         channel_positions = readNPY([ephysDir, filesep, 'channel_positions.npy']);
         topLimit = find(probe_ccf(iRecording).probe_depths >= min(channel_positions(:, 2)), 1, 'first');
         bottomLimit = find(probe_ccf(iRecording).probe_depths >= max(channel_positions(:, 2)), 1, 'first');
         region_id = st.id(find(~cellfun(@isempty, strfind(st.acronym, region))));
         area_contained = find(probe_ccf(iRecording).trajectory_areas == region_id);
         locationKeep = probe_ccf(iRecording).probe_depths(area_contained);
+        else
+             disp('no ephys dir, skipping this experiment')
+            continue;
+        end
 
         if ~any(area_contained >= topLimit & area_contained <= bottomLimit)
             disp('region of interest not present, skipping this experiment')
@@ -76,7 +81,7 @@ for iAnimal = 1:size(animals)
                 n_trials(iExperiment) = NaN;
             end
         end
-        experiment = find(n_trials == max(n_trials));
+        experiment = experiments(curr_day).experiment(find(n_trials == max(n_trials)));
 
         % load quality metrics if present
         ephysDirPath = AP_cortexlab_filenameJF(animal, day, experiment, 'ephys_dir', site, recording);

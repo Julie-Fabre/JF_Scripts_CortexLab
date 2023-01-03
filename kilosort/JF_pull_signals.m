@@ -241,8 +241,8 @@
             % (choice and outcome)
             trial_choice = signals_events.responseValues(n_trials(1):n_trials(end));
             correctResp = nan(size(signals_events.stimulusTypeValues(n_trials(1):n_trials(end)), 2), 1);
-            correctResp(signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 1) = 1;
-            correctResp(signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 2) = 1;
+            correctResp(signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 1) = -1;
+            correctResp(signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 2) = -1;
             correctResp(signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 3) = 0;
             trial_outcome =  block.events.responseValues(n_trials(1):n_trials(end))'== correctResp;
 

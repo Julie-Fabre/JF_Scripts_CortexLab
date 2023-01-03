@@ -95,6 +95,11 @@ if ~isempty(align_group)
         groups_unique = unique(align_group);
         [sortedGroup, sortedAlignId] = sort(align_group);
         [raster_y, raster_x] = find(curr_raster(sortedAlignId, :));
+        for iGroup = 1:length(groups_unique)
+                these_grp_rows = find(sortedGroup == groups_unique(iGroup));
+        end
+        rasterColor = these_grp_rows;
+
         if plot_me
             subplot(3, 1, [2:3])
             these_col_plot = lines(length(groups_unique));

@@ -97,7 +97,10 @@ for curr_day = 1:length(days)
             
             if block_exists
                 % If signals
-                load(block_filename)
+                try
+                    load(block_filename)
+                
+                    
                 if isfield(block,'expType') % old name
                     [~,expDef] = fileparts(block.expType);
                     if flexible_name
@@ -113,6 +116,9 @@ for curr_day = 1:length(days)
                     elseif ~flexible_name
                         use_exp(curr_exp) = strcmp(expDef,protocol);
                     end
+                    
+                end
+                catch
                 end
             elseif protocol_exists
                 % If MPEP

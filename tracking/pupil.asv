@@ -122,16 +122,9 @@ makepretty;
 pup_ds = downsample(pup, 126);
 figure();
 scatter(instHit_rate, pup_ds(1:size(instHit_rate,2)))
-ylabel('pupil area (a.u.)')
-xlabel('inst hit rate')
-makepretty;
-corrcoef(pup_ds(1:size(instHit_rate,2)), instHit_rate)
 
 figure();
 scatter(motionEnergy_baselineTrial, instHit_rate)
-xlabel('motion energy baseline')
-ylabel('inst hit rate')
-makepretty;
 corrcoef(motionEnergy_baselineTrial, instHit_rate)
 % It would be good a running average of % go responses as a function of time, superimposed with a running average of summed activity as a function of time.
 
