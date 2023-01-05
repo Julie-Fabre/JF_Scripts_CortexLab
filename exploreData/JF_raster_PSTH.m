@@ -140,6 +140,7 @@ if ~isempty(align_group)
 
 else
     [raster_y, raster_x] = find(curr_raster);
+    rasterColor = ones(length(align_times),1);
     smooth_size = 51;
     gw = gausswin(smooth_size, 3)';
     if causal_smoothing

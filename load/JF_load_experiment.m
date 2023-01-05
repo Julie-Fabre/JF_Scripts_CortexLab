@@ -100,6 +100,8 @@ if timeline_exists
     wheel_smooth_samples = wheel_smooth_t / Timeline.hw.samplingInterval;
     wheel_velocity = interp1(conv(Timeline.rawDAQTimestamps, [1, 1]/2, 'valid'), ...
         diff(smooth(wheel_position, wheel_smooth_samples)), Timeline.rawDAQTimestamps)';
+    [wheel_velocity,wheel_move] = AP_parse_wheel(wheel_position,Timeline.hw.daqSampleRate);
+    
 
     % Get whether stim was flickering - this is only for when widefiled is
     % combined
@@ -409,7 +411,7 @@ if exist('Timeline', 'var') && load_parts.cam
 end
 
 %% Load ephys data (single long recording)
-
+if load_parts.ephys
 % Pick kilosort version (2 by default, 1 old if selected)
 if ~exist('kilosort_version', 'var') || kilosort_version == 2
     [ephys_path, ephys_exists] = AP_cortexlab_filenameJF(animal, day, experiment, 'ephys', site, recording);
@@ -418,7 +420,8 @@ if ~exist('kilosort_version', 'var') || kilosort_version == 2
 elseif exist('kilosort_version', 'var') && kilosort_version == 1
     [ephys_path, ephys_exists] = AP_cortexlab_filenameJF(animal, day, experiment, 'ephys_ks1', site, recording);
 end
-
+end
+if load_parts.ephys
 if ephys_exists && load_parts.ephys
 
     if verbose;
@@ -753,10 +756,11 @@ if ephys_exists && load_parts.ephys
     spike_templates = new_spike_idx(spike_templates_0idx+1);
 
 end
+end
 
 %% Load LFP
 % (either single channel full or all channel snippet)
-
+if load_parts.ephys
 if ephys_exists && load_parts.ephys && exist('lfp_channel', 'var')
 
     % Get LFP file info
@@ -1022,6 +1026,7 @@ if ephys_exists && load_parts.ephys && exist('lfp_channel', 'var')
 
         end
     end
+end
 end
 
 %% Finished

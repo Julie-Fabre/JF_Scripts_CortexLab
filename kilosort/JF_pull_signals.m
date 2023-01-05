@@ -229,6 +229,18 @@
             wheel_move_time = arrayfun(@(x) pull_times(x, wheel_move_sample(x)), 1:size(pull_times, 1))';
             wheel_move_time(~move_trial) = NaN;
 
+               % Get wheel movement on/offsets
+        wheel_starts = Timeline.rawDAQTimestamps(diff([0;wheel_move]) == 1)';
+        wheel_stops = Timeline.rawDAQTimestamps(diff([wheel_move;0]) == -1)';
+        
+        % (stim move: first move after stim)
+        % (give this a little leeway, sometimes movement starts early but
+        % stim comes on anyway)
+        stim_leeway = 0.1;
+        wheel_move_stim_idx = ...
+            arrayfun(@(stim) find(wheel_starts > stim-stim_leeway,1,'first'), ...
+            stimOn_times);
+
             % Get conditions for all trials
 
             % (trial_timing)
@@ -408,7 +420,17 @@
             [move_trial, wheel_move_sample] = max(wheel_over_thresh, [], 2);
             wheel_move_time = arrayfun(@(x) pull_times(x, wheel_move_sample(x)), 1:size(pull_times, 1))';
             wheel_move_time(~move_trial) = NaN;
-
+     % Get wheel movement on/offsets
+        wheel_starts = Timeline.rawDAQTimestamps(diff([0;wheel_move]) == 1)';
+        wheel_stops = Timeline.rawDAQTimestamps(diff([wheel_move;0]) == -1)';
+        
+        % (stim move: first move after stim)
+        % (give this a little leeway, sometimes movement starts early but
+        % stim comes on anyway)
+        stim_leeway = 0.1;
+        wheel_move_stim_idx = ...
+            arrayfun(@(stim) find(wheel_starts > stim-stim_leeway,1,'first'), ...
+            stimOn_times);
             % Get conditions for all trials
 
             % (trial_timing)

@@ -37,8 +37,75 @@ xlabel(['baseline firing rate in' newline ...
 ylabel(['baseline firing rate in' newline ...
     'no go stimulus, no go action trials'])
 
-JF_singleCellPSTH_flip_allData(allDataStruct,'stim_id', 'stim', raster_window, psth_bin_size);
+JF_singleCellPSTH_flip_allData(allDataStruct,'stim_id', 'stim', raster_window, psth_bin_size);% db mode, run cells one by one currently - need to implement  flipping 
+% single cells: inst FR IN BASELINE vs inst Go rate 
+% recording 1, unit 2, 15, 56, 60
+for iRecording = 1%:size(allDataStruct,2)
+    uniqueUnits = unique(allDataStruct(iRecording).spike_templates);
+    for iUnit = 1:length(uniqueUnits)
+        
+        %if strcmp(trialGroups, 'stim_id')
+            align_group = allDataStruct(iRecording).trial_conditions(:,1) + 10*(2+allDataStruct(iRecording).trial_conditions(:,2));
+      %  end
+       % if strcmp(alignTo, 'stim')
+            align_times = allDataStruct(iRecording).stimOn_times;
+        %end
 
+        [~ ,~, raster_x, raster_y, ~] = JF_raster_PSTH(allDataStruct(iRecording).spike_templates,...
+            allDataStruct(iRecording).spike_times, ...
+            uniqueUnits(iUnit), raster_window, psth_bin_size, align_times, [], [],[], 0, 1);
+        for iTrial = 1:size(align_times,1)
+        instBaseline_FR(iUnit, iTrial) = sum(raster_x(raster_y==iTrial)<=50 )*2; %qq hard coded
+        end
+        %allData_singleCellPSTH.psth(unitCount,:,:) = curr_smoothed_psth;
+
+    end
+end
+
+[instHit_rate, instCR_rate, instGo_rate ] = JF_getBehavArousalMeasures(allDataStruct(iRecording).trial_conditions(:,1),...
+    allDataStruct(iRecording).trial_conditions(:,2));
+
+figure();
+subplot(411)
+yyaxis left;
+plot(align_times, smoothdata(squeeze(nanmean(instBaseline_FR(:, :))),'movmedian', [1,20])); hold on;
+yyaxis right;
+plot(align_times, instGo_rate)
+legend({'inst baseline FR population', 'inst Go rate'})
+xlabel('time(s)')
+xlim([0 2200])
+
+
+figure();
+subplot(411)
+yyaxis left;
+plot(align_times, smoothdata(squeeze(instBaseline_FR(2, :)),'movmedian', [1,20])); hold on;
+yyaxis right;
+plot(align_times, instGo_rate)
+legend({'inst baseline FR unit', 'inst Go rate'})
+xlabel('time(s)')
+xlim([0 2200])
+
+subplot(412)
+yyaxis left;
+plot(align_times, smoothdata(squeeze(instBaseline_FR(15, :)),'movmedian', [1,20])); hold on;
+yyaxis right;
+plot(align_times, instGo_rate)
+xlim([0 2200])
+
+subplot(413)
+yyaxis left;
+plot(align_times, smoothdata(squeeze(instBaseline_FR(56, :)),'movmedian', [1,20])); hold on;
+yyaxis right;
+plot(align_times, instGo_rate)
+xlim([0 2200])
+
+subplot(414)
+yyaxis left;
+plot(align_times, smoothdata(squeeze(instBaseline_FR(60, :)),'movmedian', [1,20])); hold on;
+yyaxis right;
+plot(align_times, instGo_rate)
+xlim([0 2200])
 % -> FSIs. show example
 % -> MSNs. show example 
 
