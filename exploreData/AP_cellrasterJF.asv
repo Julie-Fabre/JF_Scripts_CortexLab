@@ -89,6 +89,7 @@ template_xdepths = evalin('base','template_xdepths');
 template_amplitudes = evalin('base','template_amplitudes');
 spike_xdepths = evalin('base','spike_xdepths');
 curr_shank = evalin('base','curr_shank');
+%stim_to_move = evalin('base', 'stim_to_move');
 catch me
     missing_var = textscan(me.message,'Undefined function or variable '' %s');
     error(['Ephys variable missing from base workspace: ' cell2mat(missing_var{:})]);
@@ -146,6 +147,7 @@ psth_axes = subplot(5,5,[3,4,5],'YAxisLocation','right');
 hold on;
 max_n_groups = max(cell2mat(cellfun(@(x) 1+sum(diff(sort(x,1),[],1) ~= 0),align_groups,'uni',false)));
 psth_lines = arrayfun(@(x) plot(NaN,NaN,'linewidth',2,'color','k'),1:max_n_groups);
+xlim([-0.5,2]);
 xlabel('Time from event (s)');
 ylabel('Spikes/s/trial');
 
@@ -159,7 +161,7 @@ ylabel('Trial');
 
 % (spike amplitude across the recording)
 amplitude_axes = subplot(5,5,21:25); hold on;
-amplitude_plot = plot(NaN,NaN,'.k');
+amplitude_plot = plot(NaN,NaN,'.k','MarkerSize',2);
 amplitude_lines = arrayfun(@(x) line([0,0],ylim,'linewidth',2),1:2);
 xlabel('Experiment time (s)');
 ylabel('Template amplitude');
@@ -268,13 +270,18 @@ else
 end
 
 if sum(template_use_channels) < 4 
+    maxShank = gui_data.channel_positions(max_channel,1);
+   
     ff=find(gui_data.channel_positions(:,1) >= maxShank - 32 ...
         & gui_data.channel_positions(:,1) >= maxShank + 32);
     fff = find(abs(ff - max_channel) < 15);
     template_use_channels(ff(fff)) = 1; 
 end
-NansNans = nan(20,82);
-arrayfun(@(ch) set(gui_data.waveform_lines(ch),'XData',NansNans(ch,:),'YData',NansNans(ch,:),1:20));
+for iC = 1:size(template_x,1)
+    set(gui_data.waveform_lines(iC), 'XData', nan(82, 1), ...
+            'YData', nan(82, 1));
+end
+arrayfun(@(ch) set(gui_data.waveform_lines(ch),'XData',template_x(ch,:),'YData',template_y(ch,:)),find(template_use_channels));
 arrayfun(@(ch) set(gui_data.waveform_lines(ch),'XData',template_x(ch,:),'YData',template_y(ch,:)),find(template_use_channels));
 arrayfun(@(ch) set(gui_data.waveform_lines(ch),'Color','r'),find(template_use_channels));
 arrayfun(@(ch) set(gui_data.waveform_lines(ch),'Color','k'),find(~template_use_channels));
@@ -334,6 +341,7 @@ end
 smooth_size = 51;
 gw = gausswin(smooth_size,3)';
 smWin = gw./sum(gw);
+%smWin(1:50) = 0; %make causal 
 bin_t = mean(diff(gui_data.t));
 
 curr_psth = grpstats(curr_raster,curr_group,@(x) mean(x,1));

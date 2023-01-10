@@ -9,11 +9,15 @@
 % SNr : JF070
 
 %% striatum, chaque bonne cellule, baseline go/no go action 
+
+%% load all data 
 allDataStruct = JF_loadAllData({'JF070'}, 'CP', 'stage', 1);
 raster_window = [-0.5, 2];
 psth_bin_size = 0.01;
 allData_singleCellPSTH = JF_singleCellPSTH_allData(allDataStruct,'stim_id', 'stim', raster_window, psth_bin_size);
 
+
+%% baseline in go action vs no go action 
 % plot baseline in go vs no go trials depending on stim type 
 baseline_goStim_goAction = nanmean(allData_singleCellPSTH.psth(:,1,56:71),3)./1.5;
 baseline_goStim_noGoAction = nanmean(allData_singleCellPSTH.psth(:,4,56:71),3)./1.5;
@@ -115,7 +119,26 @@ xlim([0 2200])
 
 % example cell 
 [curr_smoothed_psth, curr_psth, raster_x, raster_y, curr_raster] = JF_raster_PSTH(spike_templates, spike_times_timeline, ...
-    thisTemplate, raster_window, psth_bin_size, align_times, align_group, sort_by, color_by, plot_me, causal_smoothing)
+    thisTemplate, raster_window, psth_bin_size, align_times, align_group, sort_by, color_by, plot_me, causal_smoothing);
 
 JF_singleTrialPSTH_allData
 
+%% raster map 
+ops=struct;
+ops.nC = 30;%, number of clusters to use 
+ops.iPC = 1:100;%, number of PCs to use 
+ops.isort = [];%, initial sorting, otherwise will be the top PC sort
+ops.useGPU = 0;%, whether to use the GPU
+ops.upsamp = 100;%, upsampling factor for the embedding position
+ops.sigUp = 1;%, % standard deviation for upsampling
+[cell_traces, isort1, isort2] = JF_runRasterMap(allDataStruct(1).spike_times, allDataStruct(1).spike_templates, ops);
+
+imagesc(timeVector, [], cell_traces(isort1,:))
+xlabel('time (s)')
+ylabel('neuron #')
+makepretty
+%overlay stimOn times, rates ect 
+
+
+% singel trial population raster (neuron x time for one trial: -0.5 to 2
+% seconds

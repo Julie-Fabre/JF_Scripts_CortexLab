@@ -239,7 +239,8 @@
         stim_leeway = 0.1;
         wheel_move_stim_idx = ...
             arrayfun(@(stim) find(wheel_starts > stim-stim_leeway,1,'first'), ...
-            stimOn_times);
+            stimOn_times, 'UniformOutput',false);
+        wheel_move_stim_idx = wheel_move_stim_idx(~cellfun(@isempty, wheel_move_stim_idx));
 
             % Get conditions for all trials
 

@@ -89,7 +89,7 @@ template_xdepths = evalin('base','template_xdepths');
 template_amplitudes = evalin('base','template_amplitudes');
 spike_xdepths = evalin('base','spike_xdepths');
 curr_shank = evalin('base','curr_shank');
-stim_to_move = evalin('base', 'stim_to_move')
+%stim_to_move = evalin('base', 'stim_to_move');
 catch me
     missing_var = textscan(me.message,'Undefined function or variable '' %s');
     error(['Ephys variable missing from base workspace: ' cell2mat(missing_var{:})]);

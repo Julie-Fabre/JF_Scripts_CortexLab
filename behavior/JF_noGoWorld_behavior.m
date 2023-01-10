@@ -846,21 +846,35 @@ for iAnimal = 1:size(animalsAll, 2)
     catch
     end
     subplot(235)
-    stim_to_move_day_mean = cellfun(@(x) mean(x, 'all', 'omitnan'), bhv.stim_to_move(:, 1));
-    stim_to_move_day_std = cellfun(@(x) std(x, 'omitnan'), bhv.stim_to_move(:, 1));
-    semilogy(1:length(bhv.stim_to_move), stim_to_move_day_mean, 'Color', 'b');
-    hold on;
-    plotshaded(1:length(bhv.stim_to_move), [stim_to_move_day_mean - stim_to_move_day_std, ...
-        stim_to_move_day_mean + stim_to_move_day_std], 'b');
+    stim_to_move_day_median = cellfun(@(x) median(x, 'all', 'omitnan'), bhv.stim_to_move(:, 1));
+   % stim_to_move_day_std = cellfun(@(x) median(x-median(x, 'all', 'omitnan'), 'all', 'omitnan'), bhv.stim_to_move(:, 1)); 
+    semilogy(1:length(bhv.stim_to_move), stim_to_move_day_median, 'Color', 'b');
+     hold on;
+%     x=1:length(bhv.stim_to_move);
+%     lo = stim_to_move_day_median - stim_to_move_day_std;
+%     hi = stim_to_move_day_median + stim_to_move_day_std;
+%     lo(lo<0) = 0.0001;
+%     hi(hi<0) = 0.0001;
+%     patch([x, x(end:-1:1), x(1)], [lo; hi(end:-1:1); lo(1)], rgb('Blue'),'FaceAlpha',.3);
 
-        stim_to_move_alt_day_mean = nanmean(bhv.alt_stim_to_move_resampled(:,1,:),3);
-        stim_to_move_alt_day_std = nanstd(bhv.alt_stim_to_move_resampled(:,1,:),[],3);
-    
-       semilogy(1:length(bhv.stim_to_move), stim_to_move_alt_day_mean, 'Color', rgb('Grey'));
-        plotshaded(1:length(bhv.stim_to_move), [stim_to_move_alt_day_mean - stim_to_move_alt_day_std,...
-            stim_to_move_alt_day_mean+stim_to_move_alt_day_std],  rgb('Grey'));
-        makepretty;
-        ylim([0.1, 20])
+
+    stim_to_move_alt_day_median = nanmedian(bhv.alt_stim_to_move_resampled(:,1,:),3);
+    stim_to_move_alt_day_ci = squeeze(prctile(bhv.alt_stim_to_move_resampled(:,1,:),[5,95],3));
+
+    semilogy(1:length(bhv.stim_to_move), stim_to_move_alt_day_median, 'Color', rgb('Grey'));
+    x= 1:length(bhv.stim_to_move);
+    lo = stim_to_move_alt_day_ci(:,1);
+    hi = stim_to_move_alt_day_ci(:,2);
+    lo(lo<0,:) = 0.0001;
+    hi(hi<0,:) = 0.0001;
+    x(isnan(lo(:,1))) = [];
+    hi(isnan(lo(:,1)),:) = [];
+    lo(isnan(lo(:,1)),:) = [];
+    patch([x, x(end:-1:1), x(1)], [lo; hi(end:-1:1); lo(1)], rgb('Gray'),'FaceAlpha',.3);
+    % shading shows 95% confidence intervals from the null distribution
+    % median absolute deviation across mice
+    makepretty;
+    ylim([0.1, 20])
 
     %real: stim_to_move
     %null distribtuon: randsample delay (ITI+quiesc) -> get new stimOn
