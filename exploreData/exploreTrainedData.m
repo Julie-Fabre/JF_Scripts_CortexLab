@@ -65,7 +65,7 @@ for iRecording = 1%:size(allDataStruct,2)
 
     end
 end
-
+iRecording =1;
 [instHit_rate, instCR_rate, instGo_rate ] = JF_getBehavArousalMeasures(allDataStruct(iRecording).trial_conditions(:,1),...
     allDataStruct(iRecording).trial_conditions(:,2));
 
@@ -125,20 +125,77 @@ JF_singleTrialPSTH_allData
 
 %% raster map 
 ops=struct;
-ops.nC = 30;%, number of clusters to use 
-ops.iPC = 1:100;%, number of PCs to use 
+clus = unique(allDataStruct(1).spike_templates);
+ops.nC = 2;%length(clus);%, number of clusters to use 
+ops.iPC = 1:length(clus);%, number of PCs to use 
 ops.isort = [];%, initial sorting, otherwise will be the top PC sort
 ops.useGPU = 0;%, whether to use the GPU
 ops.upsamp = 100;%, upsampling factor for the embedding position
 ops.sigUp = 1;%, % standard deviation for upsampling
-[cell_traces, isort1, isort2] = JF_runRasterMap(allDataStruct(1).spike_times, allDataStruct(1).spike_templates, ops);
+[cell_traces, isort1, isort2, timeVector,removeMe ] = JF_runRasterMap(allDataStruct(1).spike_times, allDataStruct(1).spike_templates, ops);
 
-imagesc(timeVector, [], cell_traces(isort1,:))
+figure();
+subplot(5,1,[1:3])
+imagesc(timeVector, [], cell_traces(isort1,:)); hold on;
 xlabel('time (s)')
 ylabel('neuron #')
-makepretty
+makepretty;
+
+subplot(5,1,4)
+plot(Timeline.rawDAQTimestamps, smoothdata(abs(wheel_velocity),'movmean', 10000))
+xlim([0 2000])
+ylabel('wheel velocity')
+makepretty;
+
+subplot(5,1,5)
+iRecording =1;
+[instHit_rate, instCR_rate, instGo_rate ] = JF_getBehavArousalMeasures(allDataStruct(iRecording).trial_conditions(:,1),...
+    allDataStruct(iRecording).trial_conditions(:,2));
+
+
+plot(stimOn_times, smoothdata(instCR_rate, 'movmean', 10)); hold on;
+plot(stimOn_times, smoothdata(instHit_rate, 'movmean', 10))
+xlim([0 2000])
+legend({'CR rate', 'Hit rate'})
+makepretty;
+
+figure();
+imagesc(timeVector, [], cell_traces(:,:)); hold on;
+xlabel('time (s)')
+ylabel('neuron #')
+makepretty;
+                    
+%     line([stimOn_times(iStim), stimOn_times(iStim)], [0.5, size(cell_traces,1)])
+% end
+ %plot movement at bottom 
+
 %overlay stimOn times, rates ect 
+% 
+% 
+% figure();
+% imagesc(timeVector, [], cell_traces(isort1,isort2)); hold on;
+% xlabel('time (s)')
+% ylabel('neuron #')
+% makepretty;
 
-
-% singel trial population raster (neuron x time for one trial: -0.5 to 2
+% single trial population raster (neuron x time for one trial: -0.5 to 2
 % seconds
+figure();
+
+iTrial = iTrial+1;
+all_templates=unique(allDataStruct(1).spike_templates);
+for iUnit = 1:length(all_templates)
+timeVector = stimOn_times(iTrial)-0.5:0.01:stimOn_times(iTrial)+2;
+curr_raster_spike_times = allDataStruct(1).spike_times(allDataStruct(1).spike_templates == all_templates(iUnit));
+curr_raster_spike_times(curr_raster_spike_times > timeVector(end))= [];
+pop_raster(iUnit,:) = histcounts(curr_raster_spike_times, timeVector);
+
+end
+pop_raster(removeMe,:)=[];
+clf;
+imagesc(-0.5:0.01:2, [], pop_raster(isort1, :)); hold on;
+colormap(brewermap([],'Greys'));
+line([0, 0], [0.5, length(isort1)+0.5], 'Color', 'r');
+line([stim_to_move(iTrial), stim_to_move(iTrial)], [0.5, length(isort1)+0.5], 'Color',rgb('Purple'));
+line([stim_to_feedback(iTrial), stim_to_feedback(iTrial)], [0.5, length(isort1)+0.5], 'Color',rgb('Blue'));
+title(['stim = ', num2str(stimIDs(iTrial))])

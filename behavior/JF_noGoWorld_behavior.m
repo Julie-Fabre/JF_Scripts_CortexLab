@@ -114,7 +114,7 @@ for iAnimal = 1:size(animalsAll, 2)
                         go1Trials = block.events.trialTypeValues(response_trials) == 1;
                         go2Trials = block.events.trialTypeValues(response_trials) == 2;
                         noGoTrials = block.events.trialTypeValues(response_trials) == 3;
-                    elseif contains(block.expDef, 'Hack') || contains(block.expDef, 'noGo_stage4') || contains(block.expDef, 'noGo_stage5')
+                    elseif contains(block.expDef, 'Hack') || contains(block.expDef, 'noGo_stage4') || contains(block.expDef, 'noGo_stage5') || contains(block.expDef, 'phase')
                         go1Trials = block.events.stimulusTypeValues(response_trials) == 1;
                         go2Trials = block.events.stimulusTypeValues(response_trials) == 2;
                         noGoTrials = block.events.stimulusTypeValues(response_trials) == 3;
@@ -164,7 +164,7 @@ for iAnimal = 1:size(animalsAll, 2)
                     noGoTrialsSecHalf = noGoTrials;
                     noGoTrialsSecHalf(1:round(length(go1Trials)/2)) = 0;
 
-                    if contains(block.expDef, 'Hack') || contains(block.expDef, 'noGo_stage4') || contains(block.expDef, 'noGo_stage5')
+                    if contains(block.expDef, 'Hack') || contains(block.expDef, 'noGo_stage4') || contains(block.expDef, 'noGo_stage5') || contains(block.expDef, 'phase')
                         if strcmp(animal, 'JF042') || strcmp(animal, 'JF043') || strcmp(animal, 'JF044')
                             val = 1;
                         else
@@ -633,7 +633,7 @@ for iAnimal = 1:size(animalsAll, 2)
                     expDefName = block.expDef(expDefNameStart:expDefNameStart+5);
 
 
-                    if contains(block.expDef, 'NoGo') || contains(block.expDef, 'stage4') || contains(block.expDef, 'stage5')
+                    if contains(block.expDef, 'NoGo') || contains(block.expDef, 'stage4') || contains(block.expDef, 'stage5')|| contains(block.expDef, 'phase')
                         noGoDay = [noGoDay, curr_day];
                         if sum(go2Trials) >= 1
 
@@ -845,17 +845,20 @@ for iAnimal = 1:size(animalsAll, 2)
         caxis([- max(abs(max(max(im.CData)))), max(abs(max(max(im.CData))))])
     catch
     end
+        ylabel('training day')
+    xlabel('reaction time (s)')
+
     subplot(235)
     stim_to_move_day_median = cellfun(@(x) median(x, 'all', 'omitnan'), bhv.stim_to_move(:, 1));
    % stim_to_move_day_std = cellfun(@(x) median(x-median(x, 'all', 'omitnan'), 'all', 'omitnan'), bhv.stim_to_move(:, 1)); 
     semilogy(1:length(bhv.stim_to_move), stim_to_move_day_median, 'Color', 'b');
      hold on;
-%     x=1:length(bhv.stim_to_move);
-%     lo = stim_to_move_day_median - stim_to_move_day_std;
-%     hi = stim_to_move_day_median + stim_to_move_day_std;
-%     lo(lo<0) = 0.0001;
-%     hi(hi<0) = 0.0001;
-%     patch([x, x(end:-1:1), x(1)], [lo; hi(end:-1:1); lo(1)], rgb('Blue'),'FaceAlpha',.3);
+    x=1:length(bhv.stim_to_move);
+    lo = stim_to_move_day_median - stim_to_move_day_std;
+    hi = stim_to_move_day_median + stim_to_move_day_std;
+    lo(lo<0) = 0.0001;
+    hi(hi<0) = 0.0001;
+    patch([x, x(end:-1:1), x(1)], [lo; hi(end:-1:1); lo(1)], rgb('Blue'),'FaceAlpha',.3);
 
 
     stim_to_move_alt_day_median = nanmedian(bhv.alt_stim_to_move_resampled(:,1,:),3);
@@ -870,11 +873,13 @@ for iAnimal = 1:size(animalsAll, 2)
     x(isnan(lo(:,1))) = [];
     hi(isnan(lo(:,1)),:) = [];
     lo(isnan(lo(:,1)),:) = [];
-    patch([x, x(end:-1:1), x(1)], [lo; hi(end:-1:1); lo(1)], rgb('Gray'),'FaceAlpha',.3);
+    %patch([x, x(end:-1:1), x(1)], [lo; hi(end:-1:1); lo(1)], rgb('Gray'),'FaceAlpha',.3);
     % shading shows 95% confidence intervals from the null distribution
     % median absolute deviation across mice
     makepretty;
-    ylim([0.1, 20])
+    xlabel('training day')
+    ylabel('reaction time (s)')
+    ylim([0.1, 4])
 
     %real: stim_to_move
     %null distribtuon: randsample delay (ITI+quiesc) -> get new stimOn

@@ -874,7 +874,7 @@ for iAnimal = 1:size(animalsAll, 2)
     % shading shows 95% confidence intervals from the null distribution
     % median absolute deviation across mice
     makepretty;
-    ylim([0.1, 20])
+    ylim([0.1, 4])
 
     %real: stim_to_move
     %null distribtuon: randsample delay (ITI+quiesc) -> get new stimOn

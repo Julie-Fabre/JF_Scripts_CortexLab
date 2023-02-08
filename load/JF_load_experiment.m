@@ -264,6 +264,10 @@ if block_exists
             signals_events.(block_fieldnames{curr_times}) = ...
                 interp1(block2timeline, timeline2block, block.events.(block_fieldnames{curr_times}), 'linear', 'extrap');
         end
+        % do keyboard times too 
+        signals_events.keyboardTimes = ...
+                interp1(block2timeline, timeline2block, block.inputs.keyboardTimes, 'linear', 'extrap');
+      
 
     end
 

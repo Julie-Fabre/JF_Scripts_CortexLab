@@ -1,4 +1,4 @@
-function [cell_traces, isort1, isort2] = JF_runRasterMap(spike_times, spike_templates, ops)
+function [cell_traces, isort1, isort2, timeVector,removeMe ] = JF_runRasterMap(spike_times, spike_templates, ops)
 
 % sorts the matrix S (neurons by time) along the first axis
 % ops.nC = 30, number of clusters to use 
@@ -51,8 +51,9 @@ cell_traces(iUnit,:) = histcounts(curr_raster_spike_times, timeVector);
 end
 
 % remove no firing cells
-%firing_rate = sum(cell_traces,2) ./1000;
-%removeMe = firing_rate
+firing_rate = sum(cell_traces,2) ./2000;
+removeMe = firing_rate < 0.02;
+cell_traces(removeMe,:) = [];
 % run rastermap
 [isort1, isort2, Sm] = mapTmap(cell_traces, ops);
 imagesc(timeVector, [], cell_traces(isort1,:))

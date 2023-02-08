@@ -9,11 +9,15 @@
 % SNr : JF070
 
 %% striatum, chaque bonne cellule, baseline go/no go action 
+
+%% load all data 
 allDataStruct = JF_loadAllData({'JF070'}, 'CP', 'stage', 1);
 raster_window = [-0.5, 2];
 psth_bin_size = 0.01;
 allData_singleCellPSTH = JF_singleCellPSTH_allData(allDataStruct,'stim_id', 'stim', raster_window, psth_bin_size);
 
+
+%% baseline in go action vs no go action 
 % plot baseline in go vs no go trials depending on stim type 
 baseline_goStim_goAction = nanmean(allData_singleCellPSTH.psth(:,1,56:71),3)./1.5;
 baseline_goStim_noGoAction = nanmean(allData_singleCellPSTH.psth(:,4,56:71),3)./1.5;
@@ -42,7 +46,7 @@ JF_singleCellPSTH_flip_allData(allDataStruct,'stim_id', 'stim', raster_window, p
 % recording 1, unit 2, 15, 56, 60
 for iRecording = 1%:size(allDataStruct,2)
     uniqueUnits = unique(allDataStruct(iRecording).spike_templates);
-    for iUnit = [2,15,56,60]
+    for iUnit = 1:length(uniqueUnits)
         
         %if strcmp(trialGroups, 'stim_id')
             align_group = allDataStruct(iRecording).trial_conditions(:,1) + 10*(2+allDataStruct(iRecording).trial_conditions(:,2));
@@ -61,9 +65,51 @@ for iRecording = 1%:size(allDataStruct,2)
 
     end
 end
+iRecording =1;
+[instHit_rate, instCR_rate, instGo_rate ] = JF_getBehavArousalMeasures(allDataStruct(iRecording).trial_conditions(:,1),...
+    allDataStruct(iRecording).trial_conditions(:,2));
+
 figure();
 subplot(411)
-plot(align_times, smoothdata(instBaseline_FR(2, :),50))
+yyaxis left;
+plot(align_times, smoothdata(squeeze(nanmean(instBaseline_FR(:, :))),'movmedian', [1,20])); hold on;
+yyaxis right;
+plot(align_times, instGo_rate)
+legend({'inst baseline FR population', 'inst Go rate'})
+xlabel('time(s)')
+xlim([0 2200])
+
+
+figure();
+subplot(411)
+yyaxis left;
+plot(align_times, smoothdata(squeeze(instBaseline_FR(2, :)),'movmedian', [1,20])); hold on;
+yyaxis right;
+plot(align_times, instGo_rate)
+legend({'inst baseline FR unit', 'inst Go rate'})
+xlabel('time(s)')
+xlim([0 2200])
+
+subplot(412)
+yyaxis left;
+plot(align_times, smoothdata(squeeze(instBaseline_FR(15, :)),'movmedian', [1,20])); hold on;
+yyaxis right;
+plot(align_times, instGo_rate)
+xlim([0 2200])
+
+subplot(413)
+yyaxis left;
+plot(align_times, smoothdata(squeeze(instBaseline_FR(56, :)),'movmedian', [1,20])); hold on;
+yyaxis right;
+plot(align_times, instGo_rate)
+xlim([0 2200])
+
+subplot(414)
+yyaxis left;
+plot(align_times, smoothdata(squeeze(instBaseline_FR(60, :)),'movmedian', [1,20])); hold on;
+yyaxis right;
+plot(align_times, instGo_rate)
+xlim([0 2200])
 % -> FSIs. show example
 % -> MSNs. show example 
 
@@ -73,7 +119,80 @@ plot(align_times, smoothdata(instBaseline_FR(2, :),50))
 
 % example cell 
 [curr_smoothed_psth, curr_psth, raster_x, raster_y, curr_raster] = JF_raster_PSTH(spike_templates, spike_times_timeline, ...
-    thisTemplate, raster_window, psth_bin_size, align_times, align_group, sort_by, color_by, plot_me, causal_smoothing)
+    thisTemplate, raster_window, psth_bin_size, align_times, align_group, sort_by, color_by, plot_me, causal_smoothing);
 
 JF_singleTrialPSTH_allData
 
+%% raster map 
+ops=struct;
+clus = unique(allDataStruct(1).spike_templates);
+ops.nC = 2;%length(clus);%, number of clusters to use 
+ops.iPC = 1:length(clus);%, number of PCs to use 
+ops.isort = [];%, initial sorting, otherwise will be the top PC sort
+ops.useGPU = 0;%, whether to use the GPU
+ops.upsamp = 100;%, upsampling factor for the embedding position
+ops.sigUp = 1;%, % standard deviation for upsampling
+[cell_traces, isort1, isort2, timeVector] = JF_runRasterMap(allDataStruct(1).spike_times, allDataStruct(1).spike_templates, ops);
+
+figure();
+subplot(5,1,[1:3])
+imagesc(timeVector, [], cell_traces(isort1,:)); hold on;
+xlabel('time (s)')
+ylabel('neuron #')
+makepretty;
+
+subplot(5,1,4)
+plot(Timeline.rawDAQTimestamps, smoothdata(abs(wheel_velocity),'movmean', 10000))
+xlim([0 2000])
+ylabel('wheel velocity')
+makepretty;
+
+subplot(5,1,5)
+iRecording =1;
+[instHit_rate, instCR_rate, instGo_rate ] = JF_getBehavArousalMeasures(allDataStruct(iRecording).trial_conditions(:,1),...
+    allDataStruct(iRecording).trial_conditions(:,2));
+
+
+plot(stimOn_times, smoothdata(instCR_rate, 'movmean', 10)); hold on;
+plot(stimOn_times, smoothdata(instHit_rate, 'movmean', 10))
+xlim([0 2000])
+legend({'CR rate', 'Hit rate'})
+makepretty;
+
+figure();
+imagesc(timeVector, [], cell_traces(:,:)); hold on;
+xlabel('time (s)')
+ylabel('neuron #')
+makepretty;
+                    
+%     line([stimOn_times(iStim), stimOn_times(iStim)], [0.5, size(cell_traces,1)])
+% end
+ %plot movement at bottom 
+
+%overlay stimOn times, rates ect 
+% 
+% 
+% figure();
+% imagesc(timeVector, [], cell_traces(isort1,isort2)); hold on;
+% xlabel('time (s)')
+% ylabel('neuron #')
+% makepretty;
+
+% single trial population raster (neuron x time for one trial: -0.5 to 2
+% seconds
+figure();
+
+iTrial = 1;
+all_templates=unique(spike_templates);
+for iUnit = 1:length(all_templates)
+timeVector = stimOn_times(iTrial)-0.5:0.01:stimOn_times(iTrial)+2;
+curr_raster_spike_times = spike_times(spike_templates == all_templates(iUnit));
+curr_raster_spike_times(curr_raster_spike_times > timeVector(end))= [];
+pop_raster(iUnit,:) = histcounts(curr_raster_spike_times, timeVector);
+
+end
+
+clf;
+imagesc(-0.5:0.01:2, [], pop_raster(isort1, :)); hold on;
+line([], []);
+line([], []);

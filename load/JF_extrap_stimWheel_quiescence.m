@@ -68,7 +68,12 @@ for curr_trial = 2:n_trials
     curr_quiescence_reset_block = false(size(curr_wheel_mm));
     
     %%% Extrapolate quiescence backwards from stim
+    try
     last_quiescence_reset = signals_events.stimOnTimes(curr_trial) - curr_quiescence;
+    catch
+        last_quiescence_reset = signals_events.stimulusOnTimes(curr_trial) - curr_quiescence;
+   
+    end
     % (2 options: the ITI was the last reset, or there was post-ITI
     % movement that was the last reset)
     post_iti_q_reset_flag = min(abs(last_quiescence_reset - curr_trialstart)) >= ...
@@ -111,11 +116,17 @@ for curr_trial = 2:n_trials
     end
     
     quiescence_reset_t_block = [curr_trial_t(1);curr_wheel_mm_t(curr_quiescence_reset_block)'];   
-        
+    if numel(quiescence_reset_t_block) > 1
     t_from_quiescence_reset_full_block = t - ...
         interp1(quiescence_reset_t_block,quiescence_reset_t_block,t,'previous','extrap');
-    t_from_quiescence_reset_trial_block = t_from_quiescence_reset_full_block(curr_trial_t_idx);
-    
+    else
+         t_from_quiescence_reset_full_block = t - ...
+        NaN;
+    end
+     t_from_quiescence_reset_trial_block = t_from_quiescence_reset_full_block(curr_trial_t_idx);
+   
+   
+
     % (get reconstructed stimOn time given actual trialstart/ITI
     quiescence_reset_t_block_curriti = sort([quiescence_reset_t_block;curr_trialstart]);
     
@@ -128,9 +139,13 @@ for curr_trial = 2:n_trials
         curr_trial_t(find( ...
         t_from_quiescence_reset_trial_block_curriti > curr_quiescence & ...
         curr_trial_t > curr_trialstart,1));
+    try
     curr_reconstructed_stimOn_error = ...
         min([Inf,abs(curr_reconstructed_stimOn_block - signals_events.stimOnTimes(curr_trial))]);
-    
+    catch
+         curr_reconstructed_stimOn_error = ...
+        min([Inf,abs(curr_reconstructed_stimOn_block - signals_events.stimulusOnTimes(curr_trial))]);
+    end
     % Don't check for stimOn time error at the moment - return a valid set
     % of quiescence resets, but sometimes a skipped wheel click means it
     % can't replicate the real stimOn time

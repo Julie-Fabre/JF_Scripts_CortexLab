@@ -3,7 +3,7 @@ function [alt_stim_to_move, alt_stimOn_times] = JF_randsampleITI_stimToMove(n_tr
     wheel_move_stim_idx,quiescence_t, iti_t, signals_events, block)
           
            
-
+try
             alt_stimOn_times = cell(n_trials,1);
             alt_stimOn_trialparams = cell(n_trials,1);
             % (skip trial 1: no ITI and bad quiescence watch)
@@ -57,16 +57,31 @@ function [alt_stim_to_move, alt_stimOn_times] = JF_randsampleITI_stimToMove(n_tr
                 % which case the trial shouldn't be used for stats)
                 curr_quiescence_idx = find(possible_quiescence == quiescence_t(curr_trial));
                 curr_iti_idx = find(possible_iti == iti_t(curr_trial-1));
-                curr_block_stimOn = signals_events.stimOnTimes(curr_trial);
+                try
+                    curr_block_stimOn = signals_events.stimOnTimes(curr_trial);
+                catch
+                    curr_block_stimOn = signals_events.stimulusOnTimes(curr_trial);
+                end
+
+                try
                 curr_alt_stim_offset = curr_block_stimOn - ...
                     alt_stim_t(curr_iti_idx,curr_quiescence_idx);
+                catch
+                    curr_alt_stim_offset = curr_block_stimulusOn - ...
+                    alt_stim_t(curr_iti_idx,curr_quiescence_idx);
+                end
 %                 if curr_alt_stim_offset > 0.01
 %                     continue
 %                 end
 %                 
                 % (apply the block vs actual stim on time delay to all
                 % times - note this is regularly backwards in time??)
+                try
                 curr_stim_pd_offset = signals_events.stimOnTimes(curr_trial) - curr_block_stimOn;
+                catch
+                    curr_stim_pd_offset = signals_events.stimulusOnTimes(curr_trial) - curr_block_stimOn;
+                
+                end
                 alt_stimOn_times_all_pd = alt_stimOn_times_all + curr_stim_pd_offset;
                 
                 % (store alternate stim times)
@@ -86,6 +101,7 @@ function [alt_stim_to_move, alt_stimOn_times] = JF_randsampleITI_stimToMove(n_tr
 %                 drawnow;
                 
             end
+end
                         % Get would-be reaction time after alt stim times
             stim_leeway = 0.1;
             wheel_move_alt_stim_idx = ...

@@ -96,5 +96,5 @@ end
 % end
 
 %% run quality metrics
-JF_runBombcell(animal, date, site, recording, rerunQM )
+bc_qualityMetricsPipeline_JF(animal, date, site, 1, '', 0)
 end
