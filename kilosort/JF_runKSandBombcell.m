@@ -31,12 +31,12 @@ else
 end
 
 %% get channel map file
-chanMapFile = JF_imroToChannelMapLoc(channelMapIMRO);
+recompute = 1;
+chanMapFile = JF_imroToChannelMapLoc(channelMapIMRO,metaFile,recompute);
 
 %% kilosort
 rootH = [extraHDPath, '/data_temp/'];
-pathToYourConfigFile = [dropboxPath, 'MATLAB/onPaths/Kilosort2/configFiles'];
-chanMapFilePath = [dropboxPath, 'MATLAB/onPaths/Kilosort2/configFiles', chanMapFile];
+ pathToYourConfigFile = [dropboxPath, 'MATLAB/onPaths/Kilosort2/configFiles'];
 if contains(rootZ, 'experiment')
     saveFile = [rootZ, filesep, '..', filesep, '..', filesep, 'kilosort2', filesep, 'site', num2str(site), filesep];
 elseif contains(rootZ, 'continuous')

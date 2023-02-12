@@ -1,4 +1,4 @@
-function [filename,file_exists] = AP_cortexlab_filenameJF(animal,date,experiment,file,site,recording)
+function [filename,file_exists] = AP_cortexlab_filenameJF(animal,date,experiment,file,site,recording, shank)
 myPaths;
 % [filename,file_exists] = AP_cortexlab_filename(animal,date,experiment,file,site,recording)
 %
@@ -285,13 +285,14 @@ switch file
                 filesep 'continuous'  filesep 'Neuropix-3a-100.0' filesep 'continuous.dat'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
-
-        %spike glx
-     if ~file_exists
+        
+          if ~file_exists
+             
             filepattern = [animal filesep date filesep ...
                 'ephys' site_dir filesep recording_dir filesep '*ap.*bin'];
             [filename,file_exists] = check_locations(filepattern,server_location);
-     end
+          end
+     
         if ~file_exists
             filepattern = [animal filesep date filesep ...
                 'ephys' site_dir filesep 'experiment*' filesep '*ap.*bin'];
@@ -305,6 +306,34 @@ switch file
         if ~file_exists
             filepattern = [animal filesep date filesep ...
                 'ephys'  filesep  'recording' num2str(recording)  site_dir filesep '*ap.*bin'];
+            [filename,file_exists] = check_locations(filepattern,server_location);
+        end
+        %spike_glx local 
+        if ~file_exists
+            filepattern = [animal filesep date filesep ...
+                 'ephys' filesep site_dir filesep '*ap.*bin'];
+            [filename,file_exists] = check_locations(filepattern,server_location);
+        end
+     case 'ephys_histology'
+        
+            site_dir = ['site' num2str(site), '-*' num2str(shank-1), '*'];
+            filepattern = [animal filesep date filesep ...
+                'ephys' filesep site_dir filesep recording_dir filesep '*ap.*bin'];
+            [filename,file_exists] = check_locations(filepattern,server_location);
+     
+        if ~file_exists
+            filepattern = [animal filesep date filesep ...
+                'ephys' filesep site_dir filesep 'experiment*' filesep '*ap.*bin'];
+            [filename,file_exists] = check_locations(filepattern,server_location);
+        end
+        if ~file_exists
+            filepattern = [animal filesep date filesep ...
+                'ephys' filesep site_dir filesep 'experiment*' filesep 'recording' num2str(recording) filesep '*ap.bin'];
+            [filename,file_exists] = check_locations(filepattern,server_location);
+        end
+        if ~file_exists
+            filepattern = [animal filesep date filesep ...
+                'ephys'  filesep  'recording' num2str(recording) filesep site_dir filesep '*ap.*bin'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
         %spike_glx local 
