@@ -270,7 +270,8 @@
             correctResp(signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 2) = -1;
             correctResp(signals_events.stimulusTypeValues(n_trials(1):n_trials(end)) == 3) = 0;
             trial_outcome_expected =  block.events.responseValues(n_trials(1):n_trials(end))'== correctResp;
-            trial_outcome_reward_omission =  diff( [block.events.feedbackValues; block.events.expectedFeedbackValues]);
+            crrectExpect = block.events.expectedFeedbackValues==1;
+            trial_outcome_reward_omission =  diff( [block.events.feedbackValues( crrectExpect); block.events.expectedFeedbackValues( crrectExpect)]);
             trial_outcome = block.events.feedbackValues;
 
             imageN = unique(signals_events.stimulusTypeValues);
@@ -281,7 +282,8 @@
             trial_conditions = ...
                 [signals_events.stimulusTypeValues(n_trials(1):n_trials(end))', ...
                 trial_choice(n_trials(1):n_trials(end))', trial_outcome(n_trials(1):n_trials(end))',...
-                trial_outcome_expected(n_trials(1):n_trials(end)), trial_outcome_reward_omission(n_trials(1):n_trials(end))'];
+                trial_outcome_expected(n_trials(1):n_trials(end))];
+            %trial_outcome_reward_omission(:)
 %            [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
             stimIDs = signals_events.stimulusTypeValues;
 
@@ -302,6 +304,7 @@
             if n_trials(1) == 0
                 n_trials = 1:n_trials(end);
             end
+            repeatOnIncorrect = signals_events.repeatNumValues(n_trials);
             % Get stim on times by closest photodiode flip
             [~, closest_stimOn_photodiode] = ...
                 arrayfun(@(x) min(abs(signals_events.stimulusOnTimes(x)- ...
@@ -761,7 +764,7 @@
             stim_to_move = padarray(wheel_move_time-stimOn_times, [length(stimOn_times) - length(stimOn_times), 0], NaN, 'post');
             no_move_trials = isnan(stim_to_move) | stim_to_move < 0.2 | stim_to_move > 0.2;
 
-        case 'JF_choiceworldStimuli_wheel_left_center_all'
+        case {'JF_choiceworldStimuli_wheel_left_center_all', 'JF_choiceworldStimuli_wheel_left_center_right'}
 
 
             stimOn_times = photodiode_flip_times(2:2:end);

@@ -6,9 +6,9 @@ function [spike_times_timeline, bad_flipper] = JF_align_ephys_to_timeline(animal
 if isSpikeGLX
     load(sprintf('%s//sync.mat', ephys_sync_folder)); % ephys flipper
     possible_sync_values = unique(sync);
-    if length(possible_sync_values) < 2
+    if possible_sync_values < 2
         error('check flipper was inputed in correct IMEC card')
-    elseif length(possible_sync_values) > 2
+    elseif sum(possible_sync_values) > 2
         warning('several ephys flipper values, taking lowest as threshold')
         flip_threshold =  possible_sync_values(2);
     else

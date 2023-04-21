@@ -5,8 +5,6 @@ function JF_runKSandBombcell(animal, date, site, recording, rerunKS, rerunQM)
 experiment = [];
 %% convert raw data from .cbin to .bin and get channel map
 myPaths;
-figure();
-
 [ephysAPfile, ~] = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys_includingCompressed', site, recording);
 if size(ephysAPfile, 2) > 1 && iscell(ephysAPfile)%keep only ap
     ephysAPfile = ephysAPfile{1};
@@ -34,7 +32,6 @@ end
 
 %% get channel map file
 recompute = 1;
-
 chanMapFile = JF_imroToChannelMapLoc(channelMapIMRO,metaFile,recompute);
 
 %% kilosort
@@ -64,7 +61,6 @@ end
 kilosortExists = dir(fullfile(saveFile, 'spike_times.npy')) ;
 if isempty(kilosortExists) || rerunKS
     master_kilosort;
-    %main_kilosort3;
 end
 
 % delete catGT file if catgt 
@@ -100,5 +96,5 @@ end
 % end
 
 %% run quality metrics
-%bc_qualityMetricsPipeline_JF(animal, date, site, 1, '', rerunQM, 0, 1)
+bc_qualityMetricsPipeline_JF(animal, date, site, 1, '', rerunQM)
 end

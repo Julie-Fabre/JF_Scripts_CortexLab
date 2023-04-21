@@ -13,6 +13,8 @@ function [curr_smoothed_psth, curr_psth, raster_x, raster_y, rasterColor, aligne
 %     thisTemplate, raster_window, psth_bin_size, align_times, align_group,...
 %    sort_by, plot_me)
 % Set default raster times
+alignedVector = [];
+rasterColor = [] ;
 t_bins = raster_window(1):psth_bin_size:raster_window(2);
 t = t_bins(1:end-1) + diff(t_bins) ./ 2;
 use_align = reshape(align_times, [], 1);

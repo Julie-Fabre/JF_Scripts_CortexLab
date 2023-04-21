@@ -4,7 +4,7 @@
 %clear all;
 myPaths;
 
-animals={'JF104'};
+animals={'JF107'};
 curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};
@@ -25,7 +25,7 @@ experiments = experiments([experiments.ephys]);
 
 %% Load data from experiment 
 
-curr_day = 2; % (set which day to use)
+curr_day = 3; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date

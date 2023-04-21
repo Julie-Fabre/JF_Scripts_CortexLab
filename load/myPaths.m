@@ -21,6 +21,7 @@ localExtHdPath = '/media/julie/Elements';
 
 %% specific paths  
 
+atlasBrainRegLocation = '/home/julie/.brainglobe/allen_mouse_25um_v1.2';
 
 brainsawPath = '/home/netshare/znas-brainsaw/';
 allenAtlasPath = '/home/julie/Dropbox/Atlas/'; 

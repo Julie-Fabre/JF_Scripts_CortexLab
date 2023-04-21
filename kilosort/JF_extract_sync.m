@@ -1,7 +1,7 @@
 
 %% JF_extract_sync(mouse)
 %function JF_extract_sync(animal)
-animals = {'JF090'};
+animals = {'JF107'};
 for iAnimal = 1:length(animals)
 animal = animals{iAnimal};
 myPaths;

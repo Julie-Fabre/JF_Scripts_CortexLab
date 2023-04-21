@@ -98,8 +98,8 @@ if timeline_exists
     % Get wheel velocity by smoothing the wheel trace and taking deriv
     wheel_smooth_t = 0.05; % seconds
     wheel_smooth_samples = wheel_smooth_t / Timeline.hw.samplingInterval;
-    wheel_velocity = interp1(conv(Timeline.rawDAQTimestamps, [1, 1]/2, 'valid'), ...
-        diff(smooth(wheel_position, wheel_smooth_samples)), Timeline.rawDAQTimestamps)';
+    %wheel_velocity = interp1(conv(Timeline.rawDAQTimestamps, [1, 1]/2, 'valid'), ...
+    %    diff(smooth(wheel_position, wheel_smooth_samples)), Timeline.rawDAQTimestamps)';
     [wheel_velocity,wheel_move] = AP_parse_wheel(wheel_position,Timeline.hw.daqSampleRate);
     
 
@@ -497,7 +497,9 @@ if ephys_exists && load_parts.ephys
 
     % Default channel map/positions are from end: make from surface
     % (hardcode this: kilosort2 drops channels)
-    if isSpikeGlx
+    ephysMetaDir = dir([ephysAP_path(1:end-3), 'meta']);
+    [scalingFactor, channelMapImro, probeType] = bc_readSpikeGLXMetaFile([ephysMetaDir.folder, filesep, ephysMetaDir.name]);
+    if isSpikeGlx && strcmp(probeType ,'2')
         max_depth = 2880;
         if any(max_depth-channel_positions(:, 2) < 0) %1.0
             max_depth = 3840;
@@ -582,14 +584,13 @@ if ephys_exists && load_parts.ephys
         else
 
             myPaths;
-            [tv, av, st, bregma] = bd_loadAllenAtlas([atlasLocation.folder, filesep, atlasLocation.name]);
-            imgToRegister = dir([brainsawPath, '/*/', animal, '/downsampled_stacks/025_micron/*', channelColToRegister, '*.tif*']);
-            imgToTransform = dir([brainsawPath, '/*/', animal, '/downsampled_stacks/025_micron/*', channelColToTransform, '*.tif*']);
-            outputDir = [imgToRegister.folder, filesep, 'brainReg'];
+            [tv, av, st, bregma] = bd_loadAllenAtlas(atlasBrainRegLocation);
+           
+            probe2ephysFile = AP_cortexlab_filenameJF(animal, [], [], 'probe2ephys', [], []);
+    load(probe2ephysFile)
+    histoFile = AP_cortexlab_filenameJF(animal, [], [], 'histo', [], []);
+    load(histoFile)
 
-            load([outputDir, '/probe_ccf.mat']);
-
-            load([outputDir, '/probe2ephys.mat']);
             if isSpikeGlx
                 probeNumber = find([probe2ephys.day] == curr_day & [probe2ephys.site] == site & [probe2ephys.day] == shank);
             else
@@ -664,7 +665,7 @@ if ephys_exists && load_parts.ephys
         end
 
 
-    elseif exist('unitType', 'var')
+    elseif exist('unitType', 'var') && loadClusters 
         % If no manual but qualityMetrics are available
         if verbose
             disp('Keeping quality metrics good units...');

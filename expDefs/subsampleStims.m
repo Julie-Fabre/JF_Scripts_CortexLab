@@ -330,3 +330,45 @@ imwrite(img1,gray,['/home/julie/Documents/new/cw_all/img' num2str(iImg+13) '.jpe
 
 end
  
+
+%% nat
+
+
+for iImg = 1:30
+
+  % iImg= iImg +1
+  img1 = imread(['/home/netshare/zserver-data/pregenerated_textures/JulieF/naturalImagesimg' num2str(iImg) '.mat']);
+% figure(1);
+% imagesc(img)
+% colormap(gray)
+
+if size(img1,3) ==3 
+    img1_gray = 127 * ones(size(img1,1), size(img1,2), size(img1,3));
+    img1 = [ img1, img1_gray, img1_gray];
+    sz = size(img1);
+sc(1) = sz(1)/1024;
+sc(2) = sz(2)/3840;
+pxSt = sc * 100;
+    width = sz(1)- ceil(pxSt(1)*3): sz(1)- floor(pxSt(1))*2;
+    height = sz(2)- ceil(pxSt(2)*3) : sz(2)- floor(pxSt(2)*2);
+    img1(sz(1)- ceil(pxSt(1)*3): sz(1)- floor(pxSt(1))*2,sz(2)- ceil(pxSt(2)*3) : sz(2)- floor(pxSt(2)*2),:) = repmat(0,...
+        [max(width) - min(width) + 1, ...
+        max(height) - min(height) + 1, 3]);
+    img1= rgb2gray(img1);
+
+else
+    img1_gray = 127 * ones(size(img1,1), size(img1,2), size(img1,3));
+    img1 = [img1_gray, img1, img1_gray];
+    sz = size(img1);
+sc(1) = sz(1)/1024;
+sc(2) = sz(2)/3840;
+pxSt = sc * 100;
+
+img1(sz(1)- ceil(pxSt(1)*3): sz(1)- floor(pxSt(1))*2,sz(2)- ceil(pxSt(2)*3) : sz(2)- floor(pxSt(2)*2)) = 0;
+end
+%disp(nanmean(img1(sz(1)- ceil(pxSt(1)*2): sz(1)- floor(pxSt(1)), sz(2)- ceil(pxSt(2)*2) : sz(2)- floor(pxSt(2)))))
+imagesc(img1)
+imwrite(img1,gray,['/home/julie/Documents/new/cw_all/img' num2str(iImg) '.jpeg'])
+
+end
+

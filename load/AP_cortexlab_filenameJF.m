@@ -96,7 +96,7 @@ switch file
         filepattern = [animal filesep '*istology/processed/slices/probe_ccf.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
         if ~file_exists
-             filepattern = [animal filesep '*istology/025_micron/brainreg/probe_ccf.mat'];
+             filepattern = [animal filesep '*istology/downsampled_stacks/025_micron/brainreg/probe_ccf.mat'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
         if ~file_exists
@@ -110,7 +110,7 @@ switch file
         filepattern = [animal filesep 'Histology/processed/probe2ephys.mat'];
         [filename,file_exists] = check_locations(filepattern,server_location);
         if ~file_exists
-             filepattern = [animal filesep '*istology/025_micron/brainreg/probe2ephys.mat'];
+             filepattern = [animal filesep '*istology/downsampled_stacks/025_micron/brainreg/probe2ephys.mat'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
     case 'mainfolder'

@@ -1,4 +1,4 @@
-function experiments = AP_find_experimentsJF(animal,protocol,flexible_name)
+function experiments = AP_find_experimentsJF(animal, protocol, flexible_name)
 myPaths;
 % experiments = AP_find_experiments(animal,protocol,flexible_name)
 %
