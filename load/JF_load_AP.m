@@ -4,7 +4,7 @@
 %clear all;
 myPaths;
 
-animals={'JF104'};
+animals={'JF101'};
 curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};
@@ -15,7 +15,7 @@ experiments = experiments([experiments.ephys]);
 
 % allen_atlas_path = [allenAtlasPath, filesep, 'allenCCF/'];
 % st = loadStructureTreeJF([allen_atlas_path, filesep, 'structure_tree_safe_2017.csv']);
-% curr_plot_structure = find(strcmp(st.acronym, 'GPe'));
+% curr_plot_structure = find(strcmp(st.acronym, 'GPe'));m
 % histoFile = AP_cortexlab_filenameJF(animal, [], [], 'histo', [], []);
 % load(histoFile)
 % probe2ephysFile = AP_cortexlab_filenameJF(animal, [], [], 'probe2ephys', [], []);
@@ -74,13 +74,31 @@ qMetricsExist = dir(fullfile(savePath, 'qMetric*.mat'));
 load_parts.cam = true;
 JF_load_experiment;
 curr_shank=NaN;
+AP_cellrasterJF({stimOn_times}, {trial_conditions(:,1)})
+%AP_cellraster({stimOn_times, stimOn_times}, {trial_conditions(:,2), trial_conditions(:,3)})
+%AP_cellraster({stimOn_times}, {trial_conditions(:,1)})
+%AP_cellraster({stimOn_times, stimOn_times}, {trial_conditions(:,1), trial_conditions(:,2)})
+
+% passive, task stims 
+theseImages = [4,6,12];
+trial_conditions(trial_conditions(:,1)>13,1) = trial_conditions(trial_conditions(:,1)>13,1)-13;
+
+theseImages_trials = ismember(trial_conditions(:,1), theseImages);
+
+AP_cellrasterJF({stimOn_times(theseImages_trials & trial_conditions(:,2)==-90), stimOn_times(theseImages_trials & trial_conditions(:,2)==0),...
+    stimOn_times(theseImages_trials), stimOn_times(theseImages_trials)}, ...
+    {trial_conditions(theseImages_trials & trial_conditions(:,2)==-90,1), ...
+    trial_conditions(theseImages_trials & trial_conditions(:,2)==0,1),trial_conditions(theseImages_trials,2),...
+(trial_conditions(theseImages_trials,2)/-90)+(trial_conditions(theseImages_trials,1))});
+
+
+% go no go 
 correct_trials = trial_conditions(:,3)==1;
 correct_trials_no_repeat = trial_conditions(:,3)==1 & repeatOnIncorrect' == 1;
-% go no go 
-AP_cellraster({stimOn_times, stimOn_times(correct_trials), stimOn_times(correct_trials_no_repeat),...
+AP_cellraster({stimOn_times, stimOn_times(correct_trials), stimOn_times(correct_trials),...
     wheel_move_time,signals_events.responseTimes(n_trials)'}, ...
     {trial_conditions(:,1), trial_conditions(correct_trials,1),...
-    trial_conditions(correct_trials_no_repeat,1), trial_conditions(:,2), ...
+    trial_conditions(correct_trials,1), trial_conditions(:,2), ...
     trial_conditions(:,3)});
 
 % go go go 

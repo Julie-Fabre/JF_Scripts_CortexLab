@@ -1,4 +1,4 @@
-function AP_cellrasterJF(align_times,align_groups,unit_sort)
+function AP_cellraster(align_times,align_groups,unit_sort)
 % AP_cellraster(align_times,align_groups,unit_sort)
 %
 % Raster viewer for Neuropixels
@@ -24,12 +24,7 @@ function AP_cellrasterJF(align_times,align_groups,unit_sort)
 
 
 % Initiate align_times
-% if size(align_times,2)==size(align_groups,2)+1
-%     stim_to_move = align_times{end};
-%     align_times=align_times(1:size(align_times,2)-1);
-% else
-%     stim_to_move = NaN;
-% end
+
 % (align times required as input)
 if ~exist('align_times','var')
     error('No align times');
@@ -64,14 +59,7 @@ end
 % (check group against time dimensions, orient align times x groups)
 group_dim = cellfun(@(align,group) find(ismember(size(group),length(align))),align_times,align_groups,'uni',false);
 if any(cellfun(@isempty,group_dim))
-   
-     
-        align_times{3} = align_times{3}(1:end-1);
-        align_times{3} = align_times{3}(1:end-1);
-        group_dim = cellfun(@(align,group) find(ismember(size(group),length(align))),align_times,align_groups,'uni',false);
-    if any(cellfun(@isempty,group_dim))
-         error('Mismatching times/groups within align set')
-    end
+    error('Mismatching times/groups within align set')
 end
 align_groups = cellfun(@(groups,dim) shiftdim(groups,dim-1),align_groups,group_dim,'uni',false);
 
@@ -85,15 +73,15 @@ channel_positions = evalin('base','channel_positions');
 template_depths = evalin('base','template_depths');
 spike_times = evalin('base','spike_times_timeline');
 spike_templates = evalin('base','spike_templates');
-template_xdepths = evalin('base','template_xdepths');
 template_amplitudes = evalin('base','template_amplitudes');
-spike_xdepths = evalin('base','spike_xdepths');
+template_xdepths = evalin('base','template_xdepths');
 curr_shank = evalin('base','curr_shank');
-%stim_to_move = evalin('base', 'stim_to_move');
+spike_xdepths =  evalin('base','spike_xdepths');
 catch me
     missing_var = textscan(me.message,'Undefined function or variable '' %s');
     error(['Ephys variable missing from base workspace: ' cell2mat(missing_var{:})]);
 end
+
 if ~isnan(curr_shank)
     theseChannelPositions = [(curr_shank-1) * 250, (curr_shank-1)*250 + 32];
     theseChannels = ismember(channel_positions(:,1), theseChannelPositions);
@@ -112,6 +100,7 @@ if ~isnan(curr_shank)
     channel_positions = channel_positions(theseChannels,:);
     templates = templates(theseTemplates,:,theseChannels); 
 end
+
 % Sort the units by depth if not specified
 if ~exist('unit_sort','var')
    [~,unit_sort] = sort(template_depths); 
@@ -125,20 +114,18 @@ unit_axes = subplot(5,5,[1:5:20],'YDir','reverse');
 hold on;
 
 norm_spike_n = mat2gray(log10(accumarray(spike_templates,1)+1));
-%norm_spike_n 
 unit_dots = plot(norm_spike_n,template_depths,'.k','MarkerSize',20,'ButtonDownFcn',@unit_click);
 curr_unit_dots = plot(0,0,'.r','MarkerSize',20);
 multiunit_lines = arrayfun(@(x) line(xlim,[0,0],'linewidth',2,'visible','off'),1:2);
 xlim(unit_axes,[-0.1,1]);
-ylim([min(channel_positions(:,2))-50, max(channel_positions(:,2))+50]);
+ylim([-50, max(channel_positions(:,2))+50]);
 ylabel('Depth (\mum)')
 xlabel('Normalized log rate')
 
 % (plot of waveform across the probe)
 waveform_axes = subplot(5,5,[2:5:20],'visible','off','YDir','reverse');
 hold on;
-ylim([-50, max(channel_positions(:,1))+50]);
-
+ylim([-50, max(channel_positions(:,2))+50]);
 waveform_lines = arrayfun(@(x) plot(waveform_axes,0,0,'k','linewidth',1),1:size(templates,3));
 % linkaxes([unit_axes,waveform_axes],'y');
 
@@ -147,7 +134,6 @@ psth_axes = subplot(5,5,[3,4,5],'YAxisLocation','right');
 hold on;
 max_n_groups = max(cell2mat(cellfun(@(x) 1+sum(diff(sort(x,1),[],1) ~= 0),align_groups,'uni',false)));
 psth_lines = arrayfun(@(x) plot(NaN,NaN,'linewidth',2,'color','k'),1:max_n_groups);
-xlim([-0.5,2]);
 xlabel('Time from event (s)');
 ylabel('Spikes/s/trial');
 
@@ -161,7 +147,7 @@ ylabel('Trial');
 
 % (spike amplitude across the recording)
 amplitude_axes = subplot(5,5,21:25); hold on;
-amplitude_plot = plot(NaN,NaN,'.k','MarkerSize',2);
+amplitude_plot = plot(NaN,NaN,'.k');
 amplitude_lines = arrayfun(@(x) line([0,0],ylim,'linewidth',2),1:2);
 xlabel('Experiment time (s)');
 ylabel('Template amplitude');
@@ -189,6 +175,7 @@ gui_data.curr_unit_dots = curr_unit_dots;
 gui_data.multiunit_lines = multiunit_lines;
 gui_data.waveform_lines = waveform_lines;
 gui_data.psth_lines = psth_lines;
+gui_data.raster_axes = raster_axes;
 gui_data.raster_dots = raster_dots;
 gui_data.raster_image = raster_image;
 gui_data.amplitude_plot = amplitude_plot;
@@ -251,44 +238,20 @@ template_yscale = 0.5;
 
 template_y = permute(mean(gui_data.templates(gui_data.curr_unit,:,:),1),[3,2,1]);
 template_y = -template_y*template_yscale + gui_data.channel_positions(:,2);
-template_x = (1:size(gui_data.templates,2)) + gui_data.channel_positions(:,1)/250+mod(gui_data.channel_positions(:,1), 250)*template_xscale;
+template_x = (1:size(gui_data.templates,2)) + gui_data.channel_positions(:,1)*template_xscale;
 
 template_channel_amp = range(gui_data.templates(gui_data.curr_unit,:,:),2);
 template_thresh = max(template_channel_amp,[],3)*0.5;
-
+template_use_channels = any(template_channel_amp > template_thresh,1);
 [~,max_channel] = max(max(abs(gui_data.templates(gui_data.curr_unit,:,:)),[],2),[],3);
 
-% find max shank if 4 -shank 
-if max(gui_data.channel_positions(:,1)) > 100 % 4 shank 
-    maxShank = gui_data.channel_positions(max_channel,1);
-    template_use_channels = squeeze(any(template_channel_amp > template_thresh,1)) ...
-        & gui_data.channel_positions(:,1) >= maxShank - 32 ...
-        & gui_data.channel_positions(:,1) >= maxShank + 32;
-    
-else
-    template_use_channels = squeeze(any(template_channel_amp > template_thresh,1));
-end
-
-if sum(template_use_channels) < 4 
-    maxShank = gui_data.channel_positions(max_channel,1);
-   
-    ff=find(gui_data.channel_positions(:,1) >= maxShank - 32 ...
-        & gui_data.channel_positions(:,1) >= maxShank + 32);
-    fff = find(abs(ff - max_channel) < 15);
-    template_use_channels(ff(fff)) = 1; 
-end
-for iC = 1:size(template_x,1)
-    set(gui_data.waveform_lines(iC), 'XData', nan(82, 1), ...
-            'YData', nan(82, 1));
-end
-arrayfun(@(ch) set(gui_data.waveform_lines(ch),'XData',template_x(ch,:),'YData',template_y(ch,:)),find(template_use_channels));
-arrayfun(@(ch) set(gui_data.waveform_lines(ch),'XData',template_x(ch,:),'YData',template_y(ch,:)),find(template_use_channels));
+arrayfun(@(ch) set(gui_data.waveform_lines(ch),'XData',template_x(ch,:),'YData',template_y(ch,:)),1:size(gui_data.templates,3));
 arrayfun(@(ch) set(gui_data.waveform_lines(ch),'Color','r'),find(template_use_channels));
 arrayfun(@(ch) set(gui_data.waveform_lines(ch),'Color','k'),find(~template_use_channels));
 set(gui_data.waveform_lines(max_channel),'Color','b');
 
 if length(gui_data.curr_unit) == 1
-    yrange = range(gui_data.channel_positions(:,2))*0.1.*[-1,1];
+    yrange = range(gui_data.channel_positions(:,2))*0.03.*[-1,1];
     ylim(get(gui_data.waveform_lines(1),'Parent'),[gui_data.channel_positions(max_channel,2) + yrange]);
 elseif length(gui_data.curr_unit) > 1
     ylim(get(gui_data.waveform_lines(1),'Parent'), ...
@@ -303,7 +266,7 @@ curr_raster_spike_times(curr_raster_spike_times < min(gui_data.t_peri_event(:)) 
 
 if ~any(diff(reshape(gui_data.t_peri_event',[],1)) < 0)
     % (if no backward time jumps, can do long bin and cut out in-between, faster)
-    curr_raster_continuous = reshape([histcounts(curr_raster_spike_times, ...
+    curr_raster_continuous = reshape([histcounts(mcurr_raster_spike_times, ...
         reshape(gui_data.t_peri_event',[],1)),NaN],size(gui_data.t_peri_event'))';
     curr_raster = curr_raster_continuous(:,1:end-1);   
 else
@@ -316,9 +279,15 @@ end
 % Set color scheme
 curr_group = gui_data.align_groups{gui_data.curr_align}(:,gui_data.curr_group);
 if length(unique(curr_group)) == 1
-    % Black if one group
+    % Black if one group or number
     group_colors = [0,0,0];
-elseif length(unique(sign(curr_group(curr_group ~= 0)))) == 1 || length(unique(curr_group)) == 4
+elseif length(unique(curr_group)) == length(curr_group)
+    % Black if number of groups = trials (e.g. sort index)
+    % (and set grouping  as one's and 
+    group_colors = [0,0,0];
+    trial_sort = gui_data.align_groups{gui_data.curr_align}(:,gui_data.curr_group);
+    curr_group = ones(size(curr_group));
+elseif length(unique(sign(curr_group(curr_group ~= 0)))) == 1
     % 'Lines' colors if all groups positive
     n_groups = length(unique(curr_group));
     group_colors = lines(n_groups);
@@ -333,8 +302,7 @@ elseif length(unique(sign(curr_group(curr_group ~= 0)))) == 2
     n_groups_zero = length(unique(curr_group(curr_group == 0)));
     group_colors_zero = [zeros(n_groups_zero,1),zeros(n_groups_zero,1),zeros(n_groups_zero,1)];
     
-    group_colors = [flipud(group_colors_neg);group_colors_zero;group_colors_pos];  
- 
+    group_colors = [flipud(group_colors_neg);group_colors_zero;group_colors_pos];    
 end
 
 % Plot smoothed PSTH
@@ -356,7 +324,7 @@ arrayfun(@(align_group) set(gui_data.psth_lines(align_group), ...
 arrayfun(@(align_group) set(gui_data.psth_lines(align_group), ...
     'XData',NaN,'YData',NaN), ...
     size(curr_psth,1)+1:length(gui_data.psth_lines));
-%xlim([-0.1, 0.3])
+
 ylim(get(gui_data.psth_lines(1),'Parent'),[min(curr_smoothed_psth(:)), ...
     max(max(curr_smoothed_psth(:),min(curr_smoothed_psth(:))+1))]);
 if length(gui_data.curr_unit) == 1
@@ -370,13 +338,20 @@ title(get(gui_data.psth_lines(1),'Parent'), ...
 end
 
 % Plot raster
+% (sort raster by group)
+if ~exist('trial_sort','var')
+    [~,trial_sort] = sort(curr_group);
+end
+curr_raster_sorted = curr_raster(trial_sort,:);
+
+if all(trial_sort == [1:length(trial_sort)]')
+    ylabel(gui_data.raster_axes,'Trial')
+else
+    ylabel(gui_data.raster_axes,'Sorted trial')
+end
 if length(gui_data.curr_unit) == 1
     % (single unit mode)
-    
-    % (sort raster by group)
-     [~,trial_sort] = sort(curr_group);
-    curr_raster_sorted = curr_raster(trial_sort,:);
-    
+
     % (plot raster matrix as x,y)
     [raster_y,raster_x] = find(curr_raster_sorted);
     set(gui_data.raster_dots,'XData',gui_data.t(raster_x),'YData',raster_y);
@@ -391,21 +366,15 @@ if length(gui_data.curr_unit) == 1
     if iscell(psth_colors); psth_colors = cell2mat(psth_colors); end
     raster_dot_color = psth_colors(row_group(raster_y),:);
     set(gui_data.raster_dots,'CData',raster_dot_color);
-%     subplot(5,5,[8,9,10,13,14,15,18,19,20],'YDir','reverse','YAxisLocation','right')
-%     scatter(stim_to_move(trial_sort),1:length(trial_sort))
     
 elseif length(gui_data.curr_unit) > 1
     % (multiunit mode)
-    
-     % (sort raster by group)
-    [~,trial_sort] = sort(curr_group);
-    curr_raster_sorted = curr_raster(trial_sort,:);
-    
+     
     % (plot raster matrix as smoothed heatmap)
-    raster_heatmap = imgaussfilt(curr_raster_sorted,[5,10]);
+    raster_heatmap = imgaussfilt(curr_raster_sorted,[3,5]);
     set(gui_data.raster_image,'XData',gui_data.t,'YData', ...
         1:size(gui_data.t_peri_event,1),'CData',raster_heatmap);
-    caxis(get(gui_data.raster_image,'Parent'),prctile(raster_heatmap(:),[0.05,99.5]));
+    caxis(get(gui_data.raster_image,'Parent'),prctile(raster_heatmap(:),[0,100]));
     
 end
 

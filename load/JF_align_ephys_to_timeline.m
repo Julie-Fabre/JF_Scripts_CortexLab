@@ -45,7 +45,7 @@ end
 
 %% find experiment times
 % find long gaps in flip times = between experiments/when they end
-flip_diff_thresh = 1; % time between flips to define experiment gap (s)
+flip_diff_thresh = 10; % time between flips to define experiment gap (s)
 flipper_expt_idx = [1; find(abs(diff(ephys_sync_timestamps)) > ...
     flip_diff_thresh) + 1; length(ephys_sync_timestamps) + 1];
 possibilities = diff(flipper_expt_idx);
@@ -122,7 +122,7 @@ elseif length(flipper_flip_times_ephys) ~= length(flipper_flip_times_timeline)
             bad_flipper = true;
         end
     end
-    bad_flipper = true;
+   %bad_flipper = true;
 end
 
 %% if bad flipper, use acq live
@@ -140,8 +140,8 @@ if bad_flipper
         end
     end
     % Get acqLive times for current experiment
-    experiment_ephys_starts = ephys_sync_timestamps(ephys_sync_values == max(ephys_sync_values));
-    experiment_ephys_stops = ephys_sync_timestamps(ephys_sync_values == min(ephys_sync_values));
+    experiment_ephys_starts = ephys_sync_timestamps(ephys_sync_values == min(ephys_sync_values));
+    experiment_ephys_stops = ephys_sync_timestamps(ephys_sync_values == max(ephys_sync_values));
     acqlive_ephys_currexpt = [experiment_ephys_starts(idx), ...
         experiment_ephys_stops(idx)];
 
@@ -151,7 +151,11 @@ if bad_flipper
     % Check that the experiment time is the same within threshold
     % (it should be almost exactly the same)
     if abs(diff(acqLive_timeline)-diff(acqlive_ephys_currexpt)) > 1
-        error([animal, ' ', day, ': acqLive duration different in timeline and ephys']);
+        warning([animal, ' ', day, ': acqLive duration different in timeline and ephys']);
+
+        % try to use first and last flips
+        sync_timeline = acqLive_timeline;
+        sync_ephys = [flipper_flip_times_ephys(1), flipper_flip_times_ephys(end)];
     end
 end
 

@@ -305,7 +305,7 @@ switch file
         end
         if ~file_exists
             filepattern = [animal filesep date filesep ...
-                'ephys'  filesep  'recording' num2str(recording)  site_dir filesep '*ap.*bin'];
+                'ephys'  site_dir filesep 'recording' num2str(recording) filesep '*ap.*bin'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
         %spike_glx local 
@@ -350,7 +350,7 @@ switch file
         % Drop the kilosort version in the base workspace
         assignin('base','kilosort_version',kilosort_version);
          filepattern = [animal filesep date filesep ...
-                'ephys'  filesep  'kilosort2' filesep 'recording' num2str(recording)  site_dir ];
+                'ephys'  filesep  'kilosort2' site_dir filesep 'recording' num2str(recording)];
             [filename,file_exists] = check_locations(filepattern,server_location);
          
             if ~file_exists

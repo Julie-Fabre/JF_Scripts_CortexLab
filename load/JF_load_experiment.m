@@ -498,6 +498,9 @@ if ephys_exists && load_parts.ephys
     % Default channel map/positions are from end: make from surface
     % (hardcode this: kilosort2 drops channels)
     ephysMetaDir = dir([ephysAP_path(1:end-3), 'meta']);
+    if isempty(ephysMetaDir) %.cbin
+        ephysMetaDir = dir([ephysAP_path(1:end-4), 'meta']);
+    end
     [scalingFactor, channelMapImro, probeType] = bc_readSpikeGLXMetaFile([ephysMetaDir.folder, filesep, ephysMetaDir.name]);
     if isSpikeGlx && strcmp(probeType ,'2')
         max_depth = 2880;

@@ -32,7 +32,7 @@ for iAnimal = 1:size(animalsAll, 2)
     bhv = struct; %initialize structure
     keep_day = [];
     noGoDay = [];
-    theseD = 1:length(experiments);
+    theseD = length(experiments)-11:length(experiments);
     if strcmp(animalsAll{iAnimal}, 'JF067')
         theseD(26) = [];
     end

@@ -13,14 +13,14 @@ if size(ephysAPfile, 2) > 1 && iscell(ephysAPfile)%keep only ap
 end
 if contains(ephysAPfile, '.cbin')
     % is already decompressed ?
-    saveFileFolder = fullfile('/media/julie/Elements', animal, date, ['site', num2str(site)]);
+    saveFileFolder = fullfile('/media/julie/Expansion', animal, date, ['site', num2str(site)]);
     fN = dir(ephysAPfile);
     decompDataFile = [saveFileFolder, filesep, fN.name(1:end-14), '_bc_decompressed', fN.name(end-13:end-8),'.ap.bin'];
     if isempty(dir(decompDataFile))
         % if not,. re-decompress
         
         mkdir(saveFileFolder)
-        decompDataFile = bc_extractCbinData(ephysAPfile, [], [], [], saveFileFolder);
+        decompDataFile = bc_extractCbinData(ephysAPfile, [], [], [], saveFileFolder, 0);
     end
     rootZ = fileparts(decompDataFile);
     metaFile = strrep(ephysAPfile, '.cbin', '.meta');
