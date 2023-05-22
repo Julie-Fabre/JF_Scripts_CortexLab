@@ -1,5 +1,5 @@
 function [filename,file_exists] = AP_cortexlab_filenameJF(animal,date,experiment,file,site,recording, shank)
-myPaths;
+cl_myPaths;
 % [filename,file_exists] = AP_cortexlab_filename(animal,date,experiment,file,site,recording)
 %
 % This is an absolute mess because of lab-wide inconsistency
@@ -93,12 +93,9 @@ switch file
                 filesep 'sync_messages.txt'];
             [filename,file_exists] = check_locations(filepattern,server_location);
     case 'histo'
-        filepattern = [animal filesep '*istology/processed/slices/probe_ccf.mat'];
-        [filename,file_exists] = check_locations(filepattern,server_location);
-        if ~file_exists
-             filepattern = [animal filesep '*istology/downsampled_stacks/025_micron/brainreg/probe_ccf.mat'];
+            filepattern = [animal filesep '*istology/downsampled_stacks/025_micron/brainReg/probe_ccf.mat'];
             [filename,file_exists] = check_locations(filepattern,server_location);
-        end
+       
         if ~file_exists
              filepattern = [animal filesep '*istology/slices/probe_ccf.mat'];
             [filename,file_exists] = check_locations(filepattern,server_location);
@@ -265,6 +262,11 @@ switch file
                  site_dir filesep '*ap.bin'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
+        if ~file_exists
+            filepattern = [animal filesep date filesep ...
+                 site_dir filesep '*ap.bin'];
+            [filename,file_exists] = check_locations(filepattern,server_location);
+        end
     case 'ephys_includingCompressed'
          % New open ephys
         
@@ -417,7 +419,11 @@ function [filename,file_exists] = check_locations(filepattern,server_location)
 % Loop through all server locations and look for file
 for curr_location = 1:length(server_location)
     curr_filename = [server_location{curr_location} filesep filepattern];
-    curr_filename_dir = dir(curr_filename);
+    if iscell(curr_filename)
+        curr_filename_dir = dir([curr_filename{:}]);
+    else
+        curr_filename_dir = dir(curr_filename);
+    end
     file_exists = ~isempty(curr_filename_dir);
     
     if file_exists
