@@ -2,6 +2,7 @@
 load_passive = true;
 passive_info = readtable('/home/julie/Dropbox/PhD_summary/allPassiveRecs.csv');
 regions = {'CP','GPe','GPi','STN','SNr','SNc','VTA'};
+%regions = {'CP'};
 
 %get region nums (allen format)
 cl_myPaths;
@@ -89,7 +90,10 @@ for iRecording = 1:length(use_recs)
         end
         
 
-
+        verbose = false; % display load progress and some info figures
+        load_parts.cam=false;
+        load_parts.imaging=false;
+        load_parts.ephys=true;
         JF_load_experiment;
         % "real" template depths 
 %         metaFile = strrep(ephysAP_path, '.cbin', '.meta');
@@ -99,9 +103,11 @@ for iRecording = 1:length(use_recs)
 %         end
 
         %subselect shank 
-        if ~isnan(curr_shank)
+        if curr_shank > 0
             shank_xdepth = [250 * (curr_shank-1), 250 * (curr_shank-1) + 32];
             shank_units = find(template_xdepths >= shank_xdepth(1) & template_xdepths <= shank_xdepth(2));
+        else
+            shank_units = 1:size(template_xdepths,1);
         end
         % get units we want to keep + store each units location (region + coordinates)
         units_to_keep = [];
@@ -112,6 +118,7 @@ for iRecording = 1:length(use_recs)
                 template_depths(shank_units) <= this_region_stop(these_regions_present(iRegion)) );
             units_to_keep = [units_to_keep, new_units];
             units_to_keep_area = [units_to_keep_area, ones(size(new_units,1),1).*these_regions_present(iRegion)];
+            
             unit_closest_depth = arrayfun(@(x) ...%closest depth 
                find(probe_ccf(this_probe).probe_depths >= template_depths(shank_units(new_units(x))), 1, 'first'), 1:length(new_units));
             units_to_keep_coords = [units_to_keep_coords, ...
@@ -120,23 +127,31 @@ for iRecording = 1:length(use_recs)
 
 
     % get stim response 
+    unique_templates = unique(spike_templates);
     for iUnit = 1:size(units_to_keep,1)
         raster_window = [-0.5, 1];
         psth_bin_size = 0.01;
         align_times = stimOn_times;
-        curr_psth = cl_raster_psth(spike_templates, spike_times_timeline, shank_units(units_to_keep(iUnit)), raster_window, psth_bin_size, align_times);
+        [curr_psth, ~, t] = cl_raster_psth(spike_templates, spike_times_timeline,...
+            unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size, align_times);
         passive_data.psth(iUnit + unitCount, :) = curr_psth;
     end
 
-    unitCount = unitCount + size(units_to_keep,1);
     % save data in structure 
-    passive_data.animal_day_site_shank(unitCount+1:unitCount+size(units_to_keep,1),:) = ...
-        repmat([mouse_day_sites_shank_rec(iRecording,1), curr_day, site, curr_shank], size(new_units,1), 1);
-    passive_data.unit_area(unitCount+1:unitCount+size(units_to_keep,1),:) = units_to_keep_area;
-    passive_data.unit_coords(unitCount+1:unitCount+size(units_to_keep,1),:) = units_to_keep_coords;
+    if ~isempty(new_units)
+        passive_data.animal_day_site_shank(unitCount+1:unitCount+size(units_to_keep,1),:) = ...
+            repmat([mouse_day_sites_shank_rec(iRecording,1), curr_day, site, curr_shank], size(units_to_keep,1), 1);
+        passive_data.unit_area(unitCount+1:unitCount+size(units_to_keep,1),:) = units_to_keep_area;
+        passive_data.unit_coords(unitCount+1:unitCount+size(units_to_keep,1),:) = units_to_keep_coords;
+        passive_data.t = t;
+        unitCount = unitCount + size(units_to_keep,1);
+        if unitCount >= 1200
+            keyboard
+        end
+    
+    end
 
     % clear variables 
     keep mouse_day_sites_shank_rec unique_mice passive_data use_recs passive_info regions regions_id unitCount st
     end
 end
-
