@@ -1,7 +1,7 @@
 %% paramaters 
 load_passive = true;
 passive_info = readtable('/home/julie/Dropbox/PhD_summary/allPassiveRecs.csv');
-regions = {'CP','GPe','GPi','STN','SNr','SNc','VTA'};
+regions = {'CP', 'GPe', 'GPi', 'STN', 'SNr', 'SNc', 'VTA'};
 %regions = {'CP'};
 
 %get region nums (allen format)
@@ -107,7 +107,7 @@ for iRecording = 1:length(use_recs)
             shank_xdepth = [250 * (curr_shank-1), 250 * (curr_shank-1) + 32];
             shank_units = find(template_xdepths >= shank_xdepth(1) & template_xdepths <= shank_xdepth(2));
         else
-            shank_units = 1:size(template_xdepths,1);
+            shank_units = 1:size(template_xdepths,1)';
         end
         % get units we want to keep + store each units location (region + coordinates)
         units_to_keep = [];
@@ -116,12 +116,12 @@ for iRecording = 1:length(use_recs)
         for iRegion = 1:length(these_regions_present)
             new_units =  find(template_depths(shank_units) >= this_region_start(these_regions_present(iRegion)) &...
                 template_depths(shank_units) <= this_region_stop(these_regions_present(iRegion)) );
-            units_to_keep = [units_to_keep, new_units];
-            units_to_keep_area = [units_to_keep_area, ones(size(new_units,1),1).*these_regions_present(iRegion)];
+            units_to_keep = [units_to_keep; new_units];
+            units_to_keep_area = [units_to_keep_area; ones(size(new_units,1),1).*these_regions_present(iRegion)];
             
             unit_closest_depth = arrayfun(@(x) ...%closest depth 
                find(probe_ccf(this_probe).probe_depths >= template_depths(shank_units(new_units(x))), 1, 'first'), 1:length(new_units));
-            units_to_keep_coords = [units_to_keep_coords, ...
+            units_to_keep_coords = [units_to_keep_coords; ...
                 probe_ccf(this_probe).trajectory_coords(unit_closest_depth,:)];
         end
 
@@ -144,10 +144,8 @@ for iRecording = 1:length(use_recs)
         passive_data.unit_area(unitCount+1:unitCount+size(units_to_keep,1),:) = units_to_keep_area;
         passive_data.unit_coords(unitCount+1:unitCount+size(units_to_keep,1),:) = units_to_keep_coords;
         passive_data.t = t;
+        passive_data.unitNum((unitCount+1:unitCount+size(units_to_keep,1))) = shank_units(units_to_keep);
         unitCount = unitCount + size(units_to_keep,1);
-        if unitCount >= 1200
-            keyboard
-        end
     
     end
 

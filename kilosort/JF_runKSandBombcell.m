@@ -100,5 +100,5 @@ end
 % end
 
 %% run quality metrics
-bc_qualityMetricsPipeline_JF(animal, date, site, 1, '', rerunQM, 0, 1)
+%bc_qualityMetricsPipeline_JF(animal, date, site, 1, '', rerunQM, 0, 1)
 end

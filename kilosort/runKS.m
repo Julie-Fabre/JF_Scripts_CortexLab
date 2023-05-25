@@ -17,7 +17,7 @@ JF_runKSandBombcell('JF109', '2023-05-07', 3, [],0,0)%
 JF_runKSandBombcell('JF109', '2023-05-07', 4, [],0,0)%
 JF_runKSandBombcell('JF109', '2023-05-07', 5, [],0,0)%
 
-JF_runKSandBombcell('JF109', '2023-05-08', 1, [],0,0)%
+JF_runKSandBombcell('JF109', '2023-05-08', 1, [],0,0)%now
 JF_runKSandBombcell('JF109', '2023-05-08', 2, [],0,0)%
 JF_runKSandBombcell('JF109', '2023-05-08', 3, [],0,0)%
 JF_runKSandBombcell('JF109', '2023-05-08', 4, [],0,0)%
