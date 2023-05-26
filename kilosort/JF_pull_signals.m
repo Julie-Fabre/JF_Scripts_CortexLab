@@ -789,6 +789,8 @@
                 [ceil(signals_events.stim_idValues)', trial_azimuths];
             trial_id = trial_conditions(:, 2);
             trial_conditions(trial_conditions(:, 1) > 13, 1) = trial_conditions(trial_conditions(:, 1) > 13, 1) - 13;
+            trial_conditions(trial_conditions(:, 1) > 26, 1) = trial_conditions(trial_conditions(:, 1) > 26, 1) - 13;
+            
             stimIDs = trial_conditions(:, 1);
 
 
@@ -824,6 +826,69 @@
             stim_to_move = padarray(wheel_move_time-stimOn_times, [length(stimOn_times) - length(stimOn_times), 0], NaN, 'post');
             no_move_trials = isnan(stim_to_move) | stim_to_move < 0.2 | stim_to_move > 0.2;
 
+       case {'JF_choiceworldStimuli_onlyTask'}
+
+
+            stimOn_times = photodiode_flip_times(2:2:end);
+            JF_correct_passive_photodiode; 
+
+            % sanity check: times between stim on times in signals
+            signals_photodiode_iti_diff = diff(signals_events.stimOnTimes(2:end)) - diff(stimOn_times) - 0.5';
+            if any(signals_photodiode_iti_diff > 0.1)
+                warning('mismatching signals/photodiode stim ITIs')
+            end
+
+
+            conditions = unique([signals_events.stim_idValues', block.events.stim_aziValues'], 'rows')';
+            n_conditions = size(conditions, 1);
+            
+            trial_azimuths = nan(length(stimOn_times),1);
+            trial_azimuths(signals_events.stim_idValues <= 3) = 0;
+            trial_azimuths(signals_events.stim_idValues > 3 & signals_events.stim_idValues <= 6) = -90;
+            trial_azimuths(signals_events.stim_idValues > 6) = 90;
+           
+            trial_conditions = ... ,
+                [ceil(signals_events.stim_idValues)', trial_azimuths];
+            trial_id = trial_conditions(:, 2);
+            trial_conditions(trial_conditions(:, 1) > 3, 1) = trial_conditions(trial_conditions(:, 1) > 3, 1) - 3;
+            trial_conditions(trial_conditions(:, 1) > 6, 1) = trial_conditions(trial_conditions(:, 1) > 3, 1) - 3;
+            
+            stimIDs = trial_conditions(:, 1);
+
+
+            wheel_time = block.inputs.wheelTimes;
+            wheel = block.inputs.wheelValues;
+            surround_time = [-0.5, 2];
+            surround_sample_rate = 1 / Timeline.hw.samplingInterval; % (match this to framerate)
+            surround_time_points = surround_time(1):1 / surround_sample_rate:surround_time(2);
+            if size(stimOn_times, 2) > 1
+                stimOn_times = permute(stimOn_times, [2, 1]);
+            end
+            pull_times = bsxfun(@plus, stimOn_times, surround_time_points);
+
+            stim_aligned_wheel = interp1(Timeline.rawDAQTimestamps, ...
+                wheel_velocity, pull_times);
+            % (set a threshold in speed and time for wheel movement)
+            thresh_displacement = 0.025;
+            time_over_thresh = 0.05; % ms over velocity threshold to count
+            samples_over_thresh = time_over_thresh .* surround_sample_rate;
+            wheel_over_thresh_fullconv = convn( ...
+                abs(stim_aligned_wheel) > thresh_displacement, ...
+                ones(1, samples_over_thresh)) >= samples_over_thresh;
+            wheel_over_thresh = wheel_over_thresh_fullconv(:, end-size(stim_aligned_wheel, 2)+1:end);
+
+            [move_trial, wheel_move_sample] = max(wheel_over_thresh, [], 2);
+            wheel_move_time = arrayfun(@(x) pull_times(x, wheel_move_sample(x)), 1:size(pull_times, 1))';
+            wheel_move_time(~move_trial) = NaN;
+
+            % Get conditions for all trials
+
+            % (trial_timing)
+
+            stim_to_move = padarray(wheel_move_time-stimOn_times, [length(stimOn_times) - length(stimOn_times), 0], NaN, 'post');
+            no_move_trials = isnan(stim_to_move) | stim_to_move < 0.2 | stim_to_move > 0.2;
+
+            
 
         otherwise
             warning(['Signals protocol with no analysis script:', expDef]);

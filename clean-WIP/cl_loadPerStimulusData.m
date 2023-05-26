@@ -81,7 +81,7 @@ for iRecording = 1:length(use_recs)
         these_exps = str2num(passive_info.Exps{use_recs(iRecording)});
         % in order: gratings, location, (exp type 1,2,3,4)
         % conditions = trial_conditions 
-        for iExperiment = 1:size(these_exps)
+        for iExperiment = 1:size(these_exps,2)
             experiment = these_exps(iExperiment);%for now, just load 1 experiment
             experiments = AP_find_experimentsJF(animal, '', true);
             experiments = experiments([experiments.ephys]);
@@ -104,6 +104,8 @@ for iRecording = 1:length(use_recs)
                 experiment_type = 2;
             elseif contains(expDef, 'JF_natural_imagesFit')
                 experiment_type = 3;
+            elseif contains(expDef, 'JF_choiceworldStimuli_onlyTask')
+                experiment_type = 5;
             elseif contains(expDef, 'JF_choiceworldStimuli')
                 experiment_type = 4;
             end
@@ -151,7 +153,7 @@ for iRecording = 1:length(use_recs)
                 [curr_psth, ~, t, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline,...
                     unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size,...
                     align_times, trial_cond_idx);
-                passive_data.psth(experiment_type, iUnit + unitCount, :) = curr_psth;
+                passive_data.psth{experiment_type}(iUnit + unitCount, :, :) = curr_psth;
             end
         end
 
