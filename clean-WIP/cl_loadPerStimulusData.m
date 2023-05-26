@@ -24,7 +24,7 @@ unique_mice = unique(passive_info.Mouse(use_recs));
 
 % initialize 
 mouse_day_sites_shank_rec = [];
-
+disp('loading data...')
 for iMouse = 1:length(unique_mice)
     day_sites_shank_rec = [passive_info.DayNum(use_recs & strcmp(passive_info.Mouse, unique_mice(iMouse))), ...
         passive_info.Site(use_recs & strcmp(passive_info.Mouse, unique_mice(iMouse))), ...
@@ -184,5 +184,6 @@ for iRecording = 1:length(use_recs)
 
     % clear variables 
     keep mouse_day_sites_shank_rec unique_mice passive_data use_recs passive_info regions regions_id unitCount st
+    disp(  [num2str(iRecording), '/', num2str(length(use_exps))])
     end
 end
