@@ -3,7 +3,7 @@ load_passive = true;
 passive_info = readtable('/home/julie/Dropbox/PhD_summary/allPassiveRecs.csv');
 regions = {'CP', 'GPe', 'GPi', 'STN', 'SNr', 'SNc', 'VTA'};
 %regions = {'CP'};
-
+warning off;
 %get region nums (allen format)
 cl_myPaths;
 if ~exist('st', 'var')
@@ -145,15 +145,28 @@ for iRecording = 1:length(use_recs)
             % get stim response 
             unique_templates = unique(spike_templates);
             passive_data.psth_conditions{experiment_type} = unique(trial_conditions, 'rows');
+            % for half trials, identify max. 
+            % then average on that half. 
             for iUnit = 1:size(units_to_keep,1)
                 raster_window = [-0.5, 1];
                 psth_bin_size = 0.01;
                 align_times = stimOn_times;
                 [~, trial_cond_idx] = ismember(trial_conditions,  passive_data.psth_conditions{experiment_type}, 'rows');
+                [curr_psth, ~, ~, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline,...
+                    unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size,...
+                    align_times(1:2:end), trial_cond_idx(1:2:end));
+
+                passive_data.psth{experiment_type}(iUnit + unitCount, 1, :, :) = curr_psth;
+
                 [curr_psth, ~, t, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline,...
                     unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size,...
-                    align_times, trial_cond_idx);
-                passive_data.psth{experiment_type}(iUnit + unitCount, :, :) = curr_psth;
+                    align_times(2:2:end), trial_cond_idx(2:2:end));
+
+                passive_data.psth{experiment_type}(iUnit + unitCount, 2, :, :) = curr_psth;
+
+                
+
+
             end
         end
 

@@ -22,3 +22,5 @@
 % selectivity index based on this 
 % matrix of neurons mean response to each condition. use absolute value
 % (mean subtracted) 
+
+% for each condition, measure 
