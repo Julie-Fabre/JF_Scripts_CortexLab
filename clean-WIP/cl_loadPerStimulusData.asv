@@ -1,7 +1,8 @@
 %% paramaters 
 load_passive = true;
 passive_info = readtable('/home/julie/Dropbox/PhD_summary/allPassiveRecs.csv');
-regions = {'CP','GPe','GPi','STN','SNr','SNc','VTA'};
+regions = {'CP', 'GPe', 'GPi', 'STN', 'SNr', 'SNc', 'VTA'};
+%regions = {'CP'};
 
 %get region nums (allen format)
 cl_myPaths;
@@ -39,7 +40,7 @@ end
 passive_data = struct;
 use_recs = find(use_recs);
 unitCount = 0;
-for iRecording = 108:length(use_recs)
+for iRecording = 1:length(use_recs)
     % curr variables 
     animal = unique_mice{mouse_day_sites_shank_rec(iRecording,1)};
     curr_day =  mouse_day_sites_shank_rec(iRecording,2);
@@ -78,61 +79,76 @@ for iRecording = 108:length(use_recs)
     these_regions_present = find(this_region_stop);
     if ~isempty(these_regions_present)
         these_exps = str2num(passive_info.Exps{use_recs(iRecording)});
-        experiment = these_exps(1);%for now, just load 1 experiment
-        experiments = AP_find_experimentsJF(animal, '', true);
-        experiments = experiments([experiments.ephys]);
-        day = experiments(curr_day).day;
-        if isnan(curr_rec)
-            recording = [];
-        else
-            recording = curr_rec;
-        end
-        
-
-        verbose = false; % display load progress and some info figures
-        load_parts.cam=false;
-        load_parts.imaging=false;
-        load_parts.ephys=true;
-        JF_load_experiment;
-        % "real" template depths 
-%         metaFile = strrep(ephysAP_path, '.cbin', '.meta');
-%         [~, channelMapIMRO] = bc_readSpikeGLXMetaFile(metaFile);
-%         if contains(channelMapIMRO, 'hStripe')
-%             template_depths = template_depths - 2880 + 750;
-%         end
-
-        %subselect shank 
-        if ~isnan(curr_shank)
-            shank_xdepth = [250 * (curr_shank-1), 250 * (curr_shank-1) + 32];
-            shank_units = find(template_xdepths >= shank_xdepth(1) & template_xdepths <= shank_xdepth(2));
-        else
-            shank_units = ones(size(template_xdepths),1)
-        end
-        % get units we want to keep + store each units location (region + coordinates)
-        units_to_keep = [];
-        units_to_keep_area = [];
-        units_to_keep_coords = [];
-        for iRegion = 1:length(these_regions_present)
-            new_units =  find(template_depths(shank_units) >= this_region_start(these_regions_present(iRegion)) &...
-                template_depths(shank_units) <= this_region_stop(these_regions_present(iRegion)) );
-            units_to_keep = [units_to_keep, new_units];
-            units_to_keep_area = [units_to_keep_area, ones(size(new_units,1),1).*these_regions_present(iRegion)];
+        % in order: gratings, location, (exp type 1,2,3,4)
+        % conditions = trial_conditions 
+        for iExperiment = 1:size(these_exps)
+            experiment = these_exps(iExperiment);%for now, just load 1 experiment
+            experiments = AP_find_experimentsJF(animal, '', true);
+            experiments = experiments([experiments.ephys]);
+            day = experiments(curr_day).day;
+            if isnan(curr_rec)
+                recording = [];
+            else
+                recording = curr_rec;
+            end
             
-            unit_closest_depth = arrayfun(@(x) ...%closest depth 
-               find(probe_ccf(this_probe).probe_depths >= template_depths(shank_units(new_units(x))), 1, 'first'), 1:length(new_units));
-            units_to_keep_coords = [units_to_keep_coords, ...
-                probe_ccf(this_probe).trajectory_coords(unit_closest_depth,:)];
+    
+            verbose = false; % display load progress and some info figures
+            load_parts.cam=false;
+            load_parts.imaging=false;
+            load_parts.ephys=true;
+            JF_load_experiment;
+            if contains(expDef, 'JF_GratingPassiveVarITI')
+                experiment_type = 1;
+            else
+            end
+            % "real" template depths 
+    %         metaFile = strrep(ephysAP_path, '.cbin', '.meta');
+    %         [~, channelMapIMRO] = bc_readSpikeGLXMetaFile(metaFile);
+    %         if contains(channelMapIMRO, 'hStripe')
+    %             template_depths = template_depths - 2880 + 750;
+    %         end
+    
+            %subselect shank 
+            if iExperiment == 1
+                if curr_shank > 0
+                    shank_xdepth = [250 * (curr_shank-1), 250 * (curr_shank-1) + 32];
+                    shank_units = find(template_xdepths >= shank_xdepth(1) & template_xdepths <= shank_xdepth(2));
+                else
+                    shank_units = 1:size(template_xdepths,1)';
+                end
+                % get units we want to keep + store each units location (region + coordinates)
+                units_to_keep = [];
+                units_to_keep_area = [];
+                units_to_keep_coords = [];
+                for iRegion = 1:length(these_regions_present)
+                    new_units =  find(template_depths(shank_units) >= this_region_start(these_regions_present(iRegion)) &...
+                        template_depths(shank_units) <= this_region_stop(these_regions_present(iRegion)) );
+                    units_to_keep = [units_to_keep; new_units];
+                    units_to_keep_area = [units_to_keep_area; ones(size(new_units,1),1).*these_regions_present(iRegion)];
+                    
+                    unit_closest_depth = arrayfun(@(x) ...%closest depth 
+                       find(probe_ccf(this_probe).probe_depths >= template_depths(shank_units(new_units(x))), 1, 'first'), 1:length(new_units));
+                    units_to_keep_coords = [units_to_keep_coords; ...
+                        probe_ccf(this_probe).trajectory_coords(unit_closest_depth,:)];
+                end
+            end
+
+        
+            % get stim response 
+            unique_templates = unique(spike_templates);
+            passive_data.psth_conditions{experiment_type} = unique(trial_conditions, 'rows');
+            for iUnit = 1:size(units_to_keep,1)
+                raster_window = [-0.5, 1];
+                psth_bin_size = 0.01;
+                align_times = stimOn_times;
+                [~, trial_cond_idx] = ismember(trial_conditions,  passive_data.psth_conditions{experiment_type}, 'rows');
+                [curr_psth, ~, t, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline,...
+                    unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size,...
+                    align_times, trial_cond_idx);
+                passive_data.psth(experiment_type, iUnit + unitCount, :) = curr_psth;
+            end
         end
-
-
-    % get stim response 
-    for iUnit = 1:size(units_to_keep,1)
-        raster_window = [-0.5, 1];
-        psth_bin_size = 0.01;
-        align_times = stimOn_times;
-        [curr_psth, ~, t] = cl_raster_psth(spike_templates, spike_times_timeline, shank_units(units_to_keep(iUnit)), raster_window, psth_bin_size, align_times);
-        passive_data.psth(iUnit + unitCount, :) = curr_psth;
-    end
 
     % save data in structure 
     if ~isempty(new_units)
@@ -141,6 +157,7 @@ for iRecording = 108:length(use_recs)
         passive_data.unit_area(unitCount+1:unitCount+size(units_to_keep,1),:) = units_to_keep_area;
         passive_data.unit_coords(unitCount+1:unitCount+size(units_to_keep,1),:) = units_to_keep_coords;
         passive_data.t = t;
+        passive_data.unitNum((unitCount+1:unitCount+size(units_to_keep,1))) = shank_units(units_to_keep);
         unitCount = unitCount + size(units_to_keep,1);
     
     end

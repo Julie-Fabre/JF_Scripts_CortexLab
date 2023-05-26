@@ -1,9 +1,16 @@
 %% passive_master script 
 
-cl_loadData;
+% do cells encode visual stimuli? 
+cl_loadAverageData;
 cl_population_PSTH;
 cl_location_PSTH;
-cl_selectivity;
 cl_percentage_cells;
+
+% cell selctivity/encoding of specific visual stimuli 
+cl_loadPerStimulusData;
+cl_selectivity;
+%decoding? 
 cl_location_selectivity; 
+
+% movement stuffs
 cl_motionIndex; 

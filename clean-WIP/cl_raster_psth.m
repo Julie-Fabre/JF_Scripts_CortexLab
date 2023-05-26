@@ -1,4 +1,5 @@
-function [curr_psth, curr_raster, t] = cl_raster_psth(spike_templates, spike_times_timeline, thisTemplate, raster_window, psth_bin_size, align_times)
+function [curr_psth, curr_raster, t, raster_x, raster_y] = cl_raster_psth(spike_templates, spike_times_timeline, ...
+    thisTemplate, raster_window, psth_bin_size, align_times, align_group)
 
 
 time_bins = raster_window(1):psth_bin_size:raster_window(2);
@@ -22,8 +23,20 @@ else
     % (otherwise, bin trial-by-trial)
     curr_raster = cell2mat(arrayfun(@(x) ...
         histcounts(curr_raster_spike_times, t_peri_event(x, :)), ...
-        [1:size(t_peri_event, 1)]', 'uni', false));
+        (1:size(t_peri_event, 1))', 'uni', false));
+end
+if ~isempty(align_group)
+    [~, sortedAlignId] = sort(align_group); 
+
+    [raster_y, raster_x] = find(curr_raster(sortedAlignId, :));
+
+    curr_psth = grpstats(curr_raster, align_group(1:size(curr_raster, 1)), @(x) mean(x, 1));
+else
+    curr_psth = mean(curr_raster);
+    [raster_y, raster_x] = find(curr_raster(:, :));
+
 end
 
-curr_psth = mean(curr_raster);
+
+
 end

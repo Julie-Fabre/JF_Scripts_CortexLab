@@ -5,7 +5,7 @@ keep passive_data regions
 close all;
 
 cl_myPaths;
-regionSpacing = [10, 10, 10, 10, 10, 10, 10];
+regionResolution = [1, 1, 1, 1, 1, 1, 1];
 
 zscore_psth = (passive_data.psth - nanmean(passive_data.psth(:, 1:50), 2)) ./ ...
     nanstd(passive_data.psth(:, 1:50), [], 2);
@@ -49,8 +49,8 @@ for iRegion = 1:size(regions, 2)
         subplot(3, size(regions, 2), iRegion + (size(regions,2) * (iProjection-1)))
         boundary_projection{iProjection} = boundary(regionLocation(projection_views(iProjection,1),:)',...
             regionLocation(projection_views(iProjection,2),:)', 0);
-        plot(regionLocation(projection_views(iProjection,1),boundary_projection{iProjection})./regionSpacing(iRegion),...
-            regionLocation(projection_views(iProjection,2),boundary_projection{iProjection})./regionSpacing(iRegion),...
+        plot(regionLocation(projection_views(iProjection,1),boundary_projection{iProjection})./10,...
+            regionLocation(projection_views(iProjection,2),boundary_projection{iProjection})./10,...
             'Color', theseColors{iRegion});
         axis equal
         axis square
@@ -164,5 +164,5 @@ for iRegion = 1:size(regions, 2)
         xlim([projection_view_bins{iProjection}{1}(1) , projection_view_bins{iProjection}{1}(end) ])
         ylim([projection_view_bins{iProjection}{2}(1) , projection_view_bins{iProjection}{2}(end) ])
    end
-  keep passive_data regions thisCmap_limits st av regionSpacing structure_alpha theseColors dFR_psth iRegion bregma
+  keep passive_data regions thisCmap_limits st av regionResolution structure_alpha theseColors dFR_psth iRegion bregma
 end
