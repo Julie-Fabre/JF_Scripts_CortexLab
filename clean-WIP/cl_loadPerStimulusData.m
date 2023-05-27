@@ -183,7 +183,8 @@ for iRecording = 1:length(use_recs)
     end
 
     % clear variables 
+    disp(['\n   ', num2str(iRecording), '/', num2str(length(use_recs))])
+    
     keep mouse_day_sites_shank_rec unique_mice passive_data use_recs passive_info regions regions_id unitCount st
-    disp(  [num2str(iRecording), '/', num2str(length(use_exps))])
     end
 end

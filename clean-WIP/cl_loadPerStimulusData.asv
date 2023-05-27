@@ -149,9 +149,14 @@ for iRecording = 1:length(use_recs)
             % then average on that half. 
             for iUnit = 1:size(units_to_keep,1)
                 raster_window = [-0.5, 1];
-                psth_bin_size = 0.01;
+                psth_bin_size = 0.001;
                 align_times = stimOn_times;
                 [~, trial_cond_idx] = ismember(trial_conditions,  passive_data.psth_conditions{experiment_type}, 'rows');
+                 [curr_psth, ~, ~, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline,...
+                    unique_templates(shank_units(26)), raster_window, psth_bin_size,...
+                    align_times, []);
+
+
                 [curr_psth, ~, ~, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline,...
                     unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size,...
                     align_times(1:2:end), trial_cond_idx(1:2:end));
@@ -183,7 +188,8 @@ for iRecording = 1:length(use_recs)
     end
 
     % clear variables 
+    disp(  [num2str(iRecording), '/', num2str(length(use_recs))])
+    
     keep mouse_day_sites_shank_rec unique_mice passive_data use_recs passive_info regions regions_id unitCount st
-    disp(  [num2str(iRecording), '/', num2str(length(use_exps))])
     end
 end
