@@ -25,4 +25,27 @@
 
 % for each condition, measure 
 iCondition = 1;
-baseline_per_cond = squeeze(nanmean(passive_data.psth{iCondition}(1,1,:,1:50),4)); 
+selectivity_index = nan(size(passive_data.unit_area,1), 1);
+for iUnit = 1:size(passive_data.unit_area,1)
+    iUnit = iUnit+1
+    baseline_per_cond = squeeze(nanmean(passive_data.psth{iCondition}(iUnit,1,:,1:50),4)); 
+    baseline_sub_average_per_cond =  arrayfun(@(x) nanmean(abs(squeeze(passive_data.psth{iCondition}(iUnit,1,x,55:70))...
+        - baseline_per_cond(x))), 1:size(baseline_per_cond,1));
+
+    max_half_trials = find(baseline_sub_average_per_cond  == max(baseline_sub_average_per_cond ));
+    if length(max_half_trials) > 1
+        max_half_trials = max_half_trials(1);
+    end
+
+    baseline_per_cond_cv = squeeze(nanmean(passive_data.psth{iCondition}(iUnit,2,:,1:50),4)); 
+    baseline_sub_average_per_cond_cv =  arrayfun(@(x) nanmean(abs(squeeze(passive_data.psth{iCondition}(iUnit,2,x,55:70))...
+        - baseline_per_cond_cv(x)) + baseline_per_cond_cv(x)), 1:size(baseline_per_cond_cv,1));
+    selectivity_index(iUnit) = abs((baseline_sub_average_per_cond_cv(max_half_trials) - nanmean(baseline_sub_average_per_cond_cv))./ ...
+        baseline_sub_average_per_cond_cv(max_half_trials));
+    disp(selectivity_index(iUnit))
+end
+
+figure();
+histogram(selectivity_index)
+
+

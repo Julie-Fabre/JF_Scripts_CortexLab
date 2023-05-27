@@ -170,7 +170,7 @@ for iRecording = 1:length(use_recs)
             end
         end
 
-    % save data in structure 
+    % save data in structure    
     if ~isempty(new_units)
         passive_data.animal_day_site_shank(unitCount+1:unitCount+size(units_to_keep,1),:) = ...
             repmat([mouse_day_sites_shank_rec(iRecording,1), curr_day, site, curr_shank], size(units_to_keep,1), 1);
