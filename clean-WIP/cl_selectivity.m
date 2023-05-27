@@ -27,20 +27,21 @@
 % for each condition, measure
 keep passive_data regions
 selectivity_index = cell(size(regions,2),1);
+n_conditions = 4;
 for iRegion = 1:size(regions,2)
     curr_units = find(passive_data.unit_area == iRegion);
     selectivity_index{iRegion} = nan(size(curr_units, 1), 4);
 
-    for iCondition = 1:4 %QQ for 4th, combine 5th, + only use central ? 
+    for iCondition = 1:n_conditions %QQ for 4th, combine 5th, + only use central ? 
         if iCondition == 4 
             use_conditions = 2:2:26;
         else
             use_conditions = 1:size(passive_data.psth{iCondition},3);
         end
-        for iUnit = 1:size(passive_data.unit_area, 1)
-
-            baseline_per_cond = squeeze(nanmean(passive_data.psth{iCondition}(iUnit, 1, use_conditions, 1:50), 4));
-            baseline_sub_average_per_cond = arrayfun(@(x) nanmean(abs(squeeze(passive_data.psth{iCondition}(iUnit, 1, x, 55:70)) ...
+        for iUnit = 1:size(curr_units, 1)
+            thisUnit = curr_units(iUnit);
+            baseline_per_cond = squeeze(nanmean(passive_data.psth{iCondition}(thisUnit, 1, use_conditions, 1:50), 4));
+            baseline_sub_average_per_cond = arrayfun(@(x) nanmean(abs(squeeze(passive_data.psth{iCondition}(thisUnit, 1, x, 55:70)) ...
                 -baseline_per_cond(x))), 1:size(baseline_per_cond, 1));
 
             max_half_trials = find(baseline_sub_average_per_cond == max(baseline_sub_average_per_cond));
@@ -48,15 +49,32 @@ for iRegion = 1:size(regions,2)
                 max_half_trials = max_half_trials(1);
             end
 
-            baseline_per_cond_cv = squeeze(nanmean(passive_data.psth{iCondition}(iUnit, 2, use_conditions, 1:50), 4));
-            baseline_sub_average_per_cond_cv = arrayfun(@(x) nanmean(abs(squeeze(passive_data.psth{iCondition}(iUnit, 2, x, 55:70)) ...
+            baseline_per_cond_cv = squeeze(nanmean(passive_data.psth{iCondition}(thisUnit, 2, use_conditions, 1:50), 4));
+            baseline_sub_average_per_cond_cv = arrayfun(@(x) nanmean(abs(squeeze(passive_data.psth{iCondition}(thisUnit, 2, x, 55:70)) ...
                 -baseline_per_cond_cv(x))+baseline_per_cond_cv(x)), 1:size(baseline_per_cond_cv, 1));
-            selectivity_index{iRegion}(iUnit, iCondition) = abs((baseline_sub_average_per_cond_cv(max_half_trials) - nanmean(baseline_sub_average_per_cond_cv))./ ...
+            selectivity_index{iRegion}(thisUnit, iCondition) = abs((baseline_sub_average_per_cond_cv(max_half_trials) - nanmean(baseline_sub_average_per_cond_cv))./ ...
                 nanmax(baseline_sub_average_per_cond_cv)); % (c.v. max  - mean ) / max
 
         end
     end
 end
 
+theseColors = {rgb('DeepSkyBlue'); rgb('SeaGreen'); rgb('DarkOrange'); rgb('Crimson'); rgb('Hotpink'); rgb('Black'); rgb('Brown')};
+
 figure();
-stairs(selectivity_index)
+for iRegion = 1:size(regions,2)
+    for iCondition = 1:n_conditions
+        subplot(1, n_conditions, iCondition)
+        hold on;
+        [N,edges,bin] = histcounts(selectivity_index{iRegion}(:,iCondition), 0:0.05:1);
+        hist_bin = edges(1:end-1) + diff(edges) ./ 2;
+        stairs(hist_bin, N./length(bin), 'Color', theseColors{iRegion}, 'LineWidth', 2)
+        
+        if iRegion == 1 && iCondition == 1
+            ylabel('fraction of cells')
+            xlabel('c.v. selectivity index')
+        end
+        axis square;
+        makepretty; 
+    end
+end
