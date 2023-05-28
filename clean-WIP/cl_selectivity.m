@@ -39,24 +39,24 @@
 
 
 % for each condition, measure
-keep passive_data regions
+keep passive_data_per_cond regions
 selectivity_index = cell(size(regions,2),1);
 n_conditions = 4;
 for iRegion = 1:size(regions,2)
-    curr_units = find(passive_data.unit_area == iRegion);
+    curr_units = find(passive_data_per_cond.unit_area == iRegion);
     selectivity_index{iRegion} = nan(size(curr_units, 1), 4);
 
     for iCondition = 1:n_conditions %QQ for 4th, combine 5th, + only use central ? 
         if iCondition == 4 
             use_conditions = 2:2:26;
         else
-            use_conditions = 1:size(passive_data.psth{iCondition},3);
+            use_conditions = 1:size(passive_data_per_cond.psth{iCondition},3);
         end
         for iUnit = 1:size(curr_units, 1)
 %            iUnit = iUnit+1
             thisUnit = curr_units(iUnit);
-%             baseline_per_cond = squeeze(nanmean(passive_data.psth{iCondition}(thisUnit, 1, use_conditions, 1:50), 4));
-%             baseline_sub_average_per_cond = arrayfun(@(x) nanmean(abs(squeeze(passive_data.psth{iCondition}(thisUnit, 1, x, 55:70)) ...
+%             baseline_per_cond = squeeze(nanmean(passive_data_per_cond.psth{iCondition}(thisUnit, 1, use_conditions, 1:50), 4));
+%             baseline_sub_average_per_cond = arrayfun(@(x) nanmean(abs(squeeze(passive_data_per_cond.psth{iCondition}(thisUnit, 1, x, 55:70)) ...
 %                 -baseline_per_cond(x))+baseline_per_cond(x)), 1:size(baseline_per_cond, 1));
 % 
 %             max_half_trials = find(baseline_sub_average_per_cond == max(baseline_sub_average_per_cond));
@@ -64,23 +64,23 @@ for iRegion = 1:size(regions,2)
 %                 max_half_trials = max_half_trials(1);
 %             end
 % 
-%             baseline_per_cond_cv = squeeze(nanmean(passive_data.psth{iCondition}(thisUnit, 2, use_conditions, 1:50), 4));
-%             baseline_sub_average_per_cond_cv = arrayfun(@(x) nanmean(abs(squeeze(passive_data.psth{iCondition}(thisUnit, 2, x, 55:70)) ...
+%             baseline_per_cond_cv = squeeze(nanmean(passive_data_per_cond.psth{iCondition}(thisUnit, 2, use_conditions, 1:50), 4));
+%             baseline_sub_average_per_cond_cv = arrayfun(@(x) nanmean(abs(squeeze(passive_data_per_cond.psth{iCondition}(thisUnit, 2, x, 55:70)) ...
 %                 -baseline_per_cond_cv(x))+baseline_per_cond_cv(x)), 1:size(baseline_per_cond_cv, 1));
 %             selectivity_index{iRegion}(thisUnit, iCondition) = abs((baseline_sub_average_per_cond_cv(max_half_trials) -...
 %                 nanmean(baseline_sub_average_per_cond_cv))./ ...
 %                 nanmax(baseline_sub_average_per_cond_cv)); % (c.v. max  - mean ) / max
 
-            baseline_per_cond = squeeze(nanmean(passive_data.psth{iCondition}(thisUnit, 1, use_conditions, 1:50), 4)).*100;
-            baseline_sub_average_per_cond = nanmean(abs(squeeze(passive_data.psth{iCondition}(thisUnit, 1, :, 55:70)))).*100;
+            baseline_per_cond = squeeze(nanmean(passive_data_per_cond.psth{iCondition}(thisUnit, 1, use_conditions, 1:50), 4)).*100;
+            baseline_sub_average_per_cond = nanmean(abs(squeeze(passive_data_per_cond.psth{iCondition}(thisUnit, 1, :, 55:70)))).*100;
 
             max_half_trials = find(baseline_sub_average_per_cond == max(baseline_sub_average_per_cond));
             if length(max_half_trials) > 1
                 max_half_trials = max_half_trials(1);
             end
 
-            baseline_per_cond_cv = squeeze(nanmean(passive_data.psth{iCondition}(thisUnit, 2, use_conditions, 1:50), 4)).*100;
-            baseline_sub_average_per_cond_cv = nanmean(abs(squeeze(passive_data.psth{iCondition}(thisUnit, 2, :, 55:70)))).*100 ;
+            baseline_per_cond_cv = squeeze(nanmean(passive_data_per_cond.psth{iCondition}(thisUnit, 2, use_conditions, 1:50), 4)).*100;
+            baseline_sub_average_per_cond_cv = nanmean(abs(squeeze(passive_data_per_cond.psth{iCondition}(thisUnit, 2, :, 55:70)))).*100 ;
             selectivity_index{iRegion}(iUnit, iCondition) = abs((baseline_sub_average_per_cond_cv(max_half_trials) -...
                 nanmean(baseline_sub_average_per_cond_cv))./ ...
                 nanmax(baseline_sub_average_per_cond_cv)); % (c.v. max  - mean ) / max
@@ -88,9 +88,9 @@ for iRegion = 1:size(regions,2)
 % clf;
 % hold on;
 % for ii =1:5
-% plot(squeeze(passive_data.psth{iCondition}(thisUnit, 2, ii, :)).*100)
+% plot(squeeze(passive_data_per_cond.psth{iCondition}(thisUnit, 2, ii, :)).*100)
 % end
-% plot(squeeze(nanmean(passive_data.psth{iCondition}(thisUnit, 2, :, :))).*100, 'LineWidth',2)
+% plot(squeeze(nanmean(passive_data_per_cond.psth{iCondition}(thisUnit, 2, :, :))).*100, 'LineWidth',2)
 
         end
     end

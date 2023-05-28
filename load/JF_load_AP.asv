@@ -4,7 +4,7 @@
 %clear all;
 cl_myPaths;
 
-animals={'JF086'};
+animals={'JF088'};
 curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};

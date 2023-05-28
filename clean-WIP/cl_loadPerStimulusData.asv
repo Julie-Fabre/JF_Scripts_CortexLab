@@ -1,5 +1,5 @@
 %% paramaters 
-load_passive = true;
+load_passive_ = true;
 passive_info = readtable('/home/julie/Dropbox/PhD_summary/allPassiveRecs.csv');
 regions = {'CP', 'GPe', 'GPi', 'STN', 'SNr', 'SNc', 'VTA'};
 %regions = {'CP'};
@@ -37,7 +37,9 @@ for iMouse = 1:length(unique_mice)
 end
 
 %% load data 
-passive_data = struct;
+passive_data_per_cond = struct;
+passive_data_per_cond.psth = cell(5, 1);
+passive_data_per_cond.pvalue = cell(5,1);
 use_recs = find(use_recs);
 unitCount = 0;
 for iRecording = 1:length(use_recs)
@@ -144,30 +146,34 @@ for iRecording = 1:length(use_recs)
         
             % get stim response 
             unique_templates = unique(spike_templates);
-            passive_data.psth_conditions{experiment_type} = unique(trial_conditions, 'rows');
+            passive_data_per_cond.psth_conditions{experiment_type} = unique(trial_conditions, 'rows');
             % for half trials, identify max. 
             % then average on that half. 
             for iUnit = 1:size(units_to_keep,1)
                 raster_window = [-0.5, 1];
-                psth_bin_size = 0.001;
+                psth_bin_size = 0.01;
                 align_times = stimOn_times;
-                [~, trial_cond_idx] = ismember(trial_conditions,  passive_data.psth_conditions{experiment_type}, 'rows');
-                 [curr_psth, ~, ~, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline,...
-                    unique_templates(shank_units(26)), raster_window, psth_bin_size,...
-                    align_times, []);
+                [~, trial_cond_idx] = ismember(trial_conditions,  passive_data_per_cond.psth_conditions{experiment_type}, 'rows');
+                %responsive cell 
+                 [~, curr_raster, ~, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline,...
+                    unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size,...
+                    align_times(1:2:end), trial_cond_idx(1:2:end));
+                 passive_data_per_cond.pvalue{experiment_type}(iUnit + unitCount)  = signrank(nanmean(curr_raster(:,20:40),2), nanmean(curr_raster(:,55:75),2))
 
 
+                %psth
+                
                 [curr_psth, ~, ~, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline,...
                     unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size,...
                     align_times(1:2:end), trial_cond_idx(1:2:end));
 
-                passive_data.psth{experiment_type}(iUnit + unitCount, 1, :, :) = curr_psth;
+                passive_data_per_cond.psth{experiment_type}(iUnit + unitCount, 1, :, :) = curr_psth;
 
                 [curr_psth, ~, t, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline,...
                     unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size,...
                     align_times(2:2:end), trial_cond_idx(2:2:end));
 
-                passive_data.psth{experiment_type}(iUnit + unitCount, 2, :, :) = curr_psth;
+                passive_data_per_cond.psth{experiment_type}(iUnit + unitCount, 2, :, :) = curr_psth;
 
                 
 
@@ -177,18 +183,18 @@ for iRecording = 1:length(use_recs)
 
     % save data in structure    
     if ~isempty(new_units)
-        passive_data.animal_day_site_shank(unitCount+1:unitCount+size(units_to_keep,1),:) = ...
+        passive_data_per_cond.animal_day_site_shank(unitCount+1:unitCount+size(units_to_keep,1),:) = ...
             repmat([mouse_day_sites_shank_rec(iRecording,1), curr_day, site, curr_shank], size(units_to_keep,1), 1);
-        passive_data.unit_area(unitCount+1:unitCount+size(units_to_keep,1),:) = units_to_keep_area;
-        passive_data.unit_coords(unitCount+1:unitCount+size(units_to_keep,1),:) = units_to_keep_coords;
-        passive_data.t = t;
-        passive_data.unitNum((unitCount+1:unitCount+size(units_to_keep,1))) = shank_units(units_to_keep);
+        passive_data_per_cond.unit_area(unitCount+1:unitCount+size(units_to_keep,1),:) = units_to_keep_area;
+        passive_data_per_cond.unit_coords(unitCount+1:unitCount+size(units_to_keep,1),:) = units_to_keep_coords;
+        passive_data_per_cond.t = t;
+        passive_data_per_cond.unitNum((unitCount+1:unitCount+size(units_to_keep,1))) = shank_units(units_to_keep);
         unitCount = unitCount + size(units_to_keep,1);
     
     end
 
     % clear variables 
-    disp(  [num2str(iRecording), '/', num2str(length(use_recs))])
+    disp(['   ', num2str(iRecording), '/', num2str(length(use_recs))])
     
     keep mouse_day_sites_shank_rec unique_mice passive_data use_recs passive_info regions regions_id unitCount st
     end

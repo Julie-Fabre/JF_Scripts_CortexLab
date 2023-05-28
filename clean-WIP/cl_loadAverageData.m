@@ -31,7 +31,7 @@ for iMouse = 1:length(unique_mice)
         passive_info.Shanks(use_recs & strcmp(passive_info.Mouse, unique_mice(iMouse))),...
         passive_info.Rec_Exp(use_recs & strcmp(passive_info.Mouse, unique_mice(iMouse)))];
 
-    mouse_day_sites_shank_rec = [mouse_day_sites_shank_rec; repmat(iMouse, length(day_sites_shank_rec), 1),...
+    mouse_day_sites_shank_rec = [mouse_day_sites_shank_rec; repmat(iMouse, size(day_sites_shank_rec,1), 1),...
         day_sites_shank_rec];
 
 end
@@ -94,6 +94,7 @@ for iRecording = 1:length(use_recs)
         load_parts.cam=false;
         load_parts.imaging=false;
         load_parts.ephys=true;
+        loadClusters = false; %QQ for now. add bombcell output later 
         JF_load_experiment;
         % "real" template depths 
 %         metaFile = strrep(ephysAP_path, '.cbin', '.meta');
@@ -133,7 +134,7 @@ for iRecording = 1:length(use_recs)
         psth_bin_size = 0.01;
         align_times = stimOn_times;
         [curr_psth, ~, t] = cl_raster_psth(spike_templates, spike_times_timeline,...
-            unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size, align_times);
+            unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size, align_times, []);
         passive_data.psth(iUnit + unitCount, :) = curr_psth;
     end
 
