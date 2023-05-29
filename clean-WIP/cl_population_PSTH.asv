@@ -13,7 +13,7 @@ for iRegion = 1:size(regions,2)
     keep_these = sum(isnan(zscore_psth),2)<100;
     
     % get all cells
-    these_units = passive_data.unit_area==iRegion & passive_data.pvalue' < 0.05;
+    these_units = passive_data.unit_area==iRegion;
 
     if sum(these_units) > 0
     % sort cells by activity

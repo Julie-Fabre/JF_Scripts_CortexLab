@@ -35,6 +35,8 @@ for iRegion=1:size(regions,2)
         sum(passive_data_per_cond.unit_area ==iRegion);
 end
 
+% increase vs decrease types 
+
 
 figure();
 plot()

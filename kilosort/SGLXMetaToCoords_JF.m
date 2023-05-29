@@ -13,7 +13,8 @@
 %
 function chanMapFile = SGLXMetaToCoords_JF(metaName, path, saveDir)
 
-
+figure(1); 
+clf;
 % Output selection:
 outType = 1;
 

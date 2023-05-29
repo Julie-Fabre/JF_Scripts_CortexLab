@@ -147,10 +147,9 @@ for iRecording = 1:length(use_recs)
                      signrank(nanmean(curr_raster(:,20:40),2), nanmean(curr_raster(:,55:75),2));
     end
     % get ephys prop: firing rate, prop ISI, pss, template dur 
-    protocol = '';
-    rerunEP = 0;
-    region = '';
-    ephysProperties = bc_ephysPropertiesPipeline_JF(animal, day, site, recording, experiment, protocol, rerunEP, runEP, region);
+protocol = '';
+bc_ephysPropertiesPipeline_JF(animal, date, site, recording, experiment, protocol, rerunEP, runEP, region)
+
     % save data in structure 
     if ~isempty(new_units)
         passive_data.animal_day_site_shank(unitCount+1:unitCount+size(units_to_keep,1),:) = ...
@@ -159,11 +158,6 @@ for iRecording = 1:length(use_recs)
         passive_data.unit_coords(unitCount+1:unitCount+size(units_to_keep,1),:) = units_to_keep_coords;
         passive_data.t = t;
         passive_data.unitNum((unitCount+1:unitCount+size(units_to_keep,1))) = shank_units(units_to_keep);
-        passive_data.propISI((unitCount+1:unitCount+size(units_to_keep,1))) = ephysProperties.propLongISI(units_to_keep);
-        passive_data.pss((unitCount+1:unitCount+size(units_to_keep,1))) = ephysProperties.postSpikeSuppression(units_to_keep);
-        passive_data.wvDur((unitCount+1:unitCount+size(units_to_keep,1))) = ephysProperties.templateDuration(units_to_keep);
-        passive_data.fr((unitCount+1:unitCount+size(units_to_keep,1))) = ephysProperties.spike_rateSimple(units_to_keep);
-
         unitCount = unitCount + size(units_to_keep,1);
     
     end
