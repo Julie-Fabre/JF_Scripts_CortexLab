@@ -150,8 +150,8 @@ for iRecording = 1:length(use_recs)
     protocol = '';
     rerunEP = 0;
     plotGUI= 0;
-    runQM = 1;
-    rerunQM = 0;
+    runQM =1;
+    rerunQM = 1;
     region = '';
     try
         [unitType, qMetrics] = bc_qualityMetricsPipeline_JF(animal, day, site, recording, experiment, protocol, rerunQM, plotGUI, runQM);
