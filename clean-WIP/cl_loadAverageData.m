@@ -148,8 +148,12 @@ for iRecording = 1:length(use_recs)
     end
     % get ephys prop: firing rate, prop ISI, pss, template dur 
     protocol = '';
-    rerunEP = 0;
+    rerunEP = 1;
+    plotGUI= 0;
+    runGM =1;
+    rerunQM = 0;
     region = '';
+    [qMetrics, unitType] = bc_qualityMetricsPipeline_JF(animal, day, site, recording, experiment, protocol, rerunQM, plotGUI, runQM);
     ephysProperties = bc_ephysPropertiesPipeline_JF(animal, day, site, recording, experiment, protocol, rerunEP, runEP, region);
     % save data in structure 
     if ~isempty(new_units)
@@ -163,7 +167,7 @@ for iRecording = 1:length(use_recs)
         passive_data.pss((unitCount+1:unitCount+size(units_to_keep,1))) = ephysProperties.postSpikeSuppression(units_to_keep);
         passive_data.wvDur((unitCount+1:unitCount+size(units_to_keep,1))) = ephysProperties.templateDuration(units_to_keep);
         passive_data.fr((unitCount+1:unitCount+size(units_to_keep,1))) = ephysProperties.spike_rateSimple(units_to_keep);
-
+        passive_data.unitType((unitCount+1:unitCount+size(units_to_keep,1))) = unitType(units_to_keep);
         unitCount = unitCount + size(units_to_keep,1);
     
     end

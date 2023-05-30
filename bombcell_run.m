@@ -10,16 +10,16 @@ JF_runKSandBombcell('JF101', '2023-04-12', 4, [],rerunKS,rerunBC)%
 JF_runKSandBombcell('JF101', '2023-04-13', 1, [],rerunKS,rerunBC)%
 JF_runKSandBombcell('JF101', '2023-04-13', 2, [],rerunKS,rerunBC)%
 JF_runKSandBombcell('JF101', '2023-04-13', 3, [],rerunKS,rerunBC)%
-JF_runKSandBombcell('JF101', '2023-04-13', 4, [],rerunKS,rerunBC)%
-JF_runKSandBombcell('JF101', '2023-04-13', 5, [],rerunKS,rerunBC)%
+%JF_runKSandBombcell('JF101', '2023-04-13', 4, [],rerunKS,rerunBC)%
+%JF_runKSandBombcell('JF101', '2023-04-13', 5, [],rerunKS,rerunBC)%
 JF_runKSandBombcell('JF101', '2023-04-13', 6, [],rerunKS,rerunBC)%
 
 JF_runKSandBombcell('JF108', '2023-05-01', 1, [],rerunKS,rerunBC)%
 %JF_runKSandBombcell('JF108', '2023-05-01', 2, [],rerunKS,rerunBC)%
 JF_runKSandBombcell('JF108', '2023-05-01', 3, [],rerunKS,rerunBC)%
-JF_runKSandBombcell('JF108', '2023-05-01', 4, [],rerunKS,rerunBC)%
-JF_runKSandBombcell('JF108', '2023-05-01', 5, [],rerunKS,rerunBC)%
-JF_runKSandBombcell('JF108', '2023-05-01', 6, [],rerunKS,rerunBC)%
+%JF_runKSandBombcell('JF108', '2023-05-01', 4, [],rerunKS,rerunBC)%
+%JF_runKSandBombcell('JF108', '2023-05-01', 5, [],rerunKS,rerunBC)%
+%JF_runKSandBombcell('JF108', '2023-05-01', 6, [],rerunKS,rerunBC)%
 JF_runKSandBombcell('JF108', '2023-05-02', 1, 2,rerunKS,rerunBC)%
 JF_runKSandBombcell('JF108', '2023-05-02', 2, 2,rerunKS,rerunBC)%
 JF_runKSandBombcell('JF108', '2023-05-02', 4, [],rerunKS,rerunBC)%
@@ -75,7 +75,7 @@ JF_runKSandBombcell('JF110', '2023-05-06', 4, [],rerunKS,rerunBC)%
 %JF_runKSandBombcell('JF110', '2023-05-06', 5, [],rerunKS,rerunBC)%
 JF_runKSandBombcell('JF110', '2023-05-06', 6, [],rerunKS,rerunBC)%
 
-JF_runKSandBombcell('JF110', '2023-05-07', 1, [],rerunKS,rerunBC)%
+%JF_runKSandBombcell('JF110', '2023-05-07', 1, [],rerunKS,rerunBC)%
 JF_runKSandBombcell('JF110', '2023-05-07', 2, [],rerunKS,rerunBC)%
 JF_runKSandBombcell('JF110', '2023-05-07', 3, [],rerunKS,rerunBC)%
 JF_runKSandBombcell('JF110', '2023-05-07', 4, [],rerunKS,rerunBC)%
@@ -84,4 +84,7 @@ JF_runKSandBombcell('JF110', '2023-05-07', 6, [],rerunKS,rerunBC)%
 
 
 
-JF_runKSandBombcell('JF109', '2023-05-03', 1, [],rerunKS,rerunBC)%
+%%
+rerunKS=0
+rerunBC=1
+JF_runKSandBombcell('JF109', '2023-05-03', 1, 2,rerunKS,rerunBC)%
