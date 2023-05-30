@@ -10,20 +10,22 @@ for iRegion = 1%:size(regions,2)
     keep_these = sum(isnan(zscore_psth),2)<100;
     
     % get all cells
-    these_units = passive_data.unit_area==iRegion & passive_data.pvalue' < 0.05;
+    these_units = passive_data.unit_area==iRegion & passive_data.pvalue' < 0.05 & ...
+    (passive_data.unitType' ==1 | passive_data.unitType' ==2);
     
-    msn = passive_data.wvDur >= 500 & passive_data.pss <= 20 & passive_data.wvDur <= 1000;
-    fsi = passive_data.wvDur < 500 & passive_data.wvDur >= 200;
-    tan = passive_data.wvDur >= 500 & passive_data.pss > 20;
+    msn = passive_data.wvDur >= 400 & passive_data.pss <= 20 & passive_data.wvDur <= 1000;
+    fsi = passive_data.wvDur < 400 & passive_data.wvDur >= 200;
+    tan = passive_data.wvDur >= 400 & passive_data.pss > 20 & passive_data.wvDur <= 1000;
     figure();
     scatter(passive_data.wvDur(these_units & msn'),  passive_data.pss(these_units &msn') , [], rgb('Pink'));
     hold on;
     scatter(passive_data.wvDur(these_units & fsi'),  passive_data.pss(these_units &fsi') , [], rgb('RoyalBlue'));
     scatter(passive_data.wvDur(these_units & tan'),  passive_data.pss(these_units &tan') , [], rgb('Maroon'));
-    xlim([200, 1000])
+    
     xlabel('waveform duration (us)')
     ylabel('post spike suppression (ms)')
     makepretty;
+    xlim([200, 800])
 
 end
 % PSTH 
@@ -42,7 +44,8 @@ for iRegion = 1%:size(regions,2)
     keep_these = sum(isnan(zscore_psth),2)<100;
     
     % get all cells
-    these_units = passive_data.unit_area==iRegion & passive_data.pvalue' < 0.05;
+    these_units = passive_data.unit_area==iRegion & passive_data.pvalue' < 0.05 & ...
+    (passive_data.unitType' ==1 | passive_data.unitType' ==2);
 
     if sum(these_units) > 0
     %% MSN

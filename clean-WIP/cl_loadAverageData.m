@@ -1,7 +1,7 @@
 %% paramaters 
 load_passive = true;
 runEP = true;
-passive_info = readtable('/home/julie/Dropbox/PhD_summary/allPassiveRecs.csv');
+passive_info = readtable('/home/julie/Dropbox/PhD_summary/allPassiveRecs.csv', 'VariableNamingRule', 'modify');
 regions = {'CP', 'GPe', 'GPi', 'STN', 'SNr', 'SNc', 'VTA'};
 %regions = {'CP'};
 
@@ -41,6 +41,7 @@ end
 passive_data = struct;
 use_recs = find(use_recs);
 unitCount = 0;
+
 for iRecording = 1:length(use_recs)
     % curr variables 
     animal = unique_mice{mouse_day_sites_shank_rec(iRecording,1)};
@@ -154,12 +155,16 @@ for iRecording = 1:length(use_recs)
     rerunQM = 0;
     region = '';
     try
-        [unitType, qMetrics] = bc_qualityMetricsPipeline_JF(animal, day, site, recording, experiment, protocol, rerunQM, plotGUI, runQM);
+        [unitType, qMetrics] = bc_qualityMetricsPipeline_JF(animal, day, site, recording, 1, protocol, rerunQM, plotGUI, runQM);
     catch
-        warning('no quality metrics ')
-        unitType = nan(size(unique_templates,1), 1);
+         rerunQM = 1;
+         [unitType, qMetrics] = bc_qualityMetricsPipeline_JF(animal, day, site, recording, 1, protocol, rerunQM, plotGUI, runQM);
     end
-    ephysProperties = bc_ephysPropertiesPipeline_JF(animal, day, site, recording, experiment, protocol, rerunEP, runEP, region);
+%         warning('no quality metrics ')
+%         unitType = nan(size(unique_templates,1), 1);
+%     end
+
+    ephysProperties = bc_ephysPropertiesPipeline_JF(animal, day, site, recording, 1, protocol, rerunEP, runEP, region);
     % save data in structure 
     if ~isempty(new_units)
         passive_data.animal_day_site_shank(unitCount+1:unitCount+size(units_to_keep,1),:) = ...
@@ -181,3 +186,4 @@ for iRecording = 1:length(use_recs)
     keep mouse_day_sites_shank_rec unique_mice passive_data use_recs passive_info regions regions_id unitCount st runEP
     end
 end
+ 

@@ -35,7 +35,7 @@ load_parts.cam=false;
 load_parts.imaging=false;
 load_parts.ephys=true;
 
-site = 3;%1,1; 2,4; 3,7
+site = 5;%1,1; 2,4; 3,7
 recording = []; 
 % keep experiment with max n trials (= most likely not aborted error or end
 % shank mapping) QQ change this in the future 
@@ -54,7 +54,7 @@ for iExperiment = experiments(curr_day).experiment
     end
 end 
 
-experiment = 1;%find(n_trials == max(n_trials));
+experiment = 8;%find(n_trials == max(n_trials));
 loadClusters = 0;
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys_includingCompressed',site,recording);
 if size(ephysAPfile,2) ==2 %keep only ap

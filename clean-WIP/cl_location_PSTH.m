@@ -84,7 +84,8 @@ for iRegion = 1:size(regions, 2)
 
         for iBinX = 1:size(Xedges, 2)
             for iBinY = 1:size(Yedges, 2)
-                theseNeurons = binX == iBinX & binY == iBinY & passive_data.unit_area == iRegion;
+                theseNeurons = binX == iBinX & binY == iBinY & passive_data.unit_area == iRegion &...
+                    (passive_data.unitType' ==1 | passive_data.unitType' ==2);
                 binnedArrayTot = [];
                 if sum(theseNeurons) > 0
                     %remove any infs QQ i need to deal with this!

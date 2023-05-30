@@ -8,6 +8,8 @@ cl_percentage_cells;
 
 % cell classification 
 cl_population_PSTH_celltype;
+cl_celltype_example;
+cl_GPe_celltype_playground; 
 
 % cell selctivity/encoding of specific visual stimuli 
 cl_loadPerStimulusData;
