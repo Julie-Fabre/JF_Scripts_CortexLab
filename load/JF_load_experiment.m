@@ -452,7 +452,7 @@ if ephys_exists && load_parts.ephys
 
     % Load sync/photodiode
     if load_sync
-        if isempty(dir([ephys_path, filesep, 'sync.mat']))
+        if isempty(dir([ephys_path, filesep, '*sync*.mat']))
             error('No SYNC - extract sync before continuing')
         end
     end
@@ -497,11 +497,15 @@ if ephys_exists && load_parts.ephys
 
     % Default channel map/positions are from end: make from surface
     % (hardcode this: kilosort2 drops channels)
+    if size(ephysAP_path,2) ==2
+        ephysAP_path = ephysAP_path{1};
+    end
     ephysMetaDir = dir([ephysAP_path(1:end-3), 'meta']);
     if isempty(ephysMetaDir) %.cbin
         ephysMetaDir = dir([ephysAP_path(1:end-4), 'meta']);
     end
     [scalingFactor, channelMapImro, probeType] = bc_readSpikeGLXMetaFile([ephysMetaDir.folder, filesep, ephysMetaDir.name]);
+    isSpikeGlx=isSpikeGlx(1);
     if isSpikeGlx && strcmp(probeType ,'2')
         max_depth = 2880;
         if any(max_depth-channel_positions(:, 2) < 0) %1.0
@@ -586,7 +590,7 @@ if ephys_exists && load_parts.ephys
             theseDepths = locationKeep;
         else
 
-            myPaths;
+            cl_myPaths;
             [tv, av, st, bregma] = bd_loadAllenAtlas(atlasBrainRegLocation);
            
             probe2ephysFile = AP_cortexlab_filenameJF(animal, [], [], 'probe2ephys', [], []);

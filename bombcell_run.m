@@ -85,6 +85,20 @@ JF_runKSandBombcell('JF110', '2023-05-07', 6, [],rerunKS,rerunBC)%
 
 
 %%
-rerunKS=0
-rerunBC=1
+rerunKS = 0;
+rerunBC = 0;
 JF_runKSandBombcell('JF109', '2023-05-03', 1, 2,rerunKS,rerunBC)%
+
+
+%% task 
+rerunKS = 0;
+rerunBC = 0;
+bombcell_wrapper_mouse('JF093', rerunKS,rerunBC)
+% bombcell_wrapper_mouse('JF091', rerunKS,rerunBC)
+% bombcell_wrapper_mouse('JF104', rerunKS,rerunBC)
+% bombcell_wrapper_mouse('JF105', rerunKS,rerunBC)
+bombcell_wrapper_mouse('JF107', rerunKS,rerunBC)
+% bombcell_wrapper_mouse('JF106', rerunKS,rerunBC)
+% bombcell_wrapper_mouse('JF096', rerunKS,rerunBC)
+% bombcell_wrapper_mouse('JF097', rerunKS,rerunBC)
+% bombcell_wrapper_mouse('JF099', rerunKS,rerunBC)

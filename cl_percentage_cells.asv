@@ -43,14 +43,16 @@ end
 cl_plottingSettings;
 
 figure();
-b = barh(3:-1:1, responsive_cell_region([1,2,5]), 0.2, 'facecolor', 'flat');
-b.CData = [regionColors{3};...
-    regionColors{2};regionColors{1}];
-yticks([1:3])
-yticklabels({'SNr', 'GPe', 'CP'})
-makepretty;
-xlabel(['fraction of' newline 'visual cells'])
+b = bar(1:3, responsive_cell_region([1,2,5]), 'facecolor', 'flat');
+b.CData = [regionColors{1};...
+    regionColors{2};regionColors{3}];
+xticks([1:3])
 
+makepretty;
+ylabel('fraction of visually-responsive cells')
+xticks([1,2,3])
+xticklabels({'CP', 'GPe', 'SNr'})
+%ylim([0.1 0.2])
 
 
 

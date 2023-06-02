@@ -4,13 +4,19 @@ function [spike_times_timeline, bad_flipper] = JF_align_ephys_to_timeline(animal
 
 %% load ephys sync (flipper)
 if isSpikeGLX
-    load(sprintf('%s//sync.mat', ephys_sync_folder)); % ephys flipper
+    syncFile = dir([ephys_sync_folder, filesep, '*sync*.mat']);
+    load([syncFile.folder, filesep, syncFile.name]); % ephys flipper
+
+    if contains(syncFile.name, 'decompressed')
+        sync = syncdata';
+    end
+
     possible_sync_values = unique(sync);
     if length(possible_sync_values) < 2
         error('check flipper was inputed in correct IMEC card')
     elseif length(possible_sync_values) > 2
         warning('several ephys flipper values, taking lowest as threshold')
-        flip_threshold =  possible_sync_values(2);
+        flip_threshold = possible_sync_values(2);
     else
         flip_threshold = range(sync) / 2;
     end
@@ -20,14 +26,14 @@ if isSpikeGLX
     ephys_timestamps = [0:size(sync, 2) - 1] / ephys_sample_rate;
 
     % binarise flipper
-    
+
     ephys_binary_values = sync > flip_threshold;
 
     % get ephys flipper flip values and times
     ephys_sync_values = find((~ephys_binary_values(1:end-1) & ephys_binary_values(2:end)) | ...
         (ephys_binary_values(1:end-1) & ~ephys_binary_values(2:end))) + 1;
     ephys_sync_timestamps = ephys_timestamps(ephys_sync_values)';
-    
+
     bad_flipper = false;
 
 else
@@ -38,7 +44,7 @@ else
         ephys_sync_values = sync(flipper_sync_idx).values;
     else
         bad_flipper = true;
-        figure(); plot(ephys_sync_timestamps,ephys_sync_values  )
+        figure(); plot(ephys_sync_timestamps, ephys_sync_values)
     end
 
 end
@@ -122,7 +128,7 @@ elseif length(flipper_flip_times_ephys) ~= length(flipper_flip_times_timeline)
             bad_flipper = true;
         end
     end
-   %bad_flipper = true;
+    %bad_flipper = true;
 end
 
 %% if bad flipper, use acq live

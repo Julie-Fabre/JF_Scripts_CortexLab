@@ -1,7 +1,12 @@
 %% passive_master script 
 
 % do cells encode visual stimuli? 
-cl_loadAverageData; % check we don't have any duplicates 
+reload = 0; 
+if reload 
+    passive_data = cl_loadAverageData('passive'); % check we don't have any duplicates 
+else
+    passive_data = load();%passive.mat
+end
 cl_population_PSTH;
 cl_location_PSTH;
 cl_percentage_cells;
@@ -12,7 +17,7 @@ cl_celltype_example;
 cl_GPe_celltype_playground; 
 
 % cell selctivity/encoding of specific visual stimuli 
-cl_loadPerStimulusData;
+passive_data_per_cond = cl_loadPerStimulusData('passive');
 cl_selectivity;
 %decoding? 
 cl_location_selectivity; 

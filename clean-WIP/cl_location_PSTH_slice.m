@@ -6,13 +6,19 @@ close all;
 
 cl_myPaths;
 regionResolution = [1, 1, 1, 1, 1, 1, 1];
-
+ARA_levels = [47,66; ...% CP
+    58, 68;...%GPe
+    NaN, NaN;...%GPi
+    NaN,NaN;...%STN
+    81, 90;...%SNr
+    NaN, NaN;...%VTA
+    NaN,NaN];...%SNc; 
 zscore_psth = (passive_data.psth - nanmean(passive_data.psth(:, 1:50), 2)) ./ ...
     nanstd(passive_data.psth(:, 1:50), [], 2);
 dFR_psth = (passive_data.psth - nanmean(passive_data.psth(:, 1:50), 2)) ./ ...
     nanmean(passive_data.psth(:, 1:50), 2);
 
-thisCmap_limits = [-150, 150];
+thisCmap_limits = [-80, 80];
 theseColors = {rgb('DeepSkyBlue'); rgb('SeaGreen'); rgb('DarkOrange'); rgb('Crimson'); rgb('Hotpink'); rgb('Black'); rgb('Brown')};
 
 if ~exist('st', 'var')
@@ -44,7 +50,7 @@ for iRegion = 1:size(regions, 2)
     projection_view_bins = cell(3,1);
     projection_view_lims = nan(3,2,2);
 
-    for iProjection = 1:3 
+    for iARA_level = 1:3 
         % get structure boundaries and plot outline
         subplot(3, size(regions, 2), iRegion + (size(regions,2) * (iProjection-1)))
         boundary_projection{iProjection} = boundary(regionLocation(projection_views(iProjection,1),:)',...
@@ -102,11 +108,8 @@ for iRegion = 1:size(regions, 2)
         binnedArrayPixel(binnedArrayPixel == 0) = NaN;
         
         % smooth data
-        if iRegion==1
-            binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, 4, 4);
-        else
-            binnedArrayPixelSmooth = binnedArrayPixel;
-        end
+        %binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, 4, 4);
+        binnedArrayPixelSmooth = binnedArrayPixel;
 
        % remove any data points outside of the ROI
        isIN = nan(size(binnedArrayPixelSmooth, 1), size(binnedArrayPixelSmooth, 2));

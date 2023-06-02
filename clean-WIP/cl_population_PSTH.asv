@@ -13,12 +13,13 @@ for iRegion = 1:size(regions,2)
     keep_these = sum(isnan(zscore_psth),2)<100;
     
     % get all cells
-    these_units = passive_data.unit_area==iRegion;
+    these_units = passive_data.unit_area==iRegion & passive_data.pvalue_shuffled' ==1 &...
+        (passive_data.unitType' ==1 | passive_data.unitType' ==2) ;
 
     if sum(these_units) > 0
     % sort cells by activity
     this_image = zscore_psth(these_units&keep_these, :);
-    [~, cell_idx] = sort(nanmean(this_image(:,55:70),2));
+    [~, cell_idx] = sort(nanmean(this_image(:,55:65),2));
 
     % small smoothing -otherwise matlab doesn't display properly 
     smooth_filt = [region_smooth(iRegion),1]; % (units x frames)

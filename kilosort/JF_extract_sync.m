@@ -18,10 +18,12 @@ for iExperiment = 1:size(experiments, 1)
          site = str2num(siteDir(iSite).name(end));
         [ephysKSfile, ~] = AP_cortexlab_filenameJF(animal, date, [], 'ephys', site, []);
         if isempty(dir([ephysKSfile, filesep, 'sync.mat']))
-            [ephysAPfile, ~] = AP_cortexlab_filenameJF(animal, date, [], 'ephys_ap', site, []);
-            
+            [ephysAPfile, ~] = AP_cortexlab_filenameJF(animal, date, [], 'ephys_includingCompressed', site, []);
+            if contains(ephysAPfile, '.cbin')
+                onlySaveSyncChannel= 1;
+                decompDataFile = bc_extractCbinData(ephysAPfile, [], [], 0, ephysKSfile, onlySaveSyncChannel);
 
-
+            else
             if size(ephysAPfile, 2) == 2 && iscell(ephysAPfile) %keep only ap
                 ephysAPfile = ephysAPfile{1};
             end
@@ -32,6 +34,7 @@ for iExperiment = 1:size(experiments, 1)
                 end
             else
                 %AP_preprocess_phase3_newOEJF_onlysync(animal, date, site)
+            end
             end
         
         end
