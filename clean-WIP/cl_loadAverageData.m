@@ -166,7 +166,7 @@ for iRecording = 1:length(use_recs)
 
                 %responsive cell? signrank test
                  passive_data.pvalue(iUnit+unitCount) = ...
-                    signrank(nanmean(curr_raster(:, 20:40), 2), nanmean(curr_raster(:, 55:75), 2));
+                    signrank(nanmean(curr_raster(:, 40:50), 2), nanmean(curr_raster(:, 55:75), 2));
                 %responsive cell?  shuffle pre/post labels 
 
                 pre_activity = nanmean(curr_raster(:, 40:50), 2);
@@ -260,4 +260,5 @@ for iRecording = 1:length(use_recs)
     end
     disp(num2str(iRecording))
 end
+
 end

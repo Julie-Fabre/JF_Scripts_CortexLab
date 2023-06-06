@@ -1,28 +1,32 @@
+passive_data_cw_all = [passive_data_cw1, passive_data_cw2];
 
-
-if gogogo
-    task_data_here = task_data_gogogo;
-else
-    task_data_here = task_data; 
-end
 figure();
 %clf;
 cl_plottingSettings;
 
-contra = 1;
+contra = 0;
 if contra
-    go1_contra = squeeze(task_data_here.psth{2}(:,:,2,:));
-    go2_contra = squeeze(task_data_here.psth{2}(:,:,6,:));
-    noGo_contra = squeeze(task_data_here.psth{2}(:,:,4,:));
+    go1_contra = [squeeze(passive_data_cw_all(1).psth{5}(:,:,1,:));...
+        squeeze(passive_data_cw_all(2).psth{4}(:,:,2,:))];
+    go2_contra = [squeeze(passive_data_cw_all(1).psth{5}(:,:,5,:));...
+        squeeze(passive_data_cw_all(2).psth{4}(:,:,6,:))];
+    noGo_contra = [squeeze(passive_data_cw_all(1).psth{5}(:,:,3,:));...
+        squeeze(passive_data_cw_all(2).psth{4}(:,:,4,:))];
 else
-    go1_contra = squeeze(task_data_here.psth{2}(:,:,3,:));
-    go2_contra = squeeze(task_data_here.psth{2}(:,:,7,:));
-    noGo_contra = squeeze(task_data_here.psth{2}(:,:,5,:));
+      go1_contra = [squeeze(passive_data_cw_all(1).psth{5}(:,:,2,:));...
+        squeeze(passive_data_cw_all(2).psth{4}(:,:,3,:))];
+    go2_contra = [squeeze(passive_data_cw_all(1).psth{5}(:,:,6,:));...
+        squeeze(passive_data_cw_all(2).psth{4}(:,:,7,:))];
+    noGo_contra = [squeeze(passive_data_cw_all(1).psth{5}(:,:,4,:));...
+        squeeze(passive_data_cw_all(2).psth{4}(:,:,5,:))];
 end
 
+unit_regions = [passive_data_cw_all(1).unit_area; passive_data_cw_all(2).unit_area];
+pvalue_shuffled = [passive_data_cw_all(1).pvalue_shuffled_005{5}, passive_data_cw_all(2).pvalue_shuffled_005{4}];
+pvalue = [passive_data_cw_all(1).pvalue{5}, passive_data_cw_all(2).pvalue{4}];
 
-% zscore_psth(1,:) = (task_data.psth{2}(:,1,1,:) - nanmean(task_data.psth(:,1:50),2)) ./ ...
-%     nanstd(task_data.psth(:,1:50),[],2);
+% zscore_psth(1,:) = (passive_data_cw_all.psth{4}(:,1,1,:) - nanmean(passive_data_cw_all.psth(:,1:50),2)) ./ ...
+%     nanstd(passive_data_cw_all.psth(:,1:50),[],2);
 region_max = [1, 1, 1, 1, 1, 1, 1];
 region_smooth = [5, 1, 1, 1, 1, 1, 1];
 %region_clim_string = {'z-score (clim saturated)', 'z-score', 'z-score', 'z-score', 'z-score', 'z-score', 'z-score'};
@@ -30,11 +34,11 @@ for iRegion = 2%:size(regions,2)
     
 
     
-    % get all cells %1:301
-    these_units = task_data_here.unit_area(1:301)==iRegion &...
-        task_data_here.pvalue_shuffled_005{2}(1:301)' == 1;% & task_data.pvalue{2}' < 0.05 &...
-        %task_data.pvalue_shuffled_005{2}' == 1;%& task_data.pvalue{2}' < 0.05 &...
-        %(task_data.unitType' ==1 | task_data.unitType' ==2) ;
+    % get all cells
+    these_units = unit_regions==iRegion &...
+        pvalue' <= 0.05;% & passive_data_cw_all.pvalue{4}' < 0.05 &...
+        %passive_data_cw_all.pvalue_shuffled_005{4}' == 1;%& passive_data_cw_all.pvalue{4}' < 0.05 &...
+        %(passive_data_cw_all.unitType' ==1 | passive_data_cw_all.unitType' ==2) ;
 
     train_image = squeeze(go1_contra(these_units, 1, :));
     train_image = (train_image - nanmean(train_image(:,1:50),2)) ./ ...
@@ -50,7 +54,7 @@ for iRegion = 2%:size(regions,2)
     conv2(~isnan(test_image_go1(cell_idx,:)),ones(smooth_filt),'same');
 
     %go 2
-    test_image_go2 = squeeze([go2_contra(these_units, 2, :); go2_contra(these_units, 1, :)]);
+    test_image_go2 = squeeze([go2_contra(these_units, 2, :)]);
     test_image_go2 = (test_image_go2 - nanmean(test_image_go2(:,1:50),2)) ./ ...
         nanstd(test_image_go2(:,1:50),[],2);
     smooth_filt = [region_smooth(iRegion),1]; % (units x frames)
@@ -58,7 +62,7 @@ for iRegion = 2%:size(regions,2)
     conv2(~isnan(test_image_go2(cell_idx,:)),ones(smooth_filt),'same');
 
     %no go
-    test_image_noGo = squeeze([noGo_contra(these_units, 2, :); noGo_contra(these_units, 2, :)]);
+    test_image_noGo = squeeze([noGo_contra(these_units, 2, :)]);
     test_image_noGo = (test_image_noGo - nanmean(test_image_noGo(:,1:50),2)) ./ ...
         nanstd(test_image_noGo(:,1:50),[],2);
     smooth_filt = [region_smooth(iRegion),1]; % (units x frames)
@@ -73,7 +77,7 @@ for iRegion = 2%:size(regions,2)
     % plot PSTH 
     
     subplot(131)
-    imagesc(task_data_here.t, [], this_image_smooth_go1(keep_these,:))
+    imagesc(passive_data_cw_all(1).t, [], this_image_smooth_go1(keep_these,:))
     caxis([-max(max(abs(this_image_smooth_go1(keep_these,:)))).*region_max(iRegion), max(max(abs(this_image_smooth_go1(keep_these,:)))).*region_max(iRegion)])
     c = colorbar;
     %c.Label.String = (region_clim_string{iRegion});
@@ -84,7 +88,7 @@ for iRegion = 2%:size(regions,2)
     makepretty;
 
     subplot(132)
-    imagesc(task_data_here.t, [], this_image_smooth_go2(keep_these,:))
+    imagesc(passive_data_cw_all(1).t, [], this_image_smooth_go2(keep_these,:))
     caxis([-max(max(abs(this_image_smooth_go2(keep_these,:)))).*region_max(iRegion), max(max(abs(this_image_smooth_go2(keep_these,:)))).*region_max(iRegion)])
     c = colorbar;
     %c.Label.String = (region_clim_string{iRegion});
@@ -95,7 +99,7 @@ for iRegion = 2%:size(regions,2)
     makepretty;
 
     subplot(133)
-    imagesc(task_data_here.t, [], this_image_smooth_noGo(keep_these,:))
+    imagesc(passive_data_cw_all(1).t, [], this_image_smooth_noGo(keep_these,:))
     caxis([-max(max(abs(this_image_smooth_noGo(keep_these,:)))).*region_max(iRegion), max(max(abs(this_image_smooth_noGo(keep_these,:)))).*region_max(iRegion)])
     c = colorbar;
     %c.Label.String = (region_clim_string{iRegion});
@@ -108,36 +112,34 @@ for iRegion = 2%:size(regions,2)
 
 
 end
-%plotshaded(0:0.001:0.5, [-acgstd + acgmean; acgstd + acgmean], 'g');
-keep_these2 = find(keep_these);
-%keep_these2 = keep_these2(80:end);
-colorMtx = bc_colors(4);
-figure(1); 
-%title('Go1'); hold on;
-plot(task_data_here.t, nanmean(this_image_smooth_go1(keep_these2,:)), 'Color', colorMtx(3,:)); hold on;
-plotshaded(task_data_here.t, [-nanstd(this_image_smooth_go1(keep_these2,:))./sqrt(length(this_image_smooth_go1(keep_these2,:))) + nanmean(this_image_smooth_go1(keep_these2,:));...
-    nanstd(this_image_smooth_go1(keep_these2,:)) + nanmean(this_image_smooth_go1(keep_these2,:))],  colorMtx(3,:));
-legend('Go no go -trained', '', 'pre-learning', '', 'Go go go trained')
-makepretty;
-xlim([-0.5, 0.8])
-ylim([-1, 6])
 
+%figure(); 
+%scatter 
+colorMtx =  bc_colors(4, 'w');
 figure(2); 
-%title('Go2'); hold on;
-plot(task_data_here.t, nanmean(this_image_smooth_go2(keep_these2,:))*1.4, 'Color', colorMtx(3,:)); hold on;
-plotshaded(task_data_here.t, [-nanstd(this_image_smooth_go2(keep_these2,:)) + nanmean(this_image_smooth_go2(keep_these2,:));...
-    nanstd(this_image_smooth_go2(keep_these2,:)) + nanmean(this_image_smooth_go2(keep_these2,:))],  colorMtx(3,:));
-legend('Go no go -trained', '', 'pre-learning', '', 'Go go go trained')
-makepretty;
+plot(passive_data_cw_all(1).t, nanmean(this_image_smooth_go1(keep_these,:)), 'Color', colorMtx(3,:)); 
+plotshaded(task_data.t, [-nanstd(this_image_smooth_go1(keep_these,:)) + nanmean(this_image_smooth_go1(keep_these,:));...
+    nanstd(this_image_smooth_go1(keep_these,:)) + nanmean(this_image_smooth_go1(keep_these,:))],  colorMtx(4,:));
+
+xlabel('time from stim onset (s)')
+ylabel('zscore')
+legend('pre-learning', 'post-learning')
+ylim([-0.4, 3.5])
 xlim([-0.5, 0.8])
-ylim([-1, 6])
+makepretty;
 
 figure(3); 
-%title('No Go'); hold on;
-plot(task_data_here.t, nanmean(this_image_smooth_noGo(keep_these2,:))*1.4, 'Color', colorMtx(3,:)); hold on;
-plotshaded(task_data_here.t, [-nanstd(this_image_smooth_noGo(keep_these2,:)) + nanmean(this_image_smooth_noGo(keep_these2,:));...
-    nanstd(this_image_smooth_noGo(keep_these2,:)) + nanmean(this_image_smooth_noGo(keep_these2,:))],  colorMtx(3,:));
-legend('Go no go -trained', '', 'pre-learning', '', 'Go go go trained')
-makepretty;
+plot(passive_data_cw_all(1).t, nanmean(this_image_smooth_go2(keep_these,:)), 'Color', colorMtx(3,:)); 
+xlabel('time from stim onset (s)')
+ylabel('zscore')
+legend('pre-learning', 'post-learning')
 xlim([-0.5, 0.8])
-ylim([-1, 6])
+makepretty;
+
+figure(4); 
+plot(passive_data_cw_all(1).t, nanmean(this_image_smooth_noGo(keep_these,:)), 'Color', colorMtx(3,:)); 
+xlabel('time from stim onset (s)')
+ylabel('zscore')
+legend('pre-learning', 'post-learning')
+xlim([-0.5, 0.8])
+makepretty;

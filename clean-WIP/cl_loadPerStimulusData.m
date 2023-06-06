@@ -1,7 +1,9 @@
-function passive_data_per_cond = cl_loadPerStimulusData(load_type) %% paramaters
+function passive_data_per_cond = cl_loadPerStimulusData(load_type, keep_type) %% paramaters
 if contains(load_type, 'passive')
     info_table = readtable('/home/julie/Dropbox/PhD_summary/allPassiveRecs.csv', 'VariableNamingRule', 'modify');
-elseif contains(load_type, 'task')
+elseif contains(load_type, 'taskGo')
+    info_table = readtable('/home/julie/Dropbox/PhD_summary/allTaskGoGoGoRecs.csv', 'VariableNamingRule', 'modify');
+else
     info_table = readtable('/home/julie/Dropbox/PhD_summary/allTaskRecs.csv', 'VariableNamingRule', 'modify');
 end
 load_passive_ = true;
@@ -48,7 +50,8 @@ passive_data_per_cond.pvalue = cell(5, 1);
 passive_data_per_cond.psth_conditions = cell(5, 1);
 use_recs = find(use_recs);
 unitCount = 0;
-for iRecording = 29:length(use_recs)
+for iRecording = 1:length(use_recs)
+    %try
     % curr variables
     animal = unique_mice{mouse_day_sites_shank_rec(iRecording, 1)};
     curr_day = mouse_day_sites_shank_rec(iRecording, 2);
@@ -68,7 +71,7 @@ for iRecording = 29:length(use_recs)
 
     probe_ccf_location = AP_cortexlab_filenameJF(animal, [], [], 'histo');
     load(probe_ccf_location)
-
+    new_units =[];
     % is any region present
     this_probe = probe_rec_idx;
     if this_probe > 1
@@ -120,22 +123,47 @@ for iRecording = 29:length(use_recs)
                 JF_load_experiment;
                 if contains(load_type, 'passive')
                     if contains(expDef, 'JF_GratingPassiveVarITI')
+                        if keep_type ~= 1
+                        continue;
+                        end
                         experiment_type = 1;
                     elseif contains(expDef, 'JF_locations')
+                        if keep_type ~= 2
+                        continue;
+                        end
                         experiment_type = 2;
                     elseif contains(expDef, 'JF_natural_imagesFit')
+                        if keep_type ~= 3
+                        continue;
+                        end
                         experiment_type = 3;
                     elseif contains(expDef, 'JF_choiceworldStimuli_onlyTask')
+                        if keep_type ~= 4
+                        continue;
+                        end
                         experiment_type = 5;
                     elseif contains(expDef, 'JF_choiceworldStimuli')
+                        if keep_type ~= 5
+                        continue;
+                        end
                         experiment_type = 4;
+                        
                     elseif contains(expDef, 'JF_natural_images')
+                        if keep_type ~= 6
+                        continue;
+                        end
                         experiment_type = 6;
                     end
                 else
                     if contains(expDef, 'noGo_')
+                        if keep_type ~= 1
+                            continue;
+                        end
                         experiment_type = 1;
                     elseif contains(expDef, 'JF_choiceworldStimuli')
+                        if keep_type ~= 2
+                            continue;
+                        end
                         experiment_type = 2;
                     end
                 end
@@ -148,7 +176,7 @@ for iRecording = 29:length(use_recs)
                 %         end
 
                 %subselect shank
-                if iExperiment == these_exps(load_me(1))
+                if ismember(experiment_type, keep_type)
                     if curr_shank > 0
                         shank_xdepth = [250 * (curr_shank - 1), 250 * (curr_shank - 1) + 32];
                         shank_units = find(template_xdepths >= shank_xdepth(1) & template_xdepths <= shank_xdepth(2));
@@ -159,6 +187,7 @@ for iRecording = 29:length(use_recs)
                     units_to_keep = [];
                     units_to_keep_area = [];
                     units_to_keep_coords = [];
+                    
                     for iRegion = 1:length(these_regions_present)
                         new_units = find(template_depths(shank_units) >= this_region_start(these_regions_present(iRegion)) & ...
                             template_depths(shank_units) <= this_region_stop(these_regions_present(iRegion)));
@@ -193,13 +222,32 @@ for iRecording = 29:length(use_recs)
                 if contains(load_type, 'task')
                     if experiment_type == 1
                         passive_data_per_cond.psth_conditions{experiment_type} = unique(trial_conditions, 'rows');
-                    else
+                    
+                   else
                         passive_data_per_cond.psth_conditions{experiment_type} = unique(trial_conditions(ismember(trial_conditions(:, 1), ...
                             [4, 6, 12]) & ismember(trial_conditions(:, 2), [-90, 0]), :), 'rows');
                     end
                 else
                     %if experiment_type == 1%nat images
                     passive_data_per_cond.psth_conditions{experiment_type} = unique(trial_conditions, 'rows');
+                    if experiment_type==4
+                        if size(trial_conditions,2) == 2
+                     
+                            these_guys = ismember(trial_conditions(:, 1), ...
+                                [4, 6, 12]) & ismember(trial_conditions(:, 2), [-90, 0]);
+                            
+                            if size(unique(trial_conditions(these_guys,:), 'rows'),1) ==6
+                                passive_data_per_cond.psth_conditions{experiment_type} = unique(trial_conditions(these_guys,:), 'rows');
+                            else
+                                continue;
+                            end
+                        else
+                            continue;
+                        end
+                    else
+                        passive_data_per_cond.psth_conditions{experiment_type} = unique(trial_conditions, 'rows');
+                    end
+                        
 
                 end
 
@@ -211,15 +259,69 @@ for iRecording = 29:length(use_recs)
                     align_times = stimOn_times;
 
                     [~, trial_cond_idx] = ismember(trial_conditions, passive_data_per_cond.psth_conditions{experiment_type}, 'rows');
+                    %stats = grpstats(passive_data_per_cond.psth_conditions{experiment_type}, trial_conditions);
                     %responsive cell
 
 
-                    [~, curr_raster, ~, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
+                    [curr_psth, curr_raster, t, raster_x, raster_y] = cl_raster_psth(spike_templates, spike_times_timeline, ...
                         unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size, ...
                         align_times, []);
-                    passive_data_per_cond.pvalue{experiment_type}(iUnit + unitCount) = ...
-                        signrank(nanmean(curr_raster(:, 20:40), 2), nanmean(curr_raster(:, 55:75), 2));
+                    % p value test for *each* condition 
+                    for iCond = 1:size(passive_data_per_cond.psth_conditions{experiment_type},1)
+                        [~, trial_cond_idx_single] = ismember(trial_conditions, passive_data_per_cond.psth_conditions{experiment_type}(iCond,:), 'rows');
+                        pvals_per_cond(iCond) = signrank(nanmean(curr_raster(logical(trial_cond_idx_single), 40:50), 2),...
+                            nanmean(curr_raster(logical(trial_cond_idx_single), 55:65), 2));
+                         passive_data_per_cond.pvalue{experiment_type}(iUnit + unitCount, iCond) = pvals_per_cond(iCond);
+                    end
+                       %responsive cell?  shuffle pre/post labels 
 
+                pre_activity = nanmean(curr_raster(:, 40:50), 2);
+                post_activity = nanmean(curr_raster(:, 55:65), 2);
+                all_activity = [pre_activity; post_activity];
+                shuffling_idx = randi(size(all_activity,1),1000);
+                shuffled_diffs = arrayfun(@(x) nanmean(all_activity(shuffling_idx(1:500,x))...
+                    - all_activity(shuffling_idx(501:1000,x))), 1:1000);
+                real_diff = nanmean(post_activity - pre_activity);
+                pctile_2 = prctile(shuffled_diffs, 95);
+                pctile_1 = prctile(shuffled_diffs, 5);
+
+                passive_data_per_cond.pvalue_shuffled_005{experiment_type}(iUnit+unitCount) = ...
+                   real_diff >= pctile_2 || real_diff <= pctile_1;
+
+                 passive_data_per_cond.pvalue_shuffled_0025{experiment_type}(iUnit+unitCount) = ...
+                   real_diff >= prctile(shuffled_diffs, 97.5) || real_diff <= prctile(shuffled_diffs, 2.5);
+
+                                  colorMtx =  bc_colors(3, 'w');
+%                 figure();
+%                 subplot(6,2,[1,3, 5, 7])
+%                 scatter(t(raster_x), raster_y, 2, [0,0,0], 'filled')
+%                 ylabel('trial #')
+%                 xticklabels({''})
+%                 makepretty;
+% 
+%                 subplot(6,2,[9, 11])
+%                 plot(t, curr_psth .* 1/psth_bin_size,'Color', colorMtx(2,:))
+%                 xlabel('time from stim onset (s)')
+%                 ylabel('spikes/s')
+%                 legend(['sign rank p-value = ', num2str(passive_data_per_cond.pvalue{experiment_type}(iUnit+unitCount),3)])
+%                 makepretty;
+% 
+%                 subplot(6,2,[6, 8])
+%                 h = histogram(shuffled_diffs, 'FaceColor', colorMtx(1,:), 'EdgeColor', colorMtx(1,:), 'Normalization' ,'probability'); 
+%                 hold on;
+%                 ylims = ylim;
+%                 line([real_diff, real_diff], [ylims(1), ylims(2)], 'Color', colorMtx(2,:))
+%                 
+%                 l1 = line([real_diff, real_diff], [ylims(1), ylims(2)], 'Color', colorMtx(2,:));
+%                 l2 = line([pctile_2, pctile_2], [ylims(1), ylims(2)], 'Color', colorMtx(3,:));
+%                 line([pctile_1, pctile_1], [ylims(1), ylims(2)], 'Color', colorMtx(3,:))
+%                 xlabel('average f.r. post-stim - pre-stim')
+%                 ylabel('fraction')
+%                 legend([h, l1, l2], {'shuffled data', 'real value', '2.5%'})
+%                 
+% 
+%                 makepretty;
+% 
 
                     %psth
 
@@ -235,7 +337,7 @@ for iRecording = 29:length(use_recs)
 
                     passive_data_per_cond.psth{experiment_type}(iUnit + unitCount, 2, :, :) = curr_psth;
 
-
+            
                 end
 
             end
@@ -248,7 +350,7 @@ for iRecording = 29:length(use_recs)
                 passive_data_per_cond.unit_coords(unitCount+1:unitCount+size(units_to_keep, 1), :) = units_to_keep_coords;
                 passive_data_per_cond.t = t;
                 passive_data_per_cond.unitNum((unitCount + 1:unitCount + size(units_to_keep, 1))) = shank_units(units_to_keep);
-                passive_data.propISI((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.propLongISI(units_to_keep);
+                passive_data_per_cond.propISI((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.propLongISI(units_to_keep);
                 passive_data_per_cond.pss((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.postSpikeSuppression(units_to_keep);
                 passive_data_per_cond.wvDur((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.templateDuration(units_to_keep);
                 passive_data_per_cond.fr((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.spike_rateSimple(units_to_keep);
@@ -261,9 +363,11 @@ for iRecording = 29:length(use_recs)
             % clear variables
             disp(['   ', num2str(iRecording), '/', num2str(length(use_recs))])
 
-            keep mouse_day_sites_shank_rec unique_mice passive_data_per_cond use_recs info_table regions regions_id unitCount st load_type
+            keep mouse_day_sites_shank_rec unique_mice passive_data_per_cond use_recs info_table regions regions_id unitCount st load_type keep_type
         end
     end
+    %catch
+    %end
 end
 
 end

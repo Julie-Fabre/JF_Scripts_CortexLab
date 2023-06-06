@@ -14,7 +14,17 @@ task_data = cl_loadAverageData('task');
 % cl_GPe_celltype_playground; 
 % 
 % % cell selctivity/encoding of specific visual stimuli 
-task_data = cl_loadPerStimulusData('task'); 
+passive_data = cl_loadPerStimulusData('passive');
+cl_plot_average_task; 
+
+
+task_data = cl_loadPerStimulusData('task', 2); 
+gogogo = 0;
+cl_plot_average_task; 
+
+
+task_data_gogogo = cl_loadPerStimulusData('taskGo', 2); 
+gogogo = 1;
 cl_plot_average_task; 
 % cl_selectivity;
 % %decoding? 

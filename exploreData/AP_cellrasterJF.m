@@ -266,7 +266,7 @@ curr_raster_spike_times(curr_raster_spike_times < min(gui_data.t_peri_event(:)) 
 
 if ~any(diff(reshape(gui_data.t_peri_event',[],1)) < 0)
     % (if no backward time jumps, can do long bin and cut out in-between, faster)
-    curr_raster_continuous = reshape([histcounts(mcurr_raster_spike_times, ...
+    curr_raster_continuous = reshape([histcounts(curr_raster_spike_times, ...
         reshape(gui_data.t_peri_event',[],1)),NaN],size(gui_data.t_peri_event'))';
     curr_raster = curr_raster_continuous(:,1:end-1);   
 else

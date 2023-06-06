@@ -9,7 +9,7 @@ curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};
 
-protocol = ''; % (this is the name of the Signals protocol)
+protocol = 'choiceworld'; % (this is the name of the Signals protocol)
 experiments = AP_find_experimentsJF(animal, protocol, true);
 experiments = experiments([experiments.ephys]);
 
@@ -25,7 +25,7 @@ experiments = experiments([experiments.ephys]);
 
 %% Load data from experiment 
 
-curr_day = 4; % (set which day to use)
+curr_day = 8; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
@@ -54,7 +54,7 @@ for iExperiment = experiments(curr_day).experiment
     end
 end 
 
-experiment = 2;%find(n_trials == max(n_trials));
+experiment = experiments(curr_day).experiment(1);%find(n_trials == max(n_trials));
 loadClusters = 0;
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys_includingCompressed',site,recording);
 if size(ephysAPfile,2) ==2 %keep only ap
@@ -74,10 +74,12 @@ qMetricsExist = dir(fullfile(savePath, 'qMetric*.mat'));
 %load_parts.cam = false;
 
 JF_load_experiment;
+curr_shank=NaN;
+%AP_cellraster({stimOn_times, stimOn_times}, {trial_conditions(:,2), trial_conditions(:,3)})
 %unique(spike_xdepths)
 %curr_shank=NaN
 theseImages = [4,6,12];
-trial_conditions(trial_conditions(:,1)>13,1) = trial_conditions(trial_conditions(:,1)>13,1)-13;
+%trial_conditions(trial_conditions(:,1)>13,1) = trial_conditions(trial_conditions(:,1)>13,1)-13;
 
 theseImages_trials = ismember(trial_conditions(:,1), theseImages) & ismember(trial_conditions(:,2), [-90,0]);
 AP_cellrasterJF({stimOn_times(theseImages_trials), stimOn_times(theseImages_trials), stimOn_times(theseImages_trials)},...
@@ -252,3 +254,35 @@ AP_cellrasterJF({stimOn_times(theseImages_trials), stimOn_times(theseImages_tria
 % % %     thisTemplate, raster_window, psth_bin_size, align_times, align_group,...
 % % %    sort_by, color_by, plot_me);
 % % % title(['unit' num2str(thisTemplate)])
+
+
+%% example cells 
+% CP: 110, 1, 1 units 241, 185, 235, 223, 215, 325 
+%unique_templates = unique(spike_templates);
+% responds 
+% colorMtx =  bc_colors(3, 'w');
+% raster_window = [-0.5, 1];
+% psth_bin_size = 0.01;
+% align_times = stimOn_times;
+% [curr_psth, curr_raster, t, raster_x, raster_y] = cl_raster_psth(spike_templates, spike_times_timeline, ...
+%     33, raster_window, psth_bin_size, align_times, []);
+%                figure();
+% subplot(3,1,[1,2])
+% s = scatter(t(raster_x(1:1:end)), raster_y(1:1:end), 3, [0,0,0], 'filled', 'MarkerFaceAlpha', 0.1, ...
+%     'MarkerEdgeAlpha', 0.1);
+% s.MarkerFaceAlpha = 0.2;
+% s.AlphaData = 0.1* ones(size(raster_y,1),1);
+% s.MarkerFaceAlpha = 'flat';
+% ylabel('trial #')
+% xticklabels({''})
+% makepretty;
+% ylim([0 1200])
+% 
+% 
+% subplot(3,1,[3])
+% plot(t, curr_psth .* 1/psth_bin_size,'Color', [0,0,0])
+% xlabel('time from stim onset (s)')
+% ylabel('spikes/s')
+% makepretty;
+
+% selectivity

@@ -3,7 +3,7 @@
 
 keep passive_data regions
 close all;
-
+figure('Color', 'white')
 cl_myPaths;
 regionResolution = [1, 1, 1, 1, 1, 1, 1];
 
@@ -102,11 +102,11 @@ for iRegion = 1:size(regions, 2)
         binnedArrayPixel(binnedArrayPixel == 0) = NaN;
         
         % smooth data
-        if iRegion==1
-            binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, 4, 4);
-        else
-            binnedArrayPixelSmooth = binnedArrayPixel;
-        end
+        %if iRegion==1
+            binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, 1, 1);
+        %else
+       %     binnedArrayPixelSmooth = binnedArrayPixel;
+        %end
 
        % remove any data points outside of the ROI
        isIN = nan(size(binnedArrayPixelSmooth, 1), size(binnedArrayPixelSmooth, 2));
@@ -167,6 +167,12 @@ for iRegion = 1:size(regions, 2)
         set(gca, 'color', [0.5, 0.5, 0.5]);
         xlim([projection_view_bins{iProjection}{1}(1) , projection_view_bins{iProjection}{1}(end) ])
         ylim([projection_view_bins{iProjection}{2}(1) , projection_view_bins{iProjection}{2}(end) ])
+        set(gca,'xticklabel',{[]})
+        set(gca,'yticklabel',{[]})
+        set(gca,'XTick',[])
+        set(gca,'YTick',[])
+        set(gca,'YColor', [1 1 1])
+        set(gca,'XColor', [1 1 1])
    end
   keep passive_data regions thisCmap_limits st av regionResolution structure_alpha theseColors dFR_psth iRegion bregma
 end

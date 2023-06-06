@@ -17,10 +17,7 @@ cl_celltype_example;
 cl_GPe_celltype_playground; 
 
 % cell selctivity/encoding of specific visual stimuli 
-passive_data_gr = cl_loadPerStimulusData('passive', 1);
-passive_data_lo = cl_loadPerStimulusData('passive', 2);
-passive_data_nat1 = cl_loadPerStimulusData('passive', 3);
-passive_data_nat2 = cl_loadPerStimulusData('passive', 6);
+passive_data_per_cond = cl_loadPerStimulusData('passive');
 %choiceworld only 
 cl_selectivity;
 %decoding? 
@@ -33,7 +30,7 @@ cl_motionIndex;
 
 % passive (for vs task) 
 passive_data_cw1 = cl_loadPerStimulusData('passive', 4);
-passive_data_cw2 = cl_loadPerStimulusData('passive', 5);
+passive_data_cw1 = cl_loadPerStimulusData('passive', 5);
 
 cl_plot_average_passive_cw; 
 % DMS vs PS 

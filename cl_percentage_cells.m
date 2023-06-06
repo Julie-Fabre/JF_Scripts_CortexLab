@@ -23,8 +23,7 @@
 
 % just do a sign rank test (in cl_loadPerStimulusData)(positive for any of
 % conditions w/ holm-bonferroni test) 
-keep regions passive_data
-
+keep regions task_data passive_data
     responsive_cells = passive_data.pvalue < 0.05 &...
         passive_data.pvalue_shuffled ==1;
 zscore_psth = (passive_data.psth - nanmean(passive_data.psth(:,1:50),2)) ./ ...
@@ -38,16 +37,30 @@ for iRegion=1:size(regions,2)
         keep_these) ;
 end
 
+
+
+    responsive_cells_task = task_data.pvalue{2} < 0.05 &...
+        task_data.pvalue_shuffled_005{2} ==1;
+zscore_psth = squeeze((task_data.psth{2}(:,1,1,:)) - nanmean(squeeze(task_data.psth{2}(:,1,1,1:50)),2)) ./ ...
+    nanstd(squeeze(task_data.psth{2}(:,1,1,1:50)),[],2);
+ keep_these = sum(isnan(zscore_psth),2)<100;
+for iRegion=1:size(regions,2)
+    responsive_cell_region_task(iRegion) = 2* sum(responsive_cells_task' & task_data.unit_area ==iRegion &...
+        (task_data.unitType' ==1 | task_data.unitType' ==2) ) / ...
+        sum(task_data.unit_area ==iRegion&...
+        (task_data.unitType' ==1 | task_data.unitType' ==2)&...
+        keep_these) ;
+end
+
 % increase vs decrease types 
 
 cl_plottingSettings;
-
+colorMtx = bc_colors(4);
 figure();
-b = barh(3:-1:1, responsive_cell_region([1,2,5]), 0.2, 'facecolor', 'flat');
-b.CData = [regionColors{3};...
-    regionColors{2};regionColors{1}];
-yticks([1:3])
-yticklabels({'SNr', 'GPe', 'CP'})
+b = barh(2:-1:1, [responsive_cell_region(1), responsive_cell_region_task(1)], 0.2, 'facecolor', 'flat');
+b.CData = [colorMtx(4,:);colorMtx(3,:)];
+yticks([1:2])
+yticklabels({'pre-learning', 'post-learning'})
 makepretty;
 xlabel(['fraction of' newline 'visual cells'])
 

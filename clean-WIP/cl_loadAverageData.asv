@@ -48,7 +48,7 @@ passive_data = struct;
 use_recs = find(use_recs);
 unitCount = 0;
 
-for iRecording = 83:length(use_recs)
+for iRecording = 1:length(use_recs)
     % curr variables
     animal = unique_mice{mouse_day_sites_shank_rec(iRecording, 1)};
     curr_day = mouse_day_sites_shank_rec(iRecording, 2);
@@ -166,7 +166,7 @@ for iRecording = 83:length(use_recs)
 
                 %responsive cell? signrank test
                  passive_data.pvalue(iUnit+unitCount) = ...
-                    signrank(nanmean(curr_raster(:, 20:40), 2), nanmean(curr_raster(:, 55:75), 2));
+                    signrank(nanmean(curr_raster(:, 40:50), 2), nanmean(curr_raster(:, 55:75), 2));
                 %responsive cell?  shuffle pre/post labels 
 
                 pre_activity = nanmean(curr_raster(:, 40:50), 2);
@@ -179,8 +179,11 @@ for iRecording = 83:length(use_recs)
                 pctile_2 = prctile(shuffled_diffs, 95);
                 pctile_1 = prctile(shuffled_diffs, 5);
 
-                passive_data.pvalue_shuffled(iUnit+unitCount) = ...
+                passive_data.pvalue_shuffled_005(iUnit+unitCount) = ...
                    real_diff >= pctile_2 || real_diff <= pctile_1;
+
+                 passive_data.pvalue_shuffled_0025(iUnit+unitCount) = ...
+                   real_diff >= prctile(shuffled_diffs, 97.5) || real_diff <= prctile(shuffled_diffs, 2.5);
                 
 %                 colorMtx =  bc_colors(3, 'w');
 %                 figure();
@@ -257,4 +260,5 @@ for iRecording = 83:length(use_recs)
     end
     disp(num2str(iRecording))
 end
+
 end

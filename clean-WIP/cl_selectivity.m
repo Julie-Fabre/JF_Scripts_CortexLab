@@ -39,19 +39,18 @@
 
 
 % for each condition, measure
-keep passive_data_per_cond regions
+passive_data_per_cond = passive_data_gr;
+keep passive_data_per_cond passive_data_gr passive_data_lo passive_data_nat1 passive_data_nat2 regions
 selectivity_index = cell(size(regions,2),1);
 n_conditions = 4;
-for iRegion = 1:size(regions,2)
+for iRegion = [1,2,5]
     curr_units = find(passive_data_per_cond.unit_area == iRegion);
     selectivity_index{iRegion} = nan(size(curr_units, 1), 4);
 
     for iCondition = 1:n_conditions %QQ for 4th, combine 5th, + only use central ? 
-        if iCondition == 4 
-            use_conditions = 2:2:26;
-        else
+        
             use_conditions = 1:size(passive_data_per_cond.psth{iCondition},3);
-        end
+           % use_conditions
         for iUnit = 1:size(curr_units, 1)
 %            iUnit = iUnit+1
             thisUnit = curr_units(iUnit);
