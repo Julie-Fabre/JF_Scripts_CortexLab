@@ -20,12 +20,15 @@ cl_plot_average_task;
 
 task_data = cl_loadPerStimulusData('task', 2); 
 gogogo = 0;
+passive =0;
 cl_plot_average_task; 
 
 
 task_data_gogogo = cl_loadPerStimulusData('taskGo', 2); 
 gogogo = 1;
+passive =0;
 cl_plot_average_task; 
+cl_PC_analysis;
 % cl_selectivity;
 % %decoding? 
 % cl_location_selectivity; 

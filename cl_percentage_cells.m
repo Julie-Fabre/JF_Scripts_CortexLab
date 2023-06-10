@@ -30,12 +30,51 @@ zscore_psth = (passive_data.psth - nanmean(passive_data.psth(:,1:50),2)) ./ ...
     nanstd(passive_data.psth(:,1:50),[],2);
  keep_these = sum(isnan(zscore_psth),2)<100;
 for iRegion=1:size(regions,2)
-    responsive_cell_region(iRegion) = 2* sum(responsive_cells' & passive_data.unit_area ==iRegion &...
-        (passive_data.unitType' ==1 | passive_data.unitType' ==2) ) / ...
+    responsive_cell_region(iRegion) = sum(responsive_cells' & passive_data.unit_area ==iRegion &...
+        (passive_data.unitType' ==1 | passive_data.unitType' ==2) &keep_these ) / ...
         sum(passive_data.unit_area ==iRegion&...
         (passive_data.unitType' ==1 | passive_data.unitType' ==2)&...
         keep_these) ;
+
+    responsive_cell_region_up(iRegion) = sum(responsive_cells' & passive_data.unit_area ==iRegion &...
+        (passive_data.unitType' ==1 | passive_data.unitType' ==2) &keep_these & nanmean(zscore_psth(:,55:65),2) > 0) / ...
+        sum(passive_data.unit_area ==iRegion&...
+        (passive_data.unitType' ==1 | passive_data.unitType' ==2)&...
+        keep_these) ;
+
+     responsive_cell_region_down(iRegion) = sum(responsive_cells' & passive_data.unit_area ==iRegion &...
+        (passive_data.unitType' ==1 | passive_data.unitType' ==2) &keep_these & nanmean(zscore_psth(:,55:65),2) < 0) / ...
+        sum(passive_data.unit_area ==iRegion&...
+        (passive_data.unitType' ==1 | passive_data.unitType' ==2)&...
+        keep_these) ;
+
+
 end
+
+cl_plottingSettings;
+colorMtx = bc_colors(4);
+figure();
+b = bar(1:3, [responsive_cell_region([1,2,5])], 0.2, 'facecolor', 'flat');
+b.CData = [regionColors{1};regionColors{2};regionColors{3}];
+xticks([1:3])
+xticklabels({'STR', 'GPe', 'SNr'})
+makepretty;
+ylabel(['fraction of' newline 'visual cells'])
+xlim([0.5,3.5])
+
+iRegion =1 ;
+cl_plottingSettings;
+colorMtx = bc_colors(4);
+figure();
+b = barh(1:2, [responsive_cell_region_up(iRegion), responsive_cell_region_down(iRegion)], 0.2, 'facecolor', 'flat');
+b.CData = [regionColors{iRegion}; regionColors{iRegion}];
+yticks([1:2])
+yticklabels({'decrease', 'increase'})
+makepretty;
+ylabel(['fraction of' newline 'visual cells'])
+ylim([0.5,2.5])
+xlim([0, 0.076])
+
 
 
 

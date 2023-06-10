@@ -18,7 +18,7 @@ for iAnimal = 1:size(animalsAll, 2)
     else
         thisSide = 1;
     end
-    protocol = 'stage'; %'location'; %protocol name contains this name
+    protocol = 'noGo'; %'location'; %protocol name contains this name
     protocol2 = 'location';
     protocol3 = 'Hack';
     flexible_name = true; %protocol name can be slightly different
@@ -32,7 +32,7 @@ for iAnimal = 1:size(animalsAll, 2)
     bhv = struct; %initialize structure
     keep_day = [];
     noGoDay = [];
-    theseD = length(experiments)-12:length(experiments);
+    theseD = 1:length(experiments);
     if strcmp(animalsAll{iAnimal}, 'JF067')
         theseD(26) = [];
     end
@@ -110,11 +110,11 @@ for iAnimal = 1:size(animalsAll, 2)
 
                     block.events.hitValues(response_trials) = ff(response_trials);
                 end
-                if contains(block.expDef, 'goNoGo') 
+                if contains(block.expDef, 'goNoGo')
                     go1Trials = block.events.trialTypeValues(response_trials) == 1;
                     go2Trials = block.events.trialTypeValues(response_trials) == 2;
                     noGoTrials = block.events.trialTypeValues(response_trials) == 3;
-                elseif contains(block.expDef, 'Hack') || contains(block.expDef, 'noGo_stage4') || contains(block.expDef, 'noGo_stage5') || contains(block.expDef, 'noGo_path2stage3')
+                elseif contains(block.expDef, 'Hack') || contains(block.expDef, 'noGo_stage4') || contains(block.expDef, 'noGo_stage5') || contains(block.expDef, 'path2')
                     go1Trials = block.events.stimulusTypeValues(response_trials) == 1;
                     go2Trials = block.events.stimulusTypeValues(response_trials) == 2;
                     noGoTrials = block.events.stimulusTypeValues(response_trials) == 3;
@@ -124,21 +124,21 @@ for iAnimal = 1:size(animalsAll, 2)
                     noGoTrials = zeros(size(block.events.trialSideValues(response_trials), 2), 1)';
                 end
                 if isfield(block.events, 'repeatTrialValues')
-                    repeatOnMisses = block.events.repeatTrialValues(response_trials) > 0;
+                    repeatOnMisses = block.events.repeatTrialValues(response_trials) > 1;
                 else
                     repeatOnMisses = block.events.repeatNumValues(response_trials) > 1;
                 end
                 correctTrials((iImg - 1)*3+1) = sum( ...
-                    abs(block.events.hitValues(response_trials)) == 1 & go1Trials ...
+                    block.events.hitValues(response_trials) == 1 & go1Trials ...
                     ); % go 1
                 correctTrials((iImg - 1)*3+2) = sum( ...
-                    abs(block.events.hitValues(response_trials)) == 1 & go2Trials ...
+                    block.events.hitValues(response_trials) == 1 & go2Trials ...
                     ); % go 2
                 correctTrials((iImg - 1)*3+3) = sum( ...
-                    abs(block.events.hitValues(response_trials)) == 1 & noGoTrials ...
+                    block.events.hitValues(response_trials) == 1 & noGoTrials ...
                     ); % no go
 
-                nTrials((iImg - 1)*3+1) = sum(~repeatOnMisses(response_trials)  & ...
+                nTrials((iImg - 1)*3+1) = sum(~repeatOnMisses(response_trials) & ...
                     go1Trials ...
                     );
                 nTrials((iImg - 1)*3+2) = sum(~repeatOnMisses(response_trials) & ...
@@ -164,7 +164,7 @@ for iAnimal = 1:size(animalsAll, 2)
                 noGoTrialsSecHalf = noGoTrials;
                 noGoTrialsSecHalf(1:round(length(go1Trials)/2)) = 0;
                 
-                if contains(block.expDef, 'Hack') || contains(block.expDef, 'noGo_stage4') || contains(block.expDef, 'noGo_stage5') || contains(block.expDef, 'noGo_path2stage3')
+                if contains(block.expDef, 'Hack') || contains(block.expDef, 'noGo_stage4') || contains(block.expDef, 'noGo_stage5')|| contains(block.expDef, 'path2')
                     if strcmp(animal, 'JF042') || strcmp(animal, 'JF043') || strcmp(animal, 'JF044')
                         val = 1;
                     else
@@ -183,7 +183,7 @@ for iAnimal = 1:size(animalsAll, 2)
                         ...
                         block.events.hitValues(response_trials) == val & go1Trials ...
                         );
-                    goLeft((iImg - 1)*3+2) = sum(~repeatOnMisses(response_trials)& ...
+                    goLeft((iImg - 1)*3+2) = sum(~repeatOnMisses(response_trials) & ...
                         ...
                         block.events.hitValues(response_trials) == val & go2Trials ...
                         );
@@ -212,7 +212,7 @@ for iAnimal = 1:size(animalsAll, 2)
                     );
                 
                     
-                    goLeft1((iImg - 1)*3+1) = sum(repeatOnMisses(response_trials) & ...
+                    goLeft1((iImg - 1)*3+1) = sum(~repeatOnMisses(response_trials) & ...
                         ...
                         block.events.hitValues(response_trials) == val & go1TrialsFirstHalf ...
                         );
@@ -246,15 +246,15 @@ for iAnimal = 1:size(animalsAll, 2)
                 else
                     timeThis = block.events.stimOffTimes(response_trials) - block.events.stimOnTimes(response_trials);
                 end
-                trialTime((iImg - 1)*3+1) = nanmean(timeThis([repeatOnMisses(response_trials(2:end))<2, 0] & ...
+                trialTime((iImg - 1)*3+1) = nanmean(timeThis(~[repeatOnMisses(response_trials(2:end)), 0] & ...
                     ...
                     go1Trials ...
                     ));
-                trialTime((iImg - 1)*3+2) = nanmean(timeThis([repeatOnMisses(response_trials(2:end))<2, 0] & ...
+                trialTime((iImg - 1)*3+2) = nanmean(timeThis(~[repeatOnMisses(response_trials(2:end)), 0] & ...
                     ...
                     go2Trials ...
                     ));
-                trialTime((iImg - 1)*3+3) = nanmean(timeThis([repeatOnMisses(response_trials(2:end))<2, 0] & ...
+                trialTime((iImg - 1)*3+3) = nanmean(timeThis(~[repeatOnMisses(response_trials(2:end)), 0] & ...
                     ...
                     noGoTrials ...
                     ));
@@ -581,7 +581,7 @@ for iAnimal = 1:size(animalsAll, 2)
                 expDefName = block.expDef(expDefNameStart:expDefNameStart+5);
                 bhv.expDefName{curr_day} = expDefName;
                 
-                if contains(block.expDef, 'NoGo') || contains(block.expDef, 'stage4') || contains(block.expDef, 'stage5') || contains(block.expDef, 'path2')bhvD
+                if contains(block.expDef, 'NoGo') || contains(block.expDef, 'stage4') || contains(block.expDef, 'stage5')|| contains(block.expDef, 'path2')
                     noGoDay = [noGoDay, curr_day];
                     if sum(go2Trials) >= 1
 
@@ -621,10 +621,10 @@ for iAnimal = 1:size(animalsAll, 2)
     end
     keep_day = unique(keep_day);
     day_num = cellfun(@(x) datenum(x), {experiments(keep_day).day});
-    day_labels_temp = cellfun(@(day, protocol) [day(6:end)], ...
-        {experiments(keep_day).day},bhv.expDefName(keep_day), 'uni', false);
-    bhvOut(iAnimal). dates =  cellfun(@(day, protocol) [day], ...
-        {experiments(keep_day).day},bhv.expDefName(keep_day), 'uni', false);
+%     day_labels_temp = cellfun(@(day, protocol) [day(6:end)], ...
+%         {experiments(keep_day).day},bhv.expDefName(keep_day), 'uni', false);
+%     bhvOut(iAnimal). dates =  cellfun(@(day, protocol) [day], ...
+%         {experiments(keep_day).day},bhv.expDefName(keep_day), 'uni', false);
     %  day_labels = cellfun(@(day, protocol) [protocol, ' ', day(6:end)], ...
     %    {experiments(keep_day).day},bhv.expDefName(keep_day), 'uni', false);
     %
@@ -632,12 +632,12 @@ for iAnimal = 1:size(animalsAll, 2)
        
  
 
-    [unique_protocols,~,protocol_idx] = unique(bhv.expDefName(keep_day));
-    protocol_col = hsv(length(unique_protocols));
-    for iDay = 1:length(protocol_idx)
-        thisColor = sprintf(tempLabel,num2str(protocol_col(protocol_idx(iDay),:)));
-        day_labels{iDay} = append(thisColor, day_labels_temp{iDay});
-    end
+%    [unique_protocols,~,protocol_idx] = unique(bhv.expDefName(keep_day));
+ %   protocol_col = hsv(length(unique_protocols));
+%     for iDay = 1:length(protocol_idx)
+%         thisColor = sprintf(tempLabel,num2str(protocol_col(protocol_idx(iDay),:)));
+%         day_labels{iDay} = append(thisColor, day_labels_temp{iDay});
+%     end
     figure('Name', animal);
     subplot(231)
     yyaxis left
@@ -659,7 +659,7 @@ for iAnimal = 1:size(animalsAll, 2)
     ylabel('Total water (ul)');
     xlabel('Session');
     set(gca,'XTick',day_num);
-    set(gca,'XTickLabel',day_labels);
+%    set(gca,'XTickLabel',day_labels);
     set(gca,'XTickLabelRotation',45);
     %set(gca, 'Color', 
     makepretty;
@@ -685,7 +685,7 @@ for iAnimal = 1:size(animalsAll, 2)
     set(gca, 'XTick', 1:length(con));
     set(gca, 'XTickLabel', cc);
     set(gca, 'YTick', 1:length(keep_day));
-    set(gca, 'YTickLabel', day_labels);
+   % set(gca, 'YTickLabel', day_labels);
     xticks([1, 2, 3])
     xticklabels({'Go1', 'Go2', 'NoGo'})
     caxis([0, 1])
@@ -708,7 +708,7 @@ for iAnimal = 1:size(animalsAll, 2)
     set(gca, 'XTick', 1:length(con));
     set(gca, 'XTickLabel', cc);
     set(gca, 'YTick', 1:length(keep_day));
-    set(gca, 'YTickLabel', day_labels);
+  %  set(gca, 'YTickLabel', day_labels);
     xticks([1, 2, 3])
     xticklabels({'Go1', 'Go2', 'NoGo'})
 
@@ -732,7 +732,7 @@ for iAnimal = 1:size(animalsAll, 2)
     set(gca, 'XTick', 1:length(con));
     set(gca, 'XTickLabel', cc);
     set(gca, 'YTick', 1:length(keep_day));
-    set(gca, 'YTickLabel', day_labels);
+%    set(gca, 'YTickLabel', day_labels);
     %     for iDay = 1:size(keep_day, 2)
     %         txt = num2str(bhv.trialTime(keep_day(iDay), :)');
     %         text((1:length(con))-0.2, ones(1, length(con))*iDay, txt, 'BackgroundColor', 'w')
@@ -760,9 +760,10 @@ for iAnimal = 1:size(animalsAll, 2)
     subplot(235)
 
     transparencyValues = 0:1 / length(noGoDay):1;
-    bhvOut(iAnimal).protocol_idx = protocol_idx;
-    bhvOut(iAnimal).day_labels = day_labels;
+%    bhvOut(iAnimal).protocol_idx = protocol_idx;
+ %   bhvOut(iAnimal).day_labels = day_labels;
     bhvOut(iAnimal).binBorders = binBorders;
+    bhv.movingFrac = [];
     bhvOut(iAnimal).movingFracGo1 = bhv.movingFrac;
     bhvOut(iAnimal).goLeft = bhv.goLeft(:, :);
     bhvOut(iAnimal).nTrials = bhv.nTrials(:, :);
@@ -790,6 +791,7 @@ for iAnimal = 1:size(animalsAll, 2)
     bhvOut(iAnimal).go1trials = bhv.go1trials;
     bhvOut(iAnimal).noGotrials = bhv.noGotrials;
     bhvOut(iAnimal).stim_to_move = bhv.stim_to_move;
+    bhvOut(iAnimal).stim_to_moveMean = bhv.stim_to_moveMean;
 
     if length(noGoDay) >= 1
         bhvOut(iAnimal).movingFracGo1(noGoDay, :) = bhv.movingFracGo1(noGoDay, :);

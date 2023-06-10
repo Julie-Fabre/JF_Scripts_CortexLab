@@ -4,7 +4,7 @@
 %clear all;
 cl_myPaths;
 
-animals={'JF093'};
+animals={'JF109'};
 curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};
@@ -25,7 +25,7 @@ experiments = experiments([experiments.ephys]);
 
 %% Load data from experiment 
 
-curr_day = 8; % (set which day to use)
+curr_day = 2; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
@@ -35,8 +35,8 @@ load_parts.cam=false;
 load_parts.imaging=false;
 load_parts.ephys=true;
 
-site = 1;%1,1; 2,4; 3,7
-recording = []; 
+site = 4;%1,1; 2,4; 3,7
+recording = 1; 
 % keep experiment with max n trials (= most likely not aborted error or end
 % shank mapping) QQ change this in the future 
 n_trials = zeros(size(experiments(curr_day).experiment,2), 1);
@@ -54,7 +54,7 @@ for iExperiment = experiments(curr_day).experiment
     end
 end 
 
-experiment = experiments(curr_day).experiment(1);%find(n_trials == max(n_trials));
+experiment = 1;%experiments(curr_day).experiment(1);%find(n_trials == max(n_trials));
 loadClusters = 0;
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys_includingCompressed',site,recording);
 if size(ephysAPfile,2) ==2 %keep only ap
@@ -258,31 +258,43 @@ AP_cellrasterJF({stimOn_times(theseImages_trials), stimOn_times(theseImages_tria
 
 %% example cells 
 % CP: 110, 1, 1 units 241, 185, 235, 223, 215, 325 
-%unique_templates = unique(spike_templates);
-% responds 
-% colorMtx =  bc_colors(3, 'w');
-% raster_window = [-0.5, 1];
-% psth_bin_size = 0.01;
-% align_times = stimOn_times;
-% [curr_psth, curr_raster, t, raster_x, raster_y] = cl_raster_psth(spike_templates, spike_times_timeline, ...
-%     33, raster_window, psth_bin_size, align_times, []);
-%                figure();
-% subplot(3,1,[1,2])
-% s = scatter(t(raster_x(1:1:end)), raster_y(1:1:end), 3, [0,0,0], 'filled', 'MarkerFaceAlpha', 0.1, ...
-%     'MarkerEdgeAlpha', 0.1);
-% s.MarkerFaceAlpha = 0.2;
-% s.AlphaData = 0.1* ones(size(raster_y,1),1);
-% s.MarkerFaceAlpha = 'flat';
-% ylabel('trial #')
-% xticklabels({''})
-% makepretty;
-% ylim([0 1200])
-% 
-% 
-% subplot(3,1,[3])
-% plot(t, curr_psth .* 1/psth_bin_size,'Color', [0,0,0])
-% xlabel('time from stim onset (s)')
-% ylabel('spikes/s')
-% makepretty;
+stimC = [224, 85, 159]./256;
+unique_templates = unique(spike_templates);
+%responds 
+thisUnit = 46
+colorMtx =  bc_colors(3, 'w');
+raster_window = [-0.5, 1];
+psth_bin_size = 0.001;
+align_times = stimOn_times;
+[curr_psth, curr_raster, t, raster_x, raster_y] = cl_raster_psth(spike_templates, spike_times_timeline, ...
+    thisUnit , raster_window, psth_bin_size, align_times, []);
+               figure();
+subplot(3,1,[1,2])
+s = scatter(t(raster_x(1:1:end)), raster_y(1:1:end), 3, [0,0,0], 'filled', 'MarkerFaceAlpha', 0.1, ...
+    'MarkerEdgeAlpha', 0.1);
+s.MarkerFaceAlpha = 0.2;
+s.AlphaData = 0.1* ones(size(raster_y,1),1);
+s.MarkerFaceAlpha = 'flat';
+ylabel('trial #')
+xticklabels({''})
+makepretty;
 
+ylim([1 1080])
+yLim = ylim; 
+line([0, 0], [yLim(1), yLim(2)], 'Color', stimC, 'LineWidth', 2)
+xlim([-0.15, 0.3])
+
+psth_bin_size = 0.01;
+align_times = stimOn_times;
+[curr_psth, curr_raster, t, raster_x, raster_y] = cl_raster_psth(spike_templates, spike_times_timeline, ...
+    thisUnit , raster_window, psth_bin_size, align_times, []);
+subplot(3,1,[3])
+plot(t, curr_psth .* 1/psth_bin_size,'Color', [0,0,0])
+xlabel('time from stim onset (s)')
+ylabel('spikes/s')
+makepretty;
+hold on;
+yLim = ylim; 
+line([0, 0], [yLim(1), yLim(2)], 'Color', stimC, 'LineWidth', 2)
+xlim([-0.15, 0.3])
 % selectivity

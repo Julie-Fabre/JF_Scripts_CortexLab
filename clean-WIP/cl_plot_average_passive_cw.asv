@@ -25,30 +25,18 @@ unit_regions = [passive_data_cw_all(1).unit_area; passive_data_cw_all(2).unit_ar
 pvalue_shuffled = [passive_data_cw_all(1).pvalue_shuffled_005{5}, passive_data_cw_all(2).pvalue_shuffled_005{4}];
 pvalue = [passive_data_cw_all(1).pvalue{5}, passive_data_cw_all(2).pvalue{4}];
 
-zscore_psth(:,1) = [(nanmean(squeeze(passive_data_cw_all(1).psth{5}(:,1,1,55:65)),2) - nanmean(squeeze(passive_data_cw_all(1).psth{5}(:,1,1,1:50)),2)) ./ ...
+zscore_psth(1,:) = [(nanmean(squeeze(passive_data_cw_all(1).psth{5}(:,1,1,55:65)),2) - nanmean(squeeze(passive_data_cw_all(1).psth{5}(:,1,1,1:50)),2)) ./ ...
      nanstd(squeeze(passive_data_cw_all(1).psth{5}(:,1,1,1:50)),[],2);...
-     (nanmean(squeeze(passive_data_cw_all(2).psth{4}(:,1,2,55:65)),2) - nanmean(squeeze(passive_data_cw_all(2).psth{4}(:,1,2,1:50)),2)) ./ ...
-     nanstd(squeeze(passive_data_cw_all(2).psth{4}(:,1,2,1:50)),[],2)];
-
-zscore_psth(:,2) = [(nanmean(squeeze(passive_data_cw_all(1).psth{5}(:,1,5,55:65)),2) - nanmean(squeeze(passive_data_cw_all(1).psth{5}(:,1,5,1:50)),2)) ./ ...
-     nanstd(squeeze(passive_data_cw_all(1).psth{5}(:,1,5,1:50)),[],2);...
-     (nanmean(squeeze(passive_data_cw_all(2).psth{4}(:,1,6,55:65)),2) - nanmean(squeeze(passive_data_cw_all(2).psth{4}(:,1,6,1:50)),2)) ./ ...
-     nanstd(squeeze(passive_data_cw_all(2).psth{4}(:,1,2,1:50)),[],2)];
-
-zscore_psth(:,3) = [(nanmean(squeeze(passive_data_cw_all(1).psth{5}(:,1,3,55:65)),2) - nanmean(squeeze(passive_data_cw_all(1).psth{5}(:,1,3,1:50)),2)) ./ ...
-     nanstd(squeeze(passive_data_cw_all(1).psth{5}(:,1,3,1:50)),[],2);...
-     (nanmean(squeeze(passive_data_cw_all(2).psth{4}(:,1,4,55:65)),2) - nanmean(squeeze(passive_data_cw_all(2).psth{4}(:,1,4,1:50)),2)) ./ ...
-     nanstd(squeeze(passive_data_cw_all(2).psth{4}(:,1,4,1:50)),[],2)];
+     ;
 region_max = [1, 1, 1, 1, 1, 1, 1];
-
 region_smooth = [5, 1, 1, 1, 1, 1, 1];
 %region_clim_string = {'z-score (clim saturated)', 'z-score', 'z-score', 'z-score', 'z-score', 'z-score', 'z-score'};
-for iRegion = 1%:size(regions,2)
+for iRegion = 2%:size(regions,2)
     
 
     
     % get all cells
-    these_units = unit_regions==iRegion& any(abs(zscore_psth)>2, 2);% & passive_data_cw_all.pvalue{4}' < 0.05 &...
+    these_units = unit_regions==iRegion ;% & passive_data_cw_all.pvalue{4}' < 0.05 &...
         %passive_data_cw_all.pvalue_shuffled_005{4}' == 1;%& passive_data_cw_all.pvalue{4}' < 0.05 &...
         %(passive_data_cw_all.unitType' ==1 | passive_data_cw_all.unitType' ==2) ;
 
@@ -127,36 +115,31 @@ end
 
 %figure(); 
 %scatter 
-passiveColor = [0, 0, 0]; %[214, 37, 41]./256;
-figure(2); 
-plot(passive_data_cw_all(1).t, nanmean(this_image_smooth_go1(keep_these,:)), 'Color', passiveColor); 
-plotshaded(task_data.t, [-nanstd(this_image_smooth_go1(keep_these,:))./sqrt(sum(keep_these)) + nanmean(this_image_smooth_go1(keep_these,:));...
-    nanstd(this_image_smooth_go1(keep_these,:))./sqrt(sum(keep_these)) + nanmean(this_image_smooth_go1(keep_these,:))],  passiveColor);
+ 
+% figure(2); 
+% plot(passive_data_cw_all(1).t, nanmean(this_image_smooth_go1(keep_these,:)), 'Color', colorMtx(3,:)); 
+plotshaded(task_data.t, [-nanstd(this_image_smooth_go1(keep_these,:)) + nanmean(this_image_smooth_go1(keep_these,:));...
+    nanstd(this_image_smooth_go1(keep_these,:)) + nanmean(this_image_smooth_go1(keep_these,:))],  colorMtx(4,:));
 
-xlabel('time from stim onset (s)')
-ylabel('zscore')
-legend('pre-learning', 'post-learning')
-ylim([-0.4, 3.5])
-xlim([-0.5, 0.8])
-makepretty;
-
-figure(3); 
-plot(passive_data_cw_all(1).t, nanmean(this_image_smooth_go1(keep_these,:)), 'Color', passiveColor); 
-plotshaded(task_data.t, [-nanstd(this_image_smooth_go2(keep_these,:))./sqrt(sum(keep_these)) + nanmean(this_image_smooth_go2(keep_these,:));...
-    nanstd(this_image_smooth_go2(keep_these,:))./sqrt(sum(keep_these)) + nanmean(this_image_smooth_go2(keep_these,:))],  passiveColor);
- xlabel('time from stim onset (s)')
-ylabel('zscore')
-legend('pre-learning', 'post-learning')
-xlim([-0.5, 0.8])
-makepretty;
+% xlabel('time from stim onset (s)')
+% ylabel('zscore')
+% legend('pre-learning', 'post-learning')
+% ylim([-0.4, 3.5])
+% xlim([-0.5, 0.8])
+% makepretty;
 % 
-figure(4); 
-plot(passive_data_cw_all(1).t, nanmean(this_image_smooth_noGo(keep_these,:)), 'Color', passiveColor); 
-plotshaded(task_data.t, [-nanstd(this_image_smooth_noGo(keep_these,:))./sqrt(sum(keep_these)) + nanmean(this_image_smooth_noGo(keep_these,:));...
-    nanstd(this_image_smooth_noGo(keep_these,:))./sqrt(sum(keep_these)) + nanmean(this_image_smooth_noGo(keep_these,:))],  passiveColor);
- xlabel('time from stim onset (s)')
-ylabel('zscore')
-legend('pre-learning', 'post-learning')
-xlim([-0.5, 0.8])
-makepretty;
-
+% figure(3); 
+% plot(passive_data_cw_all(1).t, nanmean(this_image_smooth_go2(keep_these,:)), 'Color', colorMtx(3,:)); 
+% xlabel('time from stim onset (s)')
+% ylabel('zscore')
+% legend('pre-learning', 'post-learning')
+% xlim([-0.5, 0.8])
+% makepretty;
+% 
+% figure(4); 
+% plot(passive_data_cw_all(1).t, nanmean(this_image_smooth_noGo(keep_these,:)), 'Color', colorMtx(3,:)); 
+% xlabel('time from stim onset (s)')
+% ylabel('zscore')
+% legend('pre-learning', 'post-learning')
+% xlim([-0.5, 0.8])
+% makepretty;

@@ -1,6 +1,8 @@
 %% passive_master script 
 
 % do cells encode visual stimuli? 
+regions = {'CP', 'GPe', 'GPi', 'STN', 'SNr', 'SNc', 'VTA'};
+
 reload = 0; 
 if reload 
     passive_data = cl_loadAverageData('passive'); % check we don't have any duplicates 

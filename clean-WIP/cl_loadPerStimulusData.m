@@ -72,6 +72,7 @@ for iRecording = 1:length(use_recs)
     probe_ccf_location = AP_cortexlab_filenameJF(animal, [], [], 'histo');
     load(probe_ccf_location)
     new_units =[];
+    units_to_keep =[];
     % is any region present
     this_probe = probe_rec_idx;
     if this_probe > 1
@@ -120,7 +121,11 @@ for iRecording = 1:length(use_recs)
                 load_parts.imaging = false;
                 load_parts.ephys = true;
                 loadClusters = 0;
-                JF_load_experiment;
+                try
+                    JF_load_experiment;
+                catch
+                    continue
+                end
                 if contains(load_type, 'passive')
                     if contains(expDef, 'JF_GratingPassiveVarITI')
                         if keep_type ~= 1

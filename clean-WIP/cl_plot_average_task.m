@@ -26,7 +26,7 @@ end
 region_max = [1, 1, 1, 1, 1, 1, 1];
 region_smooth = [5, 1, 1, 1, 1, 1, 1];
 %region_clim_string = {'z-score (clim saturated)', 'z-score', 'z-score', 'z-score', 'z-score', 'z-score', 'z-score'};
-for iRegion = 2%:size(regions,2)
+for iRegion = 1%:size(regions,2)
     
 
     
@@ -112,31 +112,39 @@ end
 keep_these2 = find(keep_these);
 %keep_these2 = keep_these2(80:end);
 colorMtx = bc_colors(4);
-figure(1); 
-%title('Go1'); hold on;
-plot(task_data_here.t, nanmean(this_image_smooth_go1(keep_these2,:)), 'Color', colorMtx(3,:)); hold on;
-plotshaded(task_data_here.t, [-nanstd(this_image_smooth_go1(keep_these2,:))./sqrt(length(this_image_smooth_go1(keep_these2,:))) + nanmean(this_image_smooth_go1(keep_these2,:));...
-    nanstd(this_image_smooth_go1(keep_these2,:)) + nanmean(this_image_smooth_go1(keep_these2,:))],  colorMtx(3,:));
-legend('Go no go -trained', '', 'pre-learning', '', 'Go go go trained')
-makepretty;
-xlim([-0.5, 0.8])
-ylim([-1, 6])
-
+if gogogo
+    thisColor = [214, 37, 41]./256;
+    num = 1.4;
+else
+    thisColor = [143, 103, 169]./256;
+    num=1;
+end
 figure(2); 
-%title('Go2'); hold on;
-plot(task_data_here.t, nanmean(this_image_smooth_go2(keep_these2,:))*1.4, 'Color', colorMtx(3,:)); hold on;
-plotshaded(task_data_here.t, [-nanstd(this_image_smooth_go2(keep_these2,:)) + nanmean(this_image_smooth_go2(keep_these2,:));...
-    nanstd(this_image_smooth_go2(keep_these2,:)) + nanmean(this_image_smooth_go2(keep_these2,:))],  colorMtx(3,:));
+title('Go1');
+ hold on;
+plot(task_data_here.t, nanmean(this_image_smooth_go1(keep_these2,:)), 'Color',thisColor); hold on;
+plotshaded(task_data_here.t, [-nanstd(this_image_smooth_go1(keep_these2,:))./sqrt(sum(keep_these2)) + nanmean(this_image_smooth_go1(keep_these2,:));...
+    nanstd(this_image_smooth_go1(keep_these2,:))./sqrt(sum(keep_these2)) + nanmean(this_image_smooth_go1(keep_these2,:))], thisColor);
 legend('Go no go -trained', '', 'pre-learning', '', 'Go go go trained')
 makepretty;
 xlim([-0.5, 0.8])
 ylim([-1, 6])
 
 figure(3); 
-%title('No Go'); hold on;
-plot(task_data_here.t, nanmean(this_image_smooth_noGo(keep_these2,:))*1.4, 'Color', colorMtx(3,:)); hold on;
-plotshaded(task_data_here.t, [-nanstd(this_image_smooth_noGo(keep_these2,:)) + nanmean(this_image_smooth_noGo(keep_these2,:));...
-    nanstd(this_image_smooth_noGo(keep_these2,:)) + nanmean(this_image_smooth_noGo(keep_these2,:))],  colorMtx(3,:));
+title('Go2'); hold on;
+plot(task_data_here.t, nanmean(this_image_smooth_go2(keep_these2,:))*num, 'Color',thisColor); hold on;
+plotshaded(task_data_here.t, [-nanstd(this_image_smooth_go2(keep_these2,:))./sqrt(sum(keep_these2)) + nanmean(this_image_smooth_go2(keep_these2,:))*num;...
+    nanstd(this_image_smooth_go2(keep_these2,:))./sqrt(sum(keep_these2)) + nanmean(this_image_smooth_go2(keep_these2,:))*num],  thisColor);
+legend('Go no go -trained', '', 'pre-learning', '', 'Go go go trained')
+makepretty;
+xlim([-0.5, 0.8])
+ylim([-1, 6])
+
+figure(4); 
+title('No Go'); hold on;
+plot(task_data_here.t, nanmean(this_image_smooth_noGo(keep_these2,:))*num, 'Color',thisColor); hold on;
+plotshaded(task_data_here.t, [-nanstd(this_image_smooth_noGo(keep_these2,:))./sqrt(sum(keep_these2)) + nanmean(this_image_smooth_noGo(keep_these2,:))*num;...
+    nanstd(this_image_smooth_noGo(keep_these2,:))./sqrt(sum(keep_these2)) + nanmean(this_image_smooth_noGo(keep_these2,:))*num],  thisColor);
 legend('Go no go -trained', '', 'pre-learning', '', 'Go go go trained')
 makepretty;
 xlim([-0.5, 0.8])
