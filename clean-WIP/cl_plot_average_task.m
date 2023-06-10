@@ -26,13 +26,13 @@ end
 region_max = [1, 1, 1, 1, 1, 1, 1];
 region_smooth = [5, 1, 1, 1, 1, 1, 1];
 %region_clim_string = {'z-score (clim saturated)', 'z-score', 'z-score', 'z-score', 'z-score', 'z-score', 'z-score'};
-for iRegion = 1%:size(regions,2)
+for iRegion = 2%:size(regions,2)
     
 
     
     % get all cells %1:301
-    these_units = task_data_here.unit_area(1:301)==iRegion &...
-        task_data_here.pvalue_shuffled_005{2}(1:301)' == 1;% & task_data.pvalue{2}' < 0.05 &...
+    these_units = task_data_here.unit_area==iRegion &...
+        task_data_here.pvalue_shuffled_005{2}(1:size(task_data_here.unit_area,1))' == 1;% & task_data.pvalue{2}' < 0.05 &...
         %task_data.pvalue_shuffled_005{2}' == 1;%& task_data.pvalue{2}' < 0.05 &...
         %(task_data.unitType' ==1 | task_data.unitType' ==2) ;
 

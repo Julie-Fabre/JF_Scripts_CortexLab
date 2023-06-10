@@ -38,4 +38,8 @@ passive_data_cw1 = cl_loadPerStimulusData('passive', 4);
 passive_data_cw2 = cl_loadPerStimulusData('passive', 5);
 
 cl_plot_average_passive_cw; 
+
+gogogo =0;
+passive=1;
+cl_PC_analysis;
 % DMS vs PS 
