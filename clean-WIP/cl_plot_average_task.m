@@ -26,7 +26,7 @@ end
 region_max = [1, 1, 1, 1, 1, 1, 1];
 region_smooth = [5, 1, 1, 1, 1, 1, 1];
 %region_clim_string = {'z-score (clim saturated)', 'z-score', 'z-score', 'z-score', 'z-score', 'z-score', 'z-score'};
-for iRegion = 2%:size(regions,2)
+for iRegion = 1%:size(regions,2)
     
 
     

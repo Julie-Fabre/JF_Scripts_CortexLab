@@ -32,6 +32,7 @@ if ~isempty(align_group)
 
     curr_psth = grpstats(curr_raster, align_group(1:size(curr_raster, 1)), @(x) mean(x, 1));
 else
+    %if size(curr_raster) 
     curr_psth = mean(curr_raster);
     [raster_y, raster_x] = find(curr_raster(:, :));
 

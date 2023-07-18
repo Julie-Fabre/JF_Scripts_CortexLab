@@ -1208,6 +1208,7 @@ figure();
 subplot(131)
 ops=struct;
 %ops.nCall = [30,2];
+ops.isort = [];
 [isort1, isort2, Sm] = mapTmap(zscore(FRunitsPSTHtrain1(theseCells' & cellT==1,:),[],2), ops);
 [val,ii]=max(zscore(FRunitsPSTHtrain1(theseCells' &cellT==1,:),[],2),[],2);
 [sV, sI] =sort(ii);
