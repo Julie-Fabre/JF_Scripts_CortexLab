@@ -22,6 +22,29 @@ stims = [4,12,6];
 stim_types = {'Stim 1', 'Stim 2', 'Stim 3'};
 
 %% general movements 
+
+% snout ROI
+
+figure();
+plot( surround_t(use_t_store_idx(2:end)), motion_energy(:,1))
+hold on;
+plotshaded(surround_t(use_t_store_idx(2:end)), [motion_energy(:,1)' - motion_energy_std(:,1)'; ...
+    motion_energy(:,1)' + motion_energy_std(:,1)'], 'b');
+plot( surround_t(use_t_store_idx(2:end)), motion_energy(:,2))
+plotshaded(surround_t(use_t_store_idx(2:end)), [motion_energy(:,2)' - motion_energy_std(:,2)'; ...
+    motion_energy(:,2)' + motion_energy_std(:,2)'], 'r');
+plot( surround_t(use_t_store_idx(2:end)), motion_energy(:,3)+nanmean(motion_energy(:,1))- ...
+    nanmean(motion_energy(:,2)))
+xx= motion_energy(:,3)' +nanmean(motion_energy(:,1))- ...
+    nanmean(motion_energy(:,2)) - motion_energy_std(:,3)';
+xxx = motion_energy(:,3)' +nanmean(motion_energy(:,1))- ...
+    nanmean(motion_energy(:,2)) + motion_energy_std(:,3)';
+plotshaded(surround_t(use_t_store_idx(2:end)), [xx; xxx], rgb('Gold'));
+makepretty;
+
+% whisker ROI
+
+% loops 
 for iStim = 1:3
     use_stim = stims(iStim);
     use_align = stimOn_times(stimIDs == use_stim & quiescent_trials);
@@ -48,7 +71,7 @@ for iStim = 1:3
             curr_clip_diff = abs(diff(curr_clip, [], 3));
             cam_align_avg = cam_align_avg + curr_clip ./ length(use_align);
             cam_align_diff_avg = cam_align_diff_avg + curr_clip_diff ./ length(use_align);
-            use_t_storing = [-0.5, 0.5];
+            use_t_storing = [-1, 1];
             use_t_store_idx = surround_t >= use_t_storing(1) & surround_t <= use_t_storing(2);
    
             motion_energy_frame(:,curr_align,iStim) = squeeze(nansum(nansum(abs(curr_clip_diff(:, :, use_t_store_idx(2:end))),1),2));
@@ -56,11 +79,11 @@ for iStim = 1:3
         end
     end
     surround_t = [-surround_frames:surround_frames] ./ vr.FrameRate;
-%     AP_imscroll(cam_align_avg, surround_t)
-%     axis image;
-%     surround_t = [-surround_frames:surround_frames] ./ vr.FrameRate;
-%     AP_imscroll(cam_align_diff_avg, surround_t(2:end))
-%     axis image;
+    AP_imscroll(cam_align_avg, surround_t)
+    axis image;
+    surround_t = [-surround_frames:surround_frames] ./ vr.FrameRate;
+    AP_imscroll(cam_align_diff_avg, surround_t(2:end))
+    axis image;
     % Plot difference within window
     use_t_plotting = [0, 0.2];
     use_t_idx = surround_t >= use_t_plotting(1) & surround_t <= use_t_plotting(2);
@@ -76,13 +99,7 @@ for iStim = 1:3
     motion_energy_std(:,iStim) = squeeze(nanstd(motion_energy_frame(:,:,iStim),[],2)./sqrt(size(motion_energy_frame,2)));
 end
 
-figure();
-plot( surround_t(use_t_store_idx), motion_energy(:,1))
-hold on;
-plotshaded(surround_t(use_t_store_idx), [motion_energy(:,1)' - motion_energy_std(:,1)'; ...
-    motion_energy(:,1)' + motion_energy_std(:,1)'], 'b');
-plot( surround_t(use_t_store_idx), motion_energy(:,2))
-plot( surround_t(use_t_store_idx), motion_energy(:,3))
+
 %motion_energy_frame(:,:,iStim))
 %% snout movements 
 figure;

@@ -378,11 +378,15 @@ switch file
 
 
           if ~file_exists
-             filepattern = [animal filesep date filesep 'ephys'  filesep 'pykilosort' filesep site_dir filesep 'output' ];
+             filepattern = [animal filesep date filesep 'ephys'  filesep 'pykilosort' site_dir filesep 'output' ];
         [filename,file_exists] = check_locations(filepattern,server_location);
         
           end
-         
+         if ~file_exists
+             filepattern = [animal filesep date filesep 'ephys'  filesep 'pykilosort' site_dir filesep 'recording' num2str(recording) filesep 'output' ];
+        [filename,file_exists] = check_locations(filepattern,server_location);
+        
+          end
 
         
         if file_exists
