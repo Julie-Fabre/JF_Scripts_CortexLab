@@ -634,6 +634,32 @@
                 signals_events.stimOrientationValues'];
             [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
             [~, stimIDs] = ismember(trial_conditions, conditions, 'rows');
+            wheel_time = block.inputs.wheelTimes;
+            wheel = block.inputs.wheelValues;
+            surround_time = [-0.5, 2];
+            surround_sample_rate = 1 / Timeline.hw.samplingInterval; % (match this to framerate)
+            surround_time_points = surround_time(1):1 / surround_sample_rate:surround_time(2);
+            if size(stimOn_times, 2) > 1
+                stimOn_times = permute(stimOn_times, [2, 1]);
+            end
+            pull_times = bsxfun(@plus, stimOn_times, surround_time_points);
+
+            stim_aligned_wheel = interp1(Timeline.rawDAQTimestamps, ...
+                wheel_velocity, pull_times);
+            % (set a threshold in speed and time for wheel movement)
+            thresh_displacement = 0.05;
+            time_over_thresh = 0.05; % ms over velocity threshold to count
+            samples_over_thresh = time_over_thresh .* surround_sample_rate;
+            wheel_over_thresh_fullconv = convn( ...
+                abs(stim_aligned_wheel) > thresh_displacement, ...
+                ones(1, samples_over_thresh)) >= samples_over_thresh;
+            wheel_over_thresh = wheel_over_thresh_fullconv(:, end-size(stim_aligned_wheel, 2)+1:end);
+
+            [move_trial, wheel_move_sample] = max(wheel_over_thresh, [], 2);
+            wheel_move_time = arrayfun(@(x) pull_times(x, wheel_move_sample(x)), 1:size(pull_times, 1))';
+            wheel_move_time(~move_trial) = NaN;
+            stim_to_move = padarray(wheel_move_time-stimOn_times, [length(stimOn_times) - length(stimOn_times), 0], NaN, 'post');
+            no_move_trials = isnan(stim_to_move) | stim_to_move > 0.3;
 
         case {'JF_Locations', 'JF_LocationsFit', 'JF_LocationsVarITI', 'JF_locations', 'JF_locationsFit', 'JF_locationsVarITI', ...
                 'JF_locationsFitVarITIGrating'}
@@ -648,6 +674,32 @@
                 [signals_events.stim_idValues'];
             [~, trial_id] = ismember(trial_conditions, conditions, 'rows');
             [~, stimIDs] = ismember(trial_conditions, conditions, 'rows');
+            wheel_time = block.inputs.wheelTimes;
+            wheel = block.inputs.wheelValues;
+            surround_time = [-0.5, 2];
+            surround_sample_rate = 1 / Timeline.hw.samplingInterval; % (match this to framerate)
+            surround_time_points = surround_time(1):1 / surround_sample_rate:surround_time(2);
+            if size(stimOn_times, 2) > 1
+                stimOn_times = permute(stimOn_times, [2, 1]);
+            end
+            pull_times = bsxfun(@plus, stimOn_times, surround_time_points);
+
+            stim_aligned_wheel = interp1(Timeline.rawDAQTimestamps, ...
+                wheel_velocity, pull_times);
+            % (set a threshold in speed and time for wheel movement)
+            thresh_displacement = 0.05;
+            time_over_thresh = 0.05; % ms over velocity threshold to count
+            samples_over_thresh = time_over_thresh .* surround_sample_rate;
+            wheel_over_thresh_fullconv = convn( ...
+                abs(stim_aligned_wheel) > thresh_displacement, ...
+                ones(1, samples_over_thresh)) >= samples_over_thresh;
+            wheel_over_thresh = wheel_over_thresh_fullconv(:, end-size(stim_aligned_wheel, 2)+1:end);
+
+            [move_trial, wheel_move_sample] = max(wheel_over_thresh, [], 2);
+            wheel_move_time = arrayfun(@(x) pull_times(x, wheel_move_sample(x)), 1:size(pull_times, 1))';
+            wheel_move_time(~move_trial) = NaN;
+            stim_to_move = padarray(wheel_move_time-stimOn_times, [length(stimOn_times) - length(stimOn_times), 0], NaN, 'post');
+            no_move_trials = isnan(stim_to_move) | stim_to_move > 0.3;
 
         case {'JF_natural_images', 'JF_natural_imagesVarITI', 'JF_natural_images_VarITInew', 'JF_natural_images_VarITI', 'JF_natural_imagesFitVarITI'}
             stimOn_times = photodiode_flip_times(2:2:end);
@@ -687,6 +739,7 @@
             wheel_move_time = arrayfun(@(x) pull_times(x, wheel_move_sample(x)), 1:size(pull_times, 1))';
             wheel_move_time(~move_trial) = NaN;
             stim_to_move = padarray(wheel_move_time-stimOn_times, [length(stimOn_times) - length(stimOn_times), 0], NaN, 'post');
+            no_move_trials = isnan(stim_to_move) | stim_to_move > 0.3;
             
 
         case {'JF_choiceworldStimuli', 'JF_choiceworldStimuli_wheel', 'JF_choiceworldStimuli_wheel_left_center', ...
@@ -745,7 +798,7 @@
             stim_aligned_wheel = interp1(Timeline.rawDAQTimestamps, ...
                 wheel_velocity, pull_times);
             % (set a threshold in speed and time for wheel movement)
-            thresh_displacement = 0.025;
+            thresh_displacement = 0.02;
             time_over_thresh = 0.05; % ms over velocity threshold to count
             samples_over_thresh = time_over_thresh .* surround_sample_rate;
             wheel_over_thresh_fullconv = convn( ...
@@ -762,7 +815,7 @@
             % (trial_timing)
 
             stim_to_move = padarray(wheel_move_time-stimOn_times, [length(stimOn_times) - length(stimOn_times), 0], NaN, 'post');
-            no_move_trials = isnan(stim_to_move) | stim_to_move < 0.2 | stim_to_move > 0.2;
+            no_move_trials = isnan(stim_to_move) | stim_to_move > 0.3;
 
         case {'JF_choiceworldStimuli_wheel_left_center_all', 'JF_choiceworldStimuli_wheel_left_center_right'}
 
@@ -824,7 +877,7 @@
             % (trial_timing)
 
             stim_to_move = padarray(wheel_move_time-stimOn_times, [length(stimOn_times) - length(stimOn_times), 0], NaN, 'post');
-            no_move_trials = isnan(stim_to_move) | stim_to_move < 0.2 | stim_to_move > 0.2;
+            no_move_trials = isnan(stim_to_move) | stim_to_move > 0.3;
 
        case {'JF_choiceworldStimuli_onlyTask'}
 
@@ -886,7 +939,7 @@
             % (trial_timing)
 
             stim_to_move = padarray(wheel_move_time-stimOn_times, [length(stimOn_times) - length(stimOn_times), 0], NaN, 'post');
-            no_move_trials = isnan(stim_to_move) | stim_to_move < 0.2 | stim_to_move > 0.2;
+            no_move_trials = isnan(stim_to_move) | stim_to_move > 0.3;
 
             
 
