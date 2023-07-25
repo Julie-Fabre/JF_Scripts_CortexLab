@@ -21,22 +21,30 @@ for iRegion = 1:size(regions, 2)
 end
 
 % get all mice x day x site combinations
-use_recs = strcmp(info_table.Use_, 'Yes');
+use_recs_full = strcmp(info_table.Use_, 'Yes');
 
 % good units (bombcell) (+ cell type?) . location. psth per image type.
 
 %% load all mouse rec locations
 info_table = sortrows(info_table, 1); % make sure data is sorted by mouse
-unique_mice = unique(info_table.Mouse(use_recs));
+unique_mice = unique(info_table.Mouse(use_recs_full));
 
 % initialize
 mouse_day_sites_shank_rec = [];
 disp('loading data...')
+passive_data_per_cond = struct;
+passive_data_per_cond.psth = [];
+passive_data_per_cond.pvalue = [];
+passive_data_per_cond.psth_conditions = [];
+
+use_recs = find(use_recs_full);
+unitCount = 0;
+
 for iMouse = 1:length(unique_mice)
-    day_sites_shank_rec = [info_table.DayNum(use_recs & strcmp(info_table.Mouse, unique_mice(iMouse))), ...
-        info_table.Site(use_recs & strcmp(info_table.Mouse, unique_mice(iMouse))), ...
-        info_table.Shanks(use_recs & strcmp(info_table.Mouse, unique_mice(iMouse))), ...
-        info_table.Rec_Exp(use_recs & strcmp(info_table.Mouse, unique_mice(iMouse)))];
+    day_sites_shank_rec = [info_table.DayNum(use_recs_full & strcmp(info_table.Mouse, unique_mice(iMouse))), ...
+        info_table.Site(use_recs_full & strcmp(info_table.Mouse, unique_mice(iMouse))), ...
+        info_table.Shanks(use_recs_full & strcmp(info_table.Mouse, unique_mice(iMouse))), ...
+        info_table.Rec_Exp(use_recs_full & strcmp(info_table.Mouse, unique_mice(iMouse)))];
 
     mouse_day_sites_shank_rec = [mouse_day_sites_shank_rec; repmat(iMouse, length(day_sites_shank_rec), 1), ...
         day_sites_shank_rec];
@@ -44,12 +52,7 @@ for iMouse = 1:length(unique_mice)
 end
 
 %% load data
-passive_data_per_cond = struct;
-passive_data_per_cond.psth = cell(5, 1);
-passive_data_per_cond.pvalue = cell(5, 1);
-passive_data_per_cond.psth_conditions = cell(5, 1);
-use_recs = find(use_recs);
-unitCount = 0;
+
 for iRecording = 1:length(use_recs)
     %try
     % curr variables
@@ -123,6 +126,7 @@ for iRecording = 1:length(use_recs)
                 loadClusters = 0;
                 try
                     JF_load_experiment;
+                        
                 catch
                     disp('error loading experiment')
                     continue;
@@ -133,6 +137,7 @@ for iRecording = 1:length(use_recs)
                         continue;
                         end
                         experiment_type = 1;
+                        keep_trial = no_move_trials;
                     elseif contains(expDef, 'JF_locations')
                         if keep_type ~= 2
                         continue;
@@ -143,22 +148,26 @@ for iRecording = 1:length(use_recs)
                         continue;
                         end
                         experiment_type = 3;
+                        keep_trial = no_move_trials;
                     elseif contains(expDef, 'JF_choiceworldStimuli_onlyTask')
                         if keep_type ~= 4
                         continue;
                         end
                         experiment_type = 5;
+                        keep_trial = no_move_trials;
                     elseif contains(expDef, 'JF_choiceworldStimuli')
                         if keep_type ~= 5
                         continue;
                         end
                         experiment_type = 4;
+                        keep_trial = no_move_trials;
                         
                     elseif contains(expDef, 'JF_natural_images')
                         if keep_type ~= 6
                         continue;
                         end
                         experiment_type = 6;
+                        keep_trial = no_move_trials;
                     end
                 else
                     if contains(expDef, 'noGo_')
@@ -166,11 +175,13 @@ for iRecording = 1:length(use_recs)
                             continue;
                         end
                         experiment_type = 1;
+                        keep_trial = [];
                     elseif contains(expDef, 'JF_choiceworldStimuli')
                         if keep_type ~= 2
                             continue;
                         end
                         experiment_type = 2;
+                        keep_trial = no_move_trials;
                     end
                 end
                 loadClusters = 0;
@@ -262,9 +273,16 @@ for iRecording = 1:length(use_recs)
                 for iUnit = 1:size(units_to_keep, 1)
                     raster_window = [-0.5, 1];
                     psth_bin_size = 0.01;
-                    align_times = stimOn_times;
+                    if ~isempty(keep_trials)
+                        align_times = stimOn_times(keep_trials);
+                        [~, trial_cond_idx] = ismember(trial_conditions(keep_trials), passive_data_per_cond.psth_conditions{experiment_type}, 'rows');
+                    
+                    else
+                        align_times = stimOn_times;
+                        [~, trial_cond_idx] = ismember(trial_conditions, passive_data_per_cond.psth_conditions{experiment_type}, 'rows');
+                    
+                    end
 
-                    [~, trial_cond_idx] = ismember(trial_conditions, passive_data_per_cond.psth_conditions{experiment_type}, 'rows');
                     %stats = grpstats(passive_data_per_cond.psth_conditions{experiment_type}, trial_conditions);
                     %responsive cell
 

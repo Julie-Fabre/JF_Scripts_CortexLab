@@ -126,7 +126,7 @@ for iRecording = 1:length(use_recs)
                 loadClusters = 0;
                 try
                     JF_load_experiment;
-                    
+                        
                 catch
                     disp('error loading experiment')
                     continue;
@@ -137,6 +137,7 @@ for iRecording = 1:length(use_recs)
                         continue;
                         end
                         experiment_type = 1;
+                        keep_trial = no_move_trials;
                     elseif contains(expDef, 'JF_locations')
                         if keep_type ~= 2
                         continue;
@@ -147,22 +148,26 @@ for iRecording = 1:length(use_recs)
                         continue;
                         end
                         experiment_type = 3;
+                        keep_trial = no_move_trials;
                     elseif contains(expDef, 'JF_choiceworldStimuli_onlyTask')
                         if keep_type ~= 4
                         continue;
                         end
                         experiment_type = 5;
+                        keep_trial = no_move_trials;
                     elseif contains(expDef, 'JF_choiceworldStimuli')
                         if keep_type ~= 5
                         continue;
                         end
                         experiment_type = 4;
+                        keep_trial = no_move_trials;
                         
                     elseif contains(expDef, 'JF_natural_images')
                         if keep_type ~= 6
                         continue;
                         end
                         experiment_type = 6;
+                        keep_trial = no_move_trials;
                     end
                 else
                     if contains(expDef, 'noGo_')
@@ -170,11 +175,13 @@ for iRecording = 1:length(use_recs)
                             continue;
                         end
                         experiment_type = 1;
+                        keep_trial = [];
                     elseif contains(expDef, 'JF_choiceworldStimuli')
                         if keep_type ~= 2
                             continue;
                         end
                         experiment_type = 2;
+                        keep_trial = no_move_trials;
                     end
                 end
                 loadClusters = 0;
@@ -266,9 +273,16 @@ for iRecording = 1:length(use_recs)
                 for iUnit = 1:size(units_to_keep, 1)
                     raster_window = [-0.5, 1];
                     psth_bin_size = 0.01;
-                    align_times = stimOn_times;
+                    if ~isempty(keep_trial)
+                        align_times = stimOn_times(keep_trial);
+                        [~, trial_cond_idx] = ismember(trial_conditions(keep_trial), passive_data_per_cond.psth_conditions{experiment_type}, 'rows');
+                    
+                    else
+                        align_times = stimOn_times;
+                        [~, trial_cond_idx] = ismember(trial_conditions, passive_data_per_cond.psth_conditions{experiment_type}, 'rows');
+                    
+                    end
 
-                    [~, trial_cond_idx] = ismember(trial_conditions, passive_data_per_cond.psth_conditions{experiment_type}, 'rows');
                     %stats = grpstats(passive_data_per_cond.psth_conditions{experiment_type}, trial_conditions);
                     %responsive cell
 
@@ -341,11 +355,17 @@ for iRecording = 1:length(use_recs)
 
                     passive_data_per_cond.psth{experiment_type}(iUnit + unitCount, 1, :, :) = curr_psth;
 
-                    [curr_psth, ~, t, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
+                    [curr_psth, ~, ~, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
                         unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size, ...
                         align_times(2:2:end), trial_cond_idx(2:2:end));
 
                     passive_data_per_cond.psth{experiment_type}(iUnit + unitCount, 2, :, :) = curr_psth;
+
+                    [curr_psth, ~, t, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
+                        unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size, ...
+                        align_times(2:2:end), trial_cond_idx(1:1:end));
+                     passive_data_per_cond.psth{experiment_type}(iUnit + unitCount, 3, :, :) = curr_psth;
+
 
             
                 end
