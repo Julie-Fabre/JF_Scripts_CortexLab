@@ -275,7 +275,7 @@ for iRecording = 1:length(use_recs)
                     psth_bin_size = 0.01;
                     if ~isempty(keep_trial)
                         align_times = stimOn_times(keep_trial);
-                        [~, trial_cond_idx] = ismember(trial_conditions(keep_trial), passive_data_per_cond.psth_conditions{experiment_type}, 'rows');
+                        [~, trial_cond_idx] = ismember(trial_conditions(keep_trial,:), passive_data_per_cond.psth_conditions{experiment_type}, 'rows');
                     
                     else
                         align_times = stimOn_times;
@@ -292,7 +292,12 @@ for iRecording = 1:length(use_recs)
                         align_times, []);
                     % p value test for *each* condition 
                     for iCond = 1:size(passive_data_per_cond.psth_conditions{experiment_type},1)
-                        [~, trial_cond_idx_single] = ismember(trial_conditions, passive_data_per_cond.psth_conditions{experiment_type}(iCond,:), 'rows');
+                         if ~isempty(keep_trial)
+                             [~, trial_cond_idx_single] = ismember(trial_conditions(keep_trial,:), passive_data_per_cond.psth_conditions{experiment_type}(iCond,:), 'rows');
+                         else
+                             [~, trial_cond_idx_single] = ismember(trial_conditions, passive_data_per_cond.psth_conditions{experiment_type}(iCond,:), 'rows');
+                        
+                         end
                         pvals_per_cond(iCond) = signrank(nanmean(curr_raster(logical(trial_cond_idx_single), 40:50), 2),...
                             nanmean(curr_raster(logical(trial_cond_idx_single), 55:65), 2));
                          passive_data_per_cond.pvalue{experiment_type}(iUnit + unitCount, iCond) = pvals_per_cond(iCond);
@@ -363,7 +368,7 @@ for iRecording = 1:length(use_recs)
 
                     [curr_psth, ~, t, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
                         unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size, ...
-                        align_times(2:2:end), trial_cond_idx(1:1:end));
+                        align_times(1:1:end), trial_cond_idx(1:1:end));
                      passive_data_per_cond.psth{experiment_type}(iUnit + unitCount, 3, :, :) = curr_psth;
 
 
