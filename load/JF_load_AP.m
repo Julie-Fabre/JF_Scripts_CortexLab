@@ -54,7 +54,7 @@ for iExperiment = experiments(curr_day).experiment
     end
 end 
 
-experiment = 1;%experiments(curr_day).experiment(1);%find(n_trials == max(n_trials));
+experiment = 2;%experiments(curr_day).experiment(1);%find(n_trials == max(n_trials));
 loadClusters = 0;
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys_includingCompressed',site,recording);
 if size(ephysAPfile,2) ==2 %keep only ap
@@ -75,16 +75,21 @@ qMetricsExist = dir(fullfile(savePath, 'qMetric*.mat'));
 
 JF_load_experiment;
 curr_shank=NaN;
-AP_cellraster({stimOn_times, stimOn_times}, {trial_conditions(:,2), trial_conditions(:,3)})
-%unique(spike_xdepths)
-%curr_shank=NaN
-theseImages = [4,6,12];
+%AP_cellraster({stimOn_times, stimOn_times}, {trial_conditions(:,2), trial_conditions(:,3)})
+
+trial_conditions_clean = trial_conditions;
+trial_conditions_clean(trial_conditions(:,1)==4,1) = 100;%go1
+trial_conditions_clean(trial_conditions(:,1)==12,1) = 101;%go2
+trial_conditions_clean(trial_conditions(:,1)==6,1) = 102;%no go
+trial_conditions_clean(trial_conditions(:,1)==11,1) = 103;%no like
+trial_conditions_clean(trial_conditions(:,1)==13,1) = 104;%go like
+theseImages = [100:104];
 %trial_conditions(trial_conditions(:,1)>13,1) = trial_conditions(trial_conditions(:,1)>13,1)-13;
 
-theseImages_trials = ismember(trial_conditions(:,1), theseImages) & ismember(trial_conditions(:,2), [-90,0]);
+theseImages_trials = ismember(trial_conditions_clean(:,1), theseImages) & ismember(trial_conditions_clean(:,2), [-90,0]);
 AP_cellrasterJF({stimOn_times(theseImages_trials), stimOn_times(theseImages_trials), stimOn_times(theseImages_trials)},...
-    {trial_conditions(theseImages_trials,1),...
-    trial_conditions(theseImages_trials,2), -89+trial_conditions(theseImages_trials,1) + abs(trial_conditions(theseImages_trials,2))})
+    {trial_conditions_clean(theseImages_trials,1),...
+    trial_conditions_clean(theseImages_trials,2), -89+trial_conditions_clean(theseImages_trials,1) + abs(trial_conditions_clean(theseImages_trials,2))})
 %AP_cellraster({stimOn_times, stimOn_times}, {trial_conditions(:,2), trial_conditions(:,3)})
 %AP_cellraster({stimOn_times}, {trial_conditions(:,1)})
 %AP_cellraster({stimOn_times, stimOn_times}, {trial_conditions(:,1), trial_conditions(:,2)})

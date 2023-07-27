@@ -842,7 +842,7 @@
                 [ceil(signals_events.stim_idValues)', trial_azimuths];
             trial_id = trial_conditions(:, 2);
             trial_conditions(trial_conditions(:, 1) > 13, 1) = trial_conditions(trial_conditions(:, 1) > 13, 1) - 13;
-            trial_conditions(trial_conditions(:, 1) > 26, 1) = trial_conditions(trial_conditions(:, 1) > 26, 1) - 13;
+            trial_conditions(trial_conditions(:, 1) > 13, 1) = trial_conditions(trial_conditions(:, 1) > 13, 1) - 13;
             
             stimIDs = trial_conditions(:, 1);
 
@@ -904,7 +904,7 @@
                 [ceil(signals_events.stim_idValues)', trial_azimuths];
             trial_id = trial_conditions(:, 2);
             trial_conditions(trial_conditions(:, 1) > 3, 1) = trial_conditions(trial_conditions(:, 1) > 3, 1) - 3;
-            trial_conditions(trial_conditions(:, 1) > 6, 1) = trial_conditions(trial_conditions(:, 1) > 3, 1) - 3;
+            trial_conditions(trial_conditions(:, 1) > 3, 1) = trial_conditions(trial_conditions(:, 1) > 3, 1) - 3;
             
             stimIDs = trial_conditions(:, 1);
 

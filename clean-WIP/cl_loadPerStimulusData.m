@@ -242,7 +242,7 @@ for iRecording = 1:length(use_recs)
                     
                    else
                         passive_data_per_cond.psth_conditions{experiment_type} = unique(trial_conditions(ismember(trial_conditions(:, 1), ...
-                            [4, 6, 12]) & ismember(trial_conditions(:, 2), [-90, 0]), :), 'rows');
+                            [1:13]) & ismember(trial_conditions(:, 2), [-90, 0,90]), :), 'rows');
                     end
                 else
                     %if experiment_type == 1%nat images
@@ -251,7 +251,7 @@ for iRecording = 1:length(use_recs)
                         if size(trial_conditions,2) == 2
                      
                             these_guys = ismember(trial_conditions(:, 1), ...
-                                [4, 6, 12]) & ismember(trial_conditions(:, 2), [-90, 0]);
+                                [1:13]) & ismember(trial_conditions(:, 2), [-90, 0,90]);
                             
                             if size(unique(trial_conditions(these_guys,:), 'rows'),1) ==6
                                 passive_data_per_cond.psth_conditions{experiment_type} = unique(trial_conditions(these_guys,:), 'rows');
