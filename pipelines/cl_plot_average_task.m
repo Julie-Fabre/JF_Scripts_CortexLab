@@ -10,20 +10,38 @@ figure();
 cl_plottingSettings;
 
 contra = 0;
+center = 0 ;
 if contra
-    go1_contra = squeeze(task_data_here.psth{2}(:, :, 2, :));
-    go2_contra = squeeze(task_data_here.psth{2}(:, :, 8, :));
-    noGo_contra = squeeze(task_data_here.psth{2}(:, :, 4, :));
-    noGoLike_contra = squeeze(task_data_here.psth{2}(:, :, 6, :));
-    goLike_contra = squeeze(task_data_here.psth{2}(:, :, 10, :));
-    noGoLike2_contra = squeeze(task_data_here.psth{2}(:, :, 12, :));
-    noGoLike2_contra = squeeze(task_data_here.psth{2}(:, :, 14, :));
+    % 1,2,3 = all the +90s 
+    % 13,14,15 %go1 [4]
+    % 19,20,21 % nogo [6]
+    % 37,38,39 %go2 [12]
+    % 40,41,42 %go likes [13]
+    % 16,17,18; 31,32,33; 34,35,36 %nogo likes [5, 10, 11]
+    go1_contra = squeeze(task_data_here.psth{2}(:, :, 10, :));
+    go2_contra = squeeze(task_data_here.psth{2}(:, :, 34, :));
+    noGo_contra = squeeze(task_data_here.psth{2}(:, :, 16, :));
+    noGoLike_contra = squeeze(task_data_here.psth{2}(:, :, 19, :));
+    goLike_contra = squeeze(task_data_here.psth{2}(:, :, 37, :));
+    noGoLike2_contra = squeeze(task_data_here.psth{2}(:, :, 28, :));
+    noGoLike3_contra = squeeze(task_data_here.psth{2}(:, :, 31, :));
+elseif center 
+    go1_contra = squeeze(task_data_here.psth{2}(:, :, 11, :));
+    go2_contra = squeeze(task_data_here.psth{2}(:, :, 35, :));
+    noGo_contra = squeeze(task_data_here.psth{2}(:, :, 17, :));
+    noGoLike_contra = squeeze(task_data_here.psth{2}(:, :, 20, :));
+    goLike_contra = squeeze(task_data_here.psth{2}(:, :, 38, :));
+    noGoLike2_contra = squeeze(task_data_here.psth{2}(:, :, 29, :));
+    noGoLike3_contra = squeeze(task_data_here.psth{2}(:, :, 32, :));
+
 else
-    go1_contra = squeeze(task_data_here.psth{2}(:, :, 3, :));
-    go2_contra = squeeze(task_data_here.psth{2}(:, :, 7, :));
-    noGo_contra = squeeze(task_data_here.psth{2}(:, :, 5, :));
-    noGoLike_contra = squeeze(task_data_here.psth{2}(:, :, 6, :));
-    goLike_contra = squeeze(task_data_here.psth{2}(:, :, 11, :));
+    go1_contra = squeeze(task_data_here.psth{2}(:, :, 12, :));
+    go2_contra = squeeze(task_data_here.psth{2}(:, :, 36, :));
+    noGo_contra = squeeze(task_data_here.psth{2}(:, :, 18, :));
+    noGoLike_contra = squeeze(task_data_here.psth{2}(:, :, 21, :));
+    goLike_contra = squeeze(task_data_here.psth{2}(:, :, 39, :));
+    noGoLike2_contra = squeeze(task_data_here.psth{2}(:, :, 30, :));
+    noGoLike3_contra = squeeze(task_data_here.psth{2}(:, :, 33, :));
 end
 
 
@@ -87,6 +105,22 @@ for thisRegion = 1:size(plot_regions, 2)
     this_image_smooth_noGoLike = conv2(test_image_noGoLike(cell_idx, :), ones(smooth_filt), 'same') ./ ...
         conv2(~isnan(test_image_noGoLike(cell_idx, :)), ones(smooth_filt), 'same');
 
+    %no go like 2
+    test_image_noGoLike2 = squeeze([noGoLike2_contra(these_units, 2, :); noGoLike2_contra(these_units, 2, :)]);
+    test_image_noGoLike2 = (test_image_noGoLike2 - nanmean(test_image_noGoLike2(:, 1:50), 2)) ./ ...
+        nanstd(test_image_noGoLike2(:, 1:50), [], 2);
+    smooth_filt = [region_smooth(iRegion), 1]; % (units x frames)
+    this_image_smooth_noGoLike2 = conv2(test_image_noGoLike2(cell_idx, :), ones(smooth_filt), 'same') ./ ...
+        conv2(~isnan(test_image_noGoLike2(cell_idx, :)), ones(smooth_filt), 'same');
+
+    %no go like 3
+    test_image_noGoLike3 = squeeze([noGoLike3_contra(these_units, 2, :); noGoLike3_contra(these_units, 2, :)]);
+    test_image_noGoLike3 = (test_image_noGoLike3 - nanmean(test_image_noGoLike3(:, 1:50), 2)) ./ ...
+        nanstd(test_image_noGoLike3(:, 1:50), [], 2);
+    smooth_filt = [region_smooth(iRegion), 1]; % (units x frames)
+    this_image_smooth_noGoLike3 = conv2(test_image_noGoLike3(cell_idx, :), ones(smooth_filt), 'same') ./ ...
+        conv2(~isnan(test_image_noGoLike3(cell_idx, :)), ones(smooth_filt), 'same');
+
     %go like
     test_image_goLike = squeeze(goLike_contra(these_units, 2, :));
     test_image_goLike = (test_image_goLike - nanmean(test_image_goLike(:, 1:50), 2)) ./ ...
@@ -103,7 +137,7 @@ for thisRegion = 1:size(plot_regions, 2)
 
     % plot PSTH
     figure(1)
-    subplot(size(plot_regions, 2), 5, (5*(thisRegion -1))+1)
+    subplot(size(plot_regions, 2), 7, (7*(thisRegion -1))+1)
     %subplot(131)
     imagesc(task_data_here.t, [], this_image_smooth_go1(keep_these, :))
     caxis([-max(max(abs(this_image_smooth_go1(keep_these, :)))) .* region_max(iRegion), max(max(abs(this_image_smooth_go1(keep_these, :)))) .* region_max(iRegion)])
@@ -116,7 +150,7 @@ for thisRegion = 1:size(plot_regions, 2)
     makepretty;
     clim([-region_lims(iRegion),region_lims(iRegion)] )
 
-    subplot(size(plot_regions, 2), 5, (5*(thisRegion -1))+2)
+    subplot(size(plot_regions, 2), 7, (7*(thisRegion -1))+2)
     
     imagesc(task_data_here.t, [], this_image_smooth_go2(keep_these, :))
     caxis([-max(max(abs(this_image_smooth_go2(keep_these, :)))) .* region_max(iRegion), max(max(abs(this_image_smooth_go2(keep_these, :)))) .* region_max(iRegion)])
@@ -129,7 +163,7 @@ for thisRegion = 1:size(plot_regions, 2)
     makepretty;
     clim([-region_lims(iRegion),region_lims(iRegion)] )
 
-    subplot(size(plot_regions, 2), 5, (5*(thisRegion -1))+3)
+    subplot(size(plot_regions, 2), 7, (7*(thisRegion -1))+3)
     
     imagesc(task_data_here.t, [], this_image_smooth_noGo(keep_these, :))
     caxis([-max(max(abs(this_image_smooth_noGo(keep_these, :)))) .* region_max(iRegion), max(max(abs(this_image_smooth_noGo(keep_these, :)))) .* region_max(iRegion)])
@@ -142,7 +176,7 @@ for thisRegion = 1:size(plot_regions, 2)
     makepretty;
     clim([-region_lims(iRegion),region_lims(iRegion)] )
 
-    subplot(size(plot_regions, 2), 5, (5*(thisRegion -1))+4)
+    subplot(size(plot_regions, 2), 7, (7*(thisRegion -1))+4)
     
     imagesc(task_data_here.t, [], this_image_smooth_noGoLike(keep_these, :))
     caxis([-max(max(abs(this_image_smooth_noGoLike(keep_these, :)))) .* region_max(iRegion), max(max(abs(this_image_smooth_noGoLike(keep_these, :)))) .* region_max(iRegion)])
@@ -155,7 +189,33 @@ for thisRegion = 1:size(plot_regions, 2)
     makepretty;
     clim([-region_lims(iRegion),region_lims(iRegion)] )
 
-    subplot(size(plot_regions, 2), 5, (5*(thisRegion -1))+5)
+    subplot(size(plot_regions, 2), 7, (7*(thisRegion -1))+5)
+    
+    imagesc(task_data_here.t, [], this_image_smooth_noGoLike2(keep_these, :))
+    caxis([-max(max(abs(this_image_smooth_noGoLike2(keep_these, :)))) .* region_max(iRegion), max(max(abs(this_image_smooth_noGoLike2(keep_these, :)))) .* region_max(iRegion)])
+    c = colorbar;
+    %c.Label.String = (region_clim_string{iRegion});
+    colormap(brewermap([], '*BrBG'));
+    xlabel('time from stim onset (s)')
+    ylabel('unit #')
+    %title('No go -like')
+    makepretty;
+    clim([-region_lims(iRegion),region_lims(iRegion)] )
+
+    subplot(size(plot_regions, 2), 7, (7*(thisRegion -1))+6)
+    
+    imagesc(task_data_here.t, [], this_image_smooth_noGoLike3(keep_these, :))
+    caxis([-max(max(abs(this_image_smooth_noGoLike3(keep_these, :)))) .* region_max(iRegion), max(max(abs(this_image_smooth_noGoLike3(keep_these, :)))) .* region_max(iRegion)])
+    c = colorbar;
+    %c.Label.String = (region_clim_string{iRegion});
+    colormap(brewermap([], '*BrBG'));
+    xlabel('time from stim onset (s)')
+    ylabel('unit #')
+    %title('No go -like')
+    makepretty;
+    clim([-region_lims(iRegion),region_lims(iRegion)] )
+
+    subplot(size(plot_regions, 2), 7, (7*(thisRegion -1))+7)
     
     imagesc(task_data_here.t, [], this_image_smooth_goLike(keep_these, :))
     caxis([-max(max(abs(this_image_smooth_goLike(keep_these, :)))) .* region_max(iRegion), max(max(abs(this_image_smooth_goLike(keep_these, :)))) .* region_max(iRegion)])
@@ -164,7 +224,7 @@ for thisRegion = 1:size(plot_regions, 2)
     colormap(brewermap([], '*BrBG'));
     xlabel('time from stim onset (s)')
     ylabel('unit #')
-    %title('No go -like')
+    %title('Go -like')
     makepretty;
     clim([-region_lims(iRegion),region_lims(iRegion)] )
 
