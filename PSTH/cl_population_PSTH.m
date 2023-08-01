@@ -17,28 +17,28 @@ for iRegion = [1,2,5]
         passive_data.pvalue' <= 0.05 & (passive_data.unitType' ==1 | passive_data.unitType' ==2) ;
 
     if sum(these_units) > 0
-    % sort cells by activity
-    this_image = zscore_psth(these_units&keep_these, :);
-    [~, cell_idx] = sort(nanmean(this_image(:,55:65),2));
-
-    % small smoothing -otherwise matlab doesn't display properly 
-    smooth_filt = [region_smooth(iRegion),1]; % (units x frames)
-    this_image_smooth = this_image(cell_idx,:);
-    %this_image_smooth = conv2(this_image(cell_idx,:),ones(smooth_filt),'same')./ ...
-    %conv2(~isnan(this_image(cell_idx,:)),ones(smooth_filt),'same');
-
-    % plot PSTH 
-    figure();
-    imagesc(passive_data.t, [], this_image_smooth(3:end,:))
-    caxis([-max(max(abs(this_image_smooth))).*region_max(iRegion), max(max(abs(this_image_smooth))).*region_max(iRegion)])
-    c = colorbar;
-    c.Label.String = (region_clim_string{iRegion});
-    colormap(brewermap([],'*BrBG'));
-    xlabel('time from stim onset (s)')
-    ylabel('unit #')
-    title(regions{iRegion})
-    makepretty;
-    end
+        % sort cells by activity
+        this_image = zscore_psth(these_units&keep_these, :);
+        [~, cell_idx] = sort(nanmean(this_image(:,55:65),2));
+    
+        % small smoothing -otherwise matlab doesn't display properly 
+        smooth_filt = [region_smooth(iRegion),1]; % (units x frames)
+        this_image_smooth = this_image(cell_idx,:);
+        %this_image_smooth = conv2(this_image(cell_idx,:),ones(smooth_filt),'same')./ ...
+        %conv2(~isnan(this_image(cell_idx,:)),ones(smooth_filt),'same');
+    
+        % plot PSTH 
+        figure();
+        imagesc(passive_data.t, [], this_image_smooth(3:end,:))
+        caxis([-max(max(abs(this_image_smooth))).*region_max(iRegion), max(max(abs(this_image_smooth))).*region_max(iRegion)])
+        c = colorbar;
+        c.Label.String = (region_clim_string{iRegion});
+        colormap(brewermap([],'*BrBG'));
+        xlabel('time from stim onset (s)')
+        ylabel('unit #')
+        title(regions{iRegion})
+        makepretty;
+     end
     
 
 end

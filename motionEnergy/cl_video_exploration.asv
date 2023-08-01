@@ -94,9 +94,7 @@ day = '2023-03-06';
 % go go go example: JF096, day 2023-02-07 exp 2
 experiment = 2;
 load_parts.cam = true;
-load_parts.ephys = true;
 verbose = true;
-site = 1;
 JF_load_experiment;
 camera_location = facecam_fn;
 camera_t = facecam_t;
@@ -344,17 +342,7 @@ for iTrial = 1:size(stimOn_times_use,1)
 end
 
 figure();
-hold on;
 for ii=1:10
-    plot(squeeze(motion_energy_stim_trial(ii,:)))
+plot(squeeze(motion_energy_stim_trial(ii,:))
 end
 %% 2. get average visual response for every trial 
-all_temps = unique(spike_templates);
-raster_window = [-1, 1];
-psth_bin_size = 0.001;
-for iTrial = 1:size(stimOn_times_use,1)
-    [curr_psth(iTrial, :), ~, ~, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
-        all_temps, raster_window, psth_bin_size, stimOn_times_use(iTrial), []);
-end
-
-

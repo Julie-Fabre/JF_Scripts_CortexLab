@@ -798,8 +798,8 @@
             stim_aligned_wheel = interp1(Timeline.rawDAQTimestamps, ...
                 wheel_velocity, pull_times);
             % (set a threshold in speed and time for wheel movement)
-            thresh_displacement = 0.02;
-            time_over_thresh = 0.05; % ms over velocity threshold to count
+            thresh_displacement = 0.001;
+            time_over_thresh = 0.01; % ms over velocity threshold to count
             samples_over_thresh = time_over_thresh .* surround_sample_rate;
             wheel_over_thresh_fullconv = convn( ...
                 abs(stim_aligned_wheel) > thresh_displacement, ...
@@ -860,8 +860,8 @@
             stim_aligned_wheel = interp1(Timeline.rawDAQTimestamps, ...
                 wheel_velocity, pull_times);
             % (set a threshold in speed and time for wheel movement)
-            thresh_displacement = 0.025;
-            time_over_thresh = 0.05; % ms over velocity threshold to count
+            thresh_displacement = 0.001;
+            time_over_thresh = 0.01; % ms over velocity threshold to count
             samples_over_thresh = time_over_thresh .* surround_sample_rate;
             wheel_over_thresh_fullconv = convn( ...
                 abs(stim_aligned_wheel) > thresh_displacement, ...
