@@ -83,10 +83,10 @@ trial_conditions_clean(trial_conditions(:,1)==12,1) = 101;%go2
 trial_conditions_clean(trial_conditions(:,1)==6,1) = 102;%no go
 trial_conditions_clean(trial_conditions(:,1)==11,1) = 103;%no like
 trial_conditions_clean(trial_conditions(:,1)==13,1) = 104;%go like
-theseImages = [100:104];
+theseImages = [100:102];
 %trial_conditions(trial_conditions(:,1)>13,1) = trial_conditions(trial_conditions(:,1)>13,1)-13;
 
-theseImages_trials = ismember(trial_conditions_clean(:,1), theseImages) & ismember(trial_conditions_clean(:,2), [-90,0]);
+theseImages_trials = ismember(trial_conditions_clean(:,1), theseImages) & ismember(trial_conditions_clean(:,2), [-90]);
 AP_cellrasterJF({stimOn_times(theseImages_trials), stimOn_times(theseImages_trials), stimOn_times(theseImages_trials)},...
     {trial_conditions_clean(theseImages_trials,1),...
     trial_conditions_clean(theseImages_trials,2), -89+trial_conditions_clean(theseImages_trials,1) + abs(trial_conditions_clean(theseImages_trials,2))})
