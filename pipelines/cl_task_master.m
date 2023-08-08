@@ -18,7 +18,7 @@ passive_data = cl_loadPerStimulusData('passive');
 cl_plot_average_task; 
 
 
-task_data = cl_loadPerStimulusData('task', 2); 
+task_data = cl_loadPerStimulusData('task', 2); % 2 = 
 gogogo = 0;
 passive = 0;
 cl_plot_average_task; 
@@ -46,3 +46,8 @@ cl_PC_analysis;
 
 
 % DMS vs PS 
+%% 
+task_data = cl_loadPerStimulusData('task', 2); 
+save('task_data_goNogo3.mat', '-struct', 'task_data');
+task_data_gogogo = cl_loadPerStimulusData('taskGo', 2); 
+save('task_data_gogogo.mat', '-struct', 'task_data_gogogo');

@@ -1,4 +1,4 @@
-function experiments = AP_find_experimentsJF(animal, protocol, flexible_name)
+function experiments = AP_find_experimentsJF(animal, protocol, flexible_name,site)
 myPaths;
 % experiments = AP_find_experiments(animal,protocol,flexible_name)
 %
@@ -19,6 +19,10 @@ if ~exist('flexible_name','var') || isempty(flexible_name)
     flexible_name = false;
 end
 
+% If no flexible name specified, use exact
+if ~exist('site','var') || isempty(site)
+    site = [];
+end
 % Initialize pathname, add to it with each server location
 days_combined = {};
 days_pathnames_combined = {};
@@ -78,6 +82,9 @@ days_pathnames = days_pathnames_combined(unique_day_idx);
 protocol_expts = cell(size(days));
 imaging_expts = cell(size(days));
 ephys_expts = cell(size(days));
+ephys_paths = cell(size(days));
+ephys_ks_paths = cell(size(days));
+ephys_raw_paths = cell(size(days));
 
 for curr_day = 1:length(days)  
     
@@ -142,7 +149,15 @@ for curr_day = 1:length(days)
         protocol_expts{curr_day} = exp_nums(use_exp);
         imaging_path = AP_cortexlab_filenameJF(animal,day,exp_nums(use_exp),'imaging');
         imaging_expts{curr_day} = exist([imaging_path filesep 'meanImage_blue.npy'],'file') > 0;
-        [~,ephys_expts{curr_day}] = AP_cortexlab_filenameJF(animal,day,exp_nums(use_exp),'ephys_dir');
+        [ephys_paths{curr_day},ephys_expts{curr_day}] = AP_cortexlab_filenameJF(animal,day,exp_nums(use_exp),'ephys_dir');
+        [ephys_ks_paths{curr_day},~] = AP_cortexlab_filenameJF(animal,day,exp_nums(use_exp),'ephys');
+        [ephys_all_raw, ~] = AP_cortexlab_filenameJF(animal,day,exp_nums(use_exp),'ephys_includingCompressed',site);
+        if size(ephys_all_raw, 2) ==2
+            ephys_raw_paths{curr_day} = ephys_all_raw{1};
+        else
+            ephys_raw_paths{curr_day} = ephys_all_raw;
+        end
+
     end
     
 end
@@ -150,13 +165,16 @@ end
 % Package experiment info
 use_days = ~cellfun(@isempty,protocol_expts);
 experiments = struct('day',cell(sum(use_days),1),'experiment',cell(sum(use_days),1),...
-    'imaging',cell(sum(use_days),1),'ephys',cell(sum(use_days),1));
+    'imaging',cell(sum(use_days),1),'ephys',cell(sum(use_days),1), 'ephys_paths',cell(sum(use_days),1),...
+    'ephys_ks_paths',cell(sum(use_days),1), 'ephys_raw_paths',cell(sum(use_days),1));
 
 [experiments.day] = deal(days{use_days});
 [experiments.experiment] = deal(protocol_expts{use_days});
 [experiments.imaging] = deal(imaging_expts{use_days});
 [experiments.ephys] = deal(ephys_expts{use_days});
-
+[experiments.ephys_paths] = deal(ephys_paths{use_days});
+[experiments.ephys_ks_paths] = deal(ephys_ks_paths{use_days});
+[experiments.ephys_raw_paths] = deal(ephys_raw_paths{use_days});
 
 
 

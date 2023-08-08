@@ -186,120 +186,120 @@ AP_cellrasterJF({stimOn_times(theseImages_trials), stimOn_times(theseImages_tria
 % % %  trial_conditions(ismember(trial_conditions(:,1), [6]),1) = 10; % no go
 % % %  trial_conditions(ismember(trial_conditions(:,1), [5]),1) = 10; % no go
 % % %  trial_conditions(~ismember(trial_conditions(:,1), [4,7,10]),1) = 1;
-% % % %thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions, [4,7,10]) & trial_conditions(:,2)~=90;
-% % % thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions(:,2), [-90,0]) & ismember(trial_conditions(:,1), [4,7,10]);
-% % % 
-% % % %  trial_conditions(ismember(trial_conditions(:,1), [1,2,3,4,18,19,20,21,22]),1) = 4; % go 1
-% % % %  trial_conditions(ismember(trial_conditions(:,1), [5,6,10,11,12,13,14,15,16,17]),1) = 10; % go 1
-% % % %   trial_conditions(ismember(trial_conditions(:,1), [7,8,9]),1) = 7; % go 1
+% % % % %thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions, [4,7,10]) & trial_conditions(:,2)~=90;
 % % % % thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions(:,2), [-90,0]) & ismember(trial_conditions(:,1), [4,7,10]);
 % % % % 
-% % % 
-% % % AP_cellrasterJF({stimOn_times(thisIndex), stimOn_times(thisIndex), stimOn_times(thisIndex)}, ...
-% % %     {trial_conditions(thisIndex,1), trial_conditions(thisIndex,2),...
-% % % (trial_conditions(thisIndex,2)/-90)+(trial_conditions(thisIndex,1))});
-% % % 
-% % % thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions(:,1), [4,6,7]);
-% % % 
-% % % AP_cellrasterJF({stimOn_times(thisIndex), stimOn_times(thisIndex), stimOn_times(thisIndex)}, ...
-% % %     {trial_conditions(thisIndex,1), trial_conditions(thisIndex,2),...
-% % % (trial_conditions(thisIndex,2)/-90)+(trial_conditions(thisIndex,1))});
-% % % 
-% % % % imageworld passive
-% % % trial_conditions(ismember(trial_conditions(:,1), [1:3:66]),2) = -90;
-% % % trial_conditions(ismember(trial_conditions(:,1), [2:3:66]),2) = 0;
-% % % trial_conditions(ismember(trial_conditions(:,1), [3:3:66]),2) = 90;
-% % % trial_conditions(ismember(trial_conditions(:,1), [4,26,48])) = 4;
-% % % trial_conditions(ismember(trial_conditions(:,1), [7,29,51])) = 7;
-% % % trial_conditions(ismember(trial_conditions(:,1), [10,32,54])) = 10;
-% % % thisIndex = ismember(trial_conditions(:,1), [4,7,10]) & trial_conditions(:,2)~=-90; %ismember(trial_conditions(:,1), [4,7,10]);
-% % % 
-% % % AP_cellrasterJF({stimOn_times(thisIndex), stimOn_times(thisIndex), stimOn_times(thisIndex)}, ...
-% % %     {trial_conditions(thisIndex,1), trial_conditions(thisIndex,2),...
-% % % (trial_conditions(thisIndex,2)/-90)+(trial_conditions(thisIndex,1))});
-% % % 
-% % % 
-% % % AP_cellrasterJF({stimOn_times}, {trial_conditions(:,1)})
-% % % % task 
-% % AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(1:end-1)'}, ...
-% %     {trial_conditions(:,1),trial_conditions(:,2), ...
-% %     trial_conditions(:,3)});
-% % 
+% % % % %  trial_conditions(ismember(trial_conditions(:,1), [1,2,3,4,18,19,20,21,22]),1) = 4; % go 1
+% % % % %  trial_conditions(ismember(trial_conditions(:,1), [5,6,10,11,12,13,14,15,16,17]),1) = 10; % go 1
+% % % % %   trial_conditions(ismember(trial_conditions(:,1), [7,8,9]),1) = 7; % go 1
+% % % % % thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions(:,2), [-90,0]) & ismember(trial_conditions(:,1), [4,7,10]);
+% % % % % 
 % % % % 
-% % % % AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))',stimOn_times}, ...
-% % % %     {trial_conditions(:,1),trial_conditions(:,2), ...
-% % % %     trial_conditions(:,3), movement_after200ms_and_type});
+% % % % AP_cellrasterJF({stimOn_times(thisIndex), stimOn_times(thisIndex), stimOn_times(thisIndex)}, ...
+% % % %     {trial_conditions(thisIndex,1), trial_conditions(thisIndex,2),...
+% % % % (trial_conditions(thisIndex,2)/-90)+(trial_conditions(thisIndex,1))});
+% % % % 
+% % % % thisIndex = ~isnan(stimOn_times(1:size(trial_conditions,1))) & ismember(trial_conditions(:,1), [4,6,7]);
+% % % % 
+% % % % AP_cellrasterJF({stimOn_times(thisIndex), stimOn_times(thisIndex), stimOn_times(thisIndex)}, ...
+% % % %     {trial_conditions(thisIndex,1), trial_conditions(thisIndex,2),...
+% % % % (trial_conditions(thisIndex,2)/-90)+(trial_conditions(thisIndex,1))});
+% % % % 
+% % % % % imageworld passive
+% % % % trial_conditions(ismember(trial_conditions(:,1), [1:3:66]),2) = -90;
+% % % % trial_conditions(ismember(trial_conditions(:,1), [2:3:66]),2) = 0;
+% % % % trial_conditions(ismember(trial_conditions(:,1), [3:3:66]),2) = 90;
+% % % % trial_conditions(ismember(trial_conditions(:,1), [4,26,48])) = 4;
+% % % % trial_conditions(ismember(trial_conditions(:,1), [7,29,51])) = 7;
+% % % % trial_conditions(ismember(trial_conditions(:,1), [10,32,54])) = 10;
+% % % % thisIndex = ismember(trial_conditions(:,1), [4,7,10]) & trial_conditions(:,2)~=-90; %ismember(trial_conditions(:,1), [4,7,10]);
+% % % % 
+% % % % AP_cellrasterJF({stimOn_times(thisIndex), stimOn_times(thisIndex), stimOn_times(thisIndex)}, ...
+% % % %     {trial_conditions(thisIndex,1), trial_conditions(thisIndex,2),...
+% % % % (trial_conditions(thisIndex,2)/-90)+(trial_conditions(thisIndex,1))});
+% % % % 
+% % % % 
+% % % % AP_cellrasterJF({stimOn_times}, {trial_conditions(:,1)})
+% % % % % task 
+% % % AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(1:end-1)'}, ...
+% % %     {trial_conditions(:,1),trial_conditions(:,2), ...
+% % %     trial_conditions(:,3)});
 % % % 
-% % % 
-% % % % PSTH more in depth 
-% % % figure(1)
-% % % thisTemplate = 79;
-% % % raster_window = [-0.5, 2];
-% % % align_times = stimOn_times(stimIDs==3);
-% % % align_group = [];
-% % % color_by = trial_conditions(stimIDs==3,3);
-% % % psth_bin_size = 0.001;
-% % % sort_by = [];%stim_to_move(stimIDs==3);
-% % % plot_me = true;
-% % % [curr_smoothed_psth, curr_psth, raster_x, raster_y, curr_raster] = JF_raster_PSTH(spike_templates, spike_times_timeline, ...
-% % %     thisTemplate, raster_window, psth_bin_size, align_times, align_group,...
-% % %    sort_by, color_by, plot_me);
-% % % title(['unit' num2str(thisTemplate)])
-% % % 
-% % % figure(2)
-% % % 
-% % % raster_window = [-0.5, 2];
-% % % align_times = stimOn_times(stimIDs==2);
-% % % align_group = [];
-% % % color_by = trial_conditions(stimIDs==2,3);
-% % % psth_bin_size = 0.001;
-% % % sort_by = [];%stim_to_move(stimIDs==3);
-% % % plot_me = true;
-% % % [curr_smoothed_psth, curr_psth, raster_x, raster_y, curr_raster] = JF_raster_PSTH(spike_templates, spike_times_timeline, ...
-% % %     thisTemplate, raster_window, psth_bin_size, align_times, align_group,...
-% % %    sort_by, color_by, plot_me);
-% % % title(['unit' num2str(thisTemplate)])
-
-
-%% example cells 
-% CP: 110, 1, 1 units 241, 185, 235, 223, 215, 325 
-stimC = [224, 85, 159]./256;
-unique_templates = unique(spike_templates);
-%responds 
-thisUnit = 46
-colorMtx =  bc_colors(3, 'w');
-raster_window = [-0.5, 1];
-psth_bin_size = 0.001;
-align_times = stimOn_times;
-[curr_psth, curr_raster, t, raster_x, raster_y] = cl_raster_psth(spike_templates, spike_times_timeline, ...
-    thisUnit , raster_window, psth_bin_size, align_times, []);
-               figure();
-subplot(3,1,[1,2])
-s = scatter(t(raster_x(1:1:end)), raster_y(1:1:end), 3, [0,0,0], 'filled', 'MarkerFaceAlpha', 0.1, ...
-    'MarkerEdgeAlpha', 0.1);
-s.MarkerFaceAlpha = 0.2;
-s.AlphaData = 0.1* ones(size(raster_y,1),1);
-s.MarkerFaceAlpha = 'flat';
-ylabel('trial #')
-xticklabels({''})
-makepretty;
-
-ylim([1 1080])
-yLim = ylim; 
-line([0, 0], [yLim(1), yLim(2)], 'Color', stimC, 'LineWidth', 2)
-xlim([-0.15, 0.3])
-
-psth_bin_size = 0.01;
-align_times = stimOn_times;
-[curr_psth, curr_raster, t, raster_x, raster_y] = cl_raster_psth(spike_templates, spike_times_timeline, ...
-    thisUnit , raster_window, psth_bin_size, align_times, []);
-subplot(3,1,[3])
-plot(t, curr_psth .* 1/psth_bin_size,'Color', [0,0,0])
-xlabel('time from stim onset (s)')
-ylabel('spikes/s')
-makepretty;
-hold on;
-yLim = ylim; 
-line([0, 0], [yLim(1), yLim(2)], 'Color', stimC, 'LineWidth', 2)
-xlim([-0.15, 0.3])
-% selectivity
+% % % % % 
+% % % % % AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(n_trials(1):n_trials(end))',stimOn_times}, ...
+% % % % %     {trial_conditions(:,1),trial_conditions(:,2), ...
+% % % % %     trial_conditions(:,3), movement_after200ms_and_type});
+% % % % 
+% % % % 
+% % % % % PSTH more in depth 
+% % % % figure(1)
+% % % % thisTemplate = 79;
+% % % % raster_window = [-0.5, 2];
+% % % % align_times = stimOn_times(stimIDs==3);
+% % % % align_group = [];
+% % % % color_by = trial_conditions(stimIDs==3,3);
+% % % % psth_bin_size = 0.001;
+% % % % sort_by = [];%stim_to_move(stimIDs==3);
+% % % % plot_me = true;
+% % % % [curr_smoothed_psth, curr_psth, raster_x, raster_y, curr_raster] = JF_raster_PSTH(spike_templates, spike_times_timeline, ...
+% % % %     thisTemplate, raster_window, psth_bin_size, align_times, align_group,...
+% % % %    sort_by, color_by, plot_me);
+% % % % title(['unit' num2str(thisTemplate)])
+% % % % 
+% % % % figure(2)
+% % % % 
+% % % % raster_window = [-0.5, 2];
+% % % % align_times = stimOn_times(stimIDs==2);
+% % % % align_group = [];
+% % % % color_by = trial_conditions(stimIDs==2,3);
+% % % % psth_bin_size = 0.001;
+% % % % sort_by = [];%stim_to_move(stimIDs==3);
+% % % % plot_me = true;
+% % % % [curr_smoothed_psth, curr_psth, raster_x, raster_y, curr_raster] = JF_raster_PSTH(spike_templates, spike_times_timeline, ...
+% % % %     thisTemplate, raster_window, psth_bin_size, align_times, align_group,...
+% % % %    sort_by, color_by, plot_me);
+% % % % title(['unit' num2str(thisTemplate)])
+% 
+% 
+% %% example cells 
+% % CP: 110, 1, 1 units 241, 185, 235, 223, 215, 325 
+% stimC = [224, 85, 159]./256;
+% unique_templates = unique(spike_templates);
+% %responds 
+% thisUnit = 46
+% colorMtx =  bc_colors(3, 'w');
+% raster_window = [-0.5, 1];
+% psth_bin_size = 0.001;
+% align_times = stimOn_times;
+% [curr_psth, curr_raster, t, raster_x, raster_y] = cl_raster_psth(spike_templates, spike_times_timeline, ...
+%     thisUnit , raster_window, psth_bin_size, align_times, []);
+%                figure();
+% subplot(3,1,[1,2])
+% s = scatter(t(raster_x(1:1:end)), raster_y(1:1:end), 3, [0,0,0], 'filled', 'MarkerFaceAlpha', 0.1, ...
+%     'MarkerEdgeAlpha', 0.1);
+% s.MarkerFaceAlpha = 0.2;
+% s.AlphaData = 0.1* ones(size(raster_y,1),1);
+% s.MarkerFaceAlpha = 'flat';
+% ylabel('trial #')
+% xticklabels({''})
+% makepretty;
+% 
+% ylim([1 1080])
+% yLim = ylim; 
+% line([0, 0], [yLim(1), yLim(2)], 'Color', stimC, 'LineWidth', 2)
+% xlim([-0.15, 0.3])
+% 
+% psth_bin_size = 0.01;
+% align_times = stimOn_times;
+% [curr_psth, curr_raster, t, raster_x, raster_y] = cl_raster_psth(spike_templates, spike_times_timeline, ...
+%     thisUnit , raster_window, psth_bin_size, align_times, []);
+% subplot(3,1,[3])
+% plot(t, curr_psth .* 1/psth_bin_size,'Color', [0,0,0])
+% xlabel('time from stim onset (s)')
+% ylabel('spikes/s')
+% makepretty;
+% hold on;
+% yLim = ylim; 
+% line([0, 0], [yLim(1), yLim(2)], 'Color', stimC, 'LineWidth', 2)
+% xlim([-0.15, 0.3])
+% % selectivity

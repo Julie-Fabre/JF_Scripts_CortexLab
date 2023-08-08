@@ -2,7 +2,7 @@ function passive_data_per_cond = cl_loadPerStimulusData(load_type, keep_type) %%
 if contains(load_type, 'passive')
     info_table = readtable('/home/julie/Dropbox/PhD_summary/allPassiveRecs.csv', 'VariableNamingRule', 'modify');
 elseif contains(load_type, 'taskGo')
-    info_table = readtable('/home/julie/Dropbox/PhD_summary/allTaskGoGoGoRecs.csv', 'VariableNamingRule', 'modify');
+    info_table = readtable('/home/julie/Dropbox/PhD_summary/old/allTaskGoGoGoRecs_prev.csv', 'VariableNamingRule', 'modify');
 else
     info_table = readtable('/home/julie/Dropbox/PhD_summary/allTaskRecs.csv', 'VariableNamingRule', 'modify');
 end
@@ -270,6 +270,8 @@ for iRecording = 1:length(use_recs)
 
                 % for half trials, identify max.
                 % then average on that half.
+                passive_data_per_cond.trial_types{experiment_type, iRecording} = trial_conditions;
+                passive_data_per_cond.no_move_trials{experiment_type, iRecording} = no_move_trials;
                 for iUnit = 1:size(units_to_keep, 1)
                     raster_window = [-0.5, 1];
                     psth_bin_size = 0.01;
@@ -366,11 +368,17 @@ for iRecording = 1:length(use_recs)
 
                     passive_data_per_cond.psth{experiment_type}(iUnit + unitCount, 2, :, :) = curr_psth;
 
-                    [curr_psth, ~, t, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
+                    [curr_psth, curr_raster, t, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
                         unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size, ...
                         align_times(1:1:end), trial_cond_idx(1:1:end));
                      passive_data_per_cond.psth{experiment_type}(iUnit + unitCount, 3, :, :) = curr_psth;
-
+                     startIdx = find(t >= 0.05, 1, 'first');
+                     stopIdx = find(t >= 0.15, 1, 'first');
+                     passive_data_per_cond.av_per_trial{experiment_type, iRecording}(iUnit+unitCount,:) = nanmean(curr_raster(:,startIdx:stopIdx),2);
+                     passive_data_per_cond.av_psth{experiment_type, iRecording}(iUnit+unitCount,:,:) = curr_psth;
+                     % area
+                     %passive_data_per_cond.unit_area{experiment_type, iRecording}(iUnit+unitCount)
+                     % unit type 
 
             
                 end
@@ -379,6 +387,8 @@ for iRecording = 1:length(use_recs)
 
             % save data in structure
             if ~isempty(new_units)
+                passive_data_per_cond.nz_trial_types{experiment_type, iRecording} = trial_conditions;
+                passive_data_per_cond.nz_no_move_trials{experiment_type, iRecording} = no_move_trials;
                 passive_data_per_cond.animal_day_site_shank(unitCount+1:unitCount+size(units_to_keep, 1), :) = ...
                     repmat([mouse_day_sites_shank_rec(iRecording, 1), curr_day, site, curr_shank], size(units_to_keep, 1), 1);
                 passive_data_per_cond.unit_area(unitCount+1:unitCount+size(units_to_keep, 1), :) = units_to_keep_area;
