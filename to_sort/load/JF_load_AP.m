@@ -4,7 +4,7 @@
 %clear all;
 cl_myPaths;
 
-animals={'JF093'};
+animals={'JF105'};
 curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};
@@ -35,7 +35,7 @@ load_parts.cam=false;
 load_parts.imaging=false;
 load_parts.ephys=true;
 
-site = 1;%1,1; 2,4; 3,7
+site = 4;%1,1; 2,4; 3,7
 recording = []; 
 % keep experiment with max n trials (= most likely not aborted error or end
 % shank mapping) QQ change this in the future 

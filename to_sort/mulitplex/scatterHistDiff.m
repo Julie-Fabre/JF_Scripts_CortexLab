@@ -75,11 +75,11 @@ set(main_fig, 'xtick', get(main_fig, 'ytick'));
 histogram(h_inset, x-y, 'BinWidth', histogramBinSize, 'edgecolor', [0 0 0], ...
     'facecolor', [0.4 0.4 0.4]);
 
-try
-    % do statistics on the pairs, paired t-test
-    [~, pval] = ttest(x, y);
-    mysigstar(h_inset, nanmean(x-y), max(get(h_inset, 'ylim')*1.1), pval);
-end
+% try
+%     % do statistics on the pairs, paired t-test
+%     [~, pval] = ttest(x, y);
+%     mysigstar(h_inset, nanmean(x-y), max(get(h_inset, 'ylim')*1.1), pval);
+% end
 
 % change position and rotation of the histogram inset
 insetSize = axpos(3) * 0.5;

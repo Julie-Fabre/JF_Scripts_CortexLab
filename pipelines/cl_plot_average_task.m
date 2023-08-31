@@ -1,16 +1,23 @@
 
 
-if gogogo
-    task_data_here = task_data_gogogo;
-else
-    task_data_here = task_data;
-end
+% if gogogo
+%     task_data_here = task_data_gogogo;
+% else
+%     task_data_here = task_data;
+% end
 figure();
 %clf;
 cl_plottingSettings;
 
 contra = 0;
 center = 0 ;
+if passive
+    idx = 5;
+     go1_contra = squeeze(task_data_here.psth{idx}(:, :, 2, :));
+    go2_contra = squeeze(task_data_here.psth{idx}(:, :, 4, :));
+    noGo_contra = squeeze(task_data_here.psth{idx}(:, :, 3, :));
+else
+    idx=2;
 if contra
     % 1,2,3 = all the +90s 
     % 13,14,15 %go1 [4]
@@ -18,39 +25,40 @@ if contra
     % 37,38,39 %go2 [12]
     % 40,41,42 %go likes [13]
     % 16,17,18; 31,32,33; 34,35,36 %nogo likes [5, 10, 11]
-    go1_contra = squeeze(task_data_here.psth{2}(:, :, 10, :));
-    go2_contra = squeeze(task_data_here.psth{2}(:, :, 34, :));
-    noGo_contra = squeeze(task_data_here.psth{2}(:, :, 16, :));
-    noGoLike_contra = squeeze(task_data_here.psth{2}(:, :, 19, :));
-    goLike_contra = squeeze(task_data_here.psth{2}(:, :, 37, :));
-    noGoLike2_contra = squeeze(task_data_here.psth{2}(:, :, 28, :));
-    noGoLike3_contra = squeeze(task_data_here.psth{2}(:, :, 31, :));
+    go1_contra = squeeze(task_data_here.psth{idx}(:, :, 10, :));
+    go2_contra = squeeze(task_data_here.psth{idx}(:, :, 34, :));
+    noGo_contra = squeeze(task_data_here.psth{idx}(:, :, 16, :));
+    noGoLike_contra = squeeze(task_data_here.psth{idx}(:, :, 19, :));
+    goLike_contra = squeeze(task_data_here.psth{idx}(:, :, 37, :));
+    noGoLike2_contra = squeeze(task_data_here.psth{idx}(:, :, 28, :));
+    noGoLike3_contra = squeeze(task_data_here.psth{idx}(:, :, 31, :));
 elseif center 
-    go1_contra = squeeze(task_data_here.psth{2}(:, :, 11, :));
-    go2_contra = squeeze(task_data_here.psth{2}(:, :, 35, :));
-    noGo_contra = squeeze(task_data_here.psth{2}(:, :, 17, :));
-    noGoLike_contra = squeeze(task_data_here.psth{2}(:, :, 20, :));
-    goLike_contra = squeeze(task_data_here.psth{2}(:, :, 38, :));
-    noGoLike2_contra = squeeze(task_data_here.psth{2}(:, :, 29, :));
-    noGoLike3_contra = squeeze(task_data_here.psth{2}(:, :, 32, :));
+    go1_contra = squeeze(task_data_here.psth{idx}(:, :, 11, :));
+    go2_contra = squeeze(task_data_here.psth{idx}(:, :, 35, :));
+    noGo_contra = squeeze(task_data_here.psth{idx}(:, :, 17, :));
+    noGoLike_contra = squeeze(task_data_here.psth{idx}(:, :, 20, :));
+    goLike_contra = squeeze(task_data_here.psth{idx}(:, :, 38, :));
+    noGoLike2_contra = squeeze(task_data_here.psth{idx}(:, :, 29, :));
+    noGoLike3_contra = squeeze(task_data_here.psth{idx}(:, :, 32, :));
 
 else
-    go1_contra = squeeze(task_data_here.psth{2}(:, :, 12, :));
-    go2_contra = squeeze(task_data_here.psth{2}(:, :, 36, :));
-    noGo_contra = squeeze(task_data_here.psth{2}(:, :, 18, :));
-    noGoLike_contra = squeeze(task_data_here.psth{2}(:, :, 21, :));
-    goLike_contra = squeeze(task_data_here.psth{2}(:, :, 39, :));
-    noGoLike2_contra = squeeze(task_data_here.psth{2}(:, :, 30, :));
-    noGoLike3_contra = squeeze(task_data_here.psth{2}(:, :, 33, :));
+    go1_contra = squeeze(task_data_here.psth{idx}(:, :, 12, :));
+    go2_contra = squeeze(task_data_here.psth{idx}(:, :, 36, :));
+    noGo_contra = squeeze(task_data_here.psth{idx}(:, :, 18, :));
+    noGoLike_contra = squeeze(task_data_here.psth{idx}(:, :, 21, :));
+    goLike_contra = squeeze(task_data_here.psth{idx}(:, :, 39, :));
+    noGoLike2_contra = squeeze(task_data_here.psth{idx}(:, :, 30, :));
+    noGoLike3_contra = squeeze(task_data_here.psth{idx}(:, :, 33, :));
+end
 end
 
 
-% zscore_psth(1,:) = (task_data.psth{2}(:,1,1,:) - nanmean(task_data.psth(:,1:50),2)) ./ ...
+% zscore_psth(1,:) = (task_data.psth{idx}(:,1,1,:) - nanmean(task_data.psth(:,1:50),2)) ./ ...
 %     nanstd(task_data.psth(:,1:50),[],2);
 region_max = [1, 1, 1, 1, 1, 1, 1];
 region_smooth = [5, 1, 1, 1, 1, 1, 1];
 region_lims = [6, 15, 15, 15,15, 15];
-plot_regions = [1, 2, 5];
+plot_regions = [1, 2, 3];
 %region_clim_string = {'z-score (clim saturated)', 'z-score', 'z-score', 'z-score', 'z-score', 'z-score', 'z-score'};
 figure(1);
 clf;
@@ -61,11 +69,11 @@ for thisRegion = 1:size(plot_regions, 2)
 
     % get all cells %1:301
     these_units = task_data_here.unit_area == iRegion & ...
-        (task_data_here.unitType' ==1 | task_data_here.unitType' ==2) &...
-        (task_data_here.pvalue_shuffled_005{2}(1:size(task_data_here.unit_area, 1))' == 1);% |...
-        %any(task_data_here.pvalue{2}(:,:)>0.975,2) | any(task_data_here.pvalue{2}(:,:)<0.025,2) );% & ...
-        %task_data_here.pvalue_shuffled_005{2}(1:size(task_data_here.unit_area, 1))' == 1; % & task_data.pvalue{2}' < 0.05 &...
-    %task_data.pvalue_shuffled_005{2}' == 1;%& task_data.pvalue{2}' < 0.05 &...
+        (task_data_here.unitType' ==1 | task_data_here.unitType' ==2);% &...
+        (task_data_here.pvalue_shuffled_005{1,idx}(1:size(task_data_here.unit_area, 1))' == 1);% |...
+        %any(task_data_here.pvalue{idx}(:,:)>0.975,2) | any(task_data_here.pvalue{idx}(:,:)<0.025,2) );% & ...
+        %task_data_here.pvalue_shuffled_005{idx}(1:size(task_data_here.unit_area, 1))' == 1; % & task_data.pvalue{idx}' < 0.05 &...
+    %task_data.pvalue_shuffled_005{idx}' == 1;%& task_data.pvalue{idx}' < 0.05 &...
     %(task_data.unitType' ==1 | task_data.unitType' ==2) ;
 
     train_image = squeeze(go1_contra(these_units, 1, :));
@@ -97,6 +105,7 @@ for thisRegion = 1:size(plot_regions, 2)
     this_image_smooth_noGo = conv2(test_image_noGo(cell_idx, :), ones(smooth_filt), 'same') ./ ...
         conv2(~isnan(test_image_noGo(cell_idx, :)), ones(smooth_filt), 'same');
 
+    if ~passive
     %no go like
     test_image_noGoLike = squeeze([noGoLike_contra(these_units, 2, :); noGoLike_contra(these_units, 2, :)]);
     test_image_noGoLike = (test_image_noGoLike - nanmean(test_image_noGoLike(:, 1:50), 2)) ./ ...
@@ -128,7 +137,7 @@ for thisRegion = 1:size(plot_regions, 2)
     smooth_filt = [region_smooth(iRegion), 1]; % (units x frames)
     this_image_smooth_goLike = conv2(test_image_goLike(cell_idx, :), ones(smooth_filt), 'same') ./ ...
         conv2(~isnan(test_image_goLike(cell_idx, :)), ones(smooth_filt), 'same');
-
+    end
 
     % remove mostly NaN rows (to be replaced by bombcell output when that's
     % finished running)
@@ -137,7 +146,11 @@ for thisRegion = 1:size(plot_regions, 2)
 
     % plot PSTH
     figure(1)
+     if ~passive
     subplot(size(plot_regions, 2), 7, (7*(thisRegion -1))+1)
+    else
+        subplot(size(plot_regions, 2), 3, (3*(thisRegion -1))+1)
+    end
     %subplot(131)
     imagesc(task_data_here.t, [], this_image_smooth_go1(keep_these, :))
     caxis([-max(max(abs(this_image_smooth_go1(keep_these, :)))) .* region_max(iRegion), max(max(abs(this_image_smooth_go1(keep_these, :)))) .* region_max(iRegion)])
@@ -150,7 +163,11 @@ for thisRegion = 1:size(plot_regions, 2)
     makepretty;
     clim([-region_lims(iRegion),region_lims(iRegion)] )
 
+    if ~passive
     subplot(size(plot_regions, 2), 7, (7*(thisRegion -1))+2)
+    else
+        subplot(size(plot_regions, 2), 3, (3*(thisRegion -1))+2)
+    end
     
     imagesc(task_data_here.t, [], this_image_smooth_go2(keep_these, :))
     caxis([-max(max(abs(this_image_smooth_go2(keep_these, :)))) .* region_max(iRegion), max(max(abs(this_image_smooth_go2(keep_these, :)))) .* region_max(iRegion)])
@@ -162,9 +179,12 @@ for thisRegion = 1:size(plot_regions, 2)
     %title('Go 2')
     makepretty;
     clim([-region_lims(iRegion),region_lims(iRegion)] )
-
-    subplot(size(plot_regions, 2), 7, (7*(thisRegion -1))+3)
     
+    if ~passive
+    subplot(size(plot_regions, 2), 7, (7*(thisRegion -1))+3)
+    else
+        subplot(size(plot_regions, 2), 3, (3*(thisRegion -1))+3)
+    end
     imagesc(task_data_here.t, [], this_image_smooth_noGo(keep_these, :))
     caxis([-max(max(abs(this_image_smooth_noGo(keep_these, :)))) .* region_max(iRegion), max(max(abs(this_image_smooth_noGo(keep_these, :)))) .* region_max(iRegion)])
     c = colorbar;
@@ -175,7 +195,8 @@ for thisRegion = 1:size(plot_regions, 2)
     %title('No go')
     makepretty;
     clim([-region_lims(iRegion),region_lims(iRegion)] )
-
+    
+    if ~passive
     subplot(size(plot_regions, 2), 7, (7*(thisRegion -1))+4)
     
     imagesc(task_data_here.t, [], this_image_smooth_noGoLike(keep_these, :))
@@ -228,7 +249,7 @@ for thisRegion = 1:size(plot_regions, 2)
     makepretty;
     clim([-region_lims(iRegion),region_lims(iRegion)] )
 
-
+    end
 end
 
 %plotshaded(0:0.001:0.5, [-acgstd + acgmean; acgstd + acgmean], 'g');

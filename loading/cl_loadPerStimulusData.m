@@ -1,24 +1,28 @@
 function passive_data_per_cond = cl_loadPerStimulusData(load_type, keep_type) %% paramaters
-if contains(load_type, 'passive')
-    info_table = readtable('/home/julie/Dropbox/PhD_summary/allPassiveRecs.csv', 'VariableNamingRule', 'modify');
+cl_myPaths;
+    if contains(load_type, 'passive')
+    info_table = readtable([csvPath 'allPassiveRecs.csv'], 'VariableNamingRule', 'modify');
 elseif contains(load_type, 'taskGo')
-    info_table = readtable('/home/julie/Dropbox/PhD_summary/old/allTaskGoGoGoRecs_prev.csv', 'VariableNamingRule', 'modify');
+    info_table = readtable([csvPath 'old' filesep 'allTaskGoGoGoRecs_prev.csv'], 'VariableNamingRule', 'modify');
 else
-    info_table = readtable('/home/julie/Dropbox/PhD_summary/allTaskRecs.csv', 'VariableNamingRule', 'modify');
-end
+    info_table =readtable([csvPath 'allTaskRecs.csv'], 'VariableNamingRule', 'modify');
+    end
+
 load_passive_ = true;
 %info_table = readtable('/home/julie/Dropbox/PhD_summary/allPassiveRecs.csv');
-regions = {'CP', 'GPe', 'GPi', 'STN', 'SNr', 'SNc', 'VTA'};
+regions = {'CP', 'GPe', 'SNr'};% 'GPi', 'STN', 'SNr', 'SNc', 'VTA'};
 %regions = {'CP'};
 warning off;
 %get region nums (allen format)
-cl_myPaths;
+
 if ~exist('st', 'var')
-    [tv, av, st, bregma] = bd_loadAllenAtlas(atlasBrainRegLocation);
+   % [tv, av, st, bregma] = bd_loadAllenAtlas(atlasBrainRegLocation);
+    st =[];
 end
-for iRegion = 1:size(regions, 2)
-    regions_id(iRegion) = st.id(strcmp(st.acronym, regions(iRegion)));
-end
+regions_id = [672, 1022, 381];
+% for iRegion = 1:size(regions, 2)
+%     regions_id(iRegion) = st.id(strcmp(st.acronym, regions(iRegion)));
+% end
 
 % get all mice x day x site combinations
 use_recs_full = strcmp(info_table.Use_, 'Yes');
@@ -53,9 +57,11 @@ end
 
 %% load data
 
-for iRecording = 1:length(use_recs)
+for iRecording = 1:length(use_recs)%61:length(use_recs)
+    %try
     %try
     % curr variables
+
     animal = unique_mice{mouse_day_sites_shank_rec(iRecording, 1)};
     curr_day = mouse_day_sites_shank_rec(iRecording, 2);
     site = mouse_day_sites_shank_rec(iRecording, 3);
@@ -64,6 +70,10 @@ for iRecording = 1:length(use_recs)
 
     % load probe_ccf and probe2ephys
     probe2ephys_location = AP_cortexlab_filenameJF(animal, [], [], 'probe2ephys');
+    if isempty(probe2ephys_location)
+        disp('no histo')
+        continue;
+    end
     load(probe2ephys_location)
     day_sites_shank_probe = [probe2ephys.day; probe2ephys.site; probe2ephys.shank]';
 
@@ -78,7 +88,7 @@ for iRecording = 1:length(use_recs)
     units_to_keep =[];
     % is any region present
     this_probe = probe_rec_idx;
-    if this_probe > 1
+    if this_probe > 0
         for iRegion = 1:size(regions, 2)
             this_region = regions_id(iRegion);
             this_region_idx = find(probe_ccf(this_probe).trajectory_areas == this_region);
@@ -107,7 +117,10 @@ for iRecording = 1:length(use_recs)
             else
                 load_me = size(these_exps, 2);
             end
-            for iExperiment = load_me %1:size(these_exps,2)
+            % find max experiment 
+            n_trials = [];
+            exp_n_trials = [];
+            for iExperiment = load_me
                 experiment = these_exps(iExperiment); %for now, just load 1 experiment
                 experiments = AP_find_experimentsJF(animal, '', true);
                 experiments = experiments([experiments.ephys]);
@@ -153,13 +166,96 @@ for iRecording = 1:length(use_recs)
                         if keep_type ~= 4
                         continue;
                         end
-                        experiment_type = 5;
+                        experiment_type = 4;
                         keep_trial = no_move_trials;
                     elseif contains(expDef, 'JF_choiceworldStimuli')
                         if keep_type ~= 5
                         continue;
                         end
+                        experiment_type = 5;
+                        keep_trial = no_move_trials;
+                        
+                    elseif contains(expDef, 'JF_natural_images')
+                        if keep_type ~= 6
+                        continue;
+                        end
+                        experiment_type = 6;
+                        keep_trial = no_move_trials;
+                    end
+                else
+                    if contains(expDef, 'noGo_')
+                        if keep_type ~= 1
+                            continue;
+                        end
+                        experiment_type = 1;
+                        keep_trial = [];
+                    elseif contains(expDef, 'JF_choiceworldStimuli')
+                        if keep_type ~= 2
+                            continue;
+                        end
+                        experiment_type = 2;
+                        keep_trial = no_move_trials;
+                    end
+                end
+                n_trials(iExperiment) = length(keep_trial);
+                exp_n_trials(iExperiment) = experiment;
+
+            end
+            
+            load_me_max = exp_n_trials(find(n_trials==max(n_trials)));
+            for iExperiment = load_me_max %1:size(these_exps,2)
+                experiment =  load_me_max;%these_exps(iExperiment); %for now, just load 1 experiment
+                experiments = AP_find_experimentsJF(animal, '', true);
+                experiments = experiments([experiments.ephys]);
+                day = experiments(curr_day).day;
+                if isnan(curr_rec)
+                    recording = [];
+                else
+                    recording = curr_rec;
+                end
+
+
+                verbose = false; % display load progress and some info figures
+                load_parts.cam = false;
+                load_parts.imaging = false;
+                load_parts.ephys = true;
+                loadClusters = 0;
+                try
+                    JF_load_experiment;
+                        
+                catch
+                    disp('error loading experiment')
+                    continue;
+                end
+                if contains(load_type, 'passive')
+                    if contains(expDef, 'JF_GratingPassiveVarITI')
+                        if keep_type ~= 1
+                        continue;
+                        end
+                        experiment_type = 1;
+                        keep_trial = no_move_trials;
+                    elseif contains(expDef, 'JF_locations')
+                        if keep_type ~= 2
+                        continue;
+                        end
+                        experiment_type = 2;
+                    elseif contains(expDef, 'JF_natural_imagesFit')
+                        if keep_type ~= 3
+                        continue;
+                        end
+                        experiment_type = 3;
+                        keep_trial = no_move_trials;
+                    elseif contains(expDef, 'JF_choiceworldStimuli_onlyTask')
+                        if keep_type ~= 4
+                        continue;
+                        end
                         experiment_type = 4;
+                        keep_trial = no_move_trials;
+                    elseif contains(expDef, 'JF_choiceworldStimuli')
+                        if keep_type ~= 5
+                        continue;
+                        end
+                        experiment_type = 5;
                         keep_trial = no_move_trials;
                         
                     elseif contains(expDef, 'JF_natural_images')
@@ -247,15 +343,16 @@ for iRecording = 1:length(use_recs)
                 else
                     %if experiment_type == 1%nat images
                     passive_data_per_cond.psth_conditions{experiment_type} = unique(trial_conditions, 'rows');
-                    if experiment_type==4
+                    if experiment_type==5
                         if size(trial_conditions,2) == 2
                      
                             these_guys = ismember(trial_conditions(:, 1), ...
-                                [1:13]) & ismember(trial_conditions(:, 2), [-90, 0,90]);
-                            
-                            if size(unique(trial_conditions(these_guys,:), 'rows'),1) ==6
+                                [4,6,12]) & ismember(trial_conditions(:, 2), [-90]);
+                            disp(unique(trial_conditions(these_guys,:), 'rows'))
+                            if size(unique(trial_conditions(these_guys,:), 'rows'),1) ==3
                                 passive_data_per_cond.psth_conditions{experiment_type} = unique(trial_conditions(these_guys,:), 'rows');
                             else
+                                disp('no stim screen location saved')
                                 continue;
                             end
                         else
@@ -367,15 +464,26 @@ for iRecording = 1:length(use_recs)
                         align_times(2:2:end), trial_cond_idx(2:2:end));
 
                     passive_data_per_cond.psth{experiment_type}(iUnit + unitCount, 2, :, :) = curr_psth;
-
+                    %disp(unique_templates(shank_units(units_to_keep(iUnit))))
+                    
                     [curr_psth, curr_raster, t, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
                         unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size, ...
                         align_times(1:1:end), trial_cond_idx(1:1:end));
                      passive_data_per_cond.psth{experiment_type}(iUnit + unitCount, 3, :, :) = curr_psth;
+
+                     psth_bin_size_det = 0.001;
+                    raster_window_det = [-0.2, 0.6];
+                    [curr_psth, curr_raster, t, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
+                        unique_templates(shank_units(units_to_keep(iUnit))), raster_window_det, psth_bin_size_det, ...
+                        align_times(1:1:end), trial_cond_idx(1:1:end));
                      startIdx = find(t >= 0.05, 1, 'first');
                      stopIdx = find(t >= 0.15, 1, 'first');
-                     passive_data_per_cond.av_per_trial{experiment_type, iRecording}(iUnit+unitCount,:) = nanmean(curr_raster(:,startIdx:stopIdx),2);
-                     passive_data_per_cond.av_psth{experiment_type, iRecording}(iUnit+unitCount,:,:) = curr_psth;
+                     passive_data_per_cond.av_per_trial{experiment_type, iRecording}(iUnit,:) = nanmean(curr_raster(:,startIdx:stopIdx),2);
+                     startIdx = find(t >= -0.15, 1, 'first');
+                     stopIdx = find(t >= -0.05, 1, 'first');
+                     passive_data_per_cond.av_per_trial_base{experiment_type, iRecording}(iUnit,:) = nanmean(curr_raster(:,startIdx:stopIdx),2);
+                     passive_data_per_cond.av_psth{experiment_type, iRecording}(iUnit,:,:) = curr_psth;
+                    
                      % area
                      %passive_data_per_cond.unit_area{experiment_type, iRecording}(iUnit+unitCount)
                      % unit type 
@@ -386,7 +494,7 @@ for iRecording = 1:length(use_recs)
             end
 
             % save data in structure
-            if ~isempty(new_units)
+            if ~isempty(units_to_keep)
                 passive_data_per_cond.nz_trial_types{experiment_type, iRecording} = trial_conditions;
                 passive_data_per_cond.nz_no_move_trials{experiment_type, iRecording} = no_move_trials;
                 passive_data_per_cond.animal_day_site_shank(unitCount+1:unitCount+size(units_to_keep, 1), :) = ...

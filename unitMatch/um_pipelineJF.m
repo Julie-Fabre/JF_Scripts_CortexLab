@@ -1,6 +1,6 @@
 
 %% Where to save data - CHANGE THESE PATHS
-SaveDir = '/home/netshare/zinu/JF067/'; % Folder where to store the results
+SaveDir = '/home/netshare/zinu/JF067'; % Folder where to store the results
 tmpdatafolder = '/media/julie/ExtraHD/data_temp'; % temporary folder for temporary decompression of data 
 
 %% Information on mice and recording types - CHANGE THESE MOUSE NAMES AND RECORDING TYPES
@@ -48,3 +48,19 @@ for iMouse = 1:size(MiceOpt,2)
     FigureFlick(SaveDir,'julie',recompute)
     % your labels are saved in MatchTable.<user>
 end
+
+%% get matches across 10 first days 
+thisThreshold = 0.5;
+% find cells with pair-wise matches
+for iRecording = 1:max(MatchTable.RecSes1)-1
+    %theseCandidates = MatchTable.RecSes1==iRecording & MatchTable.MatchProb > 0.5;
+    sessionMatches = find(MatchTable.RecSes1==iRecording &...
+        MatchTable.RecSes2==iRecording+1 & MatchTable.MatchProb > thisThreshold);
+    match_pairID{iRecording} = [MatchTable.ID1(sessionMatches),MatchTable.ID2(sessionMatches)];
+end
+
+% find any cells with more matches 
+
+
+
+%% plot visual activity over time 
