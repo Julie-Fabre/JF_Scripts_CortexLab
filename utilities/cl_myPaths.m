@@ -32,7 +32,7 @@ if ispc % eww.
 else
 
     %% lab servers
-    %zaruPath = '/home/netshare/zaru/';
+    zaruPath = '/home/netshare/zaru/';
     znasPath = '/home/netshare/znas/';
     zserverPath = '/home/netshare/zserver-data/'; %
     zserverLabPath = '/home/netshare/zserver-lab/'; %

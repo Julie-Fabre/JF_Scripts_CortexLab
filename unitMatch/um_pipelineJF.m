@@ -1,7 +1,7 @@
 
 %% Where to save data - CHANGE THESE PATHS
-SaveDir = '/home/netshare/zinu/JF067'; % Folder where to store the results
-tmpdatafolder = '/media/julie/ExtraHD/data_temp'; % temporary folder for temporary decompression of data 
+%SaveDir = '/home/netshare/zinu/JF067'; % Folder where to store the results
+tmpdatafolder =  extraHDPath;%'/media/julie/ExtraHD/data_temp'; % temporary folder for temporary decompression of data 
 
 %% Information on mice and recording types - CHANGE THESE MOUSE NAMES AND RECORDING TYPES
 MiceOpt = {'JF067', 'JF078', 'JF051', 'AL035', 'JF082', 'JF084'}; % Add all mice you want to analyze
@@ -14,7 +14,7 @@ miceDays = [1,29; 1,16; 1,17; 1,14; 1,31];% 1:11
 % diff saving (celian run)
 saveJF=1;
 for iMouse = 2:size(MiceOpt,2)-1 %JF084 - saving deal with 
-
+   
     %% get all raw ephys and kilosort directories - CHANGE THESE PATHS
     site = 1;
     experiments = AP_find_experimentsJF(MiceOpt{iMouse}, '', true, site); % find all experiments for this mouse
@@ -24,6 +24,11 @@ for iMouse = 2:size(MiceOpt,2)-1 %JF084 - saving deal with
     kilosort_dirs = arrayfun(@(x) {[experiments(x).ephys_ks_paths, filesep, 'site', num2str(site)]}, 1:size(experiments,1));
     thisRecordingType = RecordingType{iMouse};
     mouseName = MiceOpt{iMouse};
+
+    [filename,file_exists] = AP_cortexlab_filenameJF(MiceOpt{iMouse},experiments(end).day,'','histo_folder' , '', '', '');
+    SaveDir = fileparts(filename);
+    %SaveDir = ['/home/netshare/zinu/JF067'; % Folder where to store the results
+
 
     %% subselect two first for testing 
     ephys_dirs =  ephys_dirs(miceDays(iMouse,1):miceDays(iMouse,2));
