@@ -55,7 +55,7 @@ end
 
 % List servers
 server1 = zinuPath;
-server2 = zaruPath;
+%server2 = zaruPath;
 server3 = znasPath;
 server4 = zserverPath;
 server5 = localExtHdPath;
@@ -73,7 +73,7 @@ server5 = localExtHdPath;
 % List all folders to check
 server_location = cell(0);
 server_location{end+1} = [server3 ];
-server_location{end+1} = [server2 ];
+%server_location{end+1} = [server2 ];
 server_location{end+1} = [server1 ];
 server_location{end+1} = [server4 ];
 server_location{end+1} = [server5 ];

@@ -34,7 +34,7 @@ for iAnimal = 1:size(animalsAll, 2)
     noGoDay = [];
     theseD = 1:length(experiments);
     if strcmp(animalsAll{iAnimal}, 'JF067')
-        theseD(26) = [];
+        theseD = 1:4 ;
     end
     for curr_day = theseD
 
@@ -763,7 +763,7 @@ for iAnimal = 1:size(animalsAll, 2)
 %    bhvOut(iAnimal).protocol_idx = protocol_idx;
  %   bhvOut(iAnimal).day_labels = day_labels;
     bhvOut(iAnimal).binBorders = binBorders;
-    bhv.movingFrac = [];
+    bhv.movingFrac = bhv.movingFrac;
     bhvOut(iAnimal).movingFracGo1 = bhv.movingFrac;
     bhvOut(iAnimal).goLeft = bhv.goLeft(:, :);
     bhvOut(iAnimal).nTrials = bhv.nTrials(:, :);
