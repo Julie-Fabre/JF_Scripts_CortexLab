@@ -91,7 +91,7 @@ AP_cellrasterJF({stimOn_times(theseImages_trials), stimOn_times(theseImages_tria
     {trial_conditions_clean(theseImages_trials,1),...
     trial_conditions_clean(theseImages_trials,2), -89+trial_conditions_clean(theseImages_trials,1) + abs(trial_conditions_clean(theseImages_trials,2))})
 %AP_cellraster({stimOn_times, stimOn_times}, {trial_conditions(:,2), trial_conditions(:,3)})
-%AP_cellraster({stimOn_times}, {trial_conditions(:,1)})
+%AP_cellrasterJF({stimOn_times}, {trial_conditions(:,1)})
 %AP_cellraster({stimOn_times, stimOn_times}, {trial_conditions(:,1), trial_conditions(:,2)})
 % 
 % % passive, task stims 

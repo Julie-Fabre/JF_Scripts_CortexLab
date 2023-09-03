@@ -9,7 +9,7 @@ RecordingType(ismember(MiceOpt, {'JF067', 'JF078', 'JF051', 'JF_AL035', 'JF082',
 miceDays = [1, 29; 1, 16; 1, 14; 1, 20; 1, 31; 3,19]; % 1:11
 runMe = 1;
 saveJF = 1;
-for iMouse = 2:size(MiceOpt, 2) 
+for iMouse = 1:size(MiceOpt, 2) 
 
     %% get all raw ephys and kilosort directories - CHANGE THESE PATHS
     site = 1;

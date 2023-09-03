@@ -395,7 +395,11 @@ switch file
         [filename,file_exists] = check_locations(filepattern,server_location);
         
           end
-
+        if ~file_exists
+             filepattern = [animal filesep date filesep 'ephys'  site_dir filesep 'pyKS' filesep 'output' ];
+        [filename,file_exists] = check_locations(filepattern,server_location);
+        
+          end
         
         if file_exists
             filename = fileparts(filename{end});
