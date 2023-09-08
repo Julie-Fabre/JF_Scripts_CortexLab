@@ -34,7 +34,7 @@ for iAnimal = 1:size(animalsAll, 2)
     noGoDay = [];
     theseD = 1:length(experiments);
     if strcmp(animalsAll{iAnimal}, 'JF067')
-        theseD = 1:4 ;
+        %theseD = 1:11;
     end
     for curr_day = theseD
 
@@ -611,7 +611,7 @@ for iAnimal = 1:size(animalsAll, 2)
                 end
                 bhv.stim_rxn_time(curr_day) = stim_rxn_time;
                 bhv.stim_rxn_timeSEM(curr_day) = stim_rxn_timeSEM;
-
+                bhv.protocol{curr_day} = expDefName;
                 %stims
                 catch
                 end
@@ -792,6 +792,7 @@ for iAnimal = 1:size(animalsAll, 2)
     bhvOut(iAnimal).noGotrials = bhv.noGotrials;
     bhvOut(iAnimal).stim_to_move = bhv.stim_to_move;
     bhvOut(iAnimal).stim_to_moveMean = bhv.stim_to_moveMean;
+    bhvOut(iAnimal).protocol = bhv.protocol; 
 
     if length(noGoDay) >= 1
         bhvOut(iAnimal).movingFracGo1(noGoDay, :) = bhv.movingFracGo1(noGoDay, :);

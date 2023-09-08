@@ -1,64 +1,74 @@
 
 %% Where to save data - CHANGE THESE PATHS
+clear all;
+close all;
 cl_myPaths;
 tmpdatafolder = extraHDPath; %'/media/julie/ExtraHD/data_temp'; % temporary folder for temporary decompression of data
 
 %% Information on mice and recording types - CHANGE THESE MOUSE NAMES AND RECORDING TYPES
-MiceOpt = {'JF067', 'JF078', 'JF051', 'JF_AL035', 'JF082', 'JF084'}; % Add all mice you want to analyze
-RecordingType(ismember(MiceOpt, {'JF067', 'JF078', 'JF051', 'JF_AL035', 'JF082', 'JF084'})) = {'Chronic'}; % 'Acute' or 'Chronic'
-miceDays = [1, 29; 1, 16; 1, 14; 1, 20; 1, 31; 3,19]; % 1:11
+MiceOpt = {'JF067', 'JF078', 'JF_AL035', 'JF082', 'JF084'}; % Add all mice you want to analyze. 51 = ventricule mostly, don't include
+RecordingType(ismember(MiceOpt, {'JF067', 'JF078', 'JF_AL035', 'JF082', 'JF084'})) = {'Chronic'}; % 'Acute' or 'Chronic'
+miceDays = [1, 29; 1, 15; 1, 20; 1, 31; 3,19]; % 1:11
+sites = [1,1; 2,3; 1,1; 2,2; 3,3];
 runMe = 1;
 saveJF = 1;
-for iMouse = 2:size(MiceOpt, 2) 
+for iMouse = 1%:size(MiceOpt, 2) 
 
     %% get all raw ephys and kilosort directories - CHANGE THESE PATHS
-    site = 1;
-    experiments = AP_find_experimentsJF(MiceOpt{iMouse}, '', true, site); % find all experiments for this mouse
-    experiments = experiments([experiments.ephys]); % keep only experiments that have ephys
-
-    ephys_dirs = {experiments.ephys_raw_paths};
-    kilosort_dirs = arrayfun(@(x) {[experiments(x).ephys_ks_paths, filesep, 'site', num2str(site)]}, 1:size(experiments, 1));
-    thisRecordingType = RecordingType{iMouse};
-    mouseName = MiceOpt{iMouse};
-
-    [filename, file_exists] = AP_cortexlab_filenameJF(MiceOpt{iMouse}, experiments(end).day, '', 'histo_folder', '', '', '');
-    SaveDir = fileparts(filename);
-   
-    if runMe
-        %% subselect two first for testing
-        ephys_dirs = ephys_dirs(miceDays(iMouse, 1):miceDays(iMouse, 2));
-        kilosort_dirs = kilosort_dirs(miceDays(iMouse, 1):miceDays(iMouse, 2));
-        % remove any empty ones 
-        nonEmptyCells = ~cellfun(@isempty,ephys_dirs) & ~cellfun(@isempty,kilosort_dirs);
-        ephys_dirs = ephys_dirs(nonEmptyCells);
-        kilosort_dirs = kilosort_dirs(nonEmptyCells);
+    theseSites = sites(iMouse,1):sites(iMouse,2);
+    for iSite = 1:size(theseSites,2)
+        site = theseSites(iSite);
+        experiments = AP_find_experimentsJF(MiceOpt{iMouse}, '', true, site); % find all experiments for this mouse
+        experiments = experiments([experiments.ephys]); % keep only experiments that have ephys
     
-        %% run unit match
-        set(0, 'DefaultFigureVisible', 'off')
-        [PrepareClusInfoparams, UMparam, UniqueIDConversion, MatchTable, WaveformInfo] = um_runUnitMatch(kilosort_dirs, ephys_dirs, SaveDir, tmpdatafolder, thisRecordingType, mouseName);
-        set(0, 'DefaultFigureVisible', 'on')
+        ephys_dirs = {experiments.ephys_raw_paths};
+        kilosort_dirs = arrayfun(@(x) {[experiments(x).ephys_ks_paths, filesep, 'site', num2str(site)]}, 1:size(experiments, 1));
+        thisRecordingType = RecordingType{iMouse};
+        mouseName = MiceOpt{iMouse};
     
-        %% check output
-        EvaluatingUnitMatch([SaveDir, filesep, 'UnitMatch']);
-        ComputeFunctionalScores([SaveDir, filesep, 'UnitMatch'], saveJF)
-    
-        DrawBlind = 0; %1 for blind drawing (for manual judging of pairs)
-        DrawPairsUnitMatch([SaveDir, filesep, 'UnitMatch'], DrawBlind, saveJF);
-    
-        % Key presses:
-        %   Right arrow: next pair
-        %   Left arrow: previous pair
-        %   Up arrow: label as match
-        %   Down arrow: label as non-match
-        %   o: label as I don't know (=uncurated)
-        %   m: go to first uncurated pair
-        %   p: select pair number
-        %   s: SAVE
-        recompute = 1;
-        FigureFlick([SaveDir, filesep, 'UnitMatch'], 'julie', recompute, saveJF)
-        % your labels are saved in MatchTable.<user>
-    else
-        load([SaveDir, filesep, 'UnitMatch', filesep, 'UnitMatch.mat'])
+        [filename, file_exists] = AP_cortexlab_filenameJF(MiceOpt{iMouse}, experiments(end).day, '', 'histo_folder', '', '', '');
+        SaveDir = fileparts(filename);
+       
+        if runMe
+            %% subselect two first for testing
+            ephys_dirs = ephys_dirs(miceDays(iMouse, 1):miceDays(iMouse, 2));
+            kilosort_dirs = kilosort_dirs(miceDays(iMouse, 1):miceDays(iMouse, 2));
+            % remove any empty ones 
+            nonEmptyCells = ~cellfun(@isempty,ephys_dirs) & ~cellfun(@isempty,kilosort_dirs) &...
+                arrayfun(@(x) length(kilosort_dirs{x}) > 6, 1:size(kilosort_dirs,2));
+            ephys_dirs = ephys_dirs(nonEmptyCells);
+            kilosort_dirs = kilosort_dirs(nonEmptyCells);
+        
+            %% run unit match
+            set(0, 'DefaultFigureVisible', 'off')
+            [PrepareClusInfoparams, UMparam, UniqueIDConversion, MatchTable, WaveformInfo] = um_runUnitMatch(kilosort_dirs, ephys_dirs, SaveDir, tmpdatafolder, thisRecordingType, mouseName);
+            set(0, 'DefaultFigureVisible', 'on')
+        
+            %% check output
+            EvaluatingUnitMatch([SaveDir, filesep, 'UnitMatch']);
+            ComputeFunctionalScores([SaveDir, filesep, 'UnitMatch'], saveJF)
+        
+            DrawBlind = 0; %1 for blind drawing (for manual judging of pairs)
+            DrawPairsUnitMatch([SaveDir, filesep, 'UnitMatch'], DrawBlind, saveJF);
+        
+            % Key presses:
+            %   Right arrow: next pair
+            %   Left arrow: previous pair
+            %   Up arrow: label as match
+            %   Down arrow: label as non-match
+            %   o: label as I don't know (=uncurated)
+            %   m: go to first uncurated pair
+            %   p: select pair number
+            %   s: SAVE
+            recompute = 1;
+            FigureFlick([SaveDir, filesep, 'UnitMatch'], 'julie', recompute, saveJF)
+            % your labels are saved in MatchTable.<user>
+            
+            % move dir 
+            movefile([SaveDir, filesep, 'UnitMatch'], [SaveDir, filesep, 'UnitMatch', filesep, 'site', num2str(site)])
+        else
+            load([SaveDir, filesep, 'UnitMatch', filesep, 'UnitMatch.mat'])
+        end
     end
 end
 
@@ -104,7 +114,7 @@ thisThreshold = 0.5;
 % find(matchCounts > 1)
 
 %% attempt 2
-%pairs = [379,2754,2772,1929,514,746,913,939,968,1676,1780,1826,2138,2159,2341,2451,2555,2749,2773,2866,2871,2922,3029];
+% pairs = [379,2754,2772,1929,514,746,913,939,968,1676,1780,1826,2138,2159,2341,2451,2555,2749,2773,2866,2871,2922,3029];
 MatchTable = TmpFile.MatchTable;
 clearvars num_recs
 for iPair = 1:max(MatchTable.UID1)
@@ -112,8 +122,26 @@ for iPair = 1:max(MatchTable.UID1)
     num_recs(iPair) = numel(unique([MatchTable.RecSes1(these_indices); MatchTable.RecSes2(these_indices)]));
 end
 
+uniqueID_sg = unique([MatchTable.UID1, MatchTable.UID2]);
+unitTracked = false(size(uniqueID_sg,1), size(unique([MatchTable.RecSes1, MatchTable.RecSes2]), 1), 1);
+for iPair = 1:size(uniqueID_sg,1)
+    thisPair = uniqueID_sg(iPair);
+    these_indices = MatchTable.UID1 == thisPair & MatchTable.UID2 == thisPair;
+    recs = unique([MatchTable.RecSes1(these_indices); MatchTable.RecSes2(these_indices)]);
+    unitTracked(iPair, recs, :) = true;
+end
+figure();
+imagesc(1-unitTracked)
+colormap(gray)
+xlabel('recording day #')
+ylabel('unit #')
+title('JF067')
+prettify_plot;
+
+
+
 % plot average passive response 
-animal = MiceOpt{iMouse};
+%animal = MiceOpt{iMouse};
 protocol = 'JF_choiceworldStimuli'; % (this is the name of the Signals protocol)
 experiments = AP_find_experimentsJF(animal, protocol, true);
 experiments = experiments([experiments.ephys]);
@@ -166,6 +194,15 @@ subplot(121)
 imagesc(zscore_average_all(:,2:end,1))
 subplot(122)
 imagesc(zscore_average_all(:,2:end,2))
+
+
+figure();
+iUnit=12
+cmap_cols = crameri('batlow', 29);
+for iRec=1:size(curr_psth_all,2)
+plot(smoothdata(squeeze(curr_psth_all(iUnit, iRec, 1, :)), 'movmean', [20, 70]), 'Color', cmap_cols(iRec,:)); hold on;
+end
+
 
 % plot average task response to stim / reward (movement will be a confound
 % here)

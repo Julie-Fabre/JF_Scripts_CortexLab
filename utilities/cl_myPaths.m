@@ -42,7 +42,7 @@ else
     dropboxPath = '/home/julie/Dropbox/';
     fabreServerPath = '/home/netshare/fabreServer/';
 
-    extraHDPath = '/media/julie/ExtraHD/';
+    extraHDPath = '/media/julie/Expansion';%'/media/julie/ExtraHD/';
     cortexLabBackup1 = '/media/julie/CortexLabBU1/';
     cortexLabBackup2 = '/media/julie/CortexLabBU2/';
     cortexLabBackup3 = '/media/julie/CortexLabBU3/';

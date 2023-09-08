@@ -39,8 +39,6 @@ site = 4;%1,1; 2,4; 3,7
 recording = []; 
 % keep experiment with max n trials (= most likely not aborted error or end
 % shank mapping) QQ change this in the future 
-n_trials = zeros(size(experiments(curr_day).experiment,2), 1);
-for iExperiment = experiments(curr_day).experiment
     [block_filename, block_exists] = AP_cortexlab_filenameJF(animal, day, iExperiment, 'block');
     try
         load(block_filename)
@@ -52,8 +50,6 @@ for iExperiment = experiments(curr_day).experiment
     catch
         n_trials(iExperiment) = NaN;
     end
-end 
-
 experiment = 2;%experiments(curr_day).experiment(1);%find(n_trials == max(n_trials));
 loadClusters = 0;
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys_includingCompressed',site,recording);

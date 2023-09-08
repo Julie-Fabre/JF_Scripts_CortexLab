@@ -79,7 +79,11 @@ elseif length(signals_events.stim_idValues) > length(stimOn_times) % some photod
         disp('corrected')
     else
         warning('correction failed, keeping x first stim on times')
-        stimOn_times = stimOn_times(1:length(signals_events.stim_idValues));
+        try
+            stimOn_times = stimOn_times(1:length(signals_events.stim_idValues));
+        catch
+            stimOn_times = stimOn_times;
+        end
     end
 
 end
