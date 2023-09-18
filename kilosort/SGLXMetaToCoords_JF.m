@@ -11,6 +11,7 @@
 %
 % Jennifer Colonell, Janelia Research Campus
 %
+% Julie Fabre: added option to save file to specific directory
 function chanMapFile = SGLXMetaToCoords_JF(metaName, path, saveDir)
 
 figure(1); 

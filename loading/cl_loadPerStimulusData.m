@@ -3,7 +3,7 @@ cl_myPaths;
     if contains(load_type, 'passive')
     info_table = readtable([csvPath 'allPassiveRecs.csv'], 'VariableNamingRule', 'modify');
 elseif contains(load_type, 'taskGo')
-    info_table = readtable([csvPath 'old' filesep 'allTaskGoGoGoRecs_prev.csv'], 'VariableNamingRule', 'modify');
+    info_table = readtable([csvPath 'allTaskGoGoGoRecs.csv'], 'VariableNamingRule', 'modify');
 else
     info_table =readtable([csvPath 'allTaskRecs.csv'], 'VariableNamingRule', 'modify');
     end
@@ -118,7 +118,7 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
                 load_me = size(these_exps, 2);
             end
             % find max experiment 
-            n_trials = [];
+            n_trials_exp = [];
             exp_n_trials = [];
             for iExperiment = load_me
                 experiment = these_exps(iExperiment); %for now, just load 1 experiment
@@ -195,14 +195,19 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
                         end
                         experiment_type = 2;
                         keep_trial = no_move_trials;
+                    else
+                        continue;
                     end
                 end
-                n_trials(iExperiment) = length(keep_trial);
+                n_trials_exp(iExperiment) = length(keep_trial);
                 exp_n_trials(iExperiment) = experiment;
 
             end
             
-            load_me_max = exp_n_trials(find(n_trials==max(n_trials)));
+            if isempty(find(n_trials_exp))
+                continue;
+            end
+            load_me_max = exp_n_trials(find(n_trials_exp==max(n_trials_exp)));
             for iExperiment = load_me_max %1:size(these_exps,2)
                 experiment =  load_me_max;%these_exps(iExperiment); %for now, just load 1 experiment
                 experiments = AP_find_experimentsJF(animal, '', true);

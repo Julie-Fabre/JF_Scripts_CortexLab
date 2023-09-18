@@ -50,7 +50,7 @@ else
 
     %% specific paths
     atlasBrainRegLocation = '/home/julie/.brainglobe/allen_mouse_25um_v1.2';
-
+    csvPath = '/home/julie/Dropbox/PhD_summary/';
     brainsawPath = '/home/netshare/znas-brainsaw/';
     allenAtlasPath = '/home/julie/Dropbox/Atlas/';
     regParamsPath = '/home/julie/Dropbox/MATLAB/onPaths/JF_Scripts_CortexLab/histology/';

@@ -26,3 +26,12 @@ JF_runKSandBombcell('JF107', '2023-04-10', 2, [],rerunKS,0)
 
 JF_runKSandBombcell('JF093', '2023-03-16', 1, [],rerunKS,0)%
 JF_runKSandBombcell('JF093', '2023-03-18', 1, [],rerunKS,0)%
+
+
+
+
+
+%% 
+rerunKS=1;
+JF_runKSandBombcell('JF099', '2023-02-19', 1, [],rerunKS,0)%
+JF_runKSandBombcell('JF099', '2023-02-24', 1, [],rerunKS,0)%
