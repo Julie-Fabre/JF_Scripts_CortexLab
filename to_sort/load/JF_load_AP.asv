@@ -4,7 +4,7 @@
 %clear all;
 cl_myPaths;
 
-animals={'JF106'};
+animals={'JF084'};
 curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};
@@ -25,7 +25,7 @@ experiments = experiments([experiments.ephys]);
 
 %% Load data from experiment 
 
-curr_day = 2; % (set which day to use)
+curr_day = 3; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
@@ -35,21 +35,21 @@ load_parts.cam=false;
 load_parts.imaging=false;
 load_parts.ephys=true;
 
-site = 3;%1,1; 2,4; 3,7
+site = 1;%1,1; 2,4; 3,7
 recording = []; 
 % keep experiment with max n trials (= most likely not aborted error or end
-% shank mapping) QQ change this in the future 
-    [block_filename, block_exists] = AP_cortexlab_filenameJF(animal, day, iExperiment, 'block');
-    try
-        load(block_filename)
-        if isfield(block.events, 'stim_idValues')
-            n_trials(iExperiment) = length(block.events.stim_idValues);
-        elseif isfield(block.events, 'stimulusOnTimes')
-            n_trials(iExperiment) = length(block.events.stimulusOnTimes);
-        end
-    catch
-        n_trials(iExperiment) = NaN;
-    end
+% % shank mapping) QQ change this in the future 
+%     [block_filename, block_exists] = AP_cortexlab_filenameJF(animal, day, iExperiment, 'block');
+%     try
+%         load(block_filename)
+%         if isfield(block.events, 'stim_idValues')
+%             n_trials(iExperiment) = length(block.events.stim_idValues);
+%         elseif isfield(block.events, 'stimulusOnTimes')
+%             n_trials(iExperiment) = length(block.events.stimulusOnTimes);
+%         end
+%     catch
+%         n_trials(iExperiment) = NaN;
+%     end
 experiment = 2;%experiments(curr_day).experiment(1);%find(n_trials == max(n_trials));
 loadClusters = 0;
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys_includingCompressed',site,recording);

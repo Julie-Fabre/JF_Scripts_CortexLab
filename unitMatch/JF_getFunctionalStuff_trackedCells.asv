@@ -624,24 +624,6 @@ for iUnit = 1:size(theseUnits, 2)
     end
 end
 
-bhvData = noGoWorld_behavior_debug({mouse});
-
-bhvData.correct_trials = bhvData.goLeft(1:size(RecSesPerUID, 1)+1, 1) ./ bhvData.nTrials(1:size(RecSesPerUID, 1)+1, 1);
-bhvData.rxn = bhvData.stim_to_moveMean(1:size(RecSesPerUID, 1)+1, 1);
-bhvData.protocol(cellfun(@isempty, bhvData.protocol)) = {'0'};
-
-bhvData.correct_trials_nogo = bhvData.noGo(1:size(RecSesPerUID, 1)+1, 3) ./ bhvData.nTrials(1:size(RecSesPerUID, 1)+1, 3);
-bhvData.correct_trials_go2 = bhvData.goLeft(1:size(RecSesPerUID, 1)+1, 2) ./ bhvData.nTrials(1:size(RecSesPerUID, 1)+1, 2);
-bhvData.correct_trials(26) = [];
-bhvData.rxn(26) = [];
-bhvData.protocol(26) = [];
-bhvData.correct_trials_nogo(26) = [];
-bhvData.correct_trials_go2(26) = [];
-for iS = 1:size(RecSesPerUID, 1) + 1
-    stage(iS) = str2num(bhvData.protocol{iS}(end));
-
-end
-stage(26) = [];
 
 %% vis
 close all;
@@ -743,7 +725,7 @@ for iUnit = 1:size(theseUnits, 2)
 end
 
 %% plot try one: selected example cells + movement / percentage correct 
-examples = [8,11,12,19];
+examples = [8,11,12,19,21];
 recordings_unique = unique(UniqueIDConversion.recsesAll);
 cmap_cols = crameri('batlow', size(recordings_unique, 1));
 
@@ -753,13 +735,7 @@ for ii =  1:length(examples)
     thisUnit = Or_UniqueID(theseUnits(iUnit));
     %theseRecordings = find(RecSesPerUID(:, theseUnits(iUnit)));
     theseRecordings = find(~isnan(waveforms_long_track(iUnit, :, 50)));
-    clearvars maxVal minVal
-for iRecording =1:size(recordings_unique, 1)
-    ss = smoothdata(squeeze(vis_long_track_pass(iUnit, iRecording, 1, 300:1350))', 'movmean', [10, 70]).*1000;
-     ss = (ss - nanmean(ss(:,300:500))) ./ nanstd(ss(:,300:500));
-    maxVal(iRecording) = nanmax(ss);
-    minVal(iRecording) = nanmin(ss);
-end
+
     
     for iRecording = 1:size(recordings_unique, 1)
         
@@ -812,11 +788,10 @@ end
         set(gca, 'LooseInset', get(gca,'TightInset'))
         box off;
        
-        ss = smoothdata(squeeze(vis_long_track_pass(iUnit, iRecording, 1, 300:1350))', 'movmean', [10, 70]).*1000;
-        ss = (ss - nanmean(ss(:,300:500))) ./ nanstd(ss(:,300:500));
+        ss = smoothdata(squeeze(vis_long_track_pass(iUnit, iRecording, 1, 300:1350))', 'movmean', [10, 50]).*1000;
+        ss = (ss - nanmean(ss(:,200:500))) ./ nanstd(ss(:,200:500));
         t=-0.50005:0.001:0.9995;
         plot(t(300:1350),ss,'Color', cmap_cols(iRecording, :));
-        ylim([nanmin(minVal), nanmax(maxVal)])
         %hold on;
         %xlabel('time from stim onset (s)')
         %ylabel('zscore')
@@ -856,14 +831,31 @@ end
 end
 %% plot behavior on top 
 
+bhvData = noGoWorld_behavior_debug({mouse});
 
- subplot(length(examples)+3,size(recordings_unique, 1)+2,[1:(size(recordings_unique, 1))-1]); hold on;
+bhvData.correct_trials = bhvData.goLeft(1:size(RecSesPerUID, 1)+1, 1) ./ bhvData.nTrials(1:size(RecSesPerUID, 1)+1, 1);
+bhvData.rxn = bhvData.stim_to_moveMean(1:size(RecSesPerUID, 1)+1, 1);
+bhvData.protocol(cellfun(@isempty, bhvData.protocol)) = {'0'};
+
+bhvData.correct_trials_nogo = bhvData.noGo(1:size(RecSesPerUID, 1)+1, 3) ./ bhvData.nTrials(1:size(RecSesPerUID, 1)+1, 3);
+bhvData.correct_trials_go2 = bhvData.goLeft(1:size(RecSesPerUID, 1)+1, 2) ./ bhvData.nTrials(1:size(RecSesPerUID, 1)+1, 2);
+bhvData.correct_trials(26) = [];
+bhvData.rxn(26) = [];
+bhvData.protocol(26) = [];
+bhvData.correct_trials_nogo(26) = [];
+bhvData.correct_trials_go2(26) = [];
+for iS = 1:size(RecSesPerUID, 1) + 1
+    stage(iS) = str2num(bhvData.protocol{iS}(end));
+
+end
+stage(26) = [];
+ subplot(length(examples)+3,size(recordings_unique, 1)+2,[1:(size(recordings_unique, 1))]); hold on;
  plot(1:size(recordings_unique, 1), bhvData.rxn)
  
-subplot(length(examples)+3,size(recordings_unique, 1)+2,[(size(recordings_unique, 1))+3:(size(recordings_unique, 1))*2+1]); hold on;
+subplot(length(examples)+3,size(recordings_unique, 1)+2,[(size(recordings_unique, 1))+1:(size(recordings_unique, 1))*2]); hold on;
  plot(1:size(recordings_unique, 1), bhvData.correct_trials)
 
-%prettify_plot
+
 %% plot population average for every day on bottom 
 
 

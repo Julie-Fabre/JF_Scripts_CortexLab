@@ -324,6 +324,10 @@ switch file
                  'ephys' filesep site_dir filesep '*ap.*bin'];
             [filename,file_exists] = check_locations(filepattern,server_location);
         end
+
+        if size(filename,2) == 2
+            filename = filename{1};
+        end
      case 'ephys_histology'
         
             site_dir = ['site' num2str(site), '-*' num2str(shank-1), '*'];
