@@ -16,7 +16,7 @@ if isSpikeGLX
         error('check flipper was inputed in correct IMEC card')
     elseif length(possible_sync_values) > 2
         warning('several ephys flipper values, taking lowest as threshold')
-        flip_threshold = possible_sync_values(2);
+        flip_threshold = (possible_sync_values(2) - possible_sync_values(1)) /2;
     else
         flip_threshold = range(sync) / 2;
     end
@@ -27,7 +27,7 @@ if isSpikeGLX
 
     % binarise flipper
 
-    ephys_binary_values = sync > flip_threshold;
+    ephys_binary_values = sync >= flip_threshold;
 
     % get ephys flipper flip values and times
     ephys_sync_values = find((~ephys_binary_values(1:end-1) & ephys_binary_values(2:end)) | ...

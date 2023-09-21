@@ -4,7 +4,7 @@
 %clear all;
 cl_myPaths;
 
-animals={'JF084'};
+animals={'JF067'};
 curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};
@@ -25,7 +25,7 @@ experiments = experiments([experiments.ephys]);
 
 %% Load data from experiment 
 
-curr_day = 4; % (set which day to use)
+curr_day = 13; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
@@ -50,7 +50,7 @@ recording = [];
 %     catch
 %         n_trials(iExperiment) = NaN;
 %     end
-experiment = 2;%experiments(curr_day).experiment(1);%find(n_trials == max(n_trials));
+experiment = experiments(curr_day).experiment(1);%experiments(curr_day).experiment(1);%find(n_trials == max(n_trials));
 loadClusters = 0;
 [ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys_includingCompressed',site,recording);
 if size(ephysAPfile,2) ==2 %keep only ap
@@ -68,10 +68,17 @@ qMetricsExist = dir(fullfile(savePath, 'qMetric*.mat'));
 %clearvars unitType 
 %load_parts.cam = true;
 %load_parts.cam = false;
-
+load_parts.ephys=true;
 JF_load_experiment;
 curr_shank=NaN;
-%AP_cellraster({stimOn_times, stimOn_times}, {trial_conditions(:,2), trial_conditions(:,3)})
+AP_cellrasterJF({stimOn_times, stimOn_times}, {trial_conditions(:,1), trial_conditions(:,2)})
+
+
+
+AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes'}, ...
+     {trial_conditions(:,1),trial_conditions(:,2), ...
+     trial_conditions(:,3)});
+
 
 trial_conditions_clean = trial_conditions;
 trial_conditions_clean(trial_conditions(:,1)==4,1) = 100;%go1
