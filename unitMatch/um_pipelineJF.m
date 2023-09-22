@@ -6,13 +6,13 @@ cl_myPaths;
 tmpdatafolder = extraHDPath; %'/media/julie/ExtraHD/data_temp'; % temporary folder for temporary decompression of data
 
 %% Information on mice and recording types - CHANGE THESE MOUSE NAMES AND RECORDING TYPES
-MiceOpt = {'JF067', 'JF078', 'JF_AL035', 'JF082', 'JF084'}; % Add all mice you want to analyze. 51 = ventricule mostly, don't include
+MiceOpt = {'JF067', 'JF078', 'JFAL035', 'JF082', 'JF084'}; % Add all mice you want to analyze. 51 = ventricule mostly, don't include
 RecordingType(ismember(MiceOpt, {'JF067', 'JF078', 'JF_AL035', 'JF082', 'JF084'})) = {'Chronic'}; % 'Acute' or 'Chronic'
 miceDays = [1, 29; 1, 15; 1, 20; 1, 31; 3,19]; % 1:11
-sites = [1,1; 2,3; 1,1; 1,2; 1,3];
+sites = [1,1; 1,1; 1,1; 1,2; 1,3];
 runMe = 1;
 saveJF = 1;
-for iMouse = [2,4,5]%1%1%:size(MiceOpt, 2) 
+for iMouse = [2,3,5]%1%1%:size(MiceOpt, 2) 
 
     %% get all raw ephys and kilosort directories - CHANGE THESE PATHS
     theseSites = sites(iMouse,1):sites(iMouse,2);
@@ -91,8 +91,8 @@ for iMouse = [2,4,5]%1%1%:size(MiceOpt, 2)
             EvaluatingUnitMatch([SaveDir, filesep, 'UnitMatch']);
             ComputeFunctionalScores([SaveDir, filesep, 'UnitMatch'], saveJF)
         
-            DrawBlind = 0; %1 for blind drawing (for manual judging of pairs)
-            DrawPairsUnitMatch([SaveDir, filesep, 'UnitMatch'], DrawBlind, saveJF);
+%            DrawBlind = 0; %1 for blind drawing (for manual judging of pairs)
+%            DrawPairsUnitMatch([SaveDir, filesep, 'UnitMatch'], DrawBlind, saveJF);
         
             % Key presses:
             %   Right arrow: next pair
