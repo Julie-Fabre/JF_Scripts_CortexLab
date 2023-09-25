@@ -67,7 +67,7 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
     site = mouse_day_sites_shank_rec(iRecording, 3);
     curr_shank = mouse_day_sites_shank_rec(iRecording, 4);
     curr_rec = mouse_day_sites_shank_rec(iRecording, 5);
-    %exps = 
+    exps = 
 
     % load probe_ccf and probe2ephys
     probe2ephys_location = AP_cortexlab_filenameJF(animal, [], [], 'probe2ephys');

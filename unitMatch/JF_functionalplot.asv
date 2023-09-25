@@ -337,13 +337,12 @@ for iRecording = 1:last_day
     %end
 
 end
-
-%% plot
+%% plot : 3 days (OPTION 1)
 close all;
 
 imgT = 2;
-examples = [6,19,13,18,12];%[6,12,13,18,19];%[5,13,14,17:19];%[1,7,8,11]%[1:11]%[3,8,7,9,4];%[1:20]%[3,8,7,9]
-last_day = 10;
+examples = [6,19,13,18,12];
+last_day = 4;
 cmap_cols = crameri('batlow', last_day);
 figure();
 
@@ -360,7 +359,7 @@ for ii = 1:length(examples)
         minVal(iRecording) = nanmin(ss);
     end
 if any(~isnan(maxVal))
-    for iRecording = 2:10
+    for iRecording = 2:last_day
 
         %thisRecotding = theseRecording(iRecording);
         ss = smoothdata(squeeze(vis_long_track_pass(iUnit, iRecording, imgT, :))', 'movmean', [10, 50]) .* 1000;
@@ -449,19 +448,20 @@ end
 end
 
 %examples = 3
-subplot(length(examples)+3, last_day+2, 1:3);
+subplot(length(examples)+3, last_day+2, 1:last_day-1);
 hold on;
 %yyaxis left;
 %ll=lines(2);
 plot(1:last_day, [NaN; bhvData.rxn(1:last_day-1)])
-for i=2:4
+for i=2:5
     nS(i) = nanstd(bhvData.stim_to_move{i})./sqrt(length(bhvData.stim_to_move{i}));
 end
 errorbar(1:last_day,[NaN; bhvData.rxn(1:last_day-1)],nS,nS); 
 ylabel('reaction time (s)');
 xlim([1.5, last_day+0.5])
 
-subplot(length(examples)+3, last_day+2, 7:9);
+subplot(length(examples)+3, last_day+2, last_day+3:last_day+last_day+1);
+
 hold on;
 
 plot(1:last_day, [NaN; bhvData.correct_trials(1:last_day-1)])
@@ -472,7 +472,7 @@ ylabel('frac. correct trials');
 xlim([1.5, last_day+0.5])
 %[hBins, hbIdx] = hist(bhvData.rxn(1:last_day-2));
 clearvars maxVal minVal
-for iRecording = 2:4
+for iRecording = 2:last_day
     %clearvars maxVal minVal
 
     ss = smoothdata(squeeze(vis_long_track_pass_pop(iRecording, imgT, 300:1250))', 'movmean', [10, 70]) .* 1000;
@@ -487,7 +487,371 @@ for iRecording = 2:4
     minVal(iRecording) = nanmin(ss);
 
 end
-for iRecording = 2:4
+for iRecording = 2:last_day
+    subplot(length(examples)+3, last_day+2,last_day*2+3+iRecording);
+    hold on;
+    box off;
+    set(gca, 'XTickLabel', [])
+    %set(gca, 'YTickLabel', [])
+    set(gca, 'LooseInset', get(gca, 'TightInset'))
+    box off;
+
+    ss = smoothdata(squeeze(vis_long_track_pass_pop(iRecording, imgT, 300:1250))', 'movmean', [10, 70]) .* 1000;
+    ss = (ss - nanmean(ss(:, 1:200))) ./ nanmean(ss(:, 1:200));
+    %ss = (ss - normVal(iRecording)) ./ normVal(iRecording);
+    t = -0.50005:0.001:0.9995;
+    plot(t(300:1250), ss, 'Color', cmap_cols(iRecording, :));
+    ylim([nanmin(minVal), nanmax(maxVal)])
+    xlabel('time from stim (s)')
+    ylabel('zscore, population')
+    %plotshaded(t(300:1250), [ss - squeeze(vis_long_track_pass_pop_std( iRecording, imgT, 300:1250))'; ...
+    %            ss + squeeze(vis_long_track_pass_pop_std( iRecording, imgT, 300:1250))'], cmap_cols(iRecording, :))
+           
+   % if iRecording ==2
+   %     legend('population average')
+   % end
+            
+   
+                title(['day ' num2str(iRecording)])
+            
+
+end
+
+prettify_plot('none', 'none')
+%% plot : 4 days (OPTION 2)
+close all;
+
+imgT = 2;
+examples = [17,18,19];%[6,19,13,18,12];
+
+last_day = 5;
+cmap_cols = crameri('batlow', last_day);
+figure();
+
+for ii = 1:length(examples)
+    iUnit = examples(ii);
+    thisUnit = Or_UniqueID(theseUnits(iUnit));
+    %theseRecordings = find(RecSesPerUID(:, theseUnits(iUnit)));
+    theseRecordings = find(~isnan(waveforms_long_track(iUnit, :, 50)));
+    clearvars maxVal minVal
+    for iRecording = 1:last_day
+        ss = smoothdata(squeeze(vis_long_track_pass(iUnit, iRecording, imgT, 300:1250))', 'movmean', [10, 70]) .* 1000;
+        ss = (ss - nanmean(ss(:, 1:200))) ./ nanmean(ss(:, 1:200));
+        maxVal(iRecording) = nanmax(ss);
+        minVal(iRecording) = nanmin(ss);
+    end
+if any(~isnan(maxVal))
+    for iRecording = 2:last_day
+
+        %thisRecotding = theseRecording(iRecording);
+        ss = smoothdata(squeeze(vis_long_track_pass(iUnit, iRecording, imgT, :))', 'movmean', [10, 50]) .* 1000;
+        if length(unique(ss)) > 50
+            % subplot(331)
+            % plot([0+0.0137:82/3000:(82*82/3000)], squeeze(waveforms_long_track(iUnit, iRecording, :))', 'Color', cmap_cols(iRecording, :));
+            % xlabel('time (ms)')
+            % ylabel('a.u.')
+            % hold on;
+            % title('template waveform')
+
+            subplot(length(examples)+3, last_day+2, (ii+2)*(last_day + 2)+last_day);
+            hold on;
+            plot([0 + 0.0137:82 / 3000:(82 * 82 / 3000)], squeeze(waveforms_raw_long_track_enny(iUnit, iRecording, :))', 'Color', cmap_cols(iRecording, :));
+            hold on;
+            %xlabel('time (ms)')
+            %ylabel('amplitude (uV)')
+            %title('mean raw waveform')
+            box off;
+            xlabel('time (ms)')
+            ylabel('amplitude (uV)')
+            
+            set(gca, 'LooseInset', get(gca, 'TightInset'))
+            box off;
+
+            subplot(length(examples)+3, last_day+2, (ii+2)*(last_day + 2)+last_day+1);
+            hold on;
+            plot([0.0005:0.001:0.5], squeeze(acg_long_track(iUnit, iRecording, :))', 'Color', cmap_cols(iRecording, :));
+            hold on;
+            %set(gca, 'XScale', 'log')
+            box off;
+            xlim([0 0.05])
+            %set(gca, 'XTickLabel', [])
+            %set(gca, 'YTickLabel', [])
+            set(gca, 'LooseInset', get(gca, 'TightInset'))
+            box off;
+            xlabel('time (s)')
+            ylabel('sp/s')
+            %title('ACG')
+
+            % subplot(424)
+            % plot([0.0005:0.001:0.1],squeeze(acg_long_track(iUnit, iRecording, 1:100))', 'Color', cmap_cols(iRecording, :));
+            % hold on;
+            % xlabel('time (s)')
+            % ylabel('sp/s)')
+
+
+            subplot(length(examples)+3, last_day+2, (ii+2)*(last_day + 2)+iRecording-1);
+            hold on;
+            box off;
+            set(gca, 'XTickLabel', [])
+            %set(gca, 'YTickLabel', [])
+            set(gca, 'LooseInset', get(gca, 'TightInset'))
+            box off;
+
+            ss = smoothdata(squeeze(vis_long_track_pass(iUnit, iRecording, imgT, 300:1250))', 'movmean', [10, 70]) .* 1000;
+            ss = (ss - nanmean(ss(:, 1:200))) ./ nanmean(ss(:, 1:200));
+            t = -0.50005:0.001:0.9995;
+            plot(t(300:1250), ss, 'Color', cmap_cols(iRecording, :));hold on;
+            %plotshaded(t(300:1250), [ss - squeeze(vis_long_track_pass_std(iUnit, iRecording, imgT, 300:1250))'; ...
+            %    ss + squeeze(vis_long_track_pass_std(iUnit, iRecording, imgT, 300:1250))'], cmap_cols(iRecording, :))
+            ylim([nanmin(minVal), nanmax(maxVal)])
+            %hold on;
+            xlabel('time from stim (s)')
+            ylabel(['zscore, cell #', num2str(ii)])
+            %if iRecording == 2
+            %    legend(['example cell #', num2str(ii)])
+            %end
+           
+            %title('-90* azimuth stimulus')
+
+            % subplot(3,3,[7:9])
+            %  ss2 = smoothdata(squeeze(vis_long_track_pass(iUnit, iRecording, 2, :))', 'movmean', [10, 50]).*1000;
+            % ss2 = (ss2 - nanmean(ss2(:,1:500))) ./ nanstd(ss2(:,1:500));
+            % plot([-0.50005:0.001:0.9995], ss2, 'Color', cmap_cols(iRecording, :));
+            % hold on;
+            % xlabel('time from stim onset (s)')
+            % ylabel('zscore')
+            % title('0* azimuth stimulus')
+            % %
+
+        end
+    end
+
+end
+end
+
+%examples = 3
+subplot(length(examples)+3, last_day+2, 1:last_day-1);
+hold on;
+%yyaxis left;
+%ll=lines(2);
+plot(1:last_day, [NaN; bhvData.rxn(1:last_day-1)])
+for i=1:last_day
+    nS(i) = nanstd(bhvData.stim_to_move{i})./sqrt(length(bhvData.stim_to_move{i}));
+end
+errorbar(1:last_day,[NaN; bhvData.rxn(1:last_day-1)],nS,nS); 
+ylabel('reaction time (s)');
+xlim([1.5, last_day+0.5])
+
+subplot(length(examples)+3, last_day+2, last_day+3:last_day+last_day+1);
+
+hold on;
+
+plot(1:last_day, [NaN; bhvData.correct_trials(1:last_day-1)])
+
+ylabel('frac. correct trials');
+
+%yl.Color = ll(2,:);
+xlim([1.5, last_day+0.5])
+%[hBins, hbIdx] = hist(bhvData.rxn(1:last_day-2));
+clearvars maxVal minVal
+for iRecording = 2:last_day
+    %clearvars maxVal minVal
+
+    ss = smoothdata(squeeze(vis_long_track_pass_pop(iRecording, imgT, 300:1250))', 'movmean', [10, 70]) .* 1000;
+    ss = (ss - nanmean(ss(:, 1:200))) ./ nanmean(ss(:, 1:200));
+
+
+    %ss2 = smoothdata(squeeze(vis_long_track_pass_pop(iRecording, 1, 300:1250))', 'movmean', [10, 70]) .* 1000;
+    %ss2 = (ss2 - nanmean(ss2(:, 1:200))) ./ nanstd(ss2(:, 1:200));
+    %normVal(iRecording) = nanmax(ss2);
+    %ss = (ss - normVal(iRecording)) ./ normVal(iRecording);
+    maxVal(iRecording) = nanmax(ss);
+    minVal(iRecording) = nanmin(ss);
+
+end
+for iRecording = 2:last_day
+    subplot(length(examples)+3, last_day+2,last_day*2+3+iRecording);
+    hold on;
+    box off;
+    set(gca, 'XTickLabel', [])
+    %set(gca, 'YTickLabel', [])
+    set(gca, 'LooseInset', get(gca, 'TightInset'))
+    box off;
+
+    ss = smoothdata(squeeze(vis_long_track_pass_pop(iRecording, imgT, 300:1250))', 'movmean', [10, 70]) .* 1000;
+    ss = (ss - nanmean(ss(:, 1:200))) ./ nanmean(ss(:, 1:200));
+    %ss = (ss - normVal(iRecording)) ./ normVal(iRecording);
+    t = -0.50005:0.001:0.9995;
+    plot(t(300:1250), ss, 'Color', cmap_cols(iRecording, :));
+    ylim([nanmin(minVal), nanmax(maxVal)])
+    xlabel('time from stim (s)')
+    ylabel('zscore, population')
+    %plotshaded(t(300:1250), [ss - squeeze(vis_long_track_pass_pop_std( iRecording, imgT, 300:1250))'; ...
+    %            ss + squeeze(vis_long_track_pass_pop_std( iRecording, imgT, 300:1250))'], cmap_cols(iRecording, :))
+           
+   % if iRecording ==2
+   %     legend('population average')
+   % end
+            
+   
+                title(['day ' num2str(iRecording)])
+            
+
+end
+
+prettify_plot('none', 'none')
+
+%% plot
+close all;
+
+imgT = 2;
+examples = [17,18,19];%[6,19,13,18,12];
+last_day = 5;
+cmap_cols = crameri('batlow', last_day);
+figure();
+
+for ii = 1:length(examples)
+    iUnit = examples(ii);
+    thisUnit = Or_UniqueID(theseUnits(iUnit));
+    %theseRecordings = find(RecSesPerUID(:, theseUnits(iUnit)));
+    theseRecordings = find(~isnan(waveforms_long_track(iUnit, :, 50)));
+    clearvars maxVal minVal
+    for iRecording = 1:last_day
+        ss = smoothdata(squeeze(vis_long_track_pass(iUnit, iRecording, imgT, 300:1250))', 'movmean', [10, 70]) .* 1000;
+        ss = (ss - nanmean(ss(:, 1:200))) ./ nanmean(ss(:, 1:200));
+        maxVal(iRecording) = nanmax(ss);
+        minVal(iRecording) = nanmin(ss);
+    end
+if any(~isnan(maxVal))
+    for iRecording = 2:5
+
+        %thisRecotding = theseRecording(iRecording);
+        ss = smoothdata(squeeze(vis_long_track_pass(iUnit, iRecording, imgT, :))', 'movmean', [10, 50]) .* 1000;
+        if length(unique(ss)) > 50
+            % subplot(331)
+            % plot([0+0.0137:82/3000:(82*82/3000)], squeeze(waveforms_long_track(iUnit, iRecording, :))', 'Color', cmap_cols(iRecording, :));
+            % xlabel('time (ms)')
+            % ylabel('a.u.')
+            % hold on;
+            % title('template waveform')
+
+            subplot(length(examples)+3, last_day+2, (ii+2)*(last_day + 2)+last_day);
+            hold on;
+            plot([0 + 0.0137:82 / 3000:(82 * 82 / 3000)], squeeze(waveforms_raw_long_track_enny(iUnit, iRecording, :))', 'Color', cmap_cols(iRecording, :));
+            hold on;
+            %xlabel('time (ms)')
+            %ylabel('amplitude (uV)')
+            %title('mean raw waveform')
+            box off;
+            xlabel('time (ms)')
+            ylabel('amplitude (uV)')
+            
+            set(gca, 'LooseInset', get(gca, 'TightInset'))
+            box off;
+
+            subplot(length(examples)+3, last_day+2, (ii+2)*(last_day + 2)+last_day+1);
+            hold on;
+            plot([0.0005:0.001:0.5], squeeze(acg_long_track(iUnit, iRecording, :))', 'Color', cmap_cols(iRecording, :));
+            hold on;
+            %set(gca, 'XScale', 'log')
+            box off;
+            xlim([0 0.05])
+            %set(gca, 'XTickLabel', [])
+            %set(gca, 'YTickLabel', [])
+            set(gca, 'LooseInset', get(gca, 'TightInset'))
+            box off;
+            xlabel('time (s)')
+            ylabel('sp/s')
+            %title('ACG')
+
+            % subplot(424)
+            % plot([0.0005:0.001:0.1],squeeze(acg_long_track(iUnit, iRecording, 1:100))', 'Color', cmap_cols(iRecording, :));
+            % hold on;
+            % xlabel('time (s)')
+            % ylabel('sp/s)')
+
+
+            subplot(length(examples)+3, last_day+2, (ii+2)*(last_day + 2)+iRecording-1);
+            hold on;
+            box off;
+            set(gca, 'XTickLabel', [])
+            %set(gca, 'YTickLabel', [])
+            set(gca, 'LooseInset', get(gca, 'TightInset'))
+            box off;
+
+            ss = smoothdata(squeeze(vis_long_track_pass(iUnit, iRecording, imgT, 300:1250))', 'movmean', [10, 70]) .* 1000;
+            ss = (ss - nanmean(ss(:, 1:200))) ./ nanmean(ss(:, 1:200));
+            t = -0.50005:0.001:0.9995;
+            plot(t(300:1250), ss, 'Color', cmap_cols(iRecording, :));hold on;
+            %plotshaded(t(300:1250), [ss - squeeze(vis_long_track_pass_std(iUnit, iRecording, imgT, 300:1250))'; ...
+            %    ss + squeeze(vis_long_track_pass_std(iUnit, iRecording, imgT, 300:1250))'], cmap_cols(iRecording, :))
+            ylim([nanmin(minVal), nanmax(maxVal)])
+            %hold on;
+            xlabel('time from stim (s)')
+            ylabel(['zscore, cell #', num2str(ii)])
+            %if iRecording == 2
+            %    legend(['example cell #', num2str(ii)])
+            %end
+           
+            %title('-90* azimuth stimulus')
+
+            % subplot(3,3,[7:9])
+            %  ss2 = smoothdata(squeeze(vis_long_track_pass(iUnit, iRecording, 2, :))', 'movmean', [10, 50]).*1000;
+            % ss2 = (ss2 - nanmean(ss2(:,1:500))) ./ nanstd(ss2(:,1:500));
+            % plot([-0.50005:0.001:0.9995], ss2, 'Color', cmap_cols(iRecording, :));
+            % hold on;
+            % xlabel('time from stim onset (s)')
+            % ylabel('zscore')
+            % title('0* azimuth stimulus')
+            % %
+
+        end
+    end
+
+end
+end
+
+%examples = 3
+subplot(length(examples)+3, last_day+2, 1:last_day-1);
+hold on;
+%yyaxis left;
+%ll=lines(2);
+plot(1:last_day, [NaN; bhvData.rxn(1:last_day-1)])
+for i=2:5
+    nS(i) = nanstd(bhvData.stim_to_move{i})./sqrt(length(bhvData.stim_to_move{i}));
+end
+errorbar(1:last_day,[NaN; bhvData.rxn(1:last_day-1)],nS,nS); 
+ylabel('reaction time (s)');
+xlim([1.5, last_day+0.5])
+
+subplot(length(examples)+3, last_day+2, last_day+3:last_day+last_day+1);
+
+hold on;
+
+plot(1:last_day, [NaN; bhvData.correct_trials(1:last_day-1)])
+
+ylabel('frac. correct trials');
+
+%yl.Color = ll(2,:);
+xlim([1.5, last_day+0.5])
+%[hBins, hbIdx] = hist(bhvData.rxn(1:last_day-2));
+clearvars maxVal minVal
+for iRecording = 2:5
+    %clearvars maxVal minVal
+
+    ss = smoothdata(squeeze(vis_long_track_pass_pop(iRecording, imgT, 300:1250))', 'movmean', [10, 70]) .* 1000;
+    ss = (ss - nanmean(ss(:, 1:200))) ./ nanmean(ss(:, 1:200));
+
+
+    %ss2 = smoothdata(squeeze(vis_long_track_pass_pop(iRecording, 1, 300:1250))', 'movmean', [10, 70]) .* 1000;
+    %ss2 = (ss2 - nanmean(ss2(:, 1:200))) ./ nanstd(ss2(:, 1:200));
+    %normVal(iRecording) = nanmax(ss2);
+    %ss = (ss - normVal(iRecording)) ./ normVal(iRecording);
+    maxVal(iRecording) = nanmax(ss);
+    minVal(iRecording) = nanmin(ss);
+
+end
+for iRecording = 2:5
     subplot(length(examples)+3, last_day+2,last_day*2+3+iRecording);
     hold on;
     box off;

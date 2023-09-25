@@ -12,7 +12,7 @@ miceDays = [1, 29; 1, 15; 1, 20; 1, 31; 3,19]; % 1:11
 sites = [1,1; 1,1; 1,1; 1,2; 1,3];
 runMe = 1;
 saveJF = 1;
-for iMouse = [2,3,5]%1%1%:size(MiceOpt, 2) 
+for iMouse = [3,5]%1%1%:size(MiceOpt, 2) 
 
     %% get all raw ephys and kilosort directories - CHANGE THESE PATHS
     theseSites = sites(iMouse,1):sites(iMouse,2);
