@@ -463,19 +463,24 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
                         unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size, ...
                         align_times(1:2:end), trial_cond_idx(1:2:end));
 
-                    passive_data_per_cond.psth{experiment_type}(iUnit + unitCount, 1, :, :) = curr_psth;
+                    if size(curr_psth,1) ~= size(passive_data_per_cond.psth{experiment_type},3)
+                        warning on;
+                        warning(['different number of stims for rec #', num2str(iRecording)])
+                        warning off;
+                    end
+                    passive_data_per_cond.psth{experiment_type}(iUnit + unitCount, 1, 1:size(curr_psth,1), :) = curr_psth;
 
                     [curr_psth, ~, ~, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
                         unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size, ...
                         align_times(2:2:end), trial_cond_idx(2:2:end));
 
-                    passive_data_per_cond.psth{experiment_type}(iUnit + unitCount, 2, :, :) = curr_psth;
+                    passive_data_per_cond.psth{experiment_type}(iUnit + unitCount, 2, 1:size(curr_psth,1), :) = curr_psth;
                     %disp(unique_templates(shank_units(units_to_keep(iUnit))))
                     
                     [curr_psth, curr_raster, t, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
                         unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size, ...
                         align_times(1:1:end), trial_cond_idx(1:1:end));
-                     passive_data_per_cond.psth{experiment_type}(iUnit + unitCount, 3, :, :) = curr_psth;
+                     passive_data_per_cond.psth{experiment_type}(iUnit + unitCount, 3, 1:size(curr_psth,1), :) = curr_psth;
 
                      psth_bin_size_det = 0.001;
                     raster_window_det = [-0.2, 0.6];
