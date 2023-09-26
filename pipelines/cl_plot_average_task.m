@@ -57,7 +57,7 @@ end
 %     nanstd(task_data.psth(:,1:50),[],2);
 region_max = [1, 1, 1, 1, 1, 1, 1];
 region_smooth = [5, 1, 1, 1, 1, 1, 1];
-region_lims = [6, 15, 15, 15,15, 15];
+region_lims = [1,1,1,1,1,1];
 plot_regions = [1, 2, 3];
 %region_clim_string = {'z-score (clim saturated)', 'z-score', 'z-score', 'z-score', 'z-score', 'z-score', 'z-score'};
 figure(1);
@@ -69,7 +69,7 @@ for thisRegion = 1:size(plot_regions, 2)
 
     % get all cells %1:301
     these_units = task_data_here.unit_area == iRegion & ...
-        (task_data_here.unitType' ==1 | task_data_here.unitType' ==2);% &...
+        (task_data_here.unitType' ==1 | task_data_here.unitType' ==2) &...
         (task_data_here.pvalue_shuffled_005{1,idx}(1:size(task_data_here.unit_area, 1))' == 1);% |...
         %any(task_data_here.pvalue{idx}(:,:)>0.975,2) | any(task_data_here.pvalue{idx}(:,:)<0.025,2) );% & ...
         %task_data_here.pvalue_shuffled_005{idx}(1:size(task_data_here.unit_area, 1))' == 1; % & task_data.pvalue{idx}' < 0.05 &...
@@ -157,8 +157,10 @@ for thisRegion = 1:size(plot_regions, 2)
     c = colorbar;
     %c.Label.String = (region_clim_string{iRegion});
     colormap(brewermap([], '*BrBG'));
+    if iRegion ==1
     xlabel('time from stim onset (s)')
     ylabel('unit # (sorted on 1/2 trials)')
+    end
     %title('Go 1')
     makepretty;
     clim([-region_lims(iRegion),region_lims(iRegion)] )
@@ -174,8 +176,7 @@ for thisRegion = 1:size(plot_regions, 2)
     c = colorbar;
     %c.Label.String = (region_clim_string{iRegion});
     colormap(brewermap([], '*BrBG'));
-    xlabel('time from stim onset (s)')
-    ylabel('unit #')
+    
     %title('Go 2')
     makepretty;
     clim([-region_lims(iRegion),region_lims(iRegion)] )
@@ -190,8 +191,7 @@ for thisRegion = 1:size(plot_regions, 2)
     c = colorbar;
     %c.Label.String = (region_clim_string{iRegion});
     colormap(brewermap([], '*BrBG'));
-    xlabel('time from stim onset (s)')
-    ylabel('unit #')
+    
     %title('No go')
     makepretty;
     clim([-region_lims(iRegion),region_lims(iRegion)] )
@@ -204,8 +204,7 @@ for thisRegion = 1:size(plot_regions, 2)
     c = colorbar;
     %c.Label.String = (region_clim_string{iRegion});
     colormap(brewermap([], '*BrBG'));
-    xlabel('time from stim onset (s)')
-    ylabel('unit #')
+   
     %title('No go -like')
     makepretty;
     clim([-region_lims(iRegion),region_lims(iRegion)] )
@@ -217,8 +216,7 @@ for thisRegion = 1:size(plot_regions, 2)
     c = colorbar;
     %c.Label.String = (region_clim_string{iRegion});
     colormap(brewermap([], '*BrBG'));
-    xlabel('time from stim onset (s)')
-    ylabel('unit #')
+    
     %title('No go -like')
     makepretty;
     clim([-region_lims(iRegion),region_lims(iRegion)] )
@@ -230,8 +228,7 @@ for thisRegion = 1:size(plot_regions, 2)
     c = colorbar;
     %c.Label.String = (region_clim_string{iRegion});
     colormap(brewermap([], '*BrBG'));
-    xlabel('time from stim onset (s)')
-    ylabel('unit #')
+    
     %title('No go -like')
     makepretty;
     clim([-region_lims(iRegion),region_lims(iRegion)] )
@@ -243,8 +240,7 @@ for thisRegion = 1:size(plot_regions, 2)
     c = colorbar;
     %c.Label.String = (region_clim_string{iRegion});
     colormap(brewermap([], '*BrBG'));
-    xlabel('time from stim onset (s)')
-    ylabel('unit #')
+    
     %title('Go -like')
     makepretty;
     clim([-region_lims(iRegion),region_lims(iRegion)] )

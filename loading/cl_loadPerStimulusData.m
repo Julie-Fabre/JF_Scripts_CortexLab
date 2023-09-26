@@ -377,7 +377,7 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
                 passive_data_per_cond.no_move_trials{experiment_type, iRecording} = no_move_trials;
                 for iUnit = 1:size(units_to_keep, 1)
                     raster_window = [-0.5, 1];
-                    psth_bin_size = 0.01;
+                    psth_bin_size = 0.001;
                     if ~isempty(keep_trial)
                         align_times = stimOn_times(keep_trial);
                         [~, trial_cond_idx] = ismember(trial_conditions(keep_trial,:), passive_data_per_cond.psth_conditions{experiment_type}, 'rows');
@@ -403,14 +403,14 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
                              [~, trial_cond_idx_single] = ismember(trial_conditions, passive_data_per_cond.psth_conditions{experiment_type}(iCond,:), 'rows');
                         
                          end
-                        pvals_per_cond(iCond) = signrank(nanmean(curr_raster(logical(trial_cond_idx_single), 40:50), 2),...
-                            nanmean(curr_raster(logical(trial_cond_idx_single), 55:65), 2));
+                        pvals_per_cond(iCond) = signrank(nanmean(curr_raster(logical(trial_cond_idx_single), 400:500), 2),...
+                            nanmean(curr_raster(logical(trial_cond_idx_single), 550:650), 2));
                          passive_data_per_cond.pvalue{experiment_type}(iUnit + unitCount, iCond) = pvals_per_cond(iCond);
                     end
                        %responsive cell?  shuffle pre/post labels 
 
-                pre_activity = nanmean(curr_raster(:, 40:50), 2);
-                post_activity = nanmean(curr_raster(:, 55:65), 2);
+                pre_activity = nanmean(curr_raster(:, 400:500), 2);
+                post_activity = nanmean(curr_raster(:, 550:650), 2);
                 all_activity = [pre_activity; post_activity];
                 shuffling_idx = randi(size(all_activity,1),1000);
                 shuffled_diffs = arrayfun(@(x) nanmean(all_activity(shuffling_idx(1:500,x))...
@@ -463,7 +463,7 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
                         unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size, ...
                         align_times(1:2:end), trial_cond_idx(1:2:end));
 
-                    if iRecording > 1
+                    if iRecording > 1 && iUnit == 1
                         if size(curr_psth,1) ~= size(passive_data_per_cond.psth{experiment_type},3)
                             warning on;
                             warning(['different number of stims for rec #', num2str(iRecording)])
@@ -486,14 +486,14 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
 
                      psth_bin_size_det = 0.001;
                     raster_window_det = [-0.2, 0.6];
-                    [curr_psth, curr_raster, t, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
+                    [curr_psth, curr_raster, t_det, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
                         unique_templates(shank_units(units_to_keep(iUnit))), raster_window_det, psth_bin_size_det, ...
                         align_times(1:1:end), trial_cond_idx(1:1:end));
-                     startIdx = find(t >= 0.05, 1, 'first');
-                     stopIdx = find(t >= 0.15, 1, 'first');
+                     startIdx = find(t_det >= 0.05, 1, 'first');
+                     stopIdx = find(t_det >= 0.15, 1, 'first');
                      passive_data_per_cond.av_per_trial{experiment_type, iRecording}(iUnit,:) = nanmean(curr_raster(:,startIdx:stopIdx),2);
-                     startIdx = find(t >= -0.15, 1, 'first');
-                     stopIdx = find(t >= -0.05, 1, 'first');
+                     startIdx = find(t_det >= -0.15, 1, 'first');
+                     stopIdx = find(t_det >= -0.05, 1, 'first');
                      passive_data_per_cond.av_per_trial_base{experiment_type, iRecording}(iUnit,:) = nanmean(curr_raster(:,startIdx:stopIdx),2);
                      passive_data_per_cond.av_psth{experiment_type, iRecording}(iUnit,:,:) = curr_psth;
                     
@@ -515,6 +515,7 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
                 passive_data_per_cond.unit_area(unitCount+1:unitCount+size(units_to_keep, 1), :) = units_to_keep_area;
                 passive_data_per_cond.unit_coords(unitCount+1:unitCount+size(units_to_keep, 1), :) = units_to_keep_coords;
                 passive_data_per_cond.t = t;
+                passive_data_per_cond.t_det = t_det;
                 passive_data_per_cond.unitNum((unitCount + 1:unitCount + size(units_to_keep, 1))) = shank_units(units_to_keep);
                 passive_data_per_cond.propISI((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.propLongISI(units_to_keep);
                 passive_data_per_cond.pss((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.postSpikeSuppression(units_to_keep);
