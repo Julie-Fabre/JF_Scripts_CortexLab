@@ -463,10 +463,12 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
                         unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size, ...
                         align_times(1:2:end), trial_cond_idx(1:2:end));
 
-                    if size(curr_psth,1) ~= size(passive_data_per_cond.psth{experiment_type},3)
-                        warning on;
-                        warning(['different number of stims for rec #', num2str(iRecording)])
-                        warning off;
+                    if iRecording > 1
+                        if size(curr_psth,1) ~= size(passive_data_per_cond.psth{experiment_type},3)
+                            warning on;
+                            warning(['different number of stims for rec #', num2str(iRecording)])
+                            warning off;
+                        end
                     end
                     passive_data_per_cond.psth{experiment_type}(iUnit + unitCount, 1, 1:size(curr_psth,1), :) = curr_psth;
 
