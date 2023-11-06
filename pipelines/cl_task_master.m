@@ -29,7 +29,7 @@ gogogo = 0;
 passive = 0;
 cl_PC_analysis;
 
-task_data_gogogo = cl_loadPerStimulusData('taskGo', 2); 
+task_data_gogogo = cl_loadPerStimulusData('taskGo', 1); 
 
 task_data_here = load('task_data_gogogo.mat');
 gogogo = 1;
@@ -52,17 +52,42 @@ cl_PC_analysis;
 % DMS vs PS 
 %% 
 task_data = cl_loadPerStimulusData('task', 2); 
-save('task_data_goNogo3.mat', '-struct', 'task_data');
+save('/home/julie/Dropbox/MATLAB/task_data_goNogo.mat', '-struct', 'task_data', '-v7.3');
 
 clear all;
-
-task_data_passive = cl_loadPerStimulusData('passive', 5); 
-save('task_data_passive.mat', '-struct', 'task_data_passive');
-clear all;
-
-task_data_passive2 = cl_loadPerStimulusData('passive', 4); 
-save('task_data_passive2.mat', '-struct', 'task_data_passive2');
-clear all;
-
 task_data_gogogo = cl_loadPerStimulusData('taskGo', 2); 
-save('task_data_gogogo.mat', '-struct', 'task_data_gogogo');
+save('/home/julie/Dropbox/MATLAB/task_data_gogogo.mat', '-struct', 'task_data_gogogo', '-v7.3');
+
+clear all;
+task_data_passive = cl_loadPerStimulusData('passive', 5); 
+save('/home/julie/Dropbox/MATLAB/task_data_passive_full.mat', '-struct', 'task_data_passive', '-v7.3');
+
+clear all;
+nat_passive = cl_loadPerStimulusData('passive', 6); 
+save('/home/julie/Dropbox/MATLAB/nat_passive_full.mat', '-struct', 'nat_passive', '-v7.3');
+
+clear all;
+gratings_passive = cl_loadPerStimulusData('passive', 1); 
+save('/home/julie/Dropbox/MATLAB/gratings_passive_full.mat', '-struct', 'gratings_passive', '-v7.3');
+
+clear all; % bug 
+locations_passive = cl_loadPerStimulusData('passive', 2); 
+save('/home/julie/Dropbox/MATLAB/locations_passive_full.mat', '-struct', 'locations_passive', '-v7.3');
+
+clear all;
+task_data_passive2 = cl_loadPerStimulusData('passive', 4); 
+save('/home/julie/Dropbox/MATLAB/task_data_passive2.mat', '-struct', 'task_data_passive2', '-v7.3');
+
+
+
+
+
+%% D-prime 
+cl_dprime_summary;
+
+%% Average response to each image 
+cl_average_response_per_image;
+
+%% Fraction of cells 
+cl_fraction_cells_summary;
+cl_fraction_cells;

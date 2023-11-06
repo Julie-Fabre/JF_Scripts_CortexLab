@@ -29,7 +29,19 @@ JF_runKSandBombcell('JF093', '2023-03-18', 1, [],rerunKS,0)%
 
 
 
-
+rerunKS = 0;
+for iSite = 1:3
+    JF_runKSandBombcell('JF078', '2022-05-21', iSite, [],rerunKS,0)%done
+    JF_runKSandBombcell('JF078', '2022-05-22', iSite, [],rerunKS,0)%done
+    JF_runKSandBombcell('JF078', '2022-05-23', iSite, [],rerunKS,0)%done
+    JF_runKSandBombcell('JF078', '2022-05-25', iSite, [],rerunKS,0)%done
+    JF_runKSandBombcell('JF078', '2022-05-26', iSite, [],rerunKS,0)%done
+    JF_runKSandBombcell('JF078', '2022-05-28', iSite, [],rerunKS,0)%done
+    JF_runKSandBombcell('JF078', '2022-05-29', iSite, [],rerunKS,0)%done
+    JF_runKSandBombcell('JF078', '2022-05-30', iSite, [],rerunKS,0)%done
+    JF_runKSandBombcell('JF078', '2022-05-31', iSite, [],rerunKS,0)%done
+    JF_runKSandBombcell('JF078', '2022-06-01', iSite, [],rerunKS,0)%done
+end
 
 %% 
 rerunKS=1;

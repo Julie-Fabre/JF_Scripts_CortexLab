@@ -3,7 +3,7 @@ close all;
 mice = {'JF067', 'JF078', 'JF_AL035', 'JF084', 'JF082'};
 iMouse = 1;
 mouse = mice{iMouse};
-savedirs = {'/home/netshare/zinu/JF067/UnitMatch/site1/UnitMatch.mat', ...
+savedirs = {'/home/netshare/zinu/JF067/UnitMatch_copy_20230922/site1/UnitMatch.mat', ...
     '/home/netshare/zinu/JF078/UnitMatch/site1/UnitMatch.mat', ...
     '/home/netshare/zinu/JF_AL035/UnitMatch/site1/UnitMatch.mat', ...
     '/home/netshare/zinu/JF084/UnitMatch/site1/UnitMatch.mat'}; %'/home/netshare/zinu/JF067/UnitMatch_1_11_enny'
@@ -245,7 +245,7 @@ vis_long_track_pass_pop = nan(max_nRecs, 3, 1500);
 vis_long_track_pass_pop2 = nan(max_nRecs, 3, 1500);
 vis_long_track_pass_pop_std = nan(max_nRecs, 3, 1500);
 vis_long_track_pass_pop_std_n_neuron = nan(max_nRecs);
-
+vis_long_track_pass_pop_whole = nan(max_nRecs, 3, 1500);
 recordings_unique = unique([UniqueIDConversion.recsesAll]);
 loadClusters= 0;
 for iRecording = 1:last_day
@@ -330,8 +330,22 @@ for iRecording = 1:last_day
             average_per_neuron(iNeuron, 1:size(curr_psth, 1), :) = curr_psth;
         end
          vis_long_track_pass_pop2(thisRecording, 1:size(curr_psth, 1), :) = nanmean(average_per_neuron(find(sum(sum(average_per_neuron(:,:,:),2),3)>0),:,:));
+
+        if iMouse == 1
+            theseSpikeTemplates_0idx = spike_templates_0dx_unique(unitType == 1);
+        elseif iMouse == 2
+            theseSpikeTemplates_0idx = spike_templates_0dx_unique(unitType == 1 & template_depths >= 900 & template_depths <= 1500);
+        end
+
+        % get vis
+        [align_group_a, align_group_b] = ismember(trial_conditions(:, 2), unique(trial_conditions(:, 2)));
+        %align_group_b = ones(size(stimOn_times,1),1);
+        [curr_psth, curr_raster, t, raster_x, raster_y] = cl_raster_psth(spike_templates_0idx, spike_times_timeline, ...
+            spike_templates_0dx_unique, raster_window, psth_bin_size, stimOn_times(stimTrials_keep), align_group_b(stimTrials_keep));
+        vis_long_track_pass_pop_whole(thisRecording, 1:size(curr_psth, 1), :) = curr_psth;
        
-        %is_long_track_pass_pop_std(thisRecording, :, :) = nanstd(squeeze(average_per_neuron(find(sum(sum(average_per_neuron(:,:,:),2),3)>0),1,:)),[],1);
+        vis_long_track_pass_pop_std(thisRecording, 2, :) = nanstd(smoothdata(squeeze(average_per_neuron(find(sum(sum(average_per_neuron(:,:,:),2),3)>0),2,:)), 2,'movmean', [10,70]));%nanstd(smoothdata(squeeze(average_per_neuron(find(sum(sum(average_per_neuron(:,:,:),2),3)>0),1,:)),[],1), [10,70]);
+        vis_long_track_pass_pop_std_n_neuron(iRecording) = length(find(sum(sum(average_per_neuron(:,:,:),2),3)>0));
         %vis_long_track_pass_pop_std_n_neuron(iRecording) = length(find(sum(sum(average_per_neuron(:,:,:),2),3)>0));
     %catch
     %end
@@ -342,8 +356,8 @@ end
 close all;
 
 imgT = 2;
-examples = [17,18,19];%[6,19,13,18,12];
-last_day = 5;
+examples = [6,19,13,18,12];
+last_day = 4;
 cmap_cols = crameri('batlow', last_day);
 figure();
 
@@ -360,7 +374,7 @@ for ii = 1:length(examples)
         minVal(iRecording) = nanmin(ss);
     end
 if any(~isnan(maxVal))
-    for iRecording = 2:5
+    for iRecording = 2:last_day
 
         %thisRecotding = theseRecording(iRecording);
         ss = smoothdata(squeeze(vis_long_track_pass(iUnit, iRecording, imgT, :))', 'movmean', [10, 50]) .* 1000;
@@ -422,6 +436,7 @@ if any(~isnan(maxVal))
             plot(t(300:1250), ss, 'Color', cmap_cols(iRecording, :));hold on;
             %plotshaded(t(300:1250), [ss - squeeze(vis_long_track_pass_std(iUnit, iRecording, imgT, 300:1250))'; ...
             %    ss + squeeze(vis_long_track_pass_std(iUnit, iRecording, imgT, 300:1250))'], cmap_cols(iRecording, :))
+            line([0, 0], [nanmin(minVal), nanmax(maxVal)])
             ylim([nanmin(minVal), nanmax(maxVal)])
             %hold on;
             xlabel('time from stim (s)')
@@ -476,20 +491,24 @@ for iRecording = 2:4
     %clearvars maxVal minVal
 
     ss = smoothdata(squeeze(vis_long_track_pass_pop(iRecording, imgT, 300:1250))', 'movmean', [10, 70]) .* 1000;
+    %ss = (ss - nanmean(ss(:, 1:200))) ./ nanstd(ss(:, 1:200));
+    ss_std = (squeeze(vis_long_track_pass_pop_std( iRecording, imgT, 300:1250)).*1000  - nanmean(ss(:, 1:200))) ./ nanmean(ss(:, 1:200))./ sqrt(vis_long_track_pass_pop_std_n_neuron(iRecording));%  - nanmean(ss(:, 1:200))) ./ nanmean(ss(:, 1:200)) ./sqrt();
+  
     ss = (ss - nanmean(ss(:, 1:200))) ./ nanmean(ss(:, 1:200));
+    
 
 
     %ss2 = smoothdata(squeeze(vis_long_track_pass_pop(iRecording, 1, 300:1250))', 'movmean', [10, 70]) .* 1000;
     %ss2 = (ss2 - nanmean(ss2(:, 1:200))) ./ nanstd(ss2(:, 1:200));
     %normVal(iRecording) = nanmax(ss2);
     %ss = (ss - normVal(iRecording)) ./ normVal(iRecording);
-    maxVal(iRecording) = nanmax(ss);
-    minVal(iRecording) = nanmin(ss);
+    maxVal(iRecording) = nanmax(ss-ss_std');
+    minVal(iRecording) = nanmin(ss+ss_std');
 
 end
 for iRecording = 2:4
-    subplot(length(examples)+3, last_day+2,last_day*2+3+iRecording);
-    hold on;
+   subplot(length(examples)+3, last_day+2,last_day*2+3+iRecording);
+   hold on;
     box off;
     set(gca, 'XTickLabel', [])
     %set(gca, 'YTickLabel', [])
@@ -497,15 +516,21 @@ for iRecording = 2:4
     box off;
 
     ss = smoothdata(squeeze(vis_long_track_pass_pop(iRecording, imgT, 300:1250))', 'movmean', [10, 70]) .* 1000;
+    %ss = (ss - nanmean(ss(:, 1:200))) ./ nanstd(ss(:, 1:200));
+        ss_std = (squeeze(vis_long_track_pass_pop_std( iRecording, imgT, 300:1250)).*1000  - nanmean(ss(:, 1:200))) ./ nanmean(ss(:, 1:200))./ sqrt(vis_long_track_pass_pop_std_n_neuron(iRecording));%  - nanmean(ss(:, 1:200))) ./ nanmean(ss(:, 1:200)) ./sqrt();
+  
     ss = (ss - nanmean(ss(:, 1:200))) ./ nanmean(ss(:, 1:200));
-    %ss = (ss - normVal(iRecording)) ./ normVal(iRecording);
+  %ss = (ss - normVal(iRecording)) ./ normVal(iRecording);
     t = -0.50005:0.001:0.9995;
     plot(t(300:1250), ss, 'Color', cmap_cols(iRecording, :));
+    %
+    line([0, 0], [nanmin(minVal), nanmax(maxVal)])
     ylim([nanmin(minVal), nanmax(maxVal)])
     xlabel('time from stim (s)')
     ylabel('zscore, population')
-    %plotshaded(t(300:1250), [ss - squeeze(vis_long_track_pass_pop_std( iRecording, imgT, 300:1250))'; ...
-    %            ss + squeeze(vis_long_track_pass_pop_std( iRecording, imgT, 300:1250))'], cmap_cols(iRecording, :))
+    plotshaded(t(300:1250), [ss - ss_std'; ...
+                ss + ss_std'], cmap_cols(iRecording, :))
+    line([0, 0], [nanmin(minVal), nanmax(maxVal)])
            
    % if iRecording ==2
    %     legend('population average')

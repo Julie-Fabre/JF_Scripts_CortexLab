@@ -7,12 +7,12 @@ figure('Color', 'white')
 cl_myPaths;
 regionResolution = [1, 1, 1, 1, 1, 1, 1];
 
-zscore_psth = (passive_data.psth - nanmean(passive_data.psth(:, 1:50), 2)) ./ ...
-    nanstd(passive_data.psth(:, 1:50), [], 2);
-dFR_psth = (passive_data.psth - nanmean(passive_data.psth(:, 1:50), 2)) ./ ...
-    nanmean(passive_data.psth(:, 1:50), 2);
+zscore_psth = abs((passive_data.psth{2} - nanmean(passive_data.psth{2}(:, 1:50), 2)) ./ ...
+    nanstd(passive_data.psth{2}(:, 1:50), [], 2));
+dFR_psth = abs((passive_data.psth{2} - nanmean(passive_data.psth{2}(:, 1:50), 2)) ./ ...
+    nanmean(passive_data.psth{2}(:, 1:50), 2));
 
-thisCmap_limits = [-150, 150];
+thisCmap_limits = [-200, 200];
 theseColors = {rgb('DeepSkyBlue'); rgb('SeaGreen'); rgb('DarkOrange'); rgb('Crimson'); rgb('Hotpink'); rgb('Black'); rgb('Brown')};
 
 if ~exist('st', 'var')
@@ -176,3 +176,5 @@ for iRegion = 1:size(regions, 2)
    end
   keep passive_data regions thisCmap_limits st av regionResolution structure_alpha theseColors dFR_psth iRegion bregma
 end
+
+

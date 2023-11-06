@@ -1,4 +1,4 @@
-function passive_data_per_cond = cl_loadPerStimulusData(load_type, keep_type) %% paramaters
+function [passive_data_per_cond, regions] = cl_loadPerStimulusData(load_type, keep_type) %% paramaters
 cl_myPaths;
     if contains(load_type, 'passive')
     info_table = readtable([csvPath 'allPassiveRecs.csv'], 'VariableNamingRule', 'modify');
@@ -222,7 +222,7 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
 
 
                 verbose = false; % display load progress and some info figures
-                load_parts.cam = false;
+                load_parts.cam = true;
                 load_parts.imaging = false;
                 load_parts.ephys = true;
                 loadClusters = 0;
@@ -230,6 +230,7 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
                     JF_load_experiment;
                         
                 catch
+                    
                     disp('error loading experiment')
                     continue;
                 end
@@ -322,11 +323,13 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
                     rerunEP = 0;
                     plotGUI = 0;
                     runQM = 1;
-                    rerunQM = 0;
+                    rerunQM = 1;
                     region = '';
                     runEP = 1;
+                    clearvars unitType
                     try
                         [unitType, qMetrics] = bc_qualityMetricsPipeline_JF(animal, day, site, recording, 1, protocol, rerunQM, plotGUI, runQM);
+                        %bc_qualityMetricsPipeline_JF(animal, day, site, recording, experiment_num, protocol, rerunQM, plotGUI, runQM)
                     catch
                         rerunQM = 1;
                         [unitType, qMetrics] = bc_qualityMetricsPipeline_JF(animal, day, site, recording, 1, protocol, rerunQM, plotGUI, runQM);
@@ -335,7 +338,7 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
 
                 end
 
-
+                passive_data_per_cond.psth_conditions_all{iRecording, experiment_type} = unique(trial_conditions, 'rows');
                 % get stim response
                 unique_templates = unique(spike_templates);
                 if contains(load_type, 'task')
@@ -349,23 +352,25 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
                 else
                     %if experiment_type == 1%nat images
                     passive_data_per_cond.psth_conditions{experiment_type} = unique(trial_conditions, 'rows');
+                    passive_data_per_cond.psth_conditions_all{iRecording, experiment_type} = unique(trial_conditions, 'rows');
                     if experiment_type==5
                         if size(trial_conditions,2) == 2
                      
                             these_guys = ismember(trial_conditions(:, 1), ...
-                                [4,6,12]) & ismember(trial_conditions(:, 2), [-90]);
-                            disp(unique(trial_conditions(these_guys,:), 'rows'))
-                            if size(unique(trial_conditions(these_guys,:), 'rows'),1) ==3
-                                passive_data_per_cond.psth_conditions{experiment_type} = unique(trial_conditions(these_guys,:), 'rows');
-                            else
-                                disp('no stim screen location saved')
-                                continue;
-                            end
+                                [1:13]) & ismember(trial_conditions(:, 2), [-90, 0, 90]);
+                            disp(unique(trial_conditions, 'rows'))
+                            
+                            %if size(unique(trial_conditions(these_guys,:), 'rows'),1) ==3
+                                %passive_data_per_cond.psth_conditions{experiment_type} = unique(trial_conditions(these_guys,:), 'rows');
+                            %else
+                            %    disp('no stim screen location saved')
+                            %    continue;
+                            %end
                         else
                             continue;
                         end
                     else
-                        passive_data_per_cond.psth_conditions{experiment_type} = unique(trial_conditions, 'rows');
+                        %passive_data_per_cond.psth_conditions_all{iRecording, experiment_type} = unique(trial_conditions, 'rows');
                     end
                         
 
@@ -377,7 +382,7 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
                 passive_data_per_cond.no_move_trials{experiment_type, iRecording} = no_move_trials;
                 for iUnit = 1:size(units_to_keep, 1)
                     raster_window = [-0.5, 1];
-                    psth_bin_size = 0.001;
+                    psth_bin_size = 0.01;
                     if ~isempty(keep_trial)
                         align_times = stimOn_times(keep_trial);
                         [~, trial_cond_idx] = ismember(trial_conditions(keep_trial,:), passive_data_per_cond.psth_conditions{experiment_type}, 'rows');
@@ -395,6 +400,7 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
                     [curr_psth, curr_raster, t, raster_x, raster_y] = cl_raster_psth(spike_templates, spike_times_timeline, ...
                         unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size, ...
                         align_times, []);
+                   
                     % p value test for *each* condition 
                     for iCond = 1:size(passive_data_per_cond.psth_conditions{experiment_type},1)
                          if ~isempty(keep_trial)
@@ -403,14 +409,14 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
                              [~, trial_cond_idx_single] = ismember(trial_conditions, passive_data_per_cond.psth_conditions{experiment_type}(iCond,:), 'rows');
                         
                          end
-                        pvals_per_cond(iCond) = signrank(nanmean(curr_raster(logical(trial_cond_idx_single), 400:500), 2),...
-                            nanmean(curr_raster(logical(trial_cond_idx_single), 550:650), 2));
+                        pvals_per_cond(iCond) = signrank(nanmean(curr_raster(logical(trial_cond_idx_single), 40:50), 2),...
+                            nanmean(curr_raster(logical(trial_cond_idx_single), 55:65), 2));
                          passive_data_per_cond.pvalue{experiment_type}(iUnit + unitCount, iCond) = pvals_per_cond(iCond);
                     end
                        %responsive cell?  shuffle pre/post labels 
 
-                pre_activity = nanmean(curr_raster(:, 400:500), 2);
-                post_activity = nanmean(curr_raster(:, 550:650), 2);
+                pre_activity = nanmean(curr_raster(:, 40:50), 2);
+                post_activity = nanmean(curr_raster(:, 55:65), 2);
                 all_activity = [pre_activity; post_activity];
                 shuffling_idx = randi(size(all_activity,1),1000);
                 shuffled_diffs = arrayfun(@(x) nanmean(all_activity(shuffling_idx(1:500,x))...
@@ -458,29 +464,34 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
 % 
 
                     %psth
-
+                    psth_bin_size_det = 0.001;
+                    raster_window_det = [-0.2, 0.6];
                     [curr_psth, ~, ~, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
-                        unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size, ...
+                        unique_templates(shank_units(units_to_keep(iUnit))), raster_window_det, psth_bin_size_det, ...
                         align_times(1:2:end), trial_cond_idx(1:2:end));
-
-                    if iRecording > 1 && iUnit == 1
-                        if size(curr_psth,1) ~= size(passive_data_per_cond.psth{experiment_type},3)
-                            warning on;
-                            warning(['different number of stims for rec #', num2str(iRecording)])
-                            warning off;
-                        end
-                    end
+                    passive_data_per_cond.av_psth_1{experiment_type, iRecording}(iUnit,:,:) = curr_psth;
+                    
+                    %plot(nanmean(curr_psth(:,:)))
+                    % if iRecording > 1 && iUnit == 1
+                    %     if size(curr_psth,1) ~= size(passive_data_per_cond.psth{experiment_type},3)
+                    %         warning on;
+                    %         warning(['different number of stims for rec #', num2str(iRecording)])
+                    %         warning off;
+                    %     end
+                    % end
+                    
                     passive_data_per_cond.psth{experiment_type}(iUnit + unitCount, 1, 1:size(curr_psth,1), :) = curr_psth;
 
                     [curr_psth, ~, ~, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
-                        unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size, ...
+                        unique_templates(shank_units(units_to_keep(iUnit))), raster_window_det, psth_bin_size_det, ...
                         align_times(2:2:end), trial_cond_idx(2:2:end));
 
                     passive_data_per_cond.psth{experiment_type}(iUnit + unitCount, 2, 1:size(curr_psth,1), :) = curr_psth;
-                    %disp(unique_templates(shank_units(units_to_keep(iUnit))))
+                    passive_data_per_cond.av_psth_2{experiment_type, iRecording}(iUnit,:,:) = curr_psth;
+                    % disp(unique_templates(shank_units(units_to_keep(iUnit))))
                     
                     [curr_psth, curr_raster, t, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
-                        unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size, ...
+                        unique_templates(shank_units(units_to_keep(iUnit))), raster_window_det, psth_bin_size_det, ...
                         align_times(1:1:end), trial_cond_idx(1:1:end));
                      passive_data_per_cond.psth{experiment_type}(iUnit + unitCount, 3, 1:size(curr_psth,1), :) = curr_psth;
 
@@ -496,6 +507,7 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
                      stopIdx = find(t_det >= -0.05, 1, 'first');
                      passive_data_per_cond.av_per_trial_base{experiment_type, iRecording}(iUnit,:) = nanmean(curr_raster(:,startIdx:stopIdx),2);
                      passive_data_per_cond.av_psth{experiment_type, iRecording}(iUnit,:,:) = curr_psth;
+                     %passive_data_per_cond.av_psth_std{experiment_type, iRecording}(iUnit,:,:) = nanstd(curr_raster);
                     
                      % area
                      %passive_data_per_cond.unit_area{experiment_type, iRecording}(iUnit+unitCount)
@@ -515,13 +527,17 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
                 passive_data_per_cond.unit_area(unitCount+1:unitCount+size(units_to_keep, 1), :) = units_to_keep_area;
                 passive_data_per_cond.unit_coords(unitCount+1:unitCount+size(units_to_keep, 1), :) = units_to_keep_coords;
                 passive_data_per_cond.t = t;
-                passive_data_per_cond.t_det = t_det;
+%                passive_data_per_cond.t_det = t_det;
                 passive_data_per_cond.unitNum((unitCount + 1:unitCount + size(units_to_keep, 1))) = shank_units(units_to_keep);
                 passive_data_per_cond.propISI((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.propLongISI(units_to_keep);
                 passive_data_per_cond.pss((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.postSpikeSuppression(units_to_keep);
                 passive_data_per_cond.wvDur((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.templateDuration(units_to_keep);
                 passive_data_per_cond.fr((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.spike_rateSimple(units_to_keep);
                 passive_data_per_cond.unitType((unitCount + 1:unitCount + size(units_to_keep, 1))) = unitType(units_to_keep);
+                passive_data_per_cond.pss((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.postSpikeSuppression(units_to_keep);
+                passive_data_per_cond.templateDuration((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.templateDuration(units_to_keep);
+                passive_data_per_cond.propLongISI((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.propLongISI(units_to_keep);
+
                 %passive_data_per_cond
                 unitCount = unitCount + size(units_to_keep, 1);
 

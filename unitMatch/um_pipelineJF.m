@@ -9,10 +9,10 @@ tmpdatafolder = extraHDPath; %'/media/julie/ExtraHD/data_temp'; % temporary fold
 MiceOpt = {'JF067', 'JF078', 'JFAL035', 'JF082', 'JF084'}; % Add all mice you want to analyze. 51 = ventricule mostly, don't include
 RecordingType(ismember(MiceOpt, {'JF067', 'JF078', 'JF_AL035', 'JF082', 'JF084'})) = {'Chronic'}; % 'Acute' or 'Chronic'
 miceDays = [1, 29; 1, 15; 1, 20; 1, 31; 3,19]; % 1:11
-sites = [1,1; 1,1; 1,1; 1,2; 1,3];
+sites = [1,1; 1,3; 1,1; 1,2; 1,3];
 runMe = 1;
 saveJF = 1;
-for iMouse = [3,5]%1%1%:size(MiceOpt, 2) 
+for iMouse = 4%1%[3,5]%1%1%:size(MiceOpt, 2) 
 
     %% get all raw ephys and kilosort directories - CHANGE THESE PATHS
     theseSites = sites(iMouse,1):sites(iMouse,2);
@@ -51,40 +51,40 @@ for iMouse = [3,5]%1%1%:size(MiceOpt, 2)
             %% get all QMs 
             % [unitType, qMetric] = bc_qualityMetricsPipeline_JF(animal, day, site, recording, experiment_num, protocol, rerunQM, plotGUI, runQM)
 
-            allQmetric = struct;
-            for iDay = 1:size(ephys_dirs,2)
-                %try
-                [unitType, qMetric] = bc_qualityMetricsPipeline_JF(mouseName, day_str{iDay}, site, [], 1, '', 0, 0, 1);
-                allQMetric(iDay).qMetric = qMetric; 
-            end
-            for iDay = 1:size(ephys_dirs,2)
-                snr(iDay) = nanmedian(allQMetric(iDay).qMetric.signalToNoiseRatio);
-                snr_std(iDay) = nanstd(allQMetric(iDay).qMetric.signalToNoiseRatio);
-                ampl(iDay)  = nanmedian(allQMetric(iDay).qMetric.rawAmplitude);
-                ampl_std(iDay)  = nanstd(allQMetric(iDay).qMetric.rawAmplitude);
-                spD(iDay)  = nanmedian(allQMetric(iDay).qMetric.spatialDecaySlope);
-                spD_std(iDay)  = nanstd(allQMetric(iDay).qMetric.spatialDecaySlope);
-                
-                %catch
-                %end
-            end
-            
-            figure();
-            subplot(311)
-            plot(snr)
-            ylabel('SNR')
-            title(mouseName)
-            
-
-            subplot(312)
-            plot(ampl)
-            ylabel('waveform amplitude (uV)')
-
-            subplot(313)
-            plot(spD)
-            ylabel('spatial decay slope')
-            xlabel('day #')
-            prettify_plot;
+            % allQmetric = struct;
+            % for iDay = 1:size(ephys_dirs,2)
+            %     %try
+            %     [unitType, qMetric] = bc_qualityMetricsPipeline_JF(mouseName, day_str{iDay}, site, [], 1, '', 0, 0, 1);
+            %     allQMetric(iDay).qMetric = qMetric; 
+            % end
+            % for iDay = 1:size(ephys_dirs,2)
+            %     snr(iDay) = nanmedian(allQMetric(iDay).qMetric.signalToNoiseRatio);
+            %     snr_std(iDay) = nanstd(allQMetric(iDay).qMetric.signalToNoiseRatio);
+            %     ampl(iDay)  = nanmedian(allQMetric(iDay).qMetric.rawAmplitude);
+            %     ampl_std(iDay)  = nanstd(allQMetric(iDay).qMetric.rawAmplitude);
+            %     spD(iDay)  = nanmedian(allQMetric(iDay).qMetric.spatialDecaySlope);
+            %     spD_std(iDay)  = nanstd(allQMetric(iDay).qMetric.spatialDecaySlope);
+            % 
+            %     %catch
+            %     %end
+            % end
+            % 
+            % figure();
+            % subplot(311)
+            % plot(snr)
+            % ylabel('SNR')
+            % title(mouseName)
+            % 
+            % 
+            % subplot(312)
+            % plot(ampl)
+            % ylabel('waveform amplitude (uV)')
+            % 
+            % subplot(313)
+            % plot(spD)
+            % ylabel('spatial decay slope')
+            % xlabel('day #')
+            % prettify_plot;
 
 
             %% check output
@@ -96,7 +96,7 @@ for iMouse = [3,5]%1%1%:size(MiceOpt, 2)
         
             % Key presses:
             %   Right arrow: next pair
-            %   Left arrow: previous pair
+            %   Left arrow: previous pair3
             %   Up arrow: label as match
             %   Down arrow: label as non-match
             %   o: label as I don't know (=uncurated)

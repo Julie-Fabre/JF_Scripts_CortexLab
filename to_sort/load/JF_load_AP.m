@@ -4,7 +4,7 @@
 %clear all;
 cl_myPaths;
 
-animals={'JF067'};
+animals={'JF096'};
 curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};
@@ -25,7 +25,7 @@ experiments = experiments([experiments.ephys]);
 
 %% Load data from experiment 
 
-curr_day = 13; % (set which day to use)
+curr_day = 3; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
@@ -35,7 +35,7 @@ load_parts.cam=false;
 load_parts.imaging=false;
 load_parts.ephys=true;
 
-site = 1;%1,1; 2,4; 3,7
+site = 2;%1,1; 2,4; 3,7
 recording = []; 
 % keep experiment with max n trials (= most likely not aborted error or end
 % % shank mapping) QQ change this in the future 

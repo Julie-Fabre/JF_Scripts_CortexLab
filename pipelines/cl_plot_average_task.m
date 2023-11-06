@@ -9,8 +9,8 @@ figure();
 %clf;
 cl_plottingSettings;
 
-contra = 0;
-center = 0 ;
+contra = 1;
+center = 0;
 if passive
     idx = 5;
      go1_contra = squeeze(task_data_here.psth{idx}(:, :, 2, :));
@@ -53,17 +53,20 @@ end
 end
 
 
+
+
 % zscore_psth(1,:) = (task_data.psth{idx}(:,1,1,:) - nanmean(task_data.psth(:,1:50),2)) ./ ...
 %     nanstd(task_data.psth(:,1:50),[],2);
 region_max = [1, 1, 1, 1, 1, 1, 1];
 region_smooth = [5, 1, 1, 1, 1, 1, 1];
-region_lims = [1,1,1,1,1,1];
+region_lims = [6, 15, 15,1,1,1];
 plot_regions = [1, 2, 3];
 %region_clim_string = {'z-score (clim saturated)', 'z-score', 'z-score', 'z-score', 'z-score', 'z-score', 'z-score'};
 figure(1);
 clf;
 figure(2);
 clf;
+passive=1;
 for thisRegion = 1:size(plot_regions, 2)
     iRegion = plot_regions(thisRegion);
 
@@ -161,7 +164,7 @@ for thisRegion = 1:size(plot_regions, 2)
     xlabel('time from stim onset (s)')
     ylabel('unit # (sorted on 1/2 trials)')
     end
-    %title('Go 1')
+    title('Go 1')
     makepretty;
     clim([-region_lims(iRegion),region_lims(iRegion)] )
 
@@ -177,7 +180,7 @@ for thisRegion = 1:size(plot_regions, 2)
     %c.Label.String = (region_clim_string{iRegion});
     colormap(brewermap([], '*BrBG'));
     
-    %title('Go 2')
+    title('Go 2')
     makepretty;
     clim([-region_lims(iRegion),region_lims(iRegion)] )
     
@@ -192,7 +195,7 @@ for thisRegion = 1:size(plot_regions, 2)
     %c.Label.String = (region_clim_string{iRegion});
     colormap(brewermap([], '*BrBG'));
     
-    %title('No go')
+    title('No go')
     makepretty;
     clim([-region_lims(iRegion),region_lims(iRegion)] )
     
@@ -205,9 +208,9 @@ for thisRegion = 1:size(plot_regions, 2)
     %c.Label.String = (region_clim_string{iRegion});
     colormap(brewermap([], '*BrBG'));
    
-    %title('No go -like')
+    title('No go -like')
     makepretty;
-    clim([-region_lims(iRegion),region_lims(iRegion)] )
+    %clim([-region_lims(iRegion),region_lims(iRegion)] )
 
     subplot(size(plot_regions, 2), 7, (7*(thisRegion -1))+5)
     
@@ -217,9 +220,9 @@ for thisRegion = 1:size(plot_regions, 2)
     %c.Label.String = (region_clim_string{iRegion});
     colormap(brewermap([], '*BrBG'));
     
-    %title('No go -like')
+    title('No go -like')
     makepretty;
-    clim([-region_lims(iRegion),region_lims(iRegion)] )
+    %clim([-region_lims(iRegion),region_lims(iRegion)] )
 
     subplot(size(plot_regions, 2), 7, (7*(thisRegion -1))+6)
     
@@ -229,9 +232,9 @@ for thisRegion = 1:size(plot_regions, 2)
     %c.Label.String = (region_clim_string{iRegion});
     colormap(brewermap([], '*BrBG'));
     
-    %title('No go -like')
+    title('No go -like')
     makepretty;
-    clim([-region_lims(iRegion),region_lims(iRegion)] )
+    %clim([-region_lims(iRegion),region_lims(iRegion)] )
 
     subplot(size(plot_regions, 2), 7, (7*(thisRegion -1))+7)
     
@@ -241,9 +244,9 @@ for thisRegion = 1:size(plot_regions, 2)
     %c.Label.String = (region_clim_string{iRegion});
     colormap(brewermap([], '*BrBG'));
     
-    %title('Go -like')
+    title('Go -like')
     makepretty;
-    clim([-region_lims(iRegion),region_lims(iRegion)] )
+    %clim([-region_lims(iRegion),region_lims(iRegion)] )
 
     end
 end
@@ -264,7 +267,7 @@ title('Go1');
 hold on;
 plot(task_data_here.t, nanmean(this_image_smooth_go1(keep_these2, :)), 'Color', thisColor);
 hold on;
-plotshaded(task_data_here.t, [-nanstd(this_image_smooth_go1(keep_these2, :)) ./ sqrt(sum(keep_these2)) + nanmean(this_image_smooth_go1(keep_these2, :)); ...
+plotshaded(task_data_here.t_det, [-nanstd(this_image_smooth_go1(keep_these2, :)) ./ sqrt(sum(keep_these2)) + nanmean(this_image_smooth_go1(keep_these2, :)); ...
     nanstd(this_image_smooth_go1(keep_these2, :)) ./ sqrt(sum(keep_these2)) + nanmean(this_image_smooth_go1(keep_these2, :))], thisColor);
 legend('Go no go -trained', '', 'pre-learning', '', 'Go go go trained')
 makepretty;
@@ -276,7 +279,7 @@ title('Go2');
 hold on;
 plot(task_data_here.t, nanmean(this_image_smooth_go2(keep_these2, :))*num, 'Color', thisColor);
 hold on;
-plotshaded(task_data_here.t, [-nanstd(this_image_smooth_go2(keep_these2, :)) ./ sqrt(sum(keep_these2)) + nanmean(this_image_smooth_go2(keep_these2, :)) * num; ...
+plotshaded(task_data_here.t_det, [-nanstd(this_image_smooth_go2(keep_these2, :)) ./ sqrt(sum(keep_these2)) + nanmean(this_image_smooth_go2(keep_these2, :)) * num; ...
     nanstd(this_image_smooth_go2(keep_these2, :)) ./ sqrt(sum(keep_these2)) + nanmean(this_image_smooth_go2(keep_these2, :)) * num], thisColor);
 legend('Go no go -trained', '', 'pre-learning', '', 'Go go go trained')
 makepretty;
@@ -288,7 +291,7 @@ title('No Go');
 hold on;
 plot(task_data_here.t, nanmean(this_image_smooth_noGo(keep_these2, :))*num, 'Color', thisColor);
 hold on;
-plotshaded(task_data_here.t, [-nanstd(this_image_smooth_noGo(keep_these2, :)) ./ sqrt(sum(keep_these2)) + nanmean(this_image_smooth_noGo(keep_these2, :)) * num; ...
+plotshaded(task_data_here.t_det, [-nanstd(this_image_smooth_noGo(keep_these2, :)) ./ sqrt(sum(keep_these2)) + nanmean(this_image_smooth_noGo(keep_these2, :)) * num; ...
     nanstd(this_image_smooth_noGo(keep_these2, :)) ./ sqrt(sum(keep_these2)) + nanmean(this_image_smooth_noGo(keep_these2, :)) * num], thisColor);
 legend('Go no go -trained', '', 'pre-learning', '', 'Go go go trained')
 makepretty;

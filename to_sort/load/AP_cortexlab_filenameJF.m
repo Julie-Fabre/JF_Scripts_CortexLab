@@ -368,7 +368,7 @@ switch file
             [filename,file_exists] = check_locations(filepattern,server_location);
          
             if ~file_exists
-        filepattern = [animal filesep date filesep 'ephys'  filesep 'kilosort2' filesep site_dir filesep recording_dir];
+        filepattern = [animal filesep date filesep 'ephys'  filesep 'kilosort2' site_dir filesep recording_dir];
         [filename,file_exists] = check_locations(filepattern,server_location);
             end
          if ~file_exists
