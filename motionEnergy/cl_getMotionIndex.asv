@@ -1,4 +1,4 @@
-function [motion_energy, motion_energy_std, cam_align_diff_avg, n_trials,  motion_energy_frame_full] = cl_getMotionIndex(camera_location, camera_t, surround_frames, box_crop, surround_t, use_align, plot_me, use_t_plotting)
+function [motion_energy, motion_energy_std, cam_align_diff_avg, n_trials] = cl_getMotionIndex(camera_location, camera_t, surround_frames, box_crop, surround_t, use_align, plot_me, use_t_plotting)
     % Initialize video reader, get average and average difference
     vr = VideoReader(camera_location);
     
@@ -38,7 +38,7 @@ function [motion_energy, motion_energy_std, cam_align_diff_avg, n_trials,  motio
             use_t_store_idx = surround_t >= use_t_storing(1) & surround_t <= use_t_storing(2);
    
             motion_energy_frame(:,curr_align) = squeeze(nansum(nansum(abs(curr_clip_diff(:, :, use_t_store_idx(2:end))),1),2));
-            motion_energy_frame_full(:,curr_align) = squeeze(nansum(nansum(abs(curr_clip_diff(:, :, :)),1),2));
+            motion_energy_frame_full(:,curr_align) = squeeze(nansum(nansum(abs(curr_clip_diff(:, :, use_t_store_idx(2:end))),1),2));
             %AP_print_progress_fraction(curr_align, length(use_align));
         end
     end

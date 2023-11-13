@@ -3,11 +3,13 @@ clear all;
 keepVis = 0;
 keepVis2 = 0;
 for ppp = 1:3
-    close all;
+    %close all;
     for rrr = 1:3
-        close all;
-        passiveYes=0;
-        if keepVis == 0 && passiveYes 
+        %close all;
+        passiveYes = 0;
+        if keepVis == 0 && passiveYes
+
+            %% passive
             passive = 1;
             goNogo = 0;
             cl_plot_dprime;
@@ -61,35 +63,38 @@ for ppp = 1:3
             save('d_prime_session_fraction_passive.mat', 'd_prime_session_fraction')
             save('d_prime_session_fraction_passive_median.mat', 'd_prime_session_fraction_median')
         end
+
+        %% gogogo
         passive = 0;
         goNogo = 1;
         cl_plot_dprime;
         %lmeTable.stimulus
         iRegion = rrr;
         iPair = ppp;
-        
-            lmeTable = table;
-            %for iRegion = 1%:3
-            kp = find(abs(d_prime{iRegion}(:, iPair)) ~= 0 & ~isinf(abs(d_prime{iRegion}(:, iPair))) & ~isnan(abs(d_prime{iRegion}(:, iPair))));
-            uu = unique(d_prime_session_num{iRegion});
-            uu = uu(~isnan(unique(d_prime_session_num{iRegion}(:, iPair))));
-            mouseys = [d_prime_animal_num{iRegion, ...
-                uu(~isnan(unique(d_prime_session_num{iRegion}(:, iPair))), 1) ...
-                }];
 
-            lmeTable.dprime = d_prime{iRegion}(kp, iPair);
-            lmeTable.sessionType = ones(size(d_prime{iRegion}(kp, iPair), 1), 1);
-            lmeTable.session = d_prime_session_num{iRegion}(kp, iPair);
-            mousee = d_prime_session_num{iRegion}(kp, iPair);
-            for iS = 1:size(uu, 1)
-                mousee(mousee == uu(iS)) = mouseys(iS);
-            end
-            lmeTable.mouse = mousee;
-            lmeTable.pss = pss{iRegion}(kp, iPair);
-            lmeTable.tempDur = tempDur{iRegion}(kp, iPair);
-            lmeTable.propISI = propISI{iRegion}(kp, iPair);
-            %end
-       
+        lmeTable = table;
+        %for iRegion = 1%:3
+        kp = find(abs(d_prime{iRegion}(:, iPair)) ~= 0 & ~isinf(abs(d_prime{iRegion}(:, iPair))) & ~isnan(abs(d_prime{iRegion}(:, iPair))));
+        uu = unique(d_prime_session_num{iRegion});
+        uu = uu(~isnan(unique(d_prime_session_num{iRegion}(:, iPair))));
+        mouseys = [d_prime_animal_num{iRegion, ...
+            uu(~isnan(unique(d_prime_session_num{iRegion}(:, iPair))), 1) ...
+            }];
+
+        lmeTable.dprime = d_prime{iRegion}(kp, iPair);
+        lmeTable.sessionType = ones(size(d_prime{iRegion}(kp, iPair), 1), 1);
+        lmeTable.session = d_prime_session_num{iRegion}(kp, iPair);
+        mousee = d_prime_session_num{iRegion}(kp, iPair);
+        for iS = 1:size(uu, 1)
+            mousee(mousee == uu(iS)) = mouseys(iS);
+        end
+        lmeTable.mouse = mousee;
+        lmeTable.pss = pss{iRegion}(kp, iPair);
+        lmeTable.tempDur = tempDur{iRegion}(kp, iPair);
+        lmeTable.propISI = propISI{iRegion}(kp, iPair);
+        lmeTable.fr = fr{iRegion}(kp, iPair);
+        %end
+
         %iRegion = rrr;
         % if ppp ==1
         diff_go_nogo = table;
@@ -101,34 +106,7 @@ for ppp = 1:3
         %diff_go_nogo
         figure();
         violinplot(diff_go_nogo.value, diff_go_nogo.region_num)
-      %  lme_diff = fitlme(diff_go_nogo(diff_go_nogo.region_num == 1 | diff_go_nogo.region_num == 2, 1:3), 'value ~ region_num  + (1|session)');
-      %  lme_diff = fitlme(diff_go_nogo(diff_go_nogo.region_num == 1 | diff_go_nogo.region_num == 3, 1:3), 'value ~ region_num  + (1|session)');
-      %  lme_diff = fitlme(diff_go_nogo(diff_go_nogo.region_num == 2 | diff_go_nogo.region_num == 3, 1:3), 'value ~ region_num  + (1|session)');
 
-       % lme_diff = fitlme(diff_go_nogo, 'value ~ region_num  + (1|session)')
-
-        %  [~, ~, stats] = fixedEffects(lme_diff);
-        % results = multcompare(stats, 'region_num');
-        % disp(results)
-        %
-        % % Define the contrasts for the pairwise comparisons
-        % contrastMatrix = [1 -1 0; 1 0 -1; 0 -1 1];
-        %
-        % % Perform the pairwise comparisons
-        % p= coefTest(lme_diff, contrastMatrix);
-        %
-        % % Display the results
-        % disp(C)
-
-        % else
-        %      diff_go_nogo2 = table;
-        %  diff_go_nogo2.value = [d_prime{1}(:,3) - d_prime{1}(:,1); ...
-        %      d_prime{2}(:,3) - d_prime{2}(:,1);...
-        %      d_prime{3}(:,3) - d_prime{3}(:,1)];
-        %  diff_go_nogo2.session = [d_prime_session_num{1,1}; d_prime_session_num{2,1}; d_prime_session_num{3,1}];
-        %   diff_go_nogo2.region_num = [ones(size(d_prime{1}(:,3),1),1); ones(size(d_prime{2}(:,3),1),1).*2;ones(size(d_prime{3}(:,3),1),1).*3];
-        %  diff_go_nogo= [diff_go_nogo; diff_go_nogo2];
-        % end
 
         % plot d prime
         figure(100);
@@ -181,6 +159,7 @@ for ppp = 1:3
         save('d_prime_session_fraction_gonogo.mat', 'd_prime_session_fraction')
         save('d_prime_session_fraction_gonogo_median.mat', 'd_prime_session_fraction_median')
 
+        %% go no go
         passive = 0;
         goNogo = 0;
         cl_plot_dprime;
@@ -252,13 +231,14 @@ for ppp = 1:3
         t2.pss = pss{iRegion}(kp, iPair);
         t2.tempDur = tempDur{iRegion}(kp, iPair);
         t2.propISI = propISI{iRegion}(kp, iPair);
+        t2.fr = fr{iRegion}(kp, iPair);
 
         lmeTable = [lmeTable; t2];
 
         %% linear mixed -effects model
         %lme = fitlme(tbl,'CityMPG~Horsepower+(1|EngineType)+(Horsepower-1|EngineType)')
         lme = fitglme(lmeTable, 'dprime ~ sessionType  + (1|mouse) + (1|mouse:session)') %what if I add 1|neuron?
-         lme = fitglme(lmeTable, 'dprime ~ sessionType  + (1|neuron) cd(1|mouse) + (1|mouse:session)')
+        %         lme = fitglme(lmeTable, 'dprime ~ sessionType  + (1|neuron) cd(1|mouse) + (1|mouse:session)')
         %lme = fitglme(lmeTable, 'dprime ~ sessionType  +  (1|mouse)')
         %lme = fitglme(lmeTable, 'dprime ~ sessionType  +  (1|session)')
 
@@ -271,170 +251,78 @@ for ppp = 1:3
         xticks([1, 2])
         xticklabels({'go/no go', 'go go go'})
         xlabel('task')
-        
-        figure('name', ['region' num2str(rrr)]);
-        subplot(1,3,1)
+
+        figure('name', ['region', num2str(rrr)]);
+        subplot(1, 4, 1)
         scatter(lmeTable.tempDur, lmeTable.pss, 4, 'filled')
         xlabel('peak to trough duration (us)')
         ylabel('post spike suppression (ms)')
 
-        subplot(1,3,2)
+        subplot(1, 4, 4)
+        stem3(lmeTable.tempDur, lmeTable.pss, lmeTable.fr)
+        xlabel('peak to trough duration (us)')
+        ylabel('post spike suppression (ms)')
+        zlabel('firing rate')
+
+        subplot(1, 4, 2)
         scatter(lmeTable.tempDur, lmeTable.propISI, 4, 'filled')
-         xlabel('peak to trough duration (us)')
+        xlabel('peak to trough duration (us)')
         ylabel('prop. ISI > 2s')
 
-        subplot(1,3,3)
+        subplot(1, 4, 3)
         scatter(lmeTable.propISI, lmeTable.pss, 4, 'filled')
-         xlabel('prop. ISI > 2s')
+        xlabel('prop. ISI > 2s')
         ylabel('post spike suppression (ms)')
 
         prettify_plot;
 
         figure(301)
         subplot(3, 3, ppp+3*(rrr - 1))
-        if rrr ==1 
-            % msns 
-        violinplot(lmeTable.dprime(lmeTable.tempDur >= 500 & lmeTable.pss <= 20),...
-            lmeTable.sessionType((lmeTable.tempDur >= 500 & lmeTable.pss <= 20)));
+        if rrr == 1
+            % msns
+            violinplot(lmeTable.dprime(lmeTable.tempDur >= 500 & lmeTable.pss <= 20), ...
+                lmeTable.sessionType((lmeTable.tempDur >= 500 & lmeTable.pss <= 20)));
 
-        %fsi
+            %fsi
 
-        %tans
+            %tans
 
         else
             violinplot(lmeTable.dprime, lmeTable.sessionType);
-       
-            end
+
+        end
         ylim([0, 4])
         ylabel('dprime(nogo - go2)')
         xticks([1, 2])
         xticklabels({'go/no go', 'go go go'})
         xlabel('task')
-        
-        
-        if rrr ==1 
-             figure(302)
-        subplot(3, 3,(ppp-1)*3+1)
-            % msns 
-        violinplot(lmeTable.dprime(lmeTable.tempDur >= 500 & lmeTable.pss <= 20),...
-            lmeTable.sessionType((lmeTable.tempDur >= 500 & lmeTable.pss <= 20)));
-title('MSNs')
-ylim([0, 4.1])
-        %fsi
-        subplot(3, 3,(ppp-1)*3+2)
-            % msns 
-        violinplot(lmeTable.dprime(lmeTable.tempDur < 500),...
-            lmeTable.sessionType((lmeTable.tempDur < 500 )));
-title('FSIs')
-ylim([0, 4.1])
-        %tans
-        subplot(3, 3,(ppp-1)*3+3)
-            % msns 
-        violinplot(lmeTable.dprime(lmeTable.tempDur >= 500 & lmeTable.pss > 20),...
-            lmeTable.sessionType((lmeTable.tempDur >= 500 & lmeTable.pss > 20)));
-title('TANs')
-ylim([0, 4.1])
+
+
+        if rrr == 1
+            figure(302)
+            subplot(3, 3, (ppp - 1)*3+1)
+            % msns
+            violinplot(lmeTable.dprime(lmeTable.tempDur >= 500 & lmeTable.pss <= 20), ...
+                lmeTable.sessionType((lmeTable.tempDur >= 500 & lmeTable.pss <= 20)));
+            title('MSNs')
+            ylim([0, 4.1])
+            %fsi
+            subplot(3, 3, (ppp - 1)*3+2)
+            % msns
+            violinplot(lmeTable.dprime(lmeTable.tempDur < 500), ...
+                lmeTable.sessionType((lmeTable.tempDur < 500)));
+            title('FSIs')
+            ylim([0, 4.1])
+            %tans
+            subplot(3, 3, (ppp - 1)*3+3)
+            % msns
+            violinplot(lmeTable.dprime(lmeTable.tempDur >= 500 & lmeTable.pss > 20), ...
+                lmeTable.sessionType((lmeTable.tempDur >= 500 & lmeTable.pss > 20)));
+            title('TANs')
+            ylim([0, 4.1])
         end
 
         %%
 
     end
 end
-
-% %% fraction
-% fraction_passive = load('d_prime_session_fraction_passive.mat');
-% fraction_gonogo = load('d_prime_session_fraction_gonogo.mat');
-% fraction_gogogo = load('d_prime_session_fraction_gogogo.mat');
-% %(iRegion,iSession, iPair)
-% cols = lines(3);
-% figure();
-% for iRegion = 1:3
-%     subplot(1, 3, iRegion);
-%     hold on;
-%     for iPair = 1:3
-%         swarmchart(ones(size(fraction_passive.d_prime_session_fraction, 2), 1)+1+((iPair) * 3), ...
-%             fraction_passive.d_prime_session_fraction(iRegion, :, iPair), 20, cols(1, :));
-%         swarmchart(ones(size(fraction_gonogo.d_prime_session_fraction, 2), 1).*3+1+((iPair) * 3), ...
-%             fraction_gonogo.d_prime_session_fraction(iRegion, :, iPair), 20, cols(3, :));
-%         swarmchart(ones(size(fraction_gogogo.d_prime_session_fraction, 2), 1).*2+1+((iPair) * 3), ...
-%             fraction_gogogo.d_prime_session_fraction(iRegion, :, iPair), 20, cols(2, :));
-%         ylim([-0.1, 1])
-%     end
-% end
-% 
-% figure();
-% for iRegion = 1:3
-%     subplot(1, 3, iRegion);
-%     hold on;
-% 
-%     bar([nanmean(fraction_passive.d_prime_session_fraction(iRegion, :, 1)), ...
-%         nanmean(fraction_gogogo.d_prime_session_fraction(iRegion, :, 1)), nanmean(fraction_gonogo.d_prime_session_fraction(iRegion, :, 1)); ...
-%         nanmean(fraction_passive.d_prime_session_fraction(iRegion, :, 2)), nanmean(fraction_gogogo.d_prime_session_fraction(iRegion, :, 2)), ...
-%         nanmean(fraction_gonogo.d_prime_session_fraction(iRegion, :, 2)); nanmean(fraction_passive.d_prime_session_fraction(iRegion, :, 3)), ...
-%         nanmean(fraction_gogogo.d_prime_session_fraction(iRegion, :, 3)), nanmean(fraction_gonogo.d_prime_session_fraction(iRegion, :, 3))])
-%     ylim([0, 0.45])
-% end
-% subplot(1, 3, 1);
-% ylabel(['mean % cells', newline, 'd-prime > 0.5 per session'])
-% xlabel('Pair # ')
-% prettify_plot
-% 
-% for iRegion = 1:3
-%     for iPair = 1:3
-%         ranksum(fraction_passive.d_prime_session_fraction(iRegion, :, iPair), fraction_gogogo.d_prime_session_fraction(iRegion, :, iPair))
-%         ranksum(fraction_passive.d_prime_session_fraction(iRegion, :, iPair), fraction_gonogo.d_prime_session_fraction(iRegion, :, iPair))
-%         ranksum(fraction_gogogo.d_prime_session_fraction(iRegion, :, iPair), fraction_gonogo.d_prime_session_fraction(iRegion, :, iPair))
-% 
-%         ttest2(fraction_passive.d_prime_session_fraction(iRegion, :, iPair), fraction_gogogo.d_prime_session_fraction(iRegion, :, iPair))
-%         ttest2(fraction_passive.d_prime_session_fraction(iRegion, :, iPair), fraction_gonogo.d_prime_session_fraction(iRegion, :, iPair))
-%         ttest2(fraction_gogogo.d_prime_session_fraction(iRegion, :, iPair), fraction_gonogo.d_prime_session_fraction(iRegion, :, iPair))
-% 
-% 
-%     end
-% end
-% 
-% %% median dprime
-% fraction_passive = load('d_prime_session_fraction_passive_median.mat');
-% fraction_gonogo = load('d_prime_session_fraction_gonogo_median.mat');
-% fraction_gogogo = load('d_prime_session_fraction_gogogo_median.mat');
-% %(iRegion,iSession, iPair)
-% cols = lines(3);
-% figure();
-% for iRegion = 1:3
-%     subplot(1, 3, iRegion);
-%     hold on;
-%     for iPair = 1:3
-%         swarmchart(ones(size(fraction_passive.d_prime_session_fraction_median, 2), 1)+1+((iPair) * 3), ...
-%             fraction_passive.d_prime_session_fraction_median(iRegion, :, iPair), 20, cols(1, :));
-%         swarmchart(ones(size(fraction_gonogo.d_prime_session_fraction_median, 2), 1).*3+1+((iPair) * 3), ...
-%             fraction_gonogo.d_prime_session_fraction_median(iRegion, :, iPair), 20, cols(3, :));
-%         swarmchart(ones(size(fraction_gogogo.d_prime_session_fraction_median, 2), 1).*2+1+((iPair) * 3), ...
-%             fraction_gogogo.d_prime_session_fraction_median(iRegion, :, iPair), 20, cols(2, :));
-%         %ylim([-0.1, 0.5])
-%     end
-% end
-% 
-% figure();
-% for iRegion = 1:3
-%     subplot(1, 3, iRegion);
-%     hold on;
-% 
-%     bar([nanmean(fraction_passive.d_prime_session_fraction(iRegion, :, 1)), ...
-%         nanmean(fraction_gogogo.d_prime_session_fraction(iRegion, :, 1)), nanmean(fraction_gonogo.d_prime_session_fraction(iRegion, :, 1)); ...
-%         nanmean(fraction_passive.d_prime_session_fraction(iRegion, :, 2)), nanmean(fraction_gogogo.d_prime_session_fraction(iRegion, :, 2)), ...
-%         nanmean(fraction_gonogo.d_prime_session_fraction(iRegion, :, 2)); nanmean(fraction_passive.d_prime_session_fraction(iRegion, :, 3)), ...
-%         nanmean(fraction_gogogo.d_prime_session_fraction(iRegion, :, 3)), nanmean(fraction_gonogo.d_prime_session_fraction(iRegion, :, 3))])
-%     ylim([0, 0.1])
-% end
-% subplot(1, 3, 1);
-% ylabel(['mean % cells', newline, 'd-prime > 0.5 per session'])
-% xlabel('Pair # ')
-% prettify_plot
-% 
-% for iRegion = 1:3
-%     for iPair = 1:3
-%         ranksum(fraction_passive.d_prime_session_fraction(iRegion, :, iPair), fraction_gogogo.d_prime_session_fraction(iRegion, :, iPair))
-%         ranksum(fraction_passive.d_prime_session_fraction(iRegion, :, iPair), fraction_gonogo.d_prime_session_fraction(iRegion, :, iPair))
-%         ranksum(fraction_gogogo.d_prime_session_fraction(iRegion, :, iPair), fraction_gonogo.d_prime_session_fraction(iRegion, :, iPair))
-%     end
-% end

@@ -23,7 +23,7 @@ if ispc % eww.
     % atlasBrainRegLocation = '/home/julie/.brainglobe/allen_mouse_25um_v1.2';
     %
     brainsawPath = 'U:\';
-    allenAtlasPath = 'C:\Users\julie\Dropbox\Atlas\';
+    allenAtlasPath = 'C:\Users\julie\Dropbox\Atlas\allenCCF';
     % regParamsPath = '/home/julie/Dropbox/MATLAB/onPaths/JF_Scripts_CortexLab/histology/';
     tempPath = 'C:\temp\';
     JF_Scripts_CortexLabPath = 'C:\Users\julie\Documents\MATLAB\JF_Scripts_Cortexlab\';
@@ -52,7 +52,7 @@ else
     atlasBrainRegLocation = '/home/julie/.brainglobe/allen_mouse_25um_v1.2';
     csvPath = '/home/julie/Dropbox/PhD_summary/';
     brainsawPath = '/home/netshare/znas-brainsaw/';
-    allenAtlasPath = '/home/julie/Dropbox/Atlas/';
+    allenAtlasPath = '/home/julie/Dropbox/Atlas/allenCCF';
     regParamsPath = '/home/julie/Dropbox/MATLAB/onPaths/JF_Scripts_CortexLab/histology/';
     tempPath = '/home/julie/temp/';
     JF_Scripts_CortexLabPath = '/home/julie/Dropbox/MATLAB/onPaths/JF_Scripts_CortexLab/';

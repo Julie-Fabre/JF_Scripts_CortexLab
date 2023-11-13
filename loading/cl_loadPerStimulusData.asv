@@ -387,32 +387,31 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
                 passive_data_per_cond.trial_types{experiment_type, iRecording} = trial_conditions;
                 passive_data_per_cond.no_move_trials{experiment_type, iRecording} = no_move_trials;
  raster_window = [-0.5, 1];
-        psth_bin_size = 0.01;           
+                    psth_bin_size = 0.01;
+                    camera_location = facecam_fn;
+                    camera_t = facecam_t;
+                    framerate = 30;
+                    surround_t = raster_window;
+                    use_align = stimOn_times;
+                    surround_frames = diff(raster_window) * framerate;
 
-% try
-%      psth_bin_size = 0.01;
-%                     camera_location = facecam_fn;
-%                     camera_t = facecam_t;
-%                     framerate = 30;
-%                     surround_t = raster_window;
-%                     use_align = stimOn_times;
-%                     surround_frames = diff(raster_window) * framerate;
-% 
-%                     use_t_plotting = '';
-%                     plot_me = false;
-%                     box_crop = [];
-% 
-%                     [motion_energy, motion_energy_std, cam_align_diff_avg, n_trials,  motion_energy_frame_full] = cl_getMotionIndex(camera_location,...
-%                         camera_t, surround_frames, box_crop, surround_t, use_align, plot_me, use_t_plotting);
-% 
-%                     session_data.motion_energy{iRecording} = motion_energy_frame_full;
-%                     session_data.trial_type{iRecording} = trial_conditions;
-%                     session_data.session_num = iRecording;
-% catch
-%      session_data.motion_energy{iRecording} =NaN;
-%                     session_data.trial_type{iRecording} = NaN;
-%                     session_data.session_num = iRecording;
-% end
+                    use_t_plotting = '';
+                    plot_me = false;
+                    box_crop = [];
+
+try
+
+                    [motion_energy, motion_energy_std, cam_align_diff_avg, n_trials,  motion_energy_frame_full] = cl_getMotionIndex(camera_location,...
+                        camera_t, surround_frames, box_crop, surround_t, use_align, plot_me, use_t_plotting);
+
+                    session_data.motion_energy{iRecording} = motion_energy_frame_full;
+                    session_data.trial_type{iRecording} = trial_conditions;
+                    session_data.session_num = iRecording;
+catch
+     session_data.motion_energy{iRecording} = motion_energy_frame_full;
+                    session_data.trial_type{iRecording} = trial_conditions;
+                    session_data.session_num = iRecording;
+end
 
 
 
@@ -447,25 +446,6 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
                         pvals_per_cond(iCond) = signrank(nanmean(curr_raster(logical(trial_cond_idx_single), 40:50), 2),...
                             nanmean(curr_raster(logical(trial_cond_idx_single), 55:65), 2));
                          passive_data_per_cond.pvalue{experiment_type}(iUnit + unitCount, iCond) = pvals_per_cond(iCond);
-
-
-                         pre_activity = nanmean(curr_raster(logical(trial_cond_idx_single), 40:50), 2);
-                post_activity = nanmean(curr_raster(logical(trial_cond_idx_single), 55:65), 2);
-                all_activity = [pre_activity; post_activity];
-                shuffling_idx = randi(size(all_activity,1),1000);
-                shuffled_diffs = arrayfun(@(x) nanmean(all_activity(shuffling_idx(1:500,x))...
-                    - all_activity(shuffling_idx(501:1000,x))), 1:1000);
-                real_diff = nanmean(post_activity - pre_activity);
-                pctile_2 = prctile(shuffled_diffs, 95);
-                pctile_1 = prctile(shuffled_diffs, 5);
-
-                passive_data_per_cond.pvalue_shuffled_005_per_cond{experiment_type}(iUnit+unitCount) = ...
-                   real_diff >= pctile_2 || real_diff <= pctile_1;
-
-                 passive_data_per_cond.pvalue_shuffled_0025_per_cond{experiment_type}(iUnit+unitCount) = ...
-                   real_diff >= prctile(shuffled_diffs, 97.5) || real_diff <= prctile(shuffled_diffs, 2.5);
-
-
                     end
                        %responsive cell?  shuffle pre/post labels 
 
