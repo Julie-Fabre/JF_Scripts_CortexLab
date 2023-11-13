@@ -2,17 +2,17 @@
 %% cl_dprime_summarize
 
 % parameters
-keepVis = 1;
+keepVis = 0;
 keepUnits = [1, 2]; % 1:good, 2:mua, 3:non-somatic, 4:noise
 plotMe = false;
 plotRegions = [1,2,3];
 
 % initialize variables
-d_prime = cell(3, 1);
-d_prime_session_num = cell(3, 1);
-d_prime_animal_num = cell(3, 1);
-d_prime_session_fraction = cell(3, 1);
-d_prime_session_faction_median = cell(3, 1);
+vis_resp = cell(3, 1);
+vis_resp_session_num = cell(3, 1);
+vis_resp_animal_num = cell(3, 1);
+vis_resp_session_fraction = cell(3, 1);
+vis_resp_session_faction_median = cell(3, 1);
 
 % run loop
 for iTask = 1:3
@@ -28,8 +28,8 @@ for iTask = 1:3
 
     end
 
-    [d_prime{iTask}, d_prime_session_num{iTask}, d_prime_animal_num{iTask}, d_prime_session_fraction{iTask}]...
-        = cl_dprime(task_data, idx, keepVis, keepUnits, plotRegions, plotMe);
+    [vis_resp{iTask}, vis_resp_session_num{iTask}, vis_resp_animal_num{iTask}, vis_resp_session_fraction{iTask}]...
+        = cl_visResp(task_data, idx, keepVis, keepUnits, plotRegions, plotMe);
 end
 
 % plot overlaid histograms
@@ -38,14 +38,14 @@ figure();
 for iRegion = 1:3
     for iPair = 1:3
         for iTask = 3:-1:1
-            if iTask == 1 && (iRegion == 2 || iRegion == 3)
-                continue;
-            end
+            %if iTask == 1 && (iRegion == 2 || iRegion == 3)
+            %    continue;
+            %end
             subplot(3, size(plot_regions, 2), iPair+(iRegion - 1)*(size(plot_regions, 2)));
             hold on;
-            kp = find(abs(d_prime{iTask}{iRegion}(:, iPair)) ~= 0 & ~isinf(abs(d_prime{iTask}{iRegion}(:, iPair))));
+            kp = find(abs(vis_resp{iTask}{iRegion}(:, iPair)) ~= 0 & ~isinf(abs(vis_resp{iTask}{iRegion}(:, iPair))));
 
-            histogram(d_prime{iTask}{iRegion}(kp, iPair), 0:0.05:4, 'Normalization', 'probability',...
+            histogram(vis_resp{iTask}{iRegion}(kp, iPair), 0:0.05:4, 'Normalization', 'probability',...
                 'FaceColor', cols(iTask,:), 'EdgeColor', cols(iTask,:), 'FaceAlpha', 0.1);
             xlabel('d-prime')
             ylabel('# of neurons')
@@ -63,33 +63,33 @@ figure();
 for iPair = 1:3
     for iRegion = 1:3
                 subplot(3, 3, iPair+(iRegion- 1)*3);
-                num_recs = size(unique(d_prime_session_num{iTask}{iRegion}(:, 1)), 1);
+                num_recs = size(unique(vis_resp_session_num{iTask}{iRegion}(:, 1)), 1);
                 %theseColors = [lines(num_recs)];
                 
                 
                 iTask = 2;
-                kp1 = find(abs(d_prime{iTask}{iRegion}(:, iPair)) ~= 0 & ~isinf(abs(d_prime{iTask}{iRegion}(:, 1))) & ~isnan(abs(d_prime{iTask}{iRegion}(:, 1))));
-                nums1 = d_prime_session_num{iTask}{iRegion}(kp1,1);
+                kp1 = find(abs(vis_resp{iTask}{iRegion}(:, iPair)) ~= 0 & ~isinf(abs(vis_resp{iTask}{iRegion}(:, 1))) & ~isnan(abs(vis_resp{iTask}{iRegion}(:, 1))));
+                nums1 = vis_resp_session_num{iTask}{iRegion}(kp1,1);
                 [~, ~, ic] = unique(nums1, 'stable');
                 nums_u1 = ic';
                 
                 iTask = 3;
-                kp2 = find(abs(d_prime{iTask}{iRegion}(:, iPair)) ~= 0 & ~isinf(abs(d_prime{iTask}{iRegion}(:, 1))) & ~isnan(abs(d_prime{iTask}{iRegion}(:, 1))));
-                nums2 = d_prime_session_num{iTask}{iRegion}(kp2,1);
+                kp2 = find(abs(vis_resp{iTask}{iRegion}(:, iPair)) ~= 0 & ~isinf(abs(vis_resp{iTask}{iRegion}(:, 1))) & ~isnan(abs(vis_resp{iTask}{iRegion}(:, 1))));
+                nums2 = vis_resp_session_num{iTask}{iRegion}(kp2,1);
                 [~, ~, ic] = unique(nums2, 'stable');
                 nums_u2 = ic';
 
                 theseColors = repelem(cols(2,:), length(unique(nums_u1)), 1);
                 theseColors = [theseColors; repelem(cols(3,:), length(unique(nums_u2)), 1)];
 
-                violinplot([d_prime{2}{iRegion}(kp1, iPair); d_prime{3}{iRegion}(kp2, iPair)], ...
+                violinplot([vis_resp{2}{iRegion}(kp1, iPair); vis_resp{3}{iRegion}(kp2, iPair)], ...
                     [nums_u1'; max(nums_u1)+nums_u2'], ...
                     'ViolinColor', theseColors);
                 ylim([0, 2.6])
 
-                uu = unique(d_prime_session_num{2}{iRegion});
-                mouseys = [d_prime_animal_num{2}{iRegion, ...
-                    uu(~isnan(unique(d_prime_session_num{2}{iRegion}(:, 1))), 1) ...
+                uu = unique(vis_resp_session_num{2}{iRegion});
+                mouseys = [vis_resp_animal_num{2}{iRegion, ...
+                    uu(~isnan(unique(vis_resp_session_num{2}{iRegion}(:, 1))), 1) ...
                     }];
                 mouseys_u = unique(mouseys);
                 cc =0;
@@ -99,9 +99,9 @@ for iPair = 1:3
                     cc = cc + length(idx_m);
                 end
                 
-                uu = unique(d_prime_session_num{3}{iRegion});
-                mouseys = [d_prime_animal_num{3}{iRegion, ...
-                    uu(~isnan(unique(d_prime_session_num{3}{iRegion}(:, 1))), 1) ...
+                uu = unique(vis_resp_session_num{3}{iRegion});
+                mouseys = [vis_resp_animal_num{3}{iRegion, ...
+                    uu(~isnan(unique(vis_resp_session_num{3}{iRegion}(:, 1))), 1) ...
                     }];
                 mouseys_u = unique(mouseys);
                 %cc =0;

@@ -38,24 +38,74 @@ figure();
 for iRegion = 1:3
     for iPair = 1:3
         for iTask = 3:-1:1
+            if iTask == 1 && (iRegion == 2 || iRegion == 3)
+                continue;
+            end
             subplot(3, size(plot_regions, 2), iPair+(iRegion - 1)*(size(plot_regions, 2)));
             hold on;
             kp = find(abs(d_prime{iTask}{iRegion}(:, iPair)) ~= 0 & ~isinf(abs(d_prime{iTask}{iRegion}(:, iPair))));
 
-            histogram(d_prime{iTask}{iRegion}(kp, iPair), 0:0.05:2, 'Normalization', 'probability',...
+            histogram(d_prime{iTask}{iRegion}(kp, iPair), 0:0.05:4, 'Normalization', 'probability',...
                 'FaceColor', cols(iTask,:), 'EdgeColor', cols(iTask,:), 'FaceAlpha', 0.1);
             xlabel('d-prime')
             ylabel('# of neurons')
             xlim([0, 2])
+            if iTask == 1 && iRegion == 1 && iPair == 1
+                legend({'gonogo', 'gogogo', 'naive'})
+            end
         end
     end
 end
-legend({'gonogo', 'gogogo', 'naive'})
 prettify_plot('YLimits', 'all')
 
-% plot histograms sorted by session and mouse (apris next to each other)
+% plot histograms sorted by session and mouse (pairs next to each other)
+figure();
+for iPair = 1:3
+    for iRegion = 1:3
+                subplot(3, 3, iPair+(iRegion- 1)*3);
+                num_recs = size(unique(d_prime_session_num{iTask}{iRegion}(:, 1)), 1);
+                %theseColors = [lines(num_recs)];
+                
+                
+                iTask = 2;
+                kp1 = find(abs(d_prime{iTask}{iRegion}(:, iPair)) ~= 0 & ~isinf(abs(d_prime{iTask}{iRegion}(:, 1))) & ~isnan(abs(d_prime{iTask}{iRegion}(:, 1))));
+                nums1 = d_prime_session_num{iTask}{iRegion}(kp1,1);
+                [~, ~, ic] = unique(nums1, 'stable');
+                nums_u1 = ic';
+                
+                iTask = 3;
+                kp2 = find(abs(d_prime{iTask}{iRegion}(:, iPair)) ~= 0 & ~isinf(abs(d_prime{iTask}{iRegion}(:, 1))) & ~isnan(abs(d_prime{iTask}{iRegion}(:, 1))));
+                nums2 = d_prime_session_num{iTask}{iRegion}(kp2,1);
+                [~, ~, ic] = unique(nums2, 'stable');
+                nums_u2 = ic';
 
-% plot histograms
+                theseColors = repelem(cols(2,:), length(nums_1), 1);
+                theseColors = repelem(cols(3,:), length(nums_2), 1);
+
+                violinplot([d_prime{2}{iRegion}(kp1, iPair); d_prime{3}{iRegion}(kp2, iPair)], ...
+                    [nums_u1'; max(nums_u1)+nums_u2'], ...
+                    'ViolinColor', theseColors);
+                ylim([0, 2.6])
+
+                uu = unique(d_prime_session_num{iTask}{iRegion});
+                mouseys = [d_prime_animal_num{iTask}{iRegion, ...
+                    uu(~isnan(unique(d_prime_session_num{iTask}{iRegion}(:, 1))), 1) ...
+                    }];
+                mouseys_u = unique(mouseys);
+                cc =0;
+                for iMousey = 1:size(mouseys_u,2)
+                    idx_m = find(mouseys == mouseys_u(iMousey));
+                    line([cc + 1, cc + length(idx_m)*3], [4, 4], 'Color', colsMice(mouseys_u(iMousey),:));
+                    cc = cc + length(idx_m)*3;
+                end
+                axis tight; 
 
 
-% plot
+    end
+end
+prettify_plot('YLimits', 'all')
+
+% plot histograms sorted by session and mouse (tasks next to each other)
+
+% plot histograms sorted by session and mouse (regions next to each other)
+

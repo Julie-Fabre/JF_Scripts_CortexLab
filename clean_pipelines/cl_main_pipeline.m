@@ -1,5 +1,7 @@
 %% passive
 
+% check where the snr and gpe stim resp come from -> partuicular regions?
+% subregions? animals? 
 
 %% task behavior 
 
