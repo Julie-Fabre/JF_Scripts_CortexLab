@@ -1,4 +1,4 @@
-function [passive_data_per_cond, session_data, regions] = cl_loadPerStimulusData(load_type, keep_type) %% paramaters
+function [passive_data_per_cond, session_data, regions] = cl_loadPerStimulusData(load_type, keep_type, loadVids    ) %% paramaters
 cl_myPaths;
     if contains(load_type, 'passive')
     info_table = readtable([csvPath 'allPassiveRecs.csv'], 'VariableNamingRule', 'modify');
@@ -227,7 +227,9 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
 
 
                 verbose = false; % display load progress and some info figures
-                load_parts.cam = true;
+                if loadVids
+                 load_parts.cam = true;
+                end
                 load_parts.imaging = false;
                 load_parts.ephys = true;
                 loadClusters = 0;
@@ -386,34 +388,34 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
                 % then average on that half.
                 passive_data_per_cond.trial_types{experiment_type, iRecording} = trial_conditions;
                 passive_data_per_cond.no_move_trials{experiment_type, iRecording} = no_move_trials;
- raster_window = [-0.5, 1];
-        psth_bin_size = 0.01;           
+ raster_window = [-0.2, 0.6];
+        psth_bin_size = 0.001;           
+if loadVids
+try
+     psth_bin_size = 0.01;
+                    camera_location = facecam_fn;
+                    camera_t = facecam_t;
+                    framerate = 30;
+                    surround_t = raster_window;
+                    use_align = stimOn_times;
+                    surround_frames = diff(raster_window) * framerate;
 
-% try
-%      psth_bin_size = 0.01;
-%                     camera_location = facecam_fn;
-%                     camera_t = facecam_t;
-%                     framerate = 30;
-%                     surround_t = raster_window;
-%                     use_align = stimOn_times;
-%                     surround_frames = diff(raster_window) * framerate;
-% 
-%                     use_t_plotting = '';
-%                     plot_me = false;
-%                     box_crop = [];
-% 
-%                     [motion_energy, motion_energy_std, cam_align_diff_avg, n_trials,  motion_energy_frame_full] = cl_getMotionIndex(camera_location,...
-%                         camera_t, surround_frames, box_crop, surround_t, use_align, plot_me, use_t_plotting);
-% 
-%                     session_data.motion_energy{iRecording} = motion_energy_frame_full;
-%                     session_data.trial_type{iRecording} = trial_conditions;
-%                     session_data.session_num = iRecording;
-% catch
-%      session_data.motion_energy{iRecording} =NaN;
-%                     session_data.trial_type{iRecording} = NaN;
-%                     session_data.session_num = iRecording;
-% end
+                    use_t_plotting = '';
+                    plot_me = false;
+                    box_crop = [];
 
+                    [motion_energy, motion_energy_std, cam_align_diff_avg, n_trials,  motion_energy_frame_full] = cl_getMotionIndex(camera_location,...
+                        camera_t, surround_frames, box_crop, surround_t, use_align, plot_me, use_t_plotting);
+
+                    session_data.motion_energy{iRecording} = motion_energy_frame_full;
+                    session_data.trial_type{iRecording} = trial_conditions;
+                    session_data.session_num = iRecording;
+catch
+     session_data.motion_energy{iRecording} =NaN;
+                    session_data.trial_type{iRecording} = NaN;
+                    session_data.session_num = iRecording;
+end
+end
 
 
                 for iUnit = 1:size(units_to_keep, 1)
@@ -587,7 +589,13 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
                 passive_data_per_cond.pss((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.postSpikeSuppression(units_to_keep);
                 passive_data_per_cond.wvDur((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.templateDuration(units_to_keep);
                 passive_data_per_cond.fr((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.spike_rateSimple(units_to_keep);
-                passive_data_per_cond.unitType((unitCount + 1:unitCount + size(units_to_keep, 1))) = unitType(units_to_keep);
+                try
+                    passive_data_per_cond.unitType((unitCount + 1:unitCount + size(units_to_keep, 1))) = unitType(units_to_keep);
+                catch
+                    rerunQM = 1;
+                    [unitType, qMetrics] = bc_qualityMetricsPipeline_JF(animal, day, site, recording, 1, protocol, rerunQM, plotGUI, runQM);
+                    passive_data_per_cond.unitType((unitCount + 1:unitCount + size(units_to_keep, 1))) = unitType(units_to_keep);
+                end
                 passive_data_per_cond.pss((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.postSpikeSuppression(units_to_keep);
                 passive_data_per_cond.templateDuration((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.templateDuration(units_to_keep);
                 passive_data_per_cond.propLongISI((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.propLongISI(units_to_keep);
@@ -600,7 +608,7 @@ for iRecording = 1:length(use_recs)%61:length(use_recs)
             % clear variables
             disp(['   ', num2str(iRecording), '/', num2str(length(use_recs))])
 
-            keep session_data mouse_day_sites_shank_rec unique_mice passive_data_per_cond use_recs info_table regions regions_id unitCount st load_type keep_type
+            keep session_data mouse_day_sites_shank_rec unique_mice passive_data_per_cond use_recs info_table regions regions_id unitCount st load_type keep_type loadVids
         end
     end
     %catch

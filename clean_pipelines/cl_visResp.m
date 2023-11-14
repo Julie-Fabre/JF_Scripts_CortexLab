@@ -1,4 +1,4 @@
-function [vis_resp, vis_resp_session_num, vis_resp_animal_num, vis_resp_session_fraction] = cl_visResp(task_data, idx, keepVis, keepUnits, plot_regions, plotMe)
+function [vis_resp, vis_resp_session_num, vis_resp_animal_num, vis_resp_session_fraction, vis_resp_full] = cl_visResp(task_data, idx, keepVis, keepUnits, plot_regions, plotMe)
 
 %plot_regions = [1, 2, 3]; %[1, 2, 5]; % Striatum, GPe, SNr
 for iSession = 1:size(task_data.av_per_trial, 2)
@@ -10,7 +10,7 @@ trialTypes = [4, -90; 12, -90; 6, -90]; %go1, go2, no go
 session_cumCells = cumsum(session_nCells);
 
 
-thesePairs = [1, 2; 1, 3; 2, 3];
+theseStims = [1; 2; 3];
 task_data.animal_day_site_shank(isnan(task_data.animal_day_site_shank)) =0;
 unique_combs = unique(task_data.animal_day_site_shank, 'rows');
 unitCount = 0;
@@ -46,11 +46,11 @@ for iRegion = 1:size(plot_regions, 2)
             av_psth_here = task_data.av_psth{idx, thisSession}(these_units_session, :, :);
             for_baseline_per_neuron_per_condition = task_data.av_psth{idx, thisSession}(these_units_session, :, 1:200);
             if size(for_baseline_per_neuron_per_condition, 2) == 39
-                cond_inds = [10, 34; 16, 34; 16, 10];
+                cond_inds = [10; 34; 16];
             elseif size(for_baseline_per_neuron_per_condition, 2) == 26
-                cond_inds = [7, 23; 11, 23; 11, 7];
+                cond_inds = [7; 23; 11];
             elseif size(for_baseline_per_neuron_per_condition, 2) == 4
-                cond_inds = [2, 4; 3, 4; 3, 2];
+                cond_inds = [2; 4; 3];
             else
                 disp('wtf')
             end
@@ -63,29 +63,30 @@ for iRegion = 1:size(plot_regions, 2)
                 if size(activity_per_trial_neuron, 2) > 2 && size(activity_per_trial_neuron, 1) > 2 
                     for iNeuron = 1:size(activity_per_trial_neuron, 2)
                         for iPair = 1:3
-                            trials_1 = ismember(theseTrialTypes, trialTypes(thesePairs(iPair, 1), :), 'rows');
-                            trials_2 = ismember(theseTrialTypes, trialTypes(thesePairs(iPair, 2), :), 'rows');
+                            trials_1 = ismember(theseTrialTypes, trialTypes(theseStims(iPair, 1), :), 'rows');
+                           
 
-                            baseline_1 = nanmean(for_baseline_per_neuron_per_condition(iNeuron, ...
+                            baseline = nanmean(for_baseline_per_neuron_per_condition(iNeuron, ...
                                 cond_inds(iPair, 1), :)./0.001);
 
-                            baseline_2 = nanmean(for_baseline_per_neuron_per_condition(iNeuron, ...
-                                cond_inds(iPair, 2), :)./0.001);
-                            if baseline_1 > 0.1
-                                average_stim_1 = (nanmean(activity_per_trial_neuron(trials_1, iNeuron)./0.001)); % QQ baseline - normalize ?
-                                average_stim_2 = (nanmean(activity_per_trial_neuron(trials_2, iNeuron)./0.001));
+                            
+                           
 
-                                sd_stim_1 = nanstd(activity_per_trial_neuron(trials_1, iNeuron)./0.001); %./sqrt(sum(trials_1));
-                                sd_stim_2 = nanstd(activity_per_trial_neuron(trials_2, iNeuron)./0.001); %./sqrt(sum(trials_2));
+                            if baseline > 0.1
+                                average_stim = (nanmean(activity_per_trial_neuron(logical(trials_1), iNeuron)./0.001)); % QQ baseline - normalize ?
 
-                                pooled_sd = sqrt((sd_stim_1 * sd_stim_1 + sd_stim_2 * sd_stim_2)./2) + 1;
-                                pooled_sd_all{iRegion}(iNeuron + unitCount, iPair) = pooled_sd;
+                                sd_stim = nanstd(activity_per_trial_neuron(trials_1, iNeuron)./0.001); %./sqrt(sum(trials_1));
                                 
-                                vis_resp{iRegion}(iNeuron + unitCount, iPair) = abs(average_stim_1-average_stim_2) / abs(average_stim_1+average_stim_2);
-                                vis_resp_session{iRegion}(iNeuron, iPair) = abs(average_stim_1-average_stim_2) / abs(average_stim_1+average_stim_2);
+                                
+                                vis_resp{iRegion}(iNeuron + unitCount, iPair) = (average_stim - baseline  ) / abs(average_stim + baseline+ 1);
+                                vis_resp_session{iRegion}(iNeuron, iPair) = (average_stim - baseline) / abs(average_stim+baseline+ 1);
+                                vis_resp_full{iRegion}(iNeuron + unitCount, iPair,:) = av_psth_here(iNeuron, cond_inds(iPair, 1), :);
+                                %vis_resp{iRegion}(iNeuron + unitCount, iPair) = (average_stim - baseline  ) / abs(sd_stim+ 0.001);
+                                %vis_resp_session{iRegion}(iNeuron, iPair) = (average_stim - baseline) / abs(sd_stim+ 0.001);
+                                
                                 vis_resp_session_num{iRegion}(iNeuron + unitCount, iPair) = iSession;
                                 
-                                ci{iRegion}(iNeuron + unitCount, iPair) = (average_stim_1 - average_stim_2) / (average_stim_1 + average_stim_2 + 0.1);
+                                ci{iRegion}(iNeuron + unitCount, iPair) = (average_stim - baseline) / (average_stim + baseline + 0.1);
                                 
                                 tempDur{iRegion}(iNeuron + unitCount, iPair) = task_data.wvDur(these_units_session_all(iNeuron));
                                 pss{iRegion}(iNeuron + unitCount, iPair) = task_data.pss(these_units_session_all(iNeuron));
