@@ -2,10 +2,10 @@
 %% cl_dprime_summarize
 
 % parameters
-keepVis = 1;
-keepUnits = [1,2]; % 1:good, 2:mua, 3:non-somatic, 4:noise
+keepVis = 0;
+keepUnits = [1, 2]; % 1:good, 2:mua, 3:non-somatic, 4:noise
 plotMe = false;
-plotRegions = [1,2,3];
+plotRegions = [1, 2, 3];
 
 % initialize variables
 vis_resp = cell(3, 1);
@@ -30,41 +30,36 @@ for iTask = 1:3
         passive = 0;
 
     end
-    [vis_resp{iTask}, vis_resp_session_num{iTask}, vis_resp_animal_num{iTask}, vis_resp_session_fraction{iTask}, vis_resp_full{iTask}]...
+    [vis_resp{iTask}, vis_resp_session_num{iTask}, vis_resp_animal_num{iTask}, vis_resp_session_fraction{iTask}, vis_resp_full{iTask}] ...
         = cl_visResp(task_data, idx, keepVis, keepUnits, plotRegions, plotMe);
 end
 
 % srted imagesc
-
-cols = ya_getColors(3);
-
-
-for iRegion = 1:3
+for iTask = 1:3
     figure();
     for iPair = 1:3
-        for iTask = 1:3
+        for iRegion = 1:3
             %if iTask == 1 && (iRegion == 2 || iRegion == 3)
             %    continue;
             %end
-            subplot(3, size(plotRegions, 2), iPair+(iTask - 1)*(size(plotRegions, 2)));
+            subplot(3, size(plotRegions, 2), iPair+(iRegion - 1)*(size(plotRegions, 2)));
             hold on;
-            kp = find( ~isnan(abs(vis_resp{iTask}{iRegion}(:, iPair))) & ~isinf(abs(vis_resp{iTask}{iRegion}(:, iPair))));
+            kp = find(~isnan(abs(vis_resp{iTask}{iRegion}(:, iPair))) & ~isinf(abs(vis_resp{iTask}{iRegion}(:, iPair))));
 
-            [~,idx]= sort(vis_resp{iTask}{iRegion}(kp, iPair));
-            ss=squeeze(vis_resp_full{iTask}{iRegion}(kp,iPair,:));
-            imagesc(smoothdata((ss(idx,:) - nanmean(ss(idx,1:200),2))./(nanmean(ss(idx,1:200),2)), 2,'gaussian', [50 0]))
+            [~, idx] = sort(vis_resp{iTask}{iRegion}(kp, iPair));
+            ss = squeeze(vis_resp_full{iTask}{iRegion}(kp, iPair, :));
+            imagesc(smoothdata((ss(idx, :) - nanmean(ss(idx, 1:200), 2))./(nanmean(ss(idx, 1:200), 2)), 2, 'gaussian', [50, 0]))
             %xlabel('(resp - resp0)/(resp + resp0)')
-            xlabel('(resp - resp0)/(std_resp + 0.001)')
-            ylabel('frac. neurons')
-            clim([-15, 15])
-            colormap(brewermap([],'*RdBu'))
+            %xlabel('(resp - resp0)/(std_resp + 0.001)')
+            ylabel('neurons, sorted by vis')
+            clim([-3, 3])
+            colormap(brewermap([], '*RdBu'))
             colorbar;
 
         end
     end
-    %prettify_plot('YLimits', 'all', 'Xlimits', 'all')
+    prettify_plot('AxisAspectRatio', 'tight');
 end
-prettify_plot('YLimits', 'all')
 
 
 
@@ -81,13 +76,13 @@ for iRegion = 1:3
             %end
             subplot(3, size(plotRegions, 2), iPair+(iRegion - 1)*(size(plotRegions, 2)));
             hold on;
-            kp = find( ~isnan(abs(vis_resp{iTask}{iRegion}(:, iPair))) & ~isinf(abs(vis_resp{iTask}{iRegion}(:, iPair))));
+            kp = find(~isnan(abs(vis_resp{iTask}{iRegion}(:, iPair))) & ~isinf(abs(vis_resp{iTask}{iRegion}(:, iPair))));
 
-        
+
             [counts, edges] = histcounts((vis_resp{iTask}{iRegion}(kp, iPair)), vals, 'Normalization', 'probability');
-            stairs(edges(1:end-1), counts, 'Color', cols(iTask,:), 'LineWidth', 1.5);
-           
-            
+            stairs(edges(1:end-1), counts, 'Color', cols(iTask, :), 'LineWidth', 1.5);
+
+
             %xlabel('(resp - resp0)/(resp + resp0)')
             xlabel('(resp - resp0)/(resp + resp0)')
             ylabel('frac. neurons')
@@ -104,56 +99,56 @@ prettify_plot('YLimits', 'all')
 figure();
 for iPair = 1:3
     for iRegion = 1:3
-                subplot(3, 3, iPair+(iRegion- 1)*3);
-                num_recs = size(unique(vis_resp_session_num{iTask}{iRegion}(:, 1)), 1);
-                %theseColors = [lines(num_recs)];
-                
-                
-                iTask = 2;
-                kp1 = find(abs(vis_resp{iTask}{iRegion}(:, iPair)) ~= 0 & ~isinf(abs(vis_resp{iTask}{iRegion}(:, 1))) & ~isnan(abs(vis_resp{iTask}{iRegion}(:, 1))));
-                nums1 = vis_resp_session_num{iTask}{iRegion}(kp1,1);
-                [~, ~, ic] = unique(nums1, 'stable');
-                nums_u1 = ic';
-                
-                iTask = 3;
-                kp2 = find(abs(vis_resp{iTask}{iRegion}(:, iPair)) ~= 0 & ~isinf(abs(vis_resp{iTask}{iRegion}(:, 1))) & ~isnan(abs(vis_resp{iTask}{iRegion}(:, 1))));
-                nums2 = vis_resp_session_num{iTask}{iRegion}(kp2,1);
-                [~, ~, ic] = unique(nums2, 'stable');
-                nums_u2 = ic';
+        subplot(3, 3, iPair+(iRegion - 1)*3);
+        num_recs = size(unique(vis_resp_session_num{iTask}{iRegion}(:, 1)), 1);
+        %theseColors = [lines(num_recs)];
 
-                theseColors = repelem(cols(2,:), length(unique(nums_u1)), 1);
-                theseColors = [theseColors; repelem(cols(3,:), length(unique(nums_u2)), 1)];
 
-                violinplot([vis_resp{2}{iRegion}(kp1, iPair); vis_resp{3}{iRegion}(kp2, iPair)], ...
-                    [nums_u1'; max(nums_u1)+nums_u2'], ...
-                    'ViolinColor', theseColors);
-                ylim([0, 2.6])
+        iTask = 2;
+        kp1 = find(abs(vis_resp{iTask}{iRegion}(:, iPair)) ~= 0 & ~isinf(abs(vis_resp{iTask}{iRegion}(:, 1))) & ~isnan(abs(vis_resp{iTask}{iRegion}(:, 1))));
+        nums1 = vis_resp_session_num{iTask}{iRegion}(kp1, 1);
+        [~, ~, ic] = unique(nums1, 'stable');
+        nums_u1 = ic';
 
-                uu = unique(vis_resp_session_num{2}{iRegion});
-                mouseys = [vis_resp_animal_num{2}{iRegion, ...
-                    uu(~isnan(unique(vis_resp_session_num{2}{iRegion}(:, 1))), 1) ...
-                    }];
-                mouseys_u = unique(mouseys);
-                cc =0;
-                for iMousey = 1:size(mouseys_u,2)
-                    idx_m = find(mouseys == mouseys_u(iMousey));
-                    line([cc , cc + length(idx_m)+0.5], [4, 4], 'Color', colsMice(mouseys_u(iMousey),:));
-                    cc = cc + length(idx_m);
-                end
-                
-                uu = unique(vis_resp_session_num{3}{iRegion});
-                mouseys = [vis_resp_animal_num{3}{iRegion, ...
-                    uu(~isnan(unique(vis_resp_session_num{3}{iRegion}(:, 1))), 1) ...
-                    }];
-                mouseys_u = unique(mouseys);
-                %cc =0;
-                for iMousey = 1:size(mouseys_u,2)
-                    idx_m = find(mouseys == mouseys_u(iMousey));
-                    line([cc , cc + length(idx_m)+ 0.5], [4, 4], 'Color', colsMice(mouseys_u(iMousey),:));
-                    cc = cc + length(idx_m);
-                end
+        iTask = 3;
+        kp2 = find(abs(vis_resp{iTask}{iRegion}(:, iPair)) ~= 0 & ~isinf(abs(vis_resp{iTask}{iRegion}(:, 1))) & ~isnan(abs(vis_resp{iTask}{iRegion}(:, 1))));
+        nums2 = vis_resp_session_num{iTask}{iRegion}(kp2, 1);
+        [~, ~, ic] = unique(nums2, 'stable');
+        nums_u2 = ic';
 
-                axis tight; 
+        theseColors = repelem(cols(2, :), length(unique(nums_u1)), 1);
+        theseColors = [theseColors; repelem(cols(3, :), length(unique(nums_u2)), 1)];
+
+        violinplot([vis_resp{2}{iRegion}(kp1, iPair); vis_resp{3}{iRegion}(kp2, iPair)], ...
+            [nums_u1'; max(nums_u1) + nums_u2'], ...
+            'ViolinColor', theseColors);
+        ylim([0, 2.6])
+
+        uu = unique(vis_resp_session_num{2}{iRegion});
+        mouseys = [vis_resp_animal_num{2}{iRegion, ...
+            uu(~isnan(unique(vis_resp_session_num{2}{iRegion}(:, 1))), 1), ...
+            }];
+        mouseys_u = unique(mouseys);
+        cc = 0;
+        for iMousey = 1:size(mouseys_u, 2)
+            idx_m = find(mouseys == mouseys_u(iMousey));
+            line([cc, cc + length(idx_m) + 0.5], [4, 4], 'Color', colsMice(mouseys_u(iMousey), :));
+            cc = cc + length(idx_m);
+        end
+
+        uu = unique(vis_resp_session_num{3}{iRegion});
+        mouseys = [vis_resp_animal_num{3}{iRegion, ...
+            uu(~isnan(unique(vis_resp_session_num{3}{iRegion}(:, 1))), 1), ...
+            }];
+        mouseys_u = unique(mouseys);
+        %cc =0;
+        for iMousey = 1:size(mouseys_u, 2)
+            idx_m = find(mouseys == mouseys_u(iMousey));
+            line([cc, cc + length(idx_m) + 0.5], [4, 4], 'Color', colsMice(mouseys_u(iMousey), :));
+            cc = cc + length(idx_m);
+        end
+
+        axis tight;
 
 
     end
@@ -163,4 +158,3 @@ prettify_plot('YLimits', 'all')
 % plot histograms sorted by session and mouse (tasks next to each other)
 
 % plot histograms sorted by session and mouse (regions next to each other)
-

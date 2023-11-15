@@ -41,7 +41,7 @@ for iRegion = 1:3
             if iTask == 1 && (iRegion == 2 || iRegion == 3)
                 continue;
             end
-            subplot(3, size(plot_regions, 2), iPair+(iRegion - 1)*(size(plot_regions, 2)));
+            subplot(3, size(plotRegions, 2), iPair+(iRegion - 1)*(size(plotRegions, 2)));
             hold on;
             kp = find(abs(d_prime{iTask}{iRegion}(:, iPair)) ~= 0 & ~isinf(abs(d_prime{iTask}{iRegion}(:, iPair))));
 
