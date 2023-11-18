@@ -389,7 +389,7 @@ for iRecording = 1:length(use_recs) %61:length(use_recs)
                 passive_data_per_cond.trial_types{experiment_type, iRecording} = trial_conditions;
                 passive_data_per_cond.no_move_trials{experiment_type, iRecording} = no_move_trials;
                 raster_window = [-0.2, 0.6];
-                psth_bin_size = 0.001;
+                
                 if loadVids
                     try
                         psth_bin_size = 0.01;
@@ -417,7 +417,7 @@ for iRecording = 1:length(use_recs) %61:length(use_recs)
                     end
                 end
 
-
+psth_bin_size = 0.001;
                 for iUnit = 1:size(units_to_keep, 1)
 
                     if ~isempty(keep_trial)

@@ -45,7 +45,7 @@ cl_plottingSettings;
 %     nanstd(task_data.psth(:,val_t_1),[],2);
 region_max = [1, 1, 1, 1, 1, 1, 1];
 region_smooth = [2, 2, 2, 1, 1, 1, 1];
-region_lims = [3, 3, 3, 1, 1, 1];
+region_lims = [1.5, 1.5, 1.5, 1, 1, 1];
 plot_regions = [1, 2, 3];
 %region_clim_string = {'z-score (clim saturated)', 'z-score', 'z-score', 'z-score', 'z-score', 'z-score', 'z-score'};
 figure();

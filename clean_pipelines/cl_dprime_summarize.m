@@ -92,6 +92,7 @@ for iPair = 1:3
                     uu(~isnan(unique(d_prime_session_num{2}{iRegion}(:, 1))), 1) ...
                     }];
                 mouseys_u = unique(mouseys);
+                colsMice = ya_getColors(max(mouseys_u));
                 cc =0;
                 for iMousey = 1:size(mouseys_u,2)
                     idx_m = find(mouseys == mouseys_u(iMousey));

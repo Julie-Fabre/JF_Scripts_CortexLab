@@ -1,5 +1,5 @@
 %% load + save data 
-loadVids = 0;
+loadVids = 1;
 [task_data, session_data] = cl_loadPerStimulusData('task', 2, loadVids); 
 if loadVids
     save('/home/julie/Dropbox/MATLAB/task_data_goNogo_session.mat', '-struct', 'session_data', '-v7.3');
@@ -39,29 +39,14 @@ keep loadVids
 % subregions? animals? 
 
 %% task behavior 
-contra = 1;
-center = 0;
-for iTask = 2:3
-    if iTask == 1 %passive
-        task_data = load('/home/julie/Dropbox/MATLAB/task_data_passive_full2.mat');
-        idx = 5;
-        passive = 1;
-    elseif iTask == 2
-        task_data = load('/home/julie/Dropbox/MATLAB/task_data_gogogo2.mat');
-        idx = 2;
-        passive = 0;
-    elseif iTask == 3
-        task_data = load('/home/julie/Dropbox/MATLAB/task_data_goNogo2.mat');
-        idx = 2;
-        passive = 0;
 
-    end
-cl_plot_average_task(task_data, idx, contra, center, passive)
-end
 
 %% task data
-cl_dprime_summarize;
+cl_plot_PSTHs; 
+
 cl_visResp_summarize;
+advent
+
 cl_decoding_summarize;
 cl_dimReduction_summarize; % PCA + angle; tSNE
 cl_modeling_summarize; 

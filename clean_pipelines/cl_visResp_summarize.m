@@ -2,7 +2,7 @@
 %% cl_dprime_summarize
 
 % parameters
-keepVis = 0;
+keepVis = 1;
 keepUnits = [1, 2]; % 1:good, 2:mua, 3:non-somatic, 4:noise
 plotMe = false;
 plotRegions = [1, 2, 3];
@@ -30,8 +30,8 @@ for iTask = 1:3
         passive = 0;
 
     end
-    [vis_resp{iTask}, vis_resp_session_num{iTask}, vis_resp_animal_num{iTask}, vis_resp_session_fraction{iTask}, vis_resp_full{iTask}] ...
-        = cl_visResp(task_data, idx, keepVis, keepUnits, plotRegions, plotMe);
+    [vis_resp{iTask}, vis_resp_session_num{iTask}, vis_resp_animal_num{iTask}, vis_resp_session_fraction{iTask},...
+        vis_resp_full{iTask}] = cl_visResp(task_data, idx, keepVis, keepUnits, plotRegions, plotMe);
 end
 
 % srted imagesc
@@ -52,7 +52,7 @@ for iTask = 1:3
             %xlabel('(resp - resp0)/(resp + resp0)')
             %xlabel('(resp - resp0)/(std_resp + 0.001)')
             ylabel('neurons, sorted by vis')
-            clim([-3, 3])
+            clim([-1.5, 1.5])
             colormap(brewermap([], '*RdBu'))
             colorbar;
 
@@ -126,8 +126,7 @@ for iPair = 1:3
 
         uu = unique(vis_resp_session_num{2}{iRegion});
         mouseys = [vis_resp_animal_num{2}{iRegion, ...
-            uu(~isnan(unique(vis_resp_session_num{2}{iRegion}(:, 1))), 1), ...
-            }];
+            uu(~isnan(unique(vis_resp_session_num{2}{iRegion}(:, 1))), 1)}];
         mouseys_u = unique(mouseys);
         cc = 0;
         for iMousey = 1:size(mouseys_u, 2)
@@ -138,8 +137,7 @@ for iPair = 1:3
 
         uu = unique(vis_resp_session_num{3}{iRegion});
         mouseys = [vis_resp_animal_num{3}{iRegion, ...
-            uu(~isnan(unique(vis_resp_session_num{3}{iRegion}(:, 1))), 1), ...
-            }];
+            uu(~isnan(unique(vis_resp_session_num{3}{iRegion}(:, 1))), 1)}];
         mouseys_u = unique(mouseys);
         %cc =0;
         for iMousey = 1:size(mouseys_u, 2)

@@ -1,5 +1,5 @@
 %% load + save data 
-loadVids = 0;
+loadVids = 1;
 [task_data, session_data] = cl_loadPerStimulusData('task', 2, loadVids); 
 if loadVids
     save('/home/julie/Dropbox/MATLAB/task_data_goNogo_session.mat', '-struct', 'session_data', '-v7.3');

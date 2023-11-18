@@ -88,8 +88,13 @@ for iRegion = 1:size(plot_regions, 2)
                                 sd_stim = nanstd(activity_per_trial_neuron(trials_1, iNeuron)./0.001); %./sqrt(sum(trials_1));
                                 
                                 
-                                vis_resp{iRegion}(iNeuron + unitCount, iPair) = (average_stim - baseline  ) / abs(average_stim + baseline+ 0.1);
-                                vis_resp_session{iRegion}(iNeuron, iPair) = (average_stim - baseline) / abs(average_stim+baseline+ 0.1);
+                                %vis_resp{iRegion}(iNeuron + unitCount, iPair) = (average_stim - baseline  ) / abs(average_stim + baseline+ 0.1);
+                                %vis_resp_session{iRegion}(iNeuron, iPair) = (average_stim - baseline) / abs(average_stim+baseline+ 0.1);
+                                train_image = (train_image - nanmean(train_image(:, val_t_1), 2)) ./ ...
+            nanstd(train_image(:, val_t_1), [], 2);
+        [~, cell_idx] = sort(nanmean(train_image(:, val_t_2), 2));
+
+                                
                                 vis_resp_full{iRegion}(iNeuron + unitCount, iPair,:) = av_psth_here(iNeuron, cond_inds(iPair, 1), :);
                                 %vis_resp{iRegion}(iNeuron + unitCount, iPair) = (average_stim - baseline  ) / abs(sd_stim+ 0.001);
                                 %vis_resp_session{iRegion}(iNeuron, iPair) = (average_stim - baseline) / abs(sd_stim+ 0.001);
