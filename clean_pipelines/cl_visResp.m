@@ -169,8 +169,8 @@ for iRegion = 1:size(plot_regions, 2)
                                 vis_resp{iRegion}(iNeuron + unitCount, iPair) = NaN;
                                 vis_resp_session_num{iRegion}(iNeuron + unitCount, iPair) = NaN;
                                 vis_resp_full{iRegion}(iNeuron + unitCount, iPair,:) = nan(800,1);
-                                pvalue_shuff{iRegion}(iNeuron + unitCount, iPair) = NaN;
-                                pvalue_shuff_session{iRegion}(iNeuron, iPair) = NaN;
+                                pvalue_shuff{iRegion}(iNeuron + unitCount, iPair) = false;
+                                pvalue_shuff_session{iRegion}(iNeuron, iPair) = false;
 
                                 
                                 tempdur{iRegion}(iNeuron + unitCount, iPair) = NaN;
