@@ -417,7 +417,7 @@ for iRecording = 1:length(use_recs) %61:length(use_recs)
                     end
                 end
 
-psth_bin_size = 0.001;
+                psth_bin_size = 0.001;
                 for iUnit = 1:size(units_to_keep, 1)
 
                     if ~isempty(keep_trial)

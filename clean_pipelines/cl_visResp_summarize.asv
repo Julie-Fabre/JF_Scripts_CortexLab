@@ -3,7 +3,7 @@
 
 % parameters
 keepVis = 0;
-keepUnits = [1];%, 2]; % 1:good, 2:mua, 3:non-somatic, 4:noise
+keepUnits = [1]%, 2]; % 1:good, 2:mua, 3:non-somatic, 4:noise
 plotMe = false;
 plotRegions = [1, 2, 3];
 
@@ -17,21 +17,21 @@ vis_resp_session_faction_median = cell(3, 1);
 % run loop
 for iTask = 1:3
     if iTask == 1 %passive
-        task_data = load('/home/julie/Dropbox/MATLAB/task_data_passive_full2.mat');
+        task_data = load('/home/julie/Dropbox/MATLAB/task_data_passive_full.mat');
         idx = 5;
         passive = 1;
     elseif iTask == 2
-        task_data = load('/home/julie/Dropbox/MATLAB/task_data_gogogo2.mat');
+        task_data = load('/home/julie/Dropbox/MATLAB/task_data_gogogo.mat');
         idx = 2;
         passive = 0;
     elseif iTask == 3
-        task_data = load('/home/julie/Dropbox/MATLAB/task_data_goNogo2.mat');
+        task_data = load('/home/julie/Dropbox/MATLAB/task_data_goNogo3.mat');
         idx = 2;
         passive = 0;
 
     end
     [vis_resp{iTask}, vis_resp_session_num{iTask}, vis_resp_animal_num{iTask}, vis_resp_session_fraction{iTask},...
-        vis_resp_full{iTask}, pvalue_shuff{iTask}] = cl_visResp(task_data, idx, keepVis, keepUnits, plotRegions, plotMe);
+        vis_resp_full{iTask}] = cl_visResp(task_data, idx, keepVis, keepUnits, plotRegions, plotMe);
 end
 
 % % srted imagesc
@@ -111,8 +111,7 @@ iTask = 3;
 
 kp3 = find(~isnan(abs(vis_resp{iTask}{iRegion}(:, iStim))) & ~isinf(abs(vis_resp{iTask}{iRegion}(:, iStim))));
 
-violinplot([abs(vis_resp{1}{iRegion}(kp1, iStim)); abs(vis_resp{2}{iRegion}(kp2, iStim));...
-    abs(vis_resp{3}{iRegion}(kp3, iStim))], ...
+violinplot([vis_resp{1}{iRegion}(kp1, iStim); vis_resp{2}{iRegion}(kp2, iStim); vis_resp{3}{iRegion}(kp3, iStim)], ...
    [ones(length(vis_resp{1}{iRegion}(kp1, iStim)),1); ones(length(vis_resp{2}{iRegion}(kp2, iStim)),1).*2;...
    ones(length(vis_resp{3}{iRegion}(kp3, iStim)),1).*3] );
 % [p1, ~] = ranksum(vis_resp{1}{iRegion}(kp1, iStim), vis_resp{2}{iRegion}(kp2, iStim));
@@ -137,32 +136,18 @@ iTask = 3;
 
 kp3 = find(~isnan(abs(vis_resp{iTask}{iRegion}(:, iStim))) & ~isinf(abs(vis_resp{iTask}{iRegion}(:, iStim))));
 lmeTable = table;
-lmeTable.value = [abs(vis_resp{1}{iRegion}(kp1, iStim)); abs(vis_resp{2}{iRegion}(kp2, iStim))];
+lmeTable.value = [vis_resp{1}{iRegion}(kp1, iStim); vis_resp{2}{iRegion}(kp2, iStim)];
 lmeTable.group = [ones(length(vis_resp{1}{iRegion}(kp1, iStim)),1); ones(length(vis_resp{2}{iRegion}(kp2, iStim)),1).*2];
 lmeTable.session = [vis_resp_session_num{1}{iRegion}(kp1, iStim); vis_resp_session_num{2}{iRegion}(kp2, iStim)];
-%lmeTable.mouse = [vis_resp_animal_num{1}{iRegion}(kp1, iStim); vis_resp_animal_num{2}{iRegion}(kp2, iStim)];
-ff = fitlme(lmeTable, 'value ~ group + (1|session)');
+lmeTable.mouse = [vis_resp_animal_num{1}{iRegion}(kp1, iStim); vis_resp_animal_num{2}{iRegion}(kp2, iStim)];
+fitlme(lmeTable, 'value ~ group + (1|mouse) + (1|mouse:session)')
 
-lmeTable = table;
-lmeTable.value = [abs(vis_resp{1}{iRegion}(kp1, iStim)); abs(vis_resp{3}{iRegion}(kp3, iStim))];
-lmeTable.group = [ones(length(vis_resp{1}{iRegion}(kp1, iStim)),1); ones(length(vis_resp{3}{iRegion}(kp3, iStim)),1).*2];
-lmeTable.session = [vis_resp_session_num{1}{iRegion}(kp1, iStim); vis_resp_session_num{3}{iRegion}(kp3, iStim)];
-%lmeTable.mouse = [vis_resp_animal_num{1}{iRegion}(kp1, iStim); vis_resp_animal_num{2}{iRegion}(kp2, iStim)];
-ff13 = fitlme(lmeTable, 'value ~ group + (1|session)');
 
-lmeTable = table;
-lmeTable.value = [abs(vis_resp{2}{iRegion}(kp2, iStim)); abs(vis_resp{3}{iRegion}(kp3, iStim))];
-lmeTable.group = [ones(length(vis_resp{2}{iRegion}(kp2, iStim)),1); ones(length(vis_resp{3}{iRegion}(kp3, iStim)),1).*2];
-lmeTable.session = [vis_resp_session_num{2}{iRegion}(kp2, iStim); vis_resp_session_num{3}{iRegion}(kp3, iStim)];
-%lmeTable.mouse = [vis_resp_animal_num{1}{iRegion}(kp1, iStim); vis_resp_animal_num{2}{iRegion}(kp2, iStim)];
-ff23 = fitlme(lmeTable, 'value ~ group + (1|session)');
-
-%ff.coefTest
 
 %[p1, ~] = ranksum(vis_resp{1}{iRegion}(kp1, iStim), vis_resp{2}{iRegion}(kp2, iStim));
 %[p2, ~] = ranksum(vis_resp{1}{iRegion}(kp1, iStim), vis_resp{3}{iRegion}(kp3, iStim));
 %[p3, ~] = ranksum(vis_resp{2}{iRegion}(kp2, iStim), vis_resp{3}{iRegion}(kp3, iStim));
-prettify_pvalues(gca, [1,1,2], [2,3,3], [ff.coefTest, ff13.coefTest, ff23.coefTest])
+prettify_pvalues(gca, [1,1,2], [2,3,3], [p1, p2, p3])
 
     end
 end
