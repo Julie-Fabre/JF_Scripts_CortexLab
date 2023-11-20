@@ -1,5 +1,6 @@
 function [vis_resp, vis_resp_session_num, vis_resp_animal_num, vis_resp_session_fraction,...
-    vis_resp_full, pvalue_shuff] = cl_visResp(task_data, idx, keepVis, keepUnits, plot_regions, plotMe)
+    vis_resp_full, pvalue_shuff, zscore_val, zscore_tiny_tiny, zscore_tiny, dfr, dsum_diff] =...
+    cl_visResp(task_data, idx, keepVis, keepUnits, plot_regions, plotMe)
 
 %plot_regions = [1, 2, 3]; %[1, 2, 5]; % Striatum, GPe, SNr
 for iSession = 1:size(task_data.av_per_trial, 2)
@@ -105,29 +106,29 @@ for iRegion = 1:size(plot_regions, 2)
                                 train_image = av_psth_here(iNeuron, cond_inds(iPair), :);
                                 train_image = (train_image - nanmean(train_image(:, val_t_1), 2)) ./ ...
                                     nanstd(train_image(:, val_t_1), [], 2);
-                                vv = nanmean(train_image(:, val_t_2), 2);
+                                zscore_val_i = nanmean(train_image(:, val_t_2), 2);
 
                                 % zscore + tiny value
                                 train_image = av_psth_here(iNeuron, cond_inds(iPair), :);
                                 train_image = (train_image - nanmean(train_image(:, val_t_1), 2)) ./ ...
                                     (nanstd(train_image(:, val_t_1), [], 2)+0.01);
-                                v2 = nanmean(train_image(:, val_t_2), 2);
+                                zscore_tiny_tiny_i = nanmean(train_image(:, val_t_2), 2);
 
                                 % zscore + small value
                                 train_image = av_psth_here(iNeuron, cond_inds(iPair), :);
                                 train_image = (train_image - nanmean(train_image(:, val_t_1), 2)) ./ ...
                                     (nanstd(train_image(:, val_t_1), [], 2)+0.1);
-                                v3 = nanmean(train_image(:, val_t_2), 2);
+                                zscore_tiny_i = nanmean(train_image(:, val_t_2), 2);
 
                                 % dFR/FR
                                 train_image = av_psth_here(iNeuron, cond_inds(iPair), :);
                                 train_image = (train_image - nanmean(train_image(:, val_t_1), 2)) ./ ...
                                     (nanmean(train_image(:, val_t_1), 2)+1);
-                                v4 = nanmean(train_image(:, val_t_2), 2);
+                                dfr_i = nanmean(train_image(:, val_t_2), 2);
 
                                 % diff over sum
                                 train_image = av_psth_here(iNeuron, cond_inds(iPair), :);
-                                v5 = (nanmean(train_image(:, val_t_2), 2) - nanmean(train_image(:, val_t_1), 2)) ./ ...
+                                dsum_diff_i = (nanmean(train_image(:, val_t_2), 2) - nanmean(train_image(:, val_t_1), 2)) ./ ...
                                     (nanmean(train_image(:, val_t_2), 2) + nanmean(train_image(:, val_t_1), 2)) ;
                                 %v5 = nanmean(train_image(:, val_t_2), 2);
 
@@ -138,15 +139,28 @@ for iRegion = 1:size(plot_regions, 2)
                                 shuffled_diffs = arrayfun(@(x) nanmean(all_activity(shuffling_idx(1:500, x)) ...
                                     -all_activity(shuffling_idx(501:1000, x))), 1:1000);
                                 real_diff = nanmean( activity_per_trial_neuron(trials_1, iNeuron)-activity_per_trial_neuron_base(trials_1, iNeuron));
-                                pctile_2 = prctile(shuffled_diffs, 95);
-                                pctile_1 = prctile(shuffled_diffs, 5);
+                                pctile_2 = prctile(shuffled_diffs, 99.9999999999999999999999999999999999999);
+                                pctile_1 = prctile(shuffled_diffs, 0.00000000000000000000000000000000000001);% ok, no. this is not viable,. 
 
-                                pvalue_shuff{iRegion}(iNeuron + unitCount, iPair) = ...
-                                    real_diff >= pctile_2 || real_diff <= pctile_1;
-                                pvalue_shuff_session{iRegion}(iNeuron, iPair) = real_diff >= pctile_2 || real_diff <= pctile_1;
-
-                                vis_resp{iRegion}(iNeuron + unitCount, iPair) = vv;%(average_stim - baseline  ) / abs(sd_stim+ 0.001);
-                                vis_resp_session{iRegion}(iNeuron, iPair) = vv;%(average_stim - baseline) / abs(sd_stim+ 0.001);
+                              %  if abs(real_diff*5) >
+                              %  end
+                                
+                                if real_diff > pctile_2 || real_diff < pctile_1
+                                    pvalue_shuff{iRegion}(iNeuron + unitCount, iPair) = 1;
+                                    pvalue_shuff_session{iRegion}(iNeuron, iPair) = 1;
+                                else
+                                    pvalue_shuff{iRegion}(iNeuron + unitCount, iPair) = 0;
+                                    pvalue_shuff_session{iRegion}(iNeuron, iPair) = 0;
+                                end
+                                
+                                zscore_val{iRegion}(iNeuron + unitCount, iPair) = zscore_val_i;
+                                zscore_tiny_tiny{iRegion}(iNeuron + unitCount, iPair) = zscore_tiny_tiny_i;
+                                zscore_tiny{iRegion}(iNeuron + unitCount, iPair) = zscore_tiny_i;
+                                dfr{iRegion}(iNeuron + unitCount, iPair) = dfr_i;
+                                dsum_diff{iRegion}(iNeuron + unitCount, iPair) = dsum_diff_i;
+                                
+                                vis_resp{iRegion}(iNeuron + unitCount, iPair) = zscore_val_i;%(average_stim - baseline  ) / abs(sd_stim+ 0.001);
+                                vis_resp_session{iRegion}(iNeuron, iPair) = zscore_val_i;%(average_stim - baseline) / abs(sd_stim+ 0.001);
                                
                                 vis_resp_full{iRegion}(iNeuron + unitCount, iPair,:) = av_psth_here(iNeuron, cond_inds(iPair, 1), :);
                                 %vis_resp{iRegion}(iNeuron + unitCount, iPair) = (average_stim - baseline  ) / abs(sd_stim+ 0.001);
@@ -169,8 +183,14 @@ for iRegion = 1:size(plot_regions, 2)
                                 vis_resp{iRegion}(iNeuron + unitCount, iPair) = NaN;
                                 vis_resp_session_num{iRegion}(iNeuron + unitCount, iPair) = NaN;
                                 vis_resp_full{iRegion}(iNeuron + unitCount, iPair,:) = nan(800,1);
-                                pvalue_shuff{iRegion}(iNeuron + unitCount, iPair) = false;
-                                pvalue_shuff_session{iRegion}(iNeuron, iPair) = false;
+                                pvalue_shuff{iRegion}(iNeuron + unitCount, iPair) = NaN;
+                                pvalue_shuff_session{iRegion}(iNeuron, iPair) = NaN;
+
+                                zscore_val{iRegion}(iNeuron + unitCount, iPair) = NaN;
+                                zscore_tiny_tiny{iRegion}(iNeuron + unitCount, iPair) = NaN;
+                                zscore_tiny{iRegion}(iNeuron + unitCount, iPair) = NaN;
+                                dfr{iRegion}(iNeuron + unitCount, iPair) = NaN;
+                                dsum_diff{iRegion}(iNeuron + unitCount, iPair) = NaN;
 
                                 
                                 tempdur{iRegion}(iNeuron + unitCount, iPair) = NaN;

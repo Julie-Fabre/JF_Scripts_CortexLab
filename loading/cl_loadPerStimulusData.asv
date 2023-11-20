@@ -446,13 +446,13 @@ for iRecording = 1:length(use_recs) %61:length(use_recs)
                             [~, trial_cond_idx_single] = ismember(trial_conditions, passive_data_per_cond.psth_conditions{experiment_type}(iCond, :), 'rows');
 
                         end
-                        pvals_per_cond(iCond) = signrank(nanmean(curr_raster(logical(trial_cond_idx_single), 1:150), 2), ...
-                            nanmean(curr_raster(logical(trial_cond_idx_single), 250:350), 2));
+                        pvals_per_cond(iCond) = signrank(nanmean(curr_raster(logical(trial_cond_idx_single), 1:200), 2), ...
+                            nanmean(curr_raster(logical(trial_cond_idx_single), 250:450), 2));
                         passive_data_per_cond.pvalue{experiment_type}(iUnit + unitCount, iCond) = pvals_per_cond(iCond);
 
 
-                        pre_activity = nanmean(curr_raster(logical(trial_cond_idx_single), 1:150), 2);
-                        post_activity = nanmean(curr_raster(logical(trial_cond_idx_single), 250:350), 2);
+                        pre_activity = nanmean(curr_raster(logical(trial_cond_idx_single), 1:200), 2);
+                        post_activity = nanmean(curr_raster(logical(trial_cond_idx_single), 250:450), 2);
                         all_activity = [pre_activity; post_activity];
                         shuffling_idx = randi(size(all_activity, 1), 1000);
                         shuffled_diffs = arrayfun(@(x) nanmean(all_activity(shuffling_idx(1:500, x)) ...

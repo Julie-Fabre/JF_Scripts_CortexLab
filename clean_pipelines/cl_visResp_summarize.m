@@ -3,7 +3,7 @@
 
 % parameters
 keepVis = 0;
-keepUnits = [1];%, 2]; % 1:good, 2:mua, 3:non-somatic, 4:noise
+keepUnits = [1,2];%, 2]; % 1:good, 2:mua, 3:non-somatic, 4:noise
 plotMe = false;
 plotRegions = [1, 2, 3];
 
@@ -31,7 +31,8 @@ for iTask = 1:3
 
     end
     [vis_resp{iTask}, vis_resp_session_num{iTask}, vis_resp_animal_num{iTask}, vis_resp_session_fraction{iTask},...
-        vis_resp_full{iTask}, pvalue_shuff{iTask}] = cl_visResp(task_data, idx, keepVis, keepUnits, plotRegions, plotMe);
+        vis_resp_full{iTask}, pvalue_shuff{iTask}, zscore_val{iTask}, zscore_tiny_tiny{iTask},...
+        zscore_tiny{iTask}, dfr{iTask}, dsum_diff{iTask}] = cl_visResp(task_data, idx, keepVis, keepUnits, plotRegions, plotMe);
 end
 
 % % srted imagesc
@@ -62,12 +63,45 @@ end
 % end
 
 
+% bar plot 
+
+%pvalue_shuffle -> wierdness there. 
+
+vis_resp = zscore_val;
+for iTask = 1:3
+    figure();
+    for iPair = 1:3
+        for iRegion = 1:3
+            %if iTask == 1 && (iRegion == 2 || iRegion == 3)
+            %    continue;
+            %end
+            subplot(3, size(plotRegions, 2), iPair+(iRegion - 1)*(size(plotRegions, 2)));
+            hold on;
+            kp = find(~isnan(abs(vis_resp{iTask}{iRegion}(:, iPair))) & ~isinf(abs(vis_resp{iTask}{iRegion}(:, iPair))) &...
+                pvalue_shuff{iTask}{iRegion}(:,iPair) ==1);
+
+            [~, idx] = sort(vis_resp{iTask}{iRegion}(kp, iPair));
+            ss = squeeze(vis_resp_full{iTask}{iRegion}(kp, iPair, :));
+            imagesc(smoothdata((ss(idx, :) - nanmean(ss(idx, 1:200), 2))./(nanmean(ss(idx, 1:200), 2)), 2, 'gaussian', [50, 0]))
+            %xlabel('(resp - resp0)/(resp + resp0)')
+            %xlabel('(resp - resp0)/(std_resp + 0.001)')
+            ylabel('neurons, sorted by vis')
+            clim([-1.5, 1.5])
+            colormap(brewermap([], '*RdBu'))
+            colorbar;
+
+        end
+    end
+    prettify_plot('AxisAspectRatio', 'tight');
+end
+
+
 
 % plot overlaid histograms
 cols = ya_getColors(3);
 figure();
 %vals = [-1:0.05:1];
-vals = [-3:0.05:3];
+vals = [-0.5:0.5:2.5];
 for iRegion = 1:3
     for iStim = 1:3
         for iTask = 3:-1:1

@@ -447,12 +447,12 @@ for iRecording = 1:length(use_recs) %61:length(use_recs)
 
                         end
                         pvals_per_cond(iCond) = signrank(nanmean(curr_raster(logical(trial_cond_idx_single), 1:150), 2), ...
-                            nanmean(curr_raster(logical(trial_cond_idx_single), 250:350), 2));
+                            nanmean(curr_raster(logical(trial_cond_idx_single), 250:400), 2));
                         passive_data_per_cond.pvalue{experiment_type}(iUnit + unitCount, iCond) = pvals_per_cond(iCond);
 
 
                         pre_activity = nanmean(curr_raster(logical(trial_cond_idx_single), 1:150), 2);
-                        post_activity = nanmean(curr_raster(logical(trial_cond_idx_single), 250:350), 2);
+                        post_activity = nanmean(curr_raster(logical(trial_cond_idx_single), 250:400), 2);
                         all_activity = [pre_activity; post_activity];
                         shuffling_idx = randi(size(all_activity, 1), 1000);
                         shuffled_diffs = arrayfun(@(x) nanmean(all_activity(shuffling_idx(1:500, x)) ...
@@ -472,7 +472,7 @@ for iRecording = 1:length(use_recs) %61:length(use_recs)
                     %responsive cell?  shuffle pre/post labels
 
                     pre_activity = nanmean(curr_raster(:, 1:150), 2);
-                    post_activity = nanmean(curr_raster(:, 250:350), 2);
+                    post_activity = nanmean(curr_raster(:, 250:400), 2);
                     all_activity = [pre_activity; post_activity];
                     shuffling_idx = randi(size(all_activity, 1), 1000);
                     shuffled_diffs = arrayfun(@(x) nanmean(all_activity(shuffling_idx(1:500, x)) ...
@@ -557,9 +557,9 @@ for iRecording = 1:length(use_recs) %61:length(use_recs)
                         unique_templates(shank_units(units_to_keep(iUnit))), raster_window_det, psth_bin_size_det, ...
                         align_times(1:1:end), trial_cond_idx(1:1:end));
                     startIdx = find(t_det >= 0.05, 1, 'first');
-                    stopIdx = find(t_det >= 0.15, 1, 'first');
+                    stopIdx = find(t_det >= 0.2, 1, 'first');
                     passive_data_per_cond.av_per_trial{experiment_type, iRecording}(iUnit, :) = nanmean(curr_raster(:, startIdx:stopIdx), 2);
-                    startIdx = find(t_det >= -0.15, 1, 'first');
+                    startIdx = find(t_det >= -0.2, 1, 'first');
                     stopIdx = find(t_det >= -0.05, 1, 'first');
                     passive_data_per_cond.av_per_trial_base{experiment_type, iRecording}(iUnit, :) = nanmean(curr_raster(:, startIdx:stopIdx), 2);
                     passive_data_per_cond.av_psth{experiment_type, iRecording}(iUnit, :, :) = curr_psth;
