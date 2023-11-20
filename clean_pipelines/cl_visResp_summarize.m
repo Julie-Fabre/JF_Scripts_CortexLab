@@ -67,7 +67,7 @@ end
 
 %pvalue_shuffle -> wierdness there. 
 
-vis_resp = zscore_val;
+vis_resp = dfr;
 for iTask = 1:3
     figure();
     for iPair = 1:3
@@ -78,9 +78,11 @@ for iTask = 1:3
             subplot(3, size(plotRegions, 2), iPair+(iRegion - 1)*(size(plotRegions, 2)));
             hold on;
             kp = find(~isnan(abs(vis_resp{iTask}{iRegion}(:, iPair))) & ~isinf(abs(vis_resp{iTask}{iRegion}(:, iPair))) &...
-                pvalue_shuff{iTask}{iRegion}(:,iPair) ==1);
+                (vis_resp{iTask}{iRegion}(:,1) >=0.15| vis_resp{iTask}{iRegion}(:,1) <=-0.15 |...
+                vis_resp{iTask}{iRegion}(:,2) >=0.15| vis_resp{iTask}{iRegion}(:,2) <=-0.15|...
+                vis_resp{iTask}{iRegion}(:,3) >=0.15| vis_resp{iTask}{iRegion}(:,3) <=-0.15));
 
-            [~, idx] = sort(vis_resp{iTask}{iRegion}(kp, iPair));
+            [~, idx] = sort(vis_resp{iTask}{iRegion}(kp, 2));
             ss = squeeze(vis_resp_full{iTask}{iRegion}(kp, iPair, :));
             imagesc(smoothdata((ss(idx, :) - nanmean(ss(idx, 1:200), 2))./(nanmean(ss(idx, 1:200), 2)), 2, 'gaussian', [50, 0]))
             %xlabel('(resp - resp0)/(resp + resp0)')
@@ -101,7 +103,7 @@ end
 cols = ya_getColors(3);
 figure();
 %vals = [-1:0.05:1];
-vals = [-0.5:0.5:2.5];
+vals = [-0.9:0.05:0.9];
 for iRegion = 1:3
     for iStim = 1:3
         for iTask = 3:-1:1

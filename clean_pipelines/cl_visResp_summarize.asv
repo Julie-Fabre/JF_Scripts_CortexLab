@@ -67,7 +67,7 @@ end
 
 %pvalue_shuffle -> wierdness there. 
 
-vis_resp = zscore_val;
+vis_resp = dsum_diff;
 for iTask = 1:3
     figure();
     for iPair = 1:3
@@ -78,7 +78,7 @@ for iTask = 1:3
             subplot(3, size(plotRegions, 2), iPair+(iRegion - 1)*(size(plotRegions, 2)));
             hold on;
             kp = find(~isnan(abs(vis_resp{iTask}{iRegion}(:, iPair))) & ~isinf(abs(vis_resp{iTask}{iRegion}(:, iPair))) &...
-                pvalue_shuff{iTask}{iRegion}(:,iPair) ==1);
+                (vis_resp{iTask}{iRegion}(:,iPair) >=0.25| vis_resp{iTask}{iRegion}(:,iPair) <=-0.25));
 
             [~, idx] = sort(vis_resp{iTask}{iRegion}(kp, iPair));
             ss = squeeze(vis_resp_full{iTask}{iRegion}(kp, iPair, :));
@@ -101,7 +101,7 @@ end
 cols = ya_getColors(3);
 figure();
 %vals = [-1:0.05:1];
-vals = [-0.5:0.5:2.5];
+vals = [-0.4:0.025:0.4];
 for iRegion = 1:3
     for iStim = 1:3
         for iTask = 3:-1:1
@@ -113,7 +113,7 @@ for iRegion = 1:3
             kp = find(~isnan(abs(vis_resp{iTask}{iRegion}(:, iStim))) & ~isinf(abs(vis_resp{iTask}{iRegion}(:, iStim))));
 
 
-            [counts, edges] = histcounts((vis_resp{iTask}{iRegion}(kp, iStim)), vals, 'Normalization', 'probability');
+            [counts, edges] = histcounts((vis_resp{iTask}{iRegion}(kp, iStim)), 50, 'Normalization', 'probability');
             stairs(edges(1:end-1), counts, 'Color', cols(iTask, :), 'LineWidth', 1.5);
 
 
