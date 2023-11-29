@@ -53,11 +53,12 @@ prettify_plot('YLimits', 'all');
 for iRegion = 1:3
     subplot(1, 3, iRegion);
     hold on;
-    [~, pval_12] = ttest(fraction_passive.increaseFR_session_fraction(iRegion, :), fraction_gogogo.increaseFR_session_fraction(iRegion, :));
-    [~, pval_13] = ttest(fraction_passive.increaseFR_session_fraction(iRegion, :), fraction_gonogo.increaseFR_session_fraction(iRegion, :));
-    [~, pval_23] = ttest(fraction_gogogo.increaseFR_session_fraction(iRegion, :), fraction_gonogo.increaseFR_session_fraction(iRegion, :));
+    pval_12 = ranksum(fraction_passive.increaseFR_session_fraction(iRegion, ~isnan(fraction_passive.increaseFR_session_fraction(iRegion,:)))...
+        , fraction_gogogo.increaseFR_session_fraction(iRegion, ~isnan(fraction_gogogo.increaseFR_session_fraction(iRegion,:))));
+    pval_13 = ranksum(fraction_passive.increaseFR_session_fraction(iRegion, :), fraction_gonogo.increaseFR_session_fraction(iRegion, :));
+    pval_23 = ranksum(fraction_gogogo.increaseFR_session_fraction(iRegion, :), fraction_gonogo.increaseFR_session_fraction(iRegion, :));
     disp([pval_12, pval_13, pval_23])
 
-    prettify_pvalues(gca, [1, 1, 2], [2, 3, 3], [pval_12, pval_13, pval_23],'PlotNonSignif',false)
+    prettify_pvalues(gca, [1, 1, 2], [2, 3, 3], [pval_12, pval_13, pval_23])
 end
 

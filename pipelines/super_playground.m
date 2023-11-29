@@ -23,7 +23,7 @@ raster_window = [-0.5, 1];
 psth_bin_size = 0.01;
 for iKeepUnit = 1:length(keepUnits)
 
-    iKeepUnit = iKeepUnit + 1
+    iKeepUnit = iKeepUnit + 1;
     
     [curr_psth, curr_raster, t, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
         keepUnits(iKeepUnit), raster_window, psth_bin_size, ...

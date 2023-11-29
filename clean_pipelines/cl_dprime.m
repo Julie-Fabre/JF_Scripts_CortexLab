@@ -77,8 +77,10 @@ for iRegion = 1:size(plot_regions, 2)
 
                                 sd_stim_1 = nanstd(activity_per_trial_neuron(trials_1, iNeuron)./0.001); %./sqrt(sum(trials_1));
                                 sd_stim_2 = nanstd(activity_per_trial_neuron(trials_2, iNeuron)./0.001); %./sqrt(sum(trials_2));
-
-                                pooled_sd = sqrt((sd_stim_1 * sd_stim_1 + sd_stim_2 * sd_stim_2)./2) + 1;
+                                n_stim_1 = length(activity_per_trial_neuron(trials_1, iNeuron))-1;
+                                n_stim_2 = length(activity_per_trial_neuron(trials_1, iNeuron))-1;
+                                %pooled_sd = sqrt((sd_stim_1 * sd_stim_1 + sd_stim_2 * sd_stim_2)./2) + 1;
+                                pooled_sd = sqrt((n_stim_1*sd_stim_1 * sd_stim_1 + n_stim_2*sd_stim_2 * sd_stim_2)./(n_stim_1+n_stim_2)) + 0.01;
                                 pooled_sd_all{iRegion}(iNeuron + unitCount, iPair) = pooled_sd;
                                 d_prime{iRegion}(iNeuron + unitCount, iPair) = abs(average_stim_1-average_stim_2) / pooled_sd;
                                 d_prime_session{iRegion}(iNeuron, iPair) = abs(average_stim_1-average_stim_2) / pooled_sd;
@@ -87,6 +89,14 @@ for iRegion = 1:size(plot_regions, 2)
                                 tempDur{iRegion}(iNeuron + unitCount, iPair) = task_data.wvDur(these_units_session_all(iNeuron));
                                 pss{iRegion}(iNeuron + unitCount, iPair) = task_data.pss(these_units_session_all(iNeuron));
                                 propISI{iRegion}(iNeuron + unitCount, iPair) = task_data.propISI(these_units_session_all(iNeuron));
+                                if d_prime{iRegion}(iNeuron + unitCount, iPair) > 1.3
+                                    %keyboard;
+                                    % figure();
+                                    % plot(smoothdata(squeeze(av_psth_here(iNeuron, cond_inds(1,1), :)), 'gaussian', [0, 50])); hold on;
+                                    % plot(smoothdata(squeeze(av_psth_here(iNeuron, cond_inds(1,2), :)), 'gaussian', [0, 50]));
+                                    % plot(smoothdata(squeeze(av_psth_here(iNeuron, cond_inds(2,1), :)), 'gaussian', [0, 50]));
+                                    % title([num2str(abs(average_stim_1-average_stim_2)),', ', num2str(pooled_sd)])
+                                end
                                 %qq thissession doesn't work. wierd! 
                                 %d_prime_z(iNeuron + unitCount, iPair, iRegion) = zscore((activity_per_trial_neuron(trials_1, iNeuron)))...
                                 %    - ztrans((activity_per_trial_neuron(trials_2, iNeuron)));
