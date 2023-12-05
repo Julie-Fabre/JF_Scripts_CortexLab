@@ -1,4 +1,4 @@
-function decodingAccuracy = cl_decoding(task_data, idx, keepVis, keepUnits, decoding_method, regularizationMethod, plot_regions, plotMe)
+function [decodingAccuracy, correct_value, guessed_value] = cl_decoding(task_data, idx, keepVis, keepUnits, decoding_method, regularizationMethod, n_folds, plot_regions, plotMe)
 
 
 %plot_regions = [1, 2, 3]; %[1, 2, 5]; % Striatum, GPe, SNr
@@ -13,12 +13,13 @@ session_cumCells = cumsum(session_nCells);
 
 task_data.animal_day_site_shank(isnan(task_data.animal_day_site_shank)) = 0;
 
-
+thesePairs = [1, 2; 1, 3; 2, 3];
 for iRegion = 1:size(plot_regions, 2)
     decoding_matrix = cell(size(nonZero_idx, 2)-1, 1);
     trialType_matrix = cell(size(nonZero_idx, 2)-1, 1);
     trialType = [];
     trialCount = 0;
+    d_prime= [];
 
     if keepVis
         these_units = task_data.unit_area == iRegion & ...
@@ -69,6 +70,27 @@ for iRegion = 1:size(plot_regions, 2)
                         decoding_matrix{iSession} = activity_per_trial_neuron; % trials * neurons
                         trialType = [trialType; theseTrialTypes(:, 1)];
                         trialType_matrix{iSession} = theseTrialTypes(:, 1);
+                         for iNeuron = 1:size(activity_per_trial_neuron, 2)
+                        clearvars dprime_here
+                        for iPair = 1:3
+                            trials_1 = ismember(theseTrialTypes, trialTypes(thesePairs(iPair, 1), :), 'rows');
+                            trials_2 = ismember(theseTrialTypes, trialTypes(thesePairs(iPair, 2), :), 'rows');
+
+ average_stim_1 = (nanmean(activity_per_trial_neuron(trials_1, iNeuron)./0.001)); % QQ baseline - normalize ?
+                                average_stim_2 = (nanmean(activity_per_trial_neuron(trials_2, iNeuron)./0.001));
+
+                               
+                        sd_stim_1 = nanstd(activity_per_trial_neuron(trials_1, iNeuron)./0.001); %./sqrt(sum(trials_1));
+                        sd_stim_2 = nanstd(activity_per_trial_neuron(trials_2, iNeuron)./0.001); %./sqrt(sum(trials_2));
+                        n_stim_1 = length(activity_per_trial_neuron(trials_1, iNeuron))-1;
+                        n_stim_2 = length(activity_per_trial_neuron(trials_1, iNeuron))-1;
+                        pooled_sd = sqrt((n_stim_1*sd_stim_1 * sd_stim_1 + n_stim_2*sd_stim_2 * sd_stim_2)./(n_stim_1+n_stim_2)) + 0.01;
+                        dprime_here(iPair,:) = abs(average_stim_1-average_stim_2) / pooled_sd;
+                        
+                        end
+                        d_prime = [d_prime, any(abs(dprime_here(:))>0.35)] ;
+                         end
+                               
                         %trialCount = trialCount + size(activity_per_trial_neuron,1);
                     end
 
@@ -142,7 +164,7 @@ for iRegion = 1:size(plot_regions, 2)
     % correct_perStim(3) = sum(correct==3)/total_trials_3;
 
     % real thing: divide into 5 folds. 
-    n_folds = 20;
+    %n_folds = 20;
     fold_length_1 = floor(total_trials_1/n_folds);
     fold_length_2 = floor(total_trials_2/n_folds);
     fold_length_3 = floor(total_trials_3/n_folds);
@@ -154,7 +176,7 @@ for iRegion = 1:size(plot_regions, 2)
         for j = 1:n_folds-1
             folds_trials = [folds_trials; ones(fold_length, 1) * j];
         end
-        folds_trials = [folds_trials; ones(total_trials - fold_length * 4, 1) * n_folds];
+        folds_trials = [folds_trials; ones(total_trials - fold_length * (n_folds-1), 1) * n_folds];
     end
 
     % compute for each fold on 4/5th, 1/5 
@@ -164,20 +186,46 @@ for iRegion = 1:size(plot_regions, 2)
         train_trials = trialTypes_merged(folds_trials ~= iFold, :);
         testSet = mergedMatrix(folds_trials == iFold, :);
         test_trials = trialTypes_merged(folds_trials == iFold, :);
+        
+        if strcmp(regularizationMethod, 'L1')
+            cvfit = cvglmnet(trainSet, train_trials, 'multinomial');
+    
+            % Best lambda
+            lambda_optimal = cvfit.lambda_min;
+    
+            options = glmnetSet;
+            options.lambda = lambda_optimal;
+            fit3 = glmnet(trainSet, train_trials, 'multinomial', options);
+            %glmnetPrint(fit3);
+            prediction_cv = glmnetPredict(fit3, testSet, lambda_optimal, 'class'); %extract coefficients at a single value of lambda%
 
-        fit3 = glmnet(trainSet, train_trials, 'multinomial');
-        %glmnetPrint(fit3);
-        prediction_cv = glmnetPredict(fit3, testSet, [], 'class'); %extract coefficients at a single value of lambda%    
-        prediction_cv_highlambda = prediction_cv(:,100);
+            ncoef = glmnetCoef(fit3,[],false)
+            figure(); hold on;
+            plot(ncoef{1});plot(ncoef{2});plot(ncoef{3});
+        else
+           % keepNeurons = d_prime;
+            options = glmnetSet;
+            fit3 = glmnet(trainSet(:,logical(d_prime)), train_trials, 'multinomial', options);
+            lambda_optimal = 0;
+            prediction_cv = glmnetPredict(fit3, testSet(:, logical(d_prime)), lambda_optimal, 'class'); %extract coefficients at a single value of lambda% 
+    
+            
+        end
 
-        correct = test_trials(prediction_cv_highlambda == test_trials);
+        %prediction_cv_highlambda = prediction_cv(:,100);
+
+        correct = test_trials(prediction_cv == test_trials);
         correct_perStim_cv(1,iFold) = sum(correct==1)/sum(test_trials==1);
         correct_perStim_cv(2,iFold) = sum(correct==2)/sum(test_trials==2);
         correct_perStim_cv(3,iFold) = sum(correct==3)/sum(test_trials==3);
+        correct_value{iRegion}{iFold} = test_trials;
+        guessed_value{iRegion}{iFold} = prediction_cv;
 
     end
     
   decodingAccuracy(iRegion, :, :) =  correct_perStim_cv;
+  %correct_value{iFold} = test_trials;
+  %guessed_value{iFold} = prediction_cv;
 
 end
 

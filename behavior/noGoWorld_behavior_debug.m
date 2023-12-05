@@ -620,11 +620,12 @@ for iAnimal = 1:size(animalsAll, 2)
         end
     end
     keep_day = unique(keep_day);
-    day_num = cellfun(@(x) datenum(x), {experiments(keep_day).day});
-%     day_labels_temp = cellfun(@(day, protocol) [day(6:end)], ...
-%         {experiments(keep_day).day},bhv.expDefName(keep_day), 'uni', false);
-%     bhvOut(iAnimal). dates =  cellfun(@(day, protocol) [day], ...
-%         {experiments(keep_day).day},bhv.expDefName(keep_day), 'uni', false);
+    day_num = (cellfun(@(x) datenum(x), {experiments(keep_day).day}));
+    day_num_label = datestr(day_num, 'mm-dd');
+    day_labels_temp = cellfun(@(day, protocol) [day(6:end)], ...
+        {experiments(keep_day).day},bhv.expDefName(keep_day), 'uni', false);
+    bhvOut(iAnimal). dates =  cellfun(@(day, protocol) [day], ...
+        {experiments(keep_day).day},bhv.expDefName(keep_day), 'uni', false);
     %  day_labels = cellfun(@(day, protocol) [protocol, ' ', day(6:end)], ...
     %    {experiments(keep_day).day},bhv.expDefName(keep_day), 'uni', false);
     %
@@ -632,12 +633,14 @@ for iAnimal = 1:size(animalsAll, 2)
        
  
 
-%    [unique_protocols,~,protocol_idx] = unique(bhv.expDefName(keep_day));
- %   protocol_col = hsv(length(unique_protocols));
-%     for iDay = 1:length(protocol_idx)
-%         thisColor = sprintf(tempLabel,num2str(protocol_col(protocol_idx(iDay),:)));
-%         day_labels{iDay} = append(thisColor, day_labels_temp{iDay});
-%     end
+    [unique_protocols,~,protocol_idx] = unique(bhv.expDefName(keep_day));
+    protocol_col = hsv(length(unique_protocols));
+     for iDay = 1:length(protocol_idx)
+         thisColor = sprintf(tempLabel,num2str(protocol_col(protocol_idx(iDay),:)));
+         day_labels{iDay} = append(thisColor, day_labels_temp{iDay});
+     end
+     day_skip = floor(length(protocol_idx)/20) + 1;
+    
     figure('Name', animal);
     subplot(231)
     yyaxis left
@@ -647,8 +650,12 @@ for iAnimal = 1:size(animalsAll, 2)
     plot(day_num, bhv.n_trials(keep_day, :), 'linewidth', 2);
     plot(day_num, bhv.water_amount(keep_day, :)*100, 'linewidth', 2, 'color', [1.0000, 0.6445, 0]);
     ylabel('Trials');
-    yyaxis right
+    xticks(day_num(1:day_skip:length(day_num)))
+    xticklabels(day_labels(1:day_skip:end))
 
+
+    yyaxis right
+    
     scatter(day_num, bhv.total_water(keep_day, :), 'linewidth', 2);
     hold on;
     plot(day_num, bhv.total_water(keep_day, :), 'linewidth', 2);
@@ -684,11 +691,13 @@ for iAnimal = 1:size(animalsAll, 2)
     ylabel('Session');
     set(gca, 'XTick', 1:length(con));
     set(gca, 'XTickLabel', cc);
-    set(gca, 'YTick', 1:length(keep_day));
-   % set(gca, 'YTickLabel', day_labels);
+    yticks(1:day_skip:length(day_num))
+    yticklabels(day_labels(1:day_skip:end))
+
     xticks([1, 2, 3])
     xticklabels({'Go1', 'Go2', 'NoGo'})
     caxis([0, 1])
+
     makepretty;
 
     subplot(233)
@@ -707,8 +716,8 @@ for iAnimal = 1:size(animalsAll, 2)
     ylabel('Session');
     set(gca, 'XTick', 1:length(con));
     set(gca, 'XTickLabel', cc);
-    set(gca, 'YTick', 1:length(keep_day));
-  %  set(gca, 'YTickLabel', day_labels);
+    yticks(1:day_skip:length(day_num))
+    yticklabels(day_labels(1:day_skip:end))
     xticks([1, 2, 3])
     xticklabels({'Go1', 'Go2', 'NoGo'})
 
@@ -731,7 +740,8 @@ for iAnimal = 1:size(animalsAll, 2)
     ylabel('Session');
     set(gca, 'XTick', 1:length(con));
     set(gca, 'XTickLabel', cc);
-    set(gca, 'YTick', 1:length(keep_day));
+    yticks(1:day_skip:length(day_num))
+    yticklabels(day_labels(1:day_skip:end))
 %    set(gca, 'YTickLabel', day_labels);
     %     for iDay = 1:size(keep_day, 2)
     %         txt = num2str(bhv.trialTime(keep_day(iDay), :)');

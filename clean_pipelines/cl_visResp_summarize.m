@@ -50,7 +50,7 @@ end
             p12 = ranksum(squeeze(vis_resp_session_fraction{1}(iRegion,:,iPair)), squeeze(vis_resp_session_fraction{2}(iRegion,:,iPair)));
             p13 = ranksum(squeeze(vis_resp_session_fraction{1}(iRegion,:,iPair)), squeeze(vis_resp_session_fraction{3}(iRegion,:,iPair)));
             p23 = ranksum(squeeze(vis_resp_session_fraction{2}(iRegion,:,iPair)), squeeze(vis_resp_session_fraction{3}(iRegion,:,iPair)));
-            ylim([-0.01, 0.1])
+            ylim([-0.01, 1.1])
             prettify_pvalues(gca, [1,1,2], [2,3,3], [p12, p13, p23])
             
         end

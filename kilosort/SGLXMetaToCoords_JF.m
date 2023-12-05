@@ -13,7 +13,7 @@
 %
 % Julie Fabre: 2023-12-02: added option to load and save file from/to specific
 % directories
-function chanMapFile = SGLXMetaToCoords_JF(metaName, path, saveDir)
+function [chanMapFile, xcoords, ycoords] = SGLXMetaToCoords_JF(metaName, path, saveDir)
 
 figure(1); 
 clf;

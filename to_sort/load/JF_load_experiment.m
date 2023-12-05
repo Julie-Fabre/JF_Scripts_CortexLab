@@ -852,9 +852,9 @@ if ephys_exists && load_parts.ephys && exist('lfp_channel', 'var')
     if isnumeric(lfp_channel) && loadLFP
 
         % Load LFP of whole current experiment from one channel
-        if verbose;
+        if verbose
             disp(['Loading LFP (channel ', num2str(lfp_channel), ')...']);
-        end;
+        end
 
         % Load single LFP channel within experiment bounds
         % (treat as concatenated if multiple files)
@@ -874,9 +874,9 @@ if ephys_exists && load_parts.ephys && exist('lfp_channel', 'var')
         lfp_t_timeline = interp1(sync_ephys, sync_timeline, lfp_t, 'linear', 'extrap');
 
         %%% Remove light artifact
-        if verbose;
+        if verbose
             disp('Cleaning LFP...');
-        end;
+        end
 
         % Get light times (assume blue/violet alternate)
         light_t_timeline = interp1(sync_ephys, sync_timeline, sync(led_sync_idx).timestamps, 'linear', 'extrap');

@@ -224,8 +224,8 @@ for iRegion = 1:size(plot_regions, 2)
                                     dfr{iRegion}(iNeuron + unitCount, iPair) = dfr_i;
                                     dsum_diff{iRegion}(iNeuron + unitCount, iPair) = dsum_diff_i;
 
-                                    vis_resp{iRegion}(iNeuron + unitCount, iPair) = zscore_tiny_i; %(average_stim - baseline  ) / abs(sd_stim+ 0.001);
-                                    vis_resp_session{iRegion}(iNeuron, iPair) = zscore_tiny_i; %(average_stim - baseline) / abs(sd_stim+ 0.001);
+                                    vis_resp{iRegion}(iNeuron + unitCount, iPair) = dsum_diff_i; %(average_stim - baseline  ) / abs(sd_stim+ 0.001);
+                                    vis_resp_session{iRegion}(iNeuron, iPair) = dsum_diff_i; %(average_stim - baseline) / abs(sd_stim+ 0.001);
                                     vis_resp1{iRegion}(iNeuron + unitCount, iPair) = zscore_tiny_i1;
                                     vis_resp2{iRegion}(iNeuron + unitCount, iPair) = zscore_tiny_i2;
 
@@ -284,7 +284,14 @@ for iRegion = 1:size(plot_regions, 2)
                 end
                 for iPair = 1:3
                     try
-                        vis_resp_session_fraction(iRegion, iSession, iPair) = sum(abs(vis_resp_session{iRegion}(:, iPair)) > 0.5) ./ size(vis_resp_session{iRegion}, 1);
+                        vis_resp_session_fraction(iRegion, iSession, iPair) = sum(abs(vis_resp_session{iRegion}(:, iPair)) >= 0.3) ...
+                            ./ size(vis_resp_session{iRegion}, 1);
+
+                         %vis_resp_session_fraction(iRegion, iSession, iPair) = sum(abs(pvalue_shuff_session{iRegion}(:, iPair)) ==1) ...
+                         %   ./ size(vis_resp_session{iRegion}, 1);
+                    
+                        
+                        %vis_resp_session_fraction(iRegion, iSession, iPair) = sum(abs(vis_resp_session{iRegion}(:, iPair)) > 0.5) ./ size(vis_resp_session{iRegion}, 1);
                     catch
                         vis_resp_session_fraction(iRegion, iSession, iPair) = NaN;
 
