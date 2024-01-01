@@ -1,49 +1,92 @@
 % JF_runKSandBombcell(animal, date, site, recording, rerunKS, rerunQM)
 
 rerunQM = 1;
-%JF_runKSandBombcell(animal, date, site, recording, rerunKS, rerunQM)
+
+
 %% ongoing
 rerunKS = 1;
-JF_runKSandBombcell('JF088', '2022-11-29', 1, [],rerunKS,0)%done
-JF_runKSandBombcell('JF088', '2022-11-30', 1, [],rerunKS,0)%done
 
-JF_runKSandBombcell('JF090', '2022-11-15', 1, [],rerunKS,0)%
-JF_runKSandBombcell('JF090', '2022-11-16', 1, [],rerunKS,0)%
-JF_runKSandBombcell('JF090', '2022-11-17', 1, [],rerunKS,0)%
-
-
-
-JF_runKSandBombcell('JF093', '2023-03-11', 1, [],rerunKS,0)%
-JF_runKSandBombcell('JF093', '2023-03-12', 1, [],rerunKS,0)%
-JF_runKSandBombcell('JF093', '2023-03-14', 2, [],rerunKS,0)%
-JF_runKSandBombcell('JF093', '2023-03-07', 2, [],rerunKS,0)%
-JF_runKSandBombcell('JF107', '2023-04-05', 3, [],rerunKS,0)%
-JF_runKSandBombcell('JF107', '2023-04-05', 4, [],rerunKS,0)%
-%JF_runKSandBombcell('JF107', '2023-04-06', 2, [],rerunKS,0)%
-JF_runKSandBombcell('JF107', '2023-04-08', 2, [],rerunKS,0)
-JF_runKSandBombcell('JF107', '2023-04-10', 1, [],rerunKS,0)
-JF_runKSandBombcell('JF107', '2023-04-10', 2, [],rerunKS,0)
-
-JF_runKSandBombcell('JF093', '2023-03-16', 1, [],rerunKS,0)%
-JF_runKSandBombcell('JF093', '2023-03-18', 1, [],rerunKS,0)%
-
-
-
-rerunKS = 0;
-for iSite = 1:3
-    JF_runKSandBombcell('JF078', '2022-05-21', iSite, [],rerunKS,0)%done
-    JF_runKSandBombcell('JF078', '2022-05-22', iSite, [],rerunKS,0)%done
-    JF_runKSandBombcell('JF078', '2022-05-23', iSite, [],rerunKS,0)%done
-    JF_runKSandBombcell('JF078', '2022-05-25', iSite, [],rerunKS,0)%done
-    JF_runKSandBombcell('JF078', '2022-05-26', iSite, [],rerunKS,0)%done
-    JF_runKSandBombcell('JF078', '2022-05-28', iSite, [],rerunKS,0)%done
-    JF_runKSandBombcell('JF078', '2022-05-29', iSite, [],rerunKS,0)%done
-    JF_runKSandBombcell('JF078', '2022-05-30', iSite, [],rerunKS,0)%done
-    JF_runKSandBombcell('JF078', '2022-05-31', iSite, [],rerunKS,0)%done
-    JF_runKSandBombcell('JF078', '2022-06-01', iSite, [],rerunKS,0)%done
-end
+% JF089
+%JF_runKSandBombcell('JF089', '2022-11-15', 1, [],rerunKS,0)
+%JF_runKSandBombcell('JF089', '2022-11-15', 2, [],rerunKS,0)
+%JF_runKSandBombcell('JF089', '2022-11-16', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF089', '2022-11-16', 2, [],rerunKS,0)
+JF_runKSandBombcell('JF089', '2022-11-17', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF089', '2022-11-17', 2, [],rerunKS,0)
 
 %% 
-rerunKS=1;
-JF_runKSandBombcell('JF099', '2023-02-19', 1, [],rerunKS,0)%
-JF_runKSandBombcell('JF099', '2023-02-24', 1, [],rerunKS,0)%
+% JF090
+JF_runKSandBombcell('JF090', '2022-11-15', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF090', '2022-11-16', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF090', '2022-11-17', 1, [],rerunKS,0)
+
+% JF059
+JF_runKSandBombcell('JF090', '2022-01-13', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF090', '2022-01-13', 2, [],rerunKS,0)
+JF_runKSandBombcell('JF090', '2022-01-14', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF090', '2022-01-14', 2, [],rerunKS,0)
+JF_runKSandBombcell('JF090', '2022-01-14', 3, [],rerunKS,0)
+JF_runKSandBombcell('JF090', '2022-01-14', 4, [],rerunKS,0)
+JF_runKSandBombcell('JF090', '2022-01-14', 5, [],rerunKS,0)
+JF_runKSandBombcell('JF090', '2022-01-14', 6, [],rerunKS,0)
+JF_runKSandBombcell('JF090', '2022-01-15', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF090', '2022-01-15', 2, [],rerunKS,0)
+JF_runKSandBombcell('JF090', '2022-01-15', 3, [],rerunKS,0)
+
+% JF062
+JF_runKSandBombcell('JF062', '2021-11-05', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF062', '2021-11-05', 2, [],rerunKS,0)
+JF_runKSandBombcell('JF062', '2021-11-06', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF062', '2021-11-07', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF062', '2021-11-07', 2, [],rerunKS,0)
+JF_runKSandBombcell('JF062', '2021-11-07', 3, [],rerunKS,0)
+JF_runKSandBombcell('JF062', '2021-11-07', 4, [],rerunKS,0)
+
+% JF063 - no histo 
+JF_runKSandBombcell('JF063', '2021-11-09', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF063', '2021-11-09', 2, [],rerunKS,0)
+JF_runKSandBombcell('JF063', '2021-11-09', 3, [],rerunKS,0)
+JF_runKSandBombcell('JF063', '2021-11-09', 4, [],rerunKS,0)
+JF_runKSandBombcell('JF063', '2021-11-09', 5, [],rerunKS,0)
+JF_runKSandBombcell('JF063', '2021-11-09', 6, [],rerunKS,0)
+JF_runKSandBombcell('JF063', '2021-11-10', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF063', '2021-11-10', 2, [],rerunKS,0)
+JF_runKSandBombcell('JF063', '2021-11-10', 3, [],rerunKS,0)
+JF_runKSandBombcell('JF063', '2021-11-10', 4, [],rerunKS,0)
+JF_runKSandBombcell('JF063', '2021-11-10', 5, [],rerunKS,0)
+JF_runKSandBombcell('JF063', '2021-11-10', 6, [],rerunKS,0)
+
+% JF065 - no histo
+JF_runKSandBombcell('JF065', '2022-01-18', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF065', '2022-01-18', 2, [],rerunKS,0)
+JF_runKSandBombcell('JF065', '2022-01-18', 3, [],rerunKS,0)
+JF_runKSandBombcell('JF065', '2022-01-18', 4, [],rerunKS,0)
+JF_runKSandBombcell('JF065', '2022-01-19', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF065', '2022-01-19', 2, [],rerunKS,0)
+JF_runKSandBombcell('JF065', '2022-01-20', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF065', '2022-01-20', 2, [],rerunKS,0)
+JF_runKSandBombcell('JF065', '2022-01-20', 3, [],rerunKS,0)
+JF_runKSandBombcell('JF065', '2022-01-20', 4, [],rerunKS,0)
+
+% JF066 - no histo 
+JF_runKSandBombcell('JF066', '2022-02-03', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF066', '2022-02-03', 2, [],rerunKS,0)
+
+% JF068 - no histo 
+JF_runKSandBombcell('JF068', '2022-01-27', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF068', '2022-01-27', 2, [],rerunKS,0)
+JF_runKSandBombcell('JF068', '2022-01-27', 3, [],rerunKS,0)
+JF_runKSandBombcell('JF068', '2022-01-27', 4, [],rerunKS,0)
+JF_runKSandBombcell('JF068', '2022-01-28', 1, [],rerunKS,0)% not sure abut the rest that day 
+
+% JF086 - no histo
+JF_runKSandBombcell('JF086', '2022-11-01', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF086', '2022-11-02', 1, [],rerunKS,0)
+
+% JF088
+JF_runKSandBombcell('JF088', '2022-11-29', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF088', '2022-11-30', 1, [],rerunKS,0)
+
+% JF092 
+JF_runKSandBombcell('JF092', '2022-12-12', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF092', '2022-12-12', 2, [],rerunKS,0)

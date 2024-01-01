@@ -9,7 +9,9 @@ else
 end
 
 load_passive_ = true;
+%info_table = readtable('/home/julie/Dropbox/PhD_summary/allPassiveRecs.csv');
 regions = {'CP', 'GPe', 'SNr'}; % 'GPi', 'STN', 'SNr', 'SNc', 'VTA'};
+%regions = {'CP'};
 warning off;
 %get region nums (allen format)
 
@@ -18,9 +20,14 @@ if ~exist('st', 'var')
     st = [];
 end
 regions_id = [672, 1022, 381];
+% for iRegion = 1:size(regions, 2)
+%     regions_id(iRegion) = st.id(strcmp(st.acronym, regions(iRegion)));
+% end
 
 % get all mice x day x site combinations
 use_recs_full = strcmp(info_table.Use_, 'Yes');
+
+% good units (bombcell) (+ cell type?) . location. psth per image type.
 
 %% load all mouse rec locations
 info_table = sortrows(info_table, 1); % make sure data is sorted by mouse
@@ -55,13 +62,17 @@ end
 
 %% load data
 
-for iRecording = 1:length(use_recs) 
+for iRecording = 1:length(use_recs) %61:length(use_recs)
+    %try
+    %try
+    % curr variables
 
     animal = unique_mice{mouse_day_sites_shank_rec(iRecording, 1)};
     curr_day = mouse_day_sites_shank_rec(iRecording, 2);
     site = mouse_day_sites_shank_rec(iRecording, 3);
     curr_shank = mouse_day_sites_shank_rec(iRecording, 4);
     curr_rec = mouse_day_sites_shank_rec(iRecording, 5);
+    %exps =
 
     % load probe_ccf and probe2ephys
     probe2ephys_location = AP_cortexlab_filenameJF(animal, [], [], 'probe2ephys');
@@ -203,7 +214,7 @@ for iRecording = 1:length(use_recs)
                 continue;
             end
             load_me_max = exp_n_trials(find(n_trials_exp == max(n_trials_exp)));
-            for iExperiment = load_me_max 
+            for iExperiment = load_me_max %1:size(these_exps,2)
                 experiment = load_me_max; %these_exps(iExperiment); %for now, just load 1 experiment
                 experiments = AP_find_experimentsJF(animal, '', true);
                 experiments = experiments([experiments.ephys]);
@@ -453,7 +464,7 @@ for iRecording = 1:length(use_recs)
                         passive_data_per_cond.pvalue_shuffled_005_per_cond{experiment_type}(iUnit + unitCount, iCond) = ...
                             real_diff >= pctile_2 || real_diff <= pctile_1;
 
-                        passive_data_per_cond.pvalue_shuffled_0025_per_cond{experiment_type}(iUnit + unitCount, iCond) = ...
+                        passive_data_per_cond.pvalue_shuffled_0025_per_cond{experiment_type}(iUnit + unitCount) = ...
                             real_diff >= prctile(shuffled_diffs, 97.5) || real_diff <= prctile(shuffled_diffs, 2.5);
 
 

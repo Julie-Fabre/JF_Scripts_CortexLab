@@ -95,7 +95,7 @@ if isempty(syncExists)
     if isSpikeGlx
         [ephysKSfile, ~] = AP_cortexlab_filenameJF(animal, date, experiment, 'ephys', site, recording);
         if isempty(dir([ephysKSfile, filesep, 'sync.mat']))
-            syncFT(ephysAPfile, 385, ephysKSfile);
+%            syncFT(ephysAPfile, 385, ephysKSfile);
         end
     else
         AP_preprocess_phase3_newOEJF_onlysync(animal,date, site)

@@ -1,6 +1,6 @@
 function [vis_resp, vis_resp1, vis_resp2, vis_resp_session_num, vis_resp_animal_num, vis_resp_session_fraction, ...
     vis_resp_full, vis_resp_full_1, vis_resp_full_2, pvalue_shuff, pvalue_glmtest, zscore_val, ...
-    zscore_tiny_tiny, zscore_tiny, dfr, dsum_diff] = ...
+    zscore_tiny_tiny, zscore_tiny, dfr, dsum_diff, vis_resp_session_fraction_all] = ...
     cl_visResp(task_data, idx, keepVis, keepUnits, plot_regions, plotMe)
 
 %plot_regions = [1, 2, 3]; %[1, 2, 5]; % Striatum, GPe, SNr
@@ -217,6 +217,7 @@ for iRegion = 1:size(plot_regions, 2)
                                     %pvalue_shuff_session{iRegion}(iNeuron, iPair) = 0;
 
                                     pvalue_glmtest{iRegion}(iNeuron + unitCount, iPair) = pValue_glmTest_i;
+                                    pvalue_glmtest_session{iRegion}(iNeuron, iPair) = double(pValue_glmTest_i > 0.95 || pValue_glmTest_i < 0.05);
 
                                     zscore_val{iRegion}(iNeuron + unitCount, iPair) = zscore_val_i;
                                     zscore_tiny_tiny{iRegion}(iNeuron + unitCount, iPair) = zscore_tiny_tiny_i;
@@ -262,6 +263,7 @@ for iRegion = 1:size(plot_regions, 2)
                                     pvalue_shuff{iRegion}(iNeuron + unitCount, iPair) = NaN;
                                     pvalue_shuff_session{iRegion}(iNeuron, iPair) = NaN;
                                     pvalue_glmtest{iRegion}(iNeuron, iPair) = NaN;
+                                    pvalue_glmtest_session{iRegion}(iNeuron, iPair) = NaN;
 
                                     zscore_val{iRegion}(iNeuron + unitCount, iPair) = NaN;
                                     zscore_tiny_tiny{iRegion}(iNeuron + unitCount, iPair) = NaN;
@@ -287,8 +289,8 @@ for iRegion = 1:size(plot_regions, 2)
                         vis_resp_session_fraction(iRegion, iSession, iPair) = sum(abs(vis_resp_session{iRegion}(:, iPair)) >= 0.3) ...
                             ./ size(vis_resp_session{iRegion}, 1);
 
-                         %vis_resp_session_fraction(iRegion, iSession, iPair) = sum(abs(pvalue_shuff_session{iRegion}(:, iPair)) ==1) ...
-                         %   ./ size(vis_resp_session{iRegion}, 1);
+                        % vis_resp_session_fraction(iRegion, iSession, iPair) = sum(abs(pvalue_shuff_session{iRegion}(:, iPair)) ==1) ...
+                        %    ./ size(vis_resp_session{iRegion}, 1);
                     
                         
                         %vis_resp_session_fraction(iRegion, iSession, iPair) = sum(abs(vis_resp_session{iRegion}(:, iPair)) > 0.5) ./ size(vis_resp_session{iRegion}, 1);
@@ -297,16 +299,30 @@ for iRegion = 1:size(plot_regions, 2)
 
                     end
                 end
+                try
+                %vis_resp_session_fraction_all(iRegion, iSession) = sum(any(abs(pvalue_shuff_session{iRegion}(:, :)),2)) ...
+                %            ./ size(vis_resp_session{iRegion}, 1);
+
+                vis_resp_session_fraction_all(iRegion, iSession) = sum(any(abs(pvalue_glmtest_session{iRegion}(:, :)),2)) ...
+                            ./ size(vis_resp_session{iRegion}, 1);
+               
+                catch
+                    vis_resp_session_fraction_all(iRegion, iSession) = NaN;
+                end
+                    
                 vis_resp_animal_num{iRegion, iSession} = unique_combs(iSession, 1);
 
 
             else
                 vis_resp_session_fraction(iRegion, iSession, 1:3) = NaN;
+                vis_resp_session_fraction_all(iRegion, iSession) = NaN;
 
             end
 
         else
             vis_resp_session_fraction(iRegion, iSession, 1:3) = NaN;
+            vis_resp_session_fraction_all(iRegion, iSession) = NaN;
+
 
         end
 

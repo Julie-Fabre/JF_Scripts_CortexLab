@@ -252,6 +252,9 @@ set(gui_data.waveform_lines(max_channel),'Color','b');
 
 if length(gui_data.curr_unit) == 1
     yrange = range(gui_data.channel_positions(:,2))*0.03.*[-1,1];
+    if any(yrange == 0)
+        yrange = range([gui_data.channel_positions(:,2), gui_data.channel_positions(:,2) - 50])*0.03.*[-1,1];
+    end
     ylim(get(gui_data.waveform_lines(1),'Parent'),[gui_data.channel_positions(max_channel,2) + yrange]);
 elseif length(gui_data.curr_unit) > 1
     ylim(get(gui_data.waveform_lines(1),'Parent'), ...

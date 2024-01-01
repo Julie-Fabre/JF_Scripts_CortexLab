@@ -32,10 +32,8 @@ for iTask = 1:3
     end
     [vis_resp{iTask}, vis_resp1{iTask}, vis_resp2{iTask}, vis_resp_session_num{iTask}, vis_resp_animal_num{iTask}, vis_resp_session_fraction{iTask}, ...
         vis_resp_full{iTask}, vis_resp_full_1{iTask}, vis_resp_full_2{iTask}, pvalue_shuff{iTask},pvalue_glmTest{iTask}, zscore_val{iTask}, zscore_tiny_tiny{iTask}, ...
-        zscore_tiny{iTask}, dfr{iTask}, dsum_diff{iTask}] = cl_visResp(task_data, idx, keepVis, keepUnits, plotRegions, plotMe);
+        zscore_tiny{iTask}, dfr{iTask}, dsum_diff{iTask}, vis_resp_session_fraction_all{iTask}] = cl_visResp(task_data, idx, keepVis, keepUnits, plotRegions, plotMe);
 end
-
-%for iTask = 1:3
     figure();
     for iPair = 1:3
         for iRegion = 1:3
@@ -56,6 +54,56 @@ end
         end
 
     end
+%% perc. cells 
+
+% per stimulus
+    figure();
+    for iPair = 1:3
+        for iRegion = 1:3
+            subplot(3, size(plotRegions, 2), iPair+(iRegion - 1)*(size(plotRegions, 2)));
+            hold on;
+
+            violinplot([squeeze(vis_resp_session_fraction{1}(iRegion,:,iPair)), squeeze(vis_resp_session_fraction{2}(iRegion,:,iPair)),...
+                squeeze(vis_resp_session_fraction{3}(iRegion,:,iPair))], ...
+                [ones(length(squeeze(vis_resp_session_fraction{1}(iRegion,:,iPair))),1);...
+                ones(length(squeeze(vis_resp_session_fraction{2}(iRegion,:,iPair))),1).*2;...
+                ones(length(squeeze(vis_resp_session_fraction{3}(iRegion,:,iPair))),1).*3])%iR, iS, iP
+            p12 = ranksum(squeeze(vis_resp_session_fraction{1}(iRegion,:,iPair)), squeeze(vis_resp_session_fraction{2}(iRegion,:,iPair)));
+            p13 = ranksum(squeeze(vis_resp_session_fraction{1}(iRegion,:,iPair)), squeeze(vis_resp_session_fraction{3}(iRegion,:,iPair)));
+            p23 = ranksum(squeeze(vis_resp_session_fraction{2}(iRegion,:,iPair)), squeeze(vis_resp_session_fraction{3}(iRegion,:,iPair)));
+            ylim([-0.01, 1.1])
+            prettify_pvalues(gca, [1,1,2], [2,3,3], [p12, p13, p23])
+            
+        end
+
+    end
+
+    % stimuli together 
+        figure();
+   % for iPair = 1:3
+        for iRegion = 1:3
+            subplot(3, size(plotRegions, 2), 1+(iRegion - 1)*(size(plotRegions, 2)));
+            hold on;
+
+            violinplot([squeeze(vis_resp_session_fraction_all{1}(iRegion,:,:)), squeeze(vis_resp_session_fraction_all{2}(iRegion,:)),...
+                squeeze(vis_resp_session_fraction_all{3}(iRegion,:))], ...
+                [ones(length(squeeze(vis_resp_session_fraction_all{1}(iRegion,:))),1);...
+                ones(length(squeeze(vis_resp_session_fraction_all{2}(iRegion,:))),1).*2;...
+                ones(length(squeeze(vis_resp_session_fraction_all{3}(iRegion,:))),1).*3])%iR, iS, iP
+            p12 = ranksum(squeeze(vis_resp_session_fraction_all{1}(iRegion,:)), squeeze(vis_resp_session_fraction_all{2}(iRegion,:)));
+            p13 = ranksum(squeeze(vis_resp_session_fraction_all{1}(iRegion,:)), squeeze(vis_resp_session_fraction_all{3}(iRegion,:)));
+            p23 = ranksum(squeeze(vis_resp_session_fraction_all{2}(iRegion,:)), squeeze(vis_resp_session_fraction_all{3}(iRegion,:)));
+            %p13 = ranksum(squeeze(vis_resp_session_fraction{1}(iRegion,:,iPair)), squeeze(vis_resp_session_fraction{3}(iRegion,:,iPair)));
+            %p23 = ranksum(squeeze(vis_resp_session_fraction{2}(iRegion,:,iPair)), squeeze(vis_resp_session_fraction{3}(iRegion,:,iPair)));
+            ylim([-0.01, 1.1])
+            prettify_pvalues(gca, [1,1,2], [2,3,3], [p12, p13, p23])
+            
+        end
+
+   % end
+
+    %% PSTHs
+
 %end
 % sorted by increase. cross validated.
 for iTask = 1:3
@@ -357,3 +405,10 @@ prettify_plot('YLimits', 'all')
 % plot histograms sorted by session and mouse (tasks next to each other)
 
 % plot histograms sorted by session and mouse (regions next to each other)
+
+
+
+%% original p-values 
+% all conds together 
+
+% any cond 
