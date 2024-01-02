@@ -115,6 +115,7 @@ for iRecording = 1:length(use_recs)
             % find max experiment
             n_trials_exp = [];
             exp_n_trials = [];
+           
             for iExperiment = load_me
                 experiment = these_exps(iExperiment); %for now, just load 1 experiment
                 experiments = AP_find_experimentsJF(animal, '', true);
@@ -309,6 +310,7 @@ for iRecording = 1:length(use_recs)
                             template_depths(shank_units) <= this_region_stop(these_regions_present(iRegion)));
                         units_to_keep = [units_to_keep; new_units];
                         units_to_keep_area = [units_to_keep_area; ones(size(new_units, 1), 1) .* these_regions_present(iRegion)];
+                        %units_to_keep_coords 
 
                         unit_closest_depth = arrayfun(@(x) ... %closest depth
                             find(probe_ccf(this_probe).probe_depths >= template_depths(shank_units(new_units(x))), 1, 'first'), 1:length(new_units));
@@ -330,7 +332,10 @@ for iRecording = 1:length(use_recs)
                         rerunQM = 1;
                         [unitType, qMetrics] = bc_qualityMetricsPipeline_JF(animal, day, site, recording, 1, protocol, rerunQM, plotGUI, runQM);
                     end
+                    try
                     ephysProperties = bc_ephysPropertiesPipeline_JF(animal, day, site, recording, 1, rerunEP, runEP, region);
+                    catch
+                    end
                     %(animal, day, site, recording, experiment, rerun, runEP, region)
 
                 end
@@ -574,6 +579,7 @@ for iRecording = 1:length(use_recs)
                 passive_data_per_cond.t = t;
                 %                passive_data_per_cond.t_det = t_det;
                 passive_data_per_cond.unitNum((unitCount + 1:unitCount + size(units_to_keep, 1))) = shank_units(units_to_keep);
+                try
                 passive_data_per_cond.propISI((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.propLongISI(units_to_keep);
                 passive_data_per_cond.pss((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.postSpikeSuppression(units_to_keep);
                 passive_data_per_cond.wvDur((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.templateDuration(units_to_keep);
@@ -588,6 +594,8 @@ for iRecording = 1:length(use_recs)
                 passive_data_per_cond.pss((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.postSpikeSuppression(units_to_keep);
                 passive_data_per_cond.templateDuration((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.templateDuration(units_to_keep);
                 passive_data_per_cond.propLongISI((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.propLongISI(units_to_keep);
+                catch
+                end
 
                 %passive_data_per_cond
                 unitCount = unitCount + size(units_to_keep, 1);

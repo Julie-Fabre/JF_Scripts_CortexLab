@@ -1,56 +1,4 @@
-%% passive_master script 
-
-task_data = cl_loadAverageData('task'); 
-
-% % do cells encode visual stimuli? 
-% cl_loadAverageData; % check we don't have any duplicates 
-% cl_population_PSTH;
-% cl_location_PSTH;
-% cl_percentage_cells;
-% 
-% % cell classification 
-% cl_population_PSTH_celltype;
-% cl_celltype_example;
-% cl_GPe_celltype_playground; 
-% 
-% % cell selctivity/encoding of specific visual stimuli 
-passive_data = cl_loadPerStimulusData('passive');
-gogogo = 0;
-passive = 1;
-cl_plot_average_task; 
-
-
-task_data = cl_loadPerStimulusData('task', 2); % 2 = 
-gogogo = 0;
-passive = 0;
-cl_plot_average_task; 
-
-gogogo = 0;
-passive = 0;
-cl_PC_analysis;
-
-task_data_gogogo = cl_loadPerStimulusData('taskGo', 1); 
-
-task_data_here = load('task_data_gogogo.mat');
-gogogo = 1;
-passive =0;
-cl_plot_average_task; 
-
-gogogo = 1;
-passive =0;
-cl_PC_analysis;
-% cl_selectivity;
-% %decoding? 
-% cl_location_selectivity; 
-% 
-% % movement stuffs
-% cl_motionIndex; 
-% 
-% % rastermap/umap
-
-
-% DMS vs PS 
-%% 
+%% load data
 loadVids = 0;
 [task_data, session_data] = cl_loadPerStimulusData('task', 2, loadVids); 
 %save('/home/julie/Dropbox/MATLAB/task_data_goNogo_session.mat', '-struct', 'session_data', '-v7.3');
@@ -87,16 +35,21 @@ clear all;
 task_data_passive2 = cl_loadPerStimulusData('passive', 4); 
 save('/home/julie/Dropbox/MATLAB/task_data_passive2.mat', '-struct', 'task_data_passive2', '-v7.3');
 
+%% Naive: example cells 
 
+%% Naive: population 
 
+%% Naive: perc. responsive
 
+%% Naive: selectivity
 
-%% D-prime 
-cl_dprime_summary;
+%% Naive: which stimuli respond? 
 
-%% Average response to each image 
+%% Naive: locations 
+
+%% Trained: example cells, population
 cl_average_response_per_image;
 
-%% Fraction of cells 
-cl_fraction_cells_summary;
-cl_fraction_cells;
+%% Trained: perc. responsive
+
+%% Trained: dprime 

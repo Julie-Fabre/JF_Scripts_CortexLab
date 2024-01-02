@@ -123,6 +123,6 @@ runEP =1;
 plotGUI = 0;
 region = ''; 
 bc_qualityMetricsPipeline_JF(animal, date, site, recording, experiment, protocol, rerunQM, plotGUI, runQM);
-bc_ephysPropertiesPipeline_JF(animal, date, site, recording, experiment, protocol, rerunEP, runEP, region);
+%bc_ephysPropertiesPipeline_JF(animal, date, site, recording, experiment, protocol, rerunEP, runEP, region);
 
 end
