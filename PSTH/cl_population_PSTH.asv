@@ -7,14 +7,14 @@ average_across_images = squeeze(nanmean(passive_data.psth{index}(:,3,:,:), 3));
 zscore_psth = (average_across_images - nanmean(average_across_images(:,1:200),2)) ./ ...
     (nanstd(average_across_images(:,1:200),[],2)+0.001);
 region_max = [1, 1, 1, 1, 1, 1, 1];
-region_smooth = [5, 1, 1, 1, 1, 1, 1];
+region_smooth = [10, 2, 2, 1, 1, 1, 1];
 region_clim_string = {'z-score', 'z-score', 'z-score', 'z-score', 'z-score', 'z-score', 'z-score'};
 for iRegion = [1,2,3]
     
     % remove mostly NaN rows (to be replaced by bombcell output when that's
     % finished running)
     keep_these = sum(isnan(zscore_psth),2) < 100 & sum(zscore_psth==0,2) < 100 &...
-        abs(nanmean(zscore_psth(:,250:450),2)) > 0.25;
+        abs(nanmean(zscore_psth(:,250:450),2)) > 1.5;
     
     % get all cells
     these_units = passive_data.unit_area==iRegion  &...
@@ -34,7 +34,7 @@ for iRegion = [1,2,3]
         % plot PSTH 
         figure();
         imagesc(passive_data.t, [], this_image_smooth(3:end,:))
-       % caxis([-max(max(abs(this_image_smooth))).*region_max(iRegion), max(max(abs(this_image_smooth))).*region_max(iRegion)])
+        caxis([-max(max(abs(this_image_smooth))).*region_max(iRegion), max(max(abs(this_image_smooth))).*region_max(iRegion)])
         c = colorbar;
         c.Label.String = (region_clim_string{iRegion});
         colormap(brewermap([],'*BrBG'));
@@ -42,7 +42,7 @@ for iRegion = [1,2,3]
         ylabel('unit #')
         title(regions{iRegion})
         makepretty;
-        caxis([-2.5, 2.5])
+       % caxis([-5, 5])
      end
     
 

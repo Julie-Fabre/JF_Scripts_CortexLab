@@ -4,7 +4,7 @@
 keep passive goNogo keepVis
 
 if passive
-    task_data_here = load('/home/julie/Dropbox/MATLAB/task_data_passive_full2.mat');
+    task_data_here = load('/home/julie/Dropbox/MATLAB/task_data_passive_full.mat');
     idx = 5; %2: task, 4/5 : passive
 
 elseif goNogo

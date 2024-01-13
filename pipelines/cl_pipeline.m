@@ -48,8 +48,13 @@ save('/home/julie/Dropbox/MATLAB/task_data_passive2.mat', '-struct', 'task_data_
 %% Naive: locations 
 
 %% Trained: example cells, population
-cl_average_response_per_image;
+%cl_average_response_per_image;
+cl_plot_PSTHs; 
 
 %% Trained: perc. responsive
+cl_fraction_cells_summary;
+%cl_visResp_summarize;
+
 
 %% Trained: dprime 
+cl_dprime_summarize;

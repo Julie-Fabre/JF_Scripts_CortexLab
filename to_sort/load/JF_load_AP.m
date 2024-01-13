@@ -4,7 +4,7 @@
 %clear all;
 cl_myPaths;
 
-animals={'JF099'};
+animals={'JF101'};
 curr_animal = 1; % (set which animal to use)
 corona = 0;
 animal = animals{curr_animal};
@@ -13,19 +13,22 @@ protocol = 'choiceworld'; % (this is the name of the Signals protocol)
 experiments = AP_find_experimentsJF(animal, protocol, true);
 experiments = experiments([experiments.ephys]);
 
-% allen_atlas_path = [allenAtlasPath, filesep, 'allenCCF/'];
-% st = loadStructureTreeJF([allen_atlas_path, filesep, 'structure_tree_safe_2017.csv']);
-% curr_plot_structure = find(strcmp(st.acronym, 'GPe'));m
-% histoFile = AP_cortexlab_filenameJF(animal, [], [], 'histo', [], []);
-% load(histoFile)
-% probe2ephysFile = AP_cortexlab_filenameJF(animal, [], [], 'probe2ephys', [], []);
-% load(probe2ephysFile)
-% min(probe_ccf(9).probe_depths(probe_ccf(9).trajectory_areas ==curr_plot_structure))
-% max(probe_ccf(9).probe_depths(probe_ccf(9).trajectory_areas ==curr_plot_structure))
+allen_atlas_path = [allenAtlasPath];
+st = loadStructureTreeJF([allen_atlas_path, filesep, 'structure_tree_safe_2017.csv']);
+curr_plot_structure = st.id(strcmp(st.acronym, 'CP'));
+histoFile = AP_cortexlab_filenameJF(animal, [], [], 'histo', [], []);
+load(histoFile)
+probe2ephysFile = AP_cortexlab_filenameJF(animal, [], [], 'probe2ephys', [], []);
+load(probe2ephysFile)
+
+
+
+min(probe_ccf(9).probe_depths(probe_ccf(9).trajectory_areas ==curr_plot_structure))
+max(probe_ccf(9).probe_depths(probe_ccf(9).trajectory_areas ==curr_plot_structure))
 
 %% Load data from experiment 
 
-curr_day = 7; % (set which day to use)
+curr_day = 1; % (set which day to use)
 
 day = experiments(curr_day).day; % date
 thisDay = experiments(curr_day).day; % date
@@ -35,7 +38,7 @@ load_parts.cam=false;
 load_parts.imaging=false;
 load_parts.ephys=true;
 
-site = 1;%1,1; 2,4; 3,7
+site = 2;%1,1; 2,4; 3,7
 recording = []; 
 % keep experiment with max n trials (= most likely not aborted error or end
 % % shank mapping) QQ change this in the future 
@@ -70,7 +73,7 @@ qMetricsExist = dir(fullfile(savePath, 'qMetric*.mat'));
 %load_parts.cam = false;
 load_parts.ephys=true;
 JF_load_experiment;
-curr_shank=NaN;
+curr_shank = NaN;
 AP_cellrasterJF({stimOn_times, stimOn_times}, {trial_conditions(:,1), trial_conditions(:,2)})
 
 
@@ -306,3 +309,62 @@ AP_cellrasterJF({stimOn_times(theseImages_trials), stimOn_times(theseImages_tria
 % line([0, 0], [yLim(1), yLim(2)], 'Color', stimC, 'LineWidth', 2)
 % xlim([-0.15, 0.3])
 % % selectivity
+
+%%
+
+currProbe = 0;
+
+%% 
+cl_myPaths;
+
+animals = {'JF108'};
+curr_animal = 1; % (set which animal to use)
+corona = 0;
+animal = animals{curr_animal};
+
+protocol = 'rating'; % (this is the name of the Signals protocol)
+experiments = AP_find_experimentsJF(animal, protocol, true);
+experiments = experiments([experiments.ephys]);
+
+ if ~exist('st', 'var')
+     [tv, av, st, bregma] = ya_loadAllenAtlas(atlasLocation);
+ end
+
+curr_plot_structure = st.id(strcmp(st.acronym, 'CP'));
+histoFile = AP_cortexlab_filenameJF(animal, [], [], 'histo', [], []);
+load(histoFile)
+probe2ephysFile = AP_cortexlab_filenameJF(animal, [], [], 'probe2ephys', [], []);
+load(probe2ephysFile)
+
+
+currProbe = currProbe + 1;
+
+min(probe_ccf(currProbe).probe_depths(probe_ccf(currProbe).trajectory_areas == curr_plot_structure))
+max(probe_ccf(currProbe).probe_depths(probe_ccf(currProbe).trajectory_areas == curr_plot_structure))
+
+day = experiments(probe2ephys(currProbe).day).day; % date
+thisDay = experiments(probe2ephys(currProbe).day).day; % date
+date = thisDay;
+site = probe2ephys(currProbe).site;
+recording = []; 
+experiment = experiments(probe2ephys(currProbe).day).experiment(5);
+
+
+% load experiment
+ephysDirPath = AP_cortexlab_filenameJF(animal, day, experiment, 'ephys_dir', site, recording);
+savePath = fullfile(ephysDirPath, 'qMetrics');
+qMetricsExist = dir(fullfile(savePath, 'qMetric*.mat'));
+loadClusters = 0;
+verbose = false; % display load progress and some info figures
+load_parts.cam = false;
+load_parts.imaging = false;
+load_parts.ephys = true;
+JF_load_experiment;
+
+curr_shank = probe2ephys(currProbe).shank;
+AP_cellrasterJF({stimOn_times, stimOn_times}, {trial_conditions(:,2), trial_conditions(:,3)})
+
+
+%AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes'}, ...
+%     {trial_conditions(:,1),trial_conditions(:,2), ...
+%     trial_conditions(:,3)});

@@ -1,7 +1,8 @@
 
 %% preprocess for npx 2.0 probes : run kilosort, extract sync and lfp channels
 function JF_runKSandBombcell(animal, date, site, recording, rerunKS, rerunQM, rerunEP)
-%% check data
+try
+    %% check data
 experiment = [];
 %kilosort exists?
 cl_myPaths;
@@ -123,6 +124,8 @@ runEP =1;
 plotGUI = 0;
 region = ''; 
 bc_qualityMetricsPipeline_JF(animal, date, site, recording, experiment, protocol, rerunQM, plotGUI, runQM);
-%bc_ephysPropertiesPipeline_JF(animal, date, site, recording, experiment, protocol, rerunEP, runEP, region);
-
+bc_ephysPropertiesPipeline_JF(animal, date, site, recording, experiment, protocol, rerunEP, runEP, region);
+catch
+    disp('error')
+end
 end

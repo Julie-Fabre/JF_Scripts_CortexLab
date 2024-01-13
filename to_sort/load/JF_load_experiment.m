@@ -571,16 +571,22 @@ if ephys_exists && load_parts.ephys
     experiment_idx = experiment == [protocols_list.experiment];
 
     % load sync and align
+    error_sync = false;
     if load_sync
         try
         [spike_times_timeline, bad_flipper] = JF_align_ephys_to_timeline(animal, day, isSpikeGlx, flipper_flip_times_timeline, ...
             ephys_path, flipper_sync_idx, experiment_idx, acqLive_sync_idx, spike_times, acqLive_timeline);
+        
         catch
             warning('error sync')
+            error_sync = true;
+            bad_flipper = true;
             spike_times_timeline = spike_times;
         end
     else
         spike_times_timeline = spike_times;
+        error_sync = true;
+        bad_flipper = true;
     end
 
     %         co = robustfit(sync_ephys, sync_timeline);

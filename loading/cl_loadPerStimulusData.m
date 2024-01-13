@@ -135,6 +135,9 @@ for iRecording = 1:length(use_recs)
                 loadClusters = 0;
                 try
                     JF_load_experiment;
+                    if bad_flipper || error_sync
+                        continue;
+                    end
 
                 catch
                     disp('error loading experiment')
@@ -152,6 +155,7 @@ for iRecording = 1:length(use_recs)
                             continue;
                         end
                         experiment_type = 2;
+                        keep_trial = no_move_trials;
                     elseif contains(expDef, 'JF_natural_imagesFit')
                         if keep_type ~= 3
                             continue;
@@ -326,16 +330,18 @@ for iRecording = 1:length(use_recs)
                     runEP = 1;
                     clearvars unitType
                     try
+                        %rerunQM = 1;
                         [unitType, qMetrics] = bc_qualityMetricsPipeline_JF(animal, day, site, recording, 1, protocol, rerunQM, plotGUI, runQM);
                         %bc_qualityMetricsPipeline_JF(animal, day, site, recording, experiment_num, protocol, rerunQM, plotGUI, runQM)
                     catch
                         rerunQM = 1;
                         [unitType, qMetrics] = bc_qualityMetricsPipeline_JF(animal, day, site, recording, 1, protocol, rerunQM, plotGUI, runQM);
                     end
-                    try
+                    %try
+                        
                     ephysProperties = bc_ephysPropertiesPipeline_JF(animal, day, site, recording, 1, rerunEP, runEP, region);
-                    catch
-                    end
+                    %catch
+                    %end
                     %(animal, day, site, recording, experiment, rerun, runEP, region)
 
                 end
@@ -579,11 +585,7 @@ for iRecording = 1:length(use_recs)
                 passive_data_per_cond.t = t;
                 %                passive_data_per_cond.t_det = t_det;
                 passive_data_per_cond.unitNum((unitCount + 1:unitCount + size(units_to_keep, 1))) = shank_units(units_to_keep);
-                try
-                passive_data_per_cond.propISI((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.propLongISI(units_to_keep);
-                passive_data_per_cond.pss((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.postSpikeSuppression(units_to_keep);
-                passive_data_per_cond.wvDur((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.templateDuration(units_to_keep);
-                passive_data_per_cond.fr((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.spike_rateSimple(units_to_keep);
+                %try
                 try
                     passive_data_per_cond.unitType((unitCount + 1:unitCount + size(units_to_keep, 1))) = unitType(units_to_keep);
                 catch
@@ -591,11 +593,41 @@ for iRecording = 1:length(use_recs)
                     [unitType, qMetrics] = bc_qualityMetricsPipeline_JF(animal, day, site, recording, 1, protocol, rerunQM, plotGUI, runQM);
                     passive_data_per_cond.unitType((unitCount + 1:unitCount + size(units_to_keep, 1))) = unitType(units_to_keep);
                 end
-                passive_data_per_cond.pss((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.postSpikeSuppression(units_to_keep);
-                passive_data_per_cond.templateDuration((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.templateDuration(units_to_keep);
-                passive_data_per_cond.propLongISI((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.propLongISI(units_to_keep);
-                catch
+                if isfield(ephysProperties, 'propLongISI')
+                    if size(ephysProperties.propLongISI,1) == size(unitType,1)
+                    try
+                    passive_data_per_cond.pss((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.postSpikeSuppression(units_to_keep);
+                    passive_data_per_cond.templateDuration((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.templateDuration(units_to_keep);
+                    passive_data_per_cond.propLongISI((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.propLongISI(units_to_keep);
+                    passive_data_per_cond.fr((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.spike_rateSimple(units_to_keep);
+                    catch
+                         passive_data_per_cond.pss((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.postSpikeSuppression_ms(units_to_keep);
+                    passive_data_per_cond.templateDuration((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.waveformDuration_peakTrough_us(units_to_keep);
+                    passive_data_per_cond.propLongISI((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.propLongISI(units_to_keep);
+                    passive_data_per_cond.fr((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.mean_firingRate(units_to_keep);
+                    end
+                    else
+
+                    rerunEP = 1;
+                    ephysProperties = bc_ephysPropertiesPipeline_JF(animal, day, site, recording, 1, rerunEP, runEP, region);
+                    passive_data_per_cond.pss((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.postSpikeSuppression_ms(units_to_keep);
+                    passive_data_per_cond.templateDuration((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.waveformDuration_peakTrough_us(units_to_keep);
+                    passive_data_per_cond.propLongISI((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.propLongISI(units_to_keep);
+                    passive_data_per_cond.fr((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.mean_firingRate(units_to_keep);
+               
+                    end
+                else
+
+                    rerunEP = 1;
+                    ephysProperties = bc_ephysPropertiesPipeline_JF(animal, day, site, recording, 1, rerunEP, runEP, region);
+                    passive_data_per_cond.pss((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.postSpikeSuppression_ms(units_to_keep);
+                    passive_data_per_cond.templateDuration((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.waveformDuration_peakTrough_us(units_to_keep);
+                    passive_data_per_cond.propLongISI((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.propLongISI(units_to_keep);
+                    passive_data_per_cond.fr((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.mean_firingRate(units_to_keep);
+               
                 end
+                % catch
+                %end
 
                 %passive_data_per_cond
                 unitCount = unitCount + size(units_to_keep, 1);

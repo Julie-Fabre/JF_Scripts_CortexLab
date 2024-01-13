@@ -4,10 +4,11 @@ function [spike_times_timeline, bad_flipper] = JF_align_ephys_to_timeline(animal
 
 %% load ephys sync (flipper)
 if isSpikeGLX
+    clearvars sync syncdata
     syncFile = dir([ephys_sync_folder, filesep, '*sync*.mat']);
-    load([syncFile.folder, filesep, syncFile.name]); % ephys flipper
+    load([syncFile(1).folder, filesep, syncFile(1).name]); % ephys flipper
 
-    if contains(syncFile.name, 'decompressed')
+    if contains(syncFile(1).name, 'decompressed') || exist('syncdata', 'var')
         sync = syncdata';
     end
 
