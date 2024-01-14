@@ -12,25 +12,14 @@ if contra
     % 37,38,39 %go2 [12]
     % 40,41,42 %go likes [13]
     % 16,17,18; 31,32,33; 34,35,36 %nogo likes [5, 10, 11]
-    if size(task_data.psth{idx},3)==6
-        go1_contra = squeeze(task_data.psth{idx}(:, :, 4, :));
-        go2_contra = squeeze(task_data.psth{idx}(:, :, 6, :));
-        noGo_contra = squeeze(task_data.psth{idx}(:, :, 5, :));
-    else
-        go1_contra = squeeze(task_data.psth{idx}(:, :, 10, :));
-        go2_contra = squeeze(task_data.psth{idx}(:, :, 34, :));
-        noGo_contra = squeeze(task_data.psth{idx}(:, :, 16, :));
-        noGoLike_contra = squeeze(task_data.psth{idx}(:, :, 19, :));
-        goLike_contra = squeeze(task_data.psth{idx}(:, :, 37, :));
-        noGoLike2_contra = squeeze(task_data.psth{idx}(:, :, 28, :));
-        noGoLike3_contra = squeeze(task_data.psth{idx}(:, :, 31, :));
-    end
+    go1_contra = squeeze(task_data.psth{idx}(:, :, 10, :));
+    go2_contra = squeeze(task_data.psth{idx}(:, :, 34, :));
+    noGo_contra = squeeze(task_data.psth{idx}(:, :, 16, :));
+    noGoLike_contra = squeeze(task_data.psth{idx}(:, :, 19, :));
+    goLike_contra = squeeze(task_data.psth{idx}(:, :, 37, :));
+    noGoLike2_contra = squeeze(task_data.psth{idx}(:, :, 28, :));
+    noGoLike3_contra = squeeze(task_data.psth{idx}(:, :, 31, :));
 elseif center
-    if size(task_data.psth{idx},3)==6
-        go1_contra = squeeze(task_data.psth{idx}(:, :, 1, :));
-        go2_contra = squeeze(task_data.psth{idx}(:, :, 3, :));
-        noGo_contra = squeeze(task_data.psth{idx}(:, :, 2, :));
-    else
     go1_contra = squeeze(task_data.psth{idx}(:, :, 11, :));
     go2_contra = squeeze(task_data.psth{idx}(:, :, 35, :));
     noGo_contra = squeeze(task_data.psth{idx}(:, :, 17, :));
@@ -38,7 +27,7 @@ elseif center
     goLike_contra = squeeze(task_data.psth{idx}(:, :, 38, :));
     noGoLike2_contra = squeeze(task_data.psth{idx}(:, :, 29, :));
     noGoLike3_contra = squeeze(task_data.psth{idx}(:, :, 32, :));
-    end
+
 else
     go1_contra = squeeze(task_data.psth{idx}(:, :, 12, :));
     go2_contra = squeeze(task_data.psth{idx}(:, :, 36, :));
@@ -54,29 +43,44 @@ end
 %     nanstd(task_data.psth(:,val_t_1),[],2);
 region_max = [1, 1, 1, 1, 1, 1, 1];
 region_smooth = [2, 2, 2, 1, 1, 1, 1];
-region_lims = [1.5, 1.5, 1.5, 1, 1, 1];
+region_lims = [6, 1, 1, 1, 1, 1];
 plot_regions = [1, 2, 3];
 
-
+average_per_image = squeeze(task_data.psth{idx}(:, 3, [10,34,16], :));
+zscore_psth(:,:,1) = (average_per_image(:,1,:) - nanmean(average_per_image(:,1, 1:200), 3)) ./ ...
+    (nanstd(average_per_image(:,1, 1:200), [], 3) + 0.001);
+zscore_psth(:,:,2) = (average_per_image(:,2,:) - nanmean(average_per_image(:,2, 1:200), 3)) ./ ...
+    (nanstd(average_per_image(:,2, 1:200), [], 3) + 0.001);
+zscore_psth(:,:,3) = (average_per_image(:,3,:) - nanmean(average_per_image(:,3, 1:200), 3)) ./ ...
+    (nanstd(average_per_image(:,3, 1:200), [], 3) + 0.001);
 
 %region_clim_string = {'z-score (clim saturated)', 'z-score', 'z-score', 'z-score', 'z-score', 'z-score', 'z-score'};
 figure();
 passive = 1; %to disable tons of plots
 for thisRegion = 1:size(plot_regions, 2)
-try
+
     iRegion = plot_regions(thisRegion);
 
     % get all cells %1:301
+    %if keepVis
+    %  these_units = task_data.unit_area == iRegion & ...
+    %      ismember(task_data.unitType', keepUnits);% &...
+    %(task_data.pvalue_shuffled_005{1,idx}(1:size(task_data.unit_area, 1))' == 1);
+    %else
     if keepVis
-     these_units = task_data.unit_area == iRegion & ...
+      %  zz = squeeze(abs(nanmean(zscore_psth(:, 250:300,1:3), 2)));
+       % these_units = task_data.unit_area == iRegion & ...
+       %     ismember(task_data.unitType', keepUnits) & any(zz > 0.5,2);
+       these_units = task_data.unit_area == iRegion & ...
           ismember(task_data.unitType', keepUnits) &...
-    (task_data.pvalue_shuffled_005{1,idx}(1:size(task_data.unit_area, 1))' == 1);
+            (task_data.pvalue_shuffled_005{1,idx}(1:size(task_data.unit_area, 1))' == 1);
     else
-    these_units = task_data.unit_area == iRegion & ...
-        ismember(task_data.unitType', keepUnits);
+        these_units = task_data.unit_area == iRegion & ...
+            ismember(task_data.unitType', keepUnits) ;
+    end
 
 
-    end% &...
+    %end% &...
     %task_data.wvDur'<=400&task_data.pss'<10000 );% |...
     %any(task_data.pvalue{idx}(:,:)>0.975,2) | any(task_data.pvalue{idx}(:,:)<0.025,2) );% & ...
     %task_data.pvalue_shuffled_005{idx}(1:size(task_data.unit_area, 1))' == 1; % & task_data.pvalue{idx}' < 0.05 &...
@@ -92,26 +96,21 @@ try
         val_t_2 = [55:75];
 
     end
-    % if sum(these_units)<10
-    %     region_smooth(iRegion) = 1;
-    % elseif sum(these_units)<20
-    %     region_smooth(iRegion) = 2;
-    % elseif sum(these_units)<30
-    %     region_smooth(iRegion) = 3;
-    % elseif sum(these_units)<40
-    %     region_smooth(iRegion) = 4;
-    % else
-    %     region_smooth(iRegion) = 5;
-    % end
+    if keepVis
+    end
+    train_image_ng = squeeze(go1_contra(these_units, 1, :));
+    train_image_ng = (train_image_ng - nanmean(train_image_ng(:, val_t_1), 2)) ./ ...
+        (nanstd(train_image_ng(:, val_t_1), [], 2)+ 0.001);
+  
+    [~, cell_idx] = sort(nanmean(train_image_ng(:, val_t_2), 2));
 
     train_image = (train_image - nanmean(train_image(:, val_t_1), 2)) ./ ...
-        nanstd(train_image(:, val_t_1), [], 2);
-    [~, cell_idx] = sort(nanmean(train_image(:, val_t_2), 2));
+        (nanstd(train_image(:, val_t_1), [], 2) + 0.001);
 
     %go 1
     test_image_go1 = squeeze(go1_contra(these_units, 2, :));
     test_image_go1 = (test_image_go1 - nanmean(test_image_go1(:, val_t_1), 2)) ./ ...
-        nanstd(test_image_go1(:, val_t_1), [], 2);
+        (nanstd(test_image_go1(:, val_t_1), [], 2)+ 0.001);
     smooth_filt = [region_smooth(iRegion), 10]; % (units x frames)
     this_image_smooth_go1 = conv2(test_image_go1(cell_idx, :), ones(smooth_filt), 'same') ./ ...
         conv2(~isnan(test_image_go1(cell_idx, :)), ones(smooth_filt), 'same');
@@ -119,7 +118,7 @@ try
     %go 2
     test_image_go2 = squeeze([go2_contra(these_units, 2, :); go2_contra(these_units, 1, :)]);
     test_image_go2 = (test_image_go2 - nanmean(test_image_go2(:, val_t_1), 2)) ./ ...
-        nanstd(test_image_go2(:, val_t_1), [], 2);
+        (nanstd(test_image_go2(:, val_t_1), [], 2)+ 0.001);
     smooth_filt = [region_smooth(iRegion), 10]; % (units x frames)
     this_image_smooth_go2 = conv2(test_image_go2(cell_idx, :), ones(smooth_filt), 'same') ./ ...
         conv2(~isnan(test_image_go2(cell_idx, :)), ones(smooth_filt), 'same');
@@ -127,7 +126,7 @@ try
     %no go
     test_image_noGo = squeeze([noGo_contra(these_units, 2, :); noGo_contra(these_units, 2, :)]);
     test_image_noGo = (test_image_noGo - nanmean(test_image_noGo(:, val_t_1), 2)) ./ ...
-        nanstd(test_image_noGo(:, val_t_1), [], 2);
+        (nanstd(test_image_noGo(:, val_t_1), [], 2)+ 0.001);
     smooth_filt = [region_smooth(iRegion), 10]; % (units x frames)
     this_image_smooth_noGo = conv2(test_image_noGo(cell_idx, :), ones(smooth_filt), 'same') ./ ...
         conv2(~isnan(test_image_noGo(cell_idx, :)), ones(smooth_filt), 'same');
@@ -136,7 +135,7 @@ try
         %no go like
         test_image_noGoLike = squeeze([noGoLike_contra(these_units, 2, :); noGoLike_contra(these_units, 2, :)]);
         test_image_noGoLike = (test_image_noGoLike - nanmean(test_image_noGoLike(:, val_t_1), 2)) ./ ...
-            nanstd(test_image_noGoLike(:, val_t_1), [], 2);
+            (nanstd(test_image_noGoLike(:, val_t_1), [], 2)+ 0.001);
         smooth_filt = [region_smooth(iRegion), 10]; % (units x frames)
         this_image_smooth_noGoLike = conv2(test_image_noGoLike(cell_idx, :), ones(smooth_filt), 'same') ./ ...
             conv2(~isnan(test_image_noGoLike(cell_idx, :)), ones(smooth_filt), 'same');
@@ -144,7 +143,7 @@ try
         %no go like 2
         test_image_noGoLike2 = squeeze([noGoLike2_contra(these_units, 2, :); noGoLike2_contra(these_units, 2, :)]);
         test_image_noGoLike2 = (test_image_noGoLike2 - nanmean(test_image_noGoLike2(:, val_t_1), 2)) ./ ...
-            nanstd(test_image_noGoLike2(:, val_t_1), [], 2);
+            (nanstd(test_image_noGoLike2(:, val_t_1), [], 2)+ 0.001);
         smooth_filt = [region_smooth(iRegion), 10]; % (units x frames)
         this_image_smooth_noGoLike2 = conv2(test_image_noGoLike2(cell_idx, :), ones(smooth_filt), 'same') ./ ...
             conv2(~isnan(test_image_noGoLike2(cell_idx, :)), ones(smooth_filt), 'same');
@@ -152,7 +151,7 @@ try
         %no go like 3
         test_image_noGoLike3 = squeeze([noGoLike3_contra(these_units, 2, :); noGoLike3_contra(these_units, 2, :)]);
         test_image_noGoLike3 = (test_image_noGoLike3 - nanmean(test_image_noGoLike3(:, val_t_1), 2)) ./ ...
-            nanstd(test_image_noGoLike3(:, val_t_1), [], 2);
+            (nanstd(test_image_noGoLike3(:, val_t_1), [], 2)+ 0.001);
         smooth_filt = [region_smooth(iRegion), 10]; % (units x frames)
         this_image_smooth_noGoLike3 = conv2(test_image_noGoLike3(cell_idx, :), ones(smooth_filt), 'same') ./ ...
             conv2(~isnan(test_image_noGoLike3(cell_idx, :)), ones(smooth_filt), 'same');
@@ -160,7 +159,7 @@ try
         %go like
         test_image_goLike = squeeze(goLike_contra(these_units, 2, :));
         test_image_goLike = (test_image_goLike - nanmean(test_image_goLike(:, val_t_1), 2)) ./ ...
-            nanstd(test_image_goLike(:, val_t_1), [], 2);
+            (nanstd(test_image_goLike(:, val_t_1), [], 2)+ 0.001);
         smooth_filt = [region_smooth(iRegion), 10]; % (units x frames)
         this_image_smooth_goLike = conv2(test_image_goLike(cell_idx, :), ones(smooth_filt), 'same') ./ ...
             conv2(~isnan(test_image_goLike(cell_idx, :)), ones(smooth_filt), 'same');
@@ -169,7 +168,8 @@ try
     % remove mostly NaN rows (to be replaced by bombcell output when that's
     % finished running)
     keep_these = sum(isnan(this_image_smooth_noGo), 2) < 100 & sum(isnan(this_image_smooth_go1), 2) < 100 & ...
-        sum(isnan(this_image_smooth_go2), 2) < 100;
+        sum(isnan(this_image_smooth_go2), 2) < 100 & sum(this_image_smooth_noGo ==0, 2) < 100 & sum(this_image_smooth_go1 ==0, 2) < 100 & ...
+        sum(this_image_smooth_go2 ==0, 2) < 100;
 
     % plot PSTH
 
@@ -273,8 +273,7 @@ try
         %clim([-region_lims(iRegion),region_lims(iRegion)] )
 
     end
-catch
-end
+
 end
 more = 0;
 if more

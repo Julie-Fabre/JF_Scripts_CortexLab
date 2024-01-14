@@ -10,7 +10,7 @@ if passive
     idx = 5; %2: task, 4/5 : passive
 
 elseif goNogo
-    task_data_here = load('/home/julie/Dropbox/MATLAB/task_data_goNogo3.mat');
+    task_data_here = load('/home/julie/Dropbox/MATLAB/task_data_goNogo.mat');
     idx = 2; %2: task, 4/5 : passive
 else
     task_data_here = load('/home/julie/Dropbox/MATLAB/task_data_gogogo.mat');
@@ -63,7 +63,7 @@ for iRegion = 1:size(plot_regions, 2)
             activity_per_trial_neuron = task_data_here.av_per_trial{idx, thisSession}(these_units_session, theseTrials)';
             av_psth_here = task_data_here.av_psth{idx, thisSession}(these_units_session, :, :);
             for_baseline_per_neuron_per_condition = task_data_here.av_psth{idx, thisSession}(these_units_session, :, 1:200);
-            if size(for_baseline_per_neuron_per_condition, 2) == 39
+            if size(for_baseline_per_neuron_per_condition, 2) == 39 ||size(for_baseline_per_neuron_per_condition, 2) == 66
                 cond_inds = [10, 34; 16, 34; 16, 10];
             elseif size(for_baseline_per_neuron_per_condition, 2) == 26
                 cond_inds = [7, 23; 11, 23; 11, 7];
@@ -118,9 +118,9 @@ for iRegion = 1:size(plot_regions, 2)
                                 d_prime_session{iRegion}(iNeuron, iPair) = abs(average_stim_1-average_stim_2) / pooled_sd;
                                 ci{iRegion}(iNeuron + unitCount, iPair) = (average_stim_1 - average_stim_2) / (average_stim_1 + average_stim_2 + 0.1);
                                 d_prime_session_num{iRegion}(iNeuron + unitCount, iPair) = iSession;
-                                tempDur{iRegion}(iNeuron + unitCount, iPair) = task_data_here.wvDur(these_units_session_all(iNeuron));
+                                tempDur{iRegion}(iNeuron + unitCount, iPair) = task_data_here.templateDuration(these_units_session_all(iNeuron));
                                 pss{iRegion}(iNeuron + unitCount, iPair) = task_data_here.pss(these_units_session_all(iNeuron));
-                                propISI{iRegion}(iNeuron + unitCount, iPair) = task_data_here.propISI(these_units_session_all(iNeuron));
+                                propISI{iRegion}(iNeuron + unitCount, iPair) = task_data_here.propLongISI(these_units_session_all(iNeuron));
                                 %qq thissession doesn't work. wierd! 
                                 %d_prime_z(iNeuron + unitCount, iPair, iRegion) = zscore((activity_per_trial_neuron(trials_1, iNeuron)))...
                                 %    - ztrans((activity_per_trial_neuron(trials_2, iNeuron)));

@@ -82,11 +82,10 @@ loadVids = 0;
 [gratings_passive, session_data] = cl_loadPerStimulusData('passive', 1, loadVids);  
 save('/home/julie/Dropbox/MATLAB/gratings_passive_full.mat', '-struct', 'gratings_passive', '-v7.3');
 
-clear all; % bug 
+clear all;
 loadVids = 0;
 locations_passive = cl_loadPerStimulusData('passive', 2, loadVids); 
 save('/home/julie/Dropbox/MATLAB/locations_passive_full.mat', '-struct', 'locations_passive', '-v7.3');
-
 
 clear all;
 loadVids = 0;
@@ -94,7 +93,12 @@ task_data_passive2 = cl_loadPerStimulusData('passive', 4, loadVids);
 save('/home/julie/Dropbox/MATLAB/task_data_passive2.mat', '-struct', 'task_data_passive2', '-v7.3');
 
 
-
+clear all;
+loadVids = 0;
+[nat_passive, session_data] = cl_loadPerStimulusData('passive', 3, loadVids); 
+%save('/home/julie/Dropbox/MATLAB/task_data_passive_session.mat', '-struct', 'session_data', '-v7.3');
+save('/home/julie/Dropbox/MATLAB/nat_passive_full2.mat', '-struct', 'nat_passive', '-v7.3');
+close all;
 
 
 

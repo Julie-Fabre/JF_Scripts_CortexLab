@@ -1,7 +1,14 @@
 %% cl_plottingSettings
 
-regions = {'CP', 'GPe', 'GPi', 'STN', 'SNr', 'SNc', 'VTA'};
+%regions = {'CP', 'GPe', 'GPi', 'STN', 'SNr', 'SNc', 'VTA'};
 
-regionColors = {rgb('DeepSkyBlue'); rgb('SeaGreen'); rgb('DarkOrange'); rgb('Crimson'); rgb('Hotpink'); rgb('Black'); rgb('Brown')};
+%regionColors = {rgb('DeepSkyBlue'); rgb('SeaGreen'); rgb('DarkOrange'); rgb('Crimson'); rgb('Hotpink'); rgb('Black'); rgb('Brown')};
 
-regionLineStyle = {'-', '--', ':', '--', ':', '-.', '-.'};
+%regionLineStyle = {'-', '--', ':', '--', ':', '-.', '-.'};
+
+
+regions = {'CP', 'GPe', 'SNr'};
+
+regionColors = {rgb('DeepSkyBlue'); rgb('SeaGreen'); rgb('DarkOrange')};
+
+regionLineStyle = {'-', '-', '-', '--', ':', '-.', '-.'};

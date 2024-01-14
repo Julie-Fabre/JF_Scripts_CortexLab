@@ -34,12 +34,6 @@ for iTask = 1:3
     [decodingAccuracy12{iTask}, correctValue12{iTask}, guessedValue12{iTask}] ...
         = cl_decoding_stim12(task_data, idx, keepVis, keepUnits, 'cvglmnet', 'L1', n_folds, plot_regions, plotMe);
 
-      [decodingAccuracy13{iTask}, correctValue13{iTask}, guessedValue13{iTask}] ...
-        = cl_decoding_stim13(task_data, idx, keepVis, keepUnits, 'cvglmnet', 'L1', n_folds, plot_regions, plotMe);
-
-        [decodingAccuracy23{iTask}, correctValue23{iTask}, guessedValue23{iTask}] ...
-        = cl_decoding_stim23(task_data, idx, keepVis, keepUnits, 'cvglmnet', 'L1', n_folds, plot_regions, plotMe);
-
 end
 
 %% all stims
@@ -109,86 +103,22 @@ prettify_plot;
 %% stims 1 and 2 
 
 
-
-for iTask =1:3
-
+iTask = 3;
 figure();
+for iTask =3
 %for iStim=1:2
    % subplot(3, 3, iStim+(iTask - 1)*(3));
     violinplot([squeeze(nanmean(decodingAccuracy12{iTask}(1, :, :))), ...
         squeeze(nanmean(decodingAccuracy12{iTask}(2, :, :))), ....
         squeeze(nanmean(decodingAccuracy12{iTask}(3, :, :)))]...
-        , [ones(n_folds,1), ones(n_folds,1).*2, ones(n_folds,1).*3]); 
-
-    
-     [p, t, stats] = anova1([squeeze(nanmean(decodingAccuracy12{iTask}(1, :, :))); ...
-         squeeze(nanmean(decodingAccuracy12{iTask}(2, :, :))); ....
-         squeeze(nanmean(decodingAccuracy12{iTask}(3, :, :)))], [ones(n_folds,1); ones(n_folds,1).*2; ones(n_folds,1).*3]);
-[c, m, h, gnames] = multcompare(stats);
-   
-    % stim12_table = table;
-    % stim12_table.decoding = [squeeze(nanmean(decodingAccuracy12{iTask}(1, :, :))); ...
-    %     squeeze(nanmean(decodingAccuracy12{iTask}(2, :, :))); ....
-    %     squeeze(nanmean(decodingAccuracy12{iTask}(3, :, :)))];
-    % stim12_table.region = [ones(n_folds,1); ones(n_folds,1).*2; ones(n_folds,1).*3]; 
-    % lme(stim12_table, 'decoding ~ 1 + region')
+        , [ones(n_folds,1), ones(n_folds,1).*2]); 
+    stim12_table = table;
+    stim12_table.decoding 
+    stim12_table.region
+    lme()
     
 %end
 end
-
-for iTask =1:3
-
-figure();
-%for iStim=1:2
-   % subplot(3, 3, iStim+(iTask - 1)*(3));
-    violinplot([squeeze(nanmean(decodingAccuracy13{iTask}(1, :, :))), ...
-        squeeze(nanmean(decodingAccuracy13{iTask}(2, :, :))), ....
-        squeeze(nanmean(decodingAccuracy13{iTask}(3, :, :)))]...
-        , [ones(n_folds,1), ones(n_folds,1).*2, ones(n_folds,1).*3]); 
-
-    
-     [p, t, stats] = anova1([squeeze(nanmean(decodingAccuracy13{iTask}(1, :, :))); ...
-         squeeze(nanmean(decodingAccuracy13{iTask}(2, :, :))); ....
-         squeeze(nanmean(decodingAccuracy13{iTask}(3, :, :)))], [ones(n_folds,1); ones(n_folds,1).*2; ones(n_folds,1).*3]);
-[c, m, h, gnames] = multcompare(stats);
-   
-    % stim12_table = table;
-    % stim12_table.decoding = [squeeze(nanmean(decodingAccuracy12{iTask}(1, :, :))); ...
-    %     squeeze(nanmean(decodingAccuracy12{iTask}(2, :, :))); ....
-    %     squeeze(nanmean(decodingAccuracy12{iTask}(3, :, :)))];
-    % stim12_table.region = [ones(n_folds,1); ones(n_folds,1).*2; ones(n_folds,1).*3]; 
-    % lme(stim12_table, 'decoding ~ 1 + region')
-    
-%end
-end
-
-
-for iTask =1:3
-
-figure();
-%for iStim=1:2
-   % subplot(3, 3, iStim+(iTask - 1)*(3));
-    violinplot([squeeze(nanmean(decodingAccuracy23{iTask}(1, :, :))), ...
-        squeeze(nanmean(decodingAccuracy23{iTask}(2, :, :))), ....
-        squeeze(nanmean(decodingAccuracy23{iTask}(3, :, :)))]...
-        , [ones(n_folds,1), ones(n_folds,1).*2, ones(n_folds,1).*3]); 
-
-    
-     [p, t, stats] = anova1([squeeze(nanmean(decodingAccuracy23{iTask}(1, :, :))); ...
-         squeeze(nanmean(decodingAccuracy23{iTask}(2, :, :))); ....
-         squeeze(nanmean(decodingAccuracy23{iTask}(3, :, :)))], [ones(n_folds,1); ones(n_folds,1).*2; ones(n_folds,1).*3]);
-[c, m, h, gnames] = multcompare(stats);
-   
-    % stim12_table = table;
-    % stim12_table.decoding = [squeeze(nanmean(decodingAccuracy12{iTask}(1, :, :))); ...
-    %     squeeze(nanmean(decodingAccuracy12{iTask}(2, :, :))); ....
-    %     squeeze(nanmean(decodingAccuracy12{iTask}(3, :, :)))];
-    % stim12_table.region = [ones(n_folds,1); ones(n_folds,1).*2; ones(n_folds,1).*3]; 
-    % lme(stim12_table, 'decoding ~ 1 + region')
-    
-%end
-end
-
 
 
 % decoding matrix 

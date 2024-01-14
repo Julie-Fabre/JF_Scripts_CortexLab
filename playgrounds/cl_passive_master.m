@@ -25,6 +25,7 @@ passive_data_nat1 = cl_loadPerStimulusData('passive', 3);
 passive_data_nat2 = cl_loadPerStimulusData('passive', 6);
 %choiceworld only 
 cl_selectivity;
+
 %decoding? 
 cl_location_selectivity; 
 

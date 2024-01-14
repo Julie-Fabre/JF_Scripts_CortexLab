@@ -1,4 +1,4 @@
-function [d_prime, d_prime_session_num, d_prime_animal_num, d_prime_session_fraction] = cl_dprime(task_data, idx, keepVis, keepUnits, plot_regions, plotMe)
+function [fr, fr_session_num, fr_animal_num, fr_session_fraction] = cl_frPerStim(task_data, idx, keepVis, keepUnits, plot_regions, plotMe)
 
 %plot_regions = [1, 2, 3]; %[1, 2, 5]; % Striatum, GPe, SNr
 for iSession = 1:size(task_data.av_per_trial, 2)
@@ -9,8 +9,8 @@ session_nCells = [1, session_nCells];
 trialTypes = [4, -90; 12, -90; 6, -90]; %go1, go2, no go
 session_cumCells = cumsum(session_nCells);
 
-clearvars d_prime pooled_sd_all ci
-thesePairs = [1, 2; 1, 3; 2, 3];
+clearvars fr pooled_sd_all ci
+thesePairs = [1, 2, 3];
 task_data.animal_day_site_shank(isnan(task_data.animal_day_site_shank)) =0;
 unique_combs = unique(task_data.animal_day_site_shank, 'rows');
 unitCount = 0;
@@ -24,6 +24,8 @@ for iRegion = 1:size(plot_regions, 2)
         these_units = task_data.unit_area == iRegion & ...
             ismember(task_data.unitType' , keepUnits); % & ...
         %task_data.pvalue_shuffled_005{1,idx}' == 1;
+    end
+    if iRegion ==1
     end
     unitCount = 0;
     for iSession = 1:size(nonZero_idx, 2) - 1
@@ -47,16 +49,16 @@ for iRegion = 1:size(plot_regions, 2)
             for_baseline_per_neuron_per_condition = task_data.av_psth{idx, thisSession}(these_units_session, :, 1:200);
             %disp(size(for_baseline_per_neuron_per_condition))
             if size(for_baseline_per_neuron_per_condition, 2) == 39 || size(for_baseline_per_neuron_per_condition, 2) == 66
-                cond_inds = [10, 34; 16, 34; 16, 10];
+                cond_inds = [10, 34, 16];
             elseif size(for_baseline_per_neuron_per_condition, 2) == 26
-                cond_inds = [7, 23; 11, 23; 11, 7];
+                cond_inds = [7, 23, 11];
             elseif size(for_baseline_per_neuron_per_condition, 2) == 4
-                cond_inds = [2, 4; 3, 4; 3, 2];
+                cond_inds = [2, 4, 3];
             else
                 disp('wtf')
                 continue;
             end
-            clearvars d_prime_session cond_fr keepIdx
+            clearvars fr_session cond_fr keepIdx
             
             if ~isempty(activity_per_trial_neuron) && ~isempty(find(any(activity_per_trial_neuron > 0)))
                
@@ -64,42 +66,45 @@ for iRegion = 1:size(plot_regions, 2)
                 if ~isempty(activity_per_trial_neuron)
                 if size(activity_per_trial_neuron, 2) > 2 && size(activity_per_trial_neuron, 1) > 2 
                     for iNeuron = 1:size(activity_per_trial_neuron, 2)
-                        for iPair = 1:3
-                            trials_1 = ismember(theseTrialTypes, trialTypes(thesePairs(iPair, 1), :), 'rows');
-                            trials_2 = ismember(theseTrialTypes, trialTypes(thesePairs(iPair, 2), :), 'rows');
+                        for iStim = 1:3
+                            trials_1 = ismember(theseTrialTypes, trialTypes(thesePairs(iStim), :), 'rows');
+                            %trials_2 = ismember(theseTrialTypes, trialTypes(thesePairs(iStim, 2), :), 'rows');
 
                             baseline_1 = nanmean(for_baseline_per_neuron_per_condition(iNeuron, ...
-                                cond_inds(iPair, 1), :)./0.001);
+                                cond_inds(iStim), :)./0.001);
 
-                            baseline_2 = nanmean(for_baseline_per_neuron_per_condition(iNeuron, ...
-                                cond_inds(iPair, 2), :)./0.001);
+                            %baseline_2 = nanmean(for_baseline_per_neuron_per_condition(iNeuron, ...
+                            %    cond_inds(iStim, 2), :)./0.001);
                             if baseline_1 > 0.1
                                 average_stim_1 = (nanmean(activity_per_trial_neuron(trials_1, iNeuron)./0.001)); % QQ baseline - normalize ?
-                                average_stim_2 = (nanmean(activity_per_trial_neuron(trials_2, iNeuron)./0.001));
+                               % average_stim_2 = (nanmean(activity_per_trial_neuron(trials_2, iNeuron)./0.001));
 
                                 sd_stim_1 = nanstd(activity_per_trial_neuron(trials_1, iNeuron)./0.001); %./sqrt(sum(trials_1));
-                                sd_stim_2 = nanstd(activity_per_trial_neuron(trials_2, iNeuron)./0.001); %./sqrt(sum(trials_2));
+                                %sd_stim_2 = nanstd(activity_per_trial_neuron(trials_2, iNeuron)./0.001); %./sqrt(sum(trials_2));
                                 n_stim_1 = length(activity_per_trial_neuron(trials_1, iNeuron))-1;
-                                n_stim_2 = length(activity_per_trial_neuron(trials_1, iNeuron))-1;
+                               % n_stim_2 = length(activity_per_trial_neuron(trials_1, iNeuron))-1;
                                 %pooled_sd = sqrt((sd_stim_1 * sd_stim_1 + sd_stim_2 * sd_stim_2)./2) + 1;
-                                pooled_sd = sqrt((n_stim_1*sd_stim_1 * sd_stim_1 + n_stim_2*sd_stim_2 * sd_stim_2)./(n_stim_1+n_stim_2)) + 0.01;
-                                pooled_sd_all{iRegion}(iNeuron + unitCount, iPair) = pooled_sd;
-                                d_prime{iRegion}(iNeuron + unitCount, iPair) = abs(average_stim_1-average_stim_2) / pooled_sd;
-                                d_prime_session{iRegion}(iNeuron, iPair) = abs(average_stim_1-average_stim_2) / pooled_sd;
-                                ci{iRegion}(iNeuron + unitCount, iPair) = (average_stim_1 - average_stim_2) / (average_stim_1 + average_stim_2 + 0.1);
-                                d_prime_session_num{iRegion}(iNeuron + unitCount, iPair) = iSession;
+                               % pooled_sd = sqrt((n_stim_1*sd_stim_1 * sd_stim_1 + n_stim_2*sd_stim_2 * sd_stim_2)./(n_stim_1+n_stim_2)) + 0.01;
+                               % pooled_sd_all{iRegion}(iNeuron + unitCount, iStim) = pooled_sd;
+                                
+                                fr{iRegion}(iNeuron + unitCount, iStim) = (average_stim_1 - baseline_1)./sd_stim_1;
+                                fr_session{iRegion}(iNeuron, iStim) = (average_stim_1 - baseline_1)./sd_stim_1;
+                                
+                                
+                                %ci{iRegion}(iNeuron + unitCount, iStim) = (average_stim_1 - average_stim_2) / (average_stim_1 + average_stim_2 + 0.1);
+                                fr_session_num{iRegion}(iNeuron + unitCount, iStim) = iSession;
                                 try
-                                tempDur{iRegion}(iNeuron + unitCount, iPair) = task_data.templateDuration(these_units_session_all(iNeuron));
+                                tempDur{iRegion}(iNeuron + unitCount, iStim) = task_data.templateDuration(these_units_session_all(iNeuron));
                                 catch
-                                    tempDur{iRegion}(iNeuron + unitCount, iPair) = task_data.wvDur(these_units_session_all(iNeuron));
+                                    tempDur{iRegion}(iNeuron + unitCount, iStim) = task_data.wvDur(these_units_session_all(iNeuron));
                                 end
-                                pss{iRegion}(iNeuron + unitCount, iPair) = task_data.pss(these_units_session_all(iNeuron));
+                                pss{iRegion}(iNeuron + unitCount, iStim) = task_data.pss(these_units_session_all(iNeuron));
                                 try
-                                propISI{iRegion}(iNeuron + unitCount, iPair) = task_data.propLongISI(these_units_session_all(iNeuron));
+                                propISI{iRegion}(iNeuron + unitCount, iStim) = task_data.propLongISI(these_units_session_all(iNeuron));
                                 catch
-                                    propISI{iRegion}(iNeuron + unitCount, iPair) = task_data.propISI(these_units_session_all(iNeuron));
+                                    propISI{iRegion}(iNeuron + unitCount, iStim) = task_data.propISI(these_units_session_all(iNeuron));
                                 end
-                                if d_prime{iRegion}(iNeuron + unitCount, iPair) > 1.3
+                                if fr{iRegion}(iNeuron + unitCount, iStim) > 1.3
                                     %keyboard;
                                     % figure();
                                     % plot(smoothdata(squeeze(av_psth_here(iNeuron, cond_inds(1,1), :)), 'gaussian', [0, 50])); hold on;
@@ -108,16 +113,16 @@ for iRegion = 1:size(plot_regions, 2)
                                     % title([num2str(abs(average_stim_1-average_stim_2)),', ', num2str(pooled_sd)])
                                 end
                                 %qq thissession doesn't work. wierd! 
-                                %d_prime_z(iNeuron + unitCount, iPair, iRegion) = zscore((activity_per_trial_neuron(trials_1, iNeuron)))...
+                                %fr_z(iNeuron + unitCount, iPair, iRegion) = zscore((activity_per_trial_neuron(trials_1, iNeuron)))...
                                 %    - ztrans((activity_per_trial_neuron(trials_2, iNeuron)));
 
                             else
-                                d_prime_session{iRegion}(iNeuron, iPair) = NaN;
-                                d_prime{iRegion}(iNeuron + unitCount, iPair) = NaN;
-                                d_prime_session_num{iRegion}(iNeuron + unitCount, iPair) = NaN;
-                                tempdur{iRegion}(iNeuron + unitCount, iPair) = NaN;
-                                pss{iRegion}(iNeuron + unitCount, iPair) = NaN;
-                                propISI{iRegion}(iNeuron + unitCount, iPair) = NaN;
+                                fr_session{iRegion}(iNeuron, iStim) = NaN;
+                                fr{iRegion}(iNeuron + unitCount, iStim) = NaN;
+                                fr_session_num{iRegion}(iNeuron + unitCount, iStim) = NaN;
+                                tempdur{iRegion}(iNeuron + unitCount, iStim) = NaN;
+                                pss{iRegion}(iNeuron + unitCount, iStim) = NaN;
+                                propISI{iRegion}(iNeuron + unitCount, iStim) = NaN;
                                
                             end
                         end
@@ -127,34 +132,34 @@ for iRegion = 1:size(plot_regions, 2)
                 else
                 end
                 end
-                for iPair = 1:3
+                for iStim = 1:3
                     try
-                        d_prime_session_fraction(iRegion, iSession, iPair) = sum(d_prime_session{iRegion}(:, iPair) > 0.5) ./ size(d_prime_session{iRegion}, 1);
-                        d_prime_session_fraction_median(iRegion, iSession, iPair) = nanmean(d_prime_session{iRegion}(:, iPair));
+                        fr_session_fraction(iRegion, iSession, iStim) = sum(fr_session{iRegion}(:, iStim) > 0.5) ./ size(fr_session{iRegion}, 1);
+                        fr_session_fraction_median(iRegion, iSession, iStim) = nanmean(fr_session{iRegion}(:, iStim));
                     catch
-                        d_prime_session_fraction(iRegion, iSession, iPair) = NaN;
-                        d_prime_session_fraction_median(iRegion, iSession, iPair) = NaN;
+                        fr_session_fraction(iRegion, iSession, iStim) = NaN;
+                        fr_session_fraction_median(iRegion, iSession, iStim) = NaN;
 
                     end
                 end
-                d_prime_animal_num{iRegion, iSession} = unique_combs(iSession,1);
+                fr_animal_num{iRegion, iSession} = unique_combs(iSession,1);
 
                 % figure();
                 % for iPair=1:3
                 %    subplot(3,1,iPair)
-                %    histogram(d_prime(unitCount+1:unitCount + size(activity_per_trial_neuron,2),iPair),50) % 1.4142   -1.4142 = one of stims has 0 spikes
-                %    nanmedian(d_prime(unitCount+1:unitCount + size(activity_per_trial_neuron,2),iPair))
+                %    histogram(fr(unitCount+1:unitCount + size(activity_per_trial_neuron,2),iPair),50) % 1.4142   -1.4142 = one of stims has 0 spikes
+                %    nanmedian(fr(unitCount+1:unitCount + size(activity_per_trial_neuron,2),iPair))
                 %    title([num2str(thesePairs(iPair,1)) ' vs ' num2str(thesePairs(iPair,2))])
                 % end
 
             else
-                d_prime_session_fraction(iRegion, iSession, 1:3) = NaN;
-                d_prime_session_fraction_median(iRegion, iSession, 1:3) = NaN;
+                fr_session_fraction(iRegion, iSession, 1:3) = NaN;
+                fr_session_fraction_median(iRegion, iSession, 1:3) = NaN;
             end
 
         else
-            d_prime_session_fraction(iRegion, iSession, 1:3) = NaN;
-            d_prime_session_fraction_median(iRegion, iSession, 1:3) = NaN;
+            fr_session_fraction(iRegion, iSession, 1:3) = NaN;
+            fr_session_fraction_median(iRegion, iSession, 1:3) = NaN;
         end
 
     end
@@ -165,16 +170,16 @@ if plotMe
 % plot d prime
 figure();
 for iRegion = 1:size(plot_regions, 2)
-    for iPair = 1:3
-        subplot(3, size(plot_regions, 2), iPair+(iRegion - 1)*(size(plot_regions, 2)))
+    for iStim = 1:3
+        subplot(3, size(plot_regions, 2), iStim+(iRegion - 1)*(size(plot_regions, 2)))
         % if 0, remove
-        %kp = find(abs(d_prime{iRegion}(:,iPair)) < 1.4141 & abs(d_prime{iRegion}(:,iPair)) ~= 0);
-        kp = find(abs(d_prime{iRegion}(:, iPair)) ~= 0 & ~isinf(abs(d_prime{iRegion}(:, iPair))));
+        %kp = find(abs(fr{iRegion}(:,iPair)) < 1.4141 & abs(fr{iRegion}(:,iPair)) ~= 0);
+        kp = find(abs(fr{iRegion}(:, iStim)) ~= 0 & ~isinf(abs(fr{iRegion}(:, iStim))));
 
-        histogram(d_prime{iRegion}(kp, iPair), [0:0.05:2]) % 1.4142   -1.4142 = one of stims has 0 spikes
-        %nanmedian(d_prime(kp,iPair,iRegion))
-        %nanmean(d_prime(kp,iPair,iRegion))
-        title([num2str(thesePairs(iPair, 1)), ' vs ', num2str(thesePairs(iPair, 2)), ', mean= ', num2str(nanmean(abs(d_prime{iRegion}(kp, iPair))))])
+        histogram(fr{iRegion}(kp, iStim), [0:0.05:2]) % 1.4142   -1.4142 = one of stims has 0 spikes
+        %nanmedian(fr(kp,iPair,iRegion))
+        %nanmean(fr(kp,iPair,iRegion))
+        title([num2str(thesePairs(iStim)), ' vs ', num2str(thesePairs(iStim, 2)), ', mean= ', num2str(nanmean(abs(fr{iRegion}(kp, iStim))))])
         xlabel('d-prime')
         ylabel('# of neurons')
         xlim([0, 2])
@@ -187,16 +192,16 @@ if more
     % plot sel. idx
     figure();
     for iRegion = 1:size(plot_regions, 2)
-        for iPair = 1:3
-            subplot(3, size(plot_regions, 2), iPair+(iRegion - 1)*(size(plot_regions, 2)))
+        for iStim = 1:3
+            subplot(3, size(plot_regions, 2), iStim+(iRegion - 1)*(size(plot_regions, 2)))
             % if 0, remove
-            %kp = find(abs(d_prime{iRegion}(:,iPair)) < 1.4141 & abs(d_prime{iRegion}(:,iPair)) ~= 0);
-            kp = find(abs(ci{iRegion}(:, iPair)) ~= 0 & ~isinf(abs(ci{iRegion}(:, iPair))));
+            %kp = find(abs(fr{iRegion}(:,iPair)) < 1.4141 & abs(fr{iRegion}(:,iPair)) ~= 0);
+            kp = find(abs(ci{iRegion}(:, iStim)) ~= 0 & ~isinf(abs(ci{iRegion}(:, iStim))));
 
-            histogram(ci{iRegion}(kp, iPair), 50) % 1.4142   -1.4142 = one of stims has 0 spikes
-            %nanmedian(d_prime(kp,iPair,iRegion))
-            %nanmean(d_prime(kp,iPair,iRegion))
-            title([num2str(thesePairs(iPair, 1)), ' vs ', num2str(thesePairs(iPair, 2)), ', mean= ', num2str(nanmean(abs(ci{iRegion}(kp, iPair))))])
+            histogram(ci{iRegion}(kp, iStim), 50) % 1.4142   -1.4142 = one of stims has 0 spikes
+            %nanmedian(fr(kp,iPair,iRegion))
+            %nanmean(fr(kp,iPair,iRegion))
+            title([num2str(thesePairs(iStim)), ' vs ', num2str(thesePairs(iStim, 2)), ', mean= ', num2str(nanmean(abs(ci{iRegion}(kp, iStim))))])
             xlabel('Sel. idx')
             ylabel('# of neurons')
             %xlim([-1.45, 1.45])
@@ -210,14 +215,14 @@ if more
         %for iPair=1:3
         subplot(size(plot_regions, 2), 1, iRegion)
         % if 0, remove
-        % kp = find(abs(d_prime(:,iPair,iRegion)) < 1.4141 & abs(d_prime(:,iPair,iRegion)) ~= 0);
-        %  kp = find( abs(d_prime(:,iPair,iRegion)) ~= 0);
+        % kp = find(abs(fr(:,iPair,iRegion)) < 1.4141 & abs(fr(:,iPair,iRegion)) ~= 0);
+        %  kp = find( abs(fr(:,iPair,iRegion)) ~= 0);
 
-        scatter(squeeze(d_prime{iRegion}(:, 1)), squeeze(d_prime{iRegion}(:, 2)), 4, 'filled');
+        scatter(squeeze(fr{iRegion}(:, 1)), squeeze(fr{iRegion}(:, 2)), 4, 'filled');
         hold on; % 1.4142   -1.4142 = one of stims has 0 spikes
-        %nanmedian(d_prime(kp,iPair,iRegion))
-        %nanmean(d_prime(kp,iPair,iRegion))
-        %title([num2str(thesePairs(iPair,1)) ' vs ' num2str(thesePairs(iPair,2)) ', mean= ' num2str(nanmean(abs(d_prime(kp,iPair,iRegion))))])
+        %nanmedian(fr(kp,iPair,iRegion))
+        %nanmean(fr(kp,iPair,iRegion))
+        %title([num2str(thesePairs(iPair,1)) ' vs ' num2str(thesePairs(iPair,2)) ', mean= ' num2str(nanmean(abs(fr(kp,iPair,iRegion))))])
         xlabel('1 vs 2')
         ylabel('1 vs 3')
         %xlim([-1.4, 1.4])
@@ -244,15 +249,15 @@ if more
         %for iPair=1:3
         subplot(size(plot_regions, 2), 1, iRegion)
         % if 0, remove
-        % kp = find(abs(d_prime(:,iPair,iRegion)) < 1.4141 & abs(d_prime(:,iPair,iRegion)) ~= 0);
-        %  kp = find( abs(d_prime(:,iPair,iRegion)) ~= 0);
+        % kp = find(abs(fr(:,iPair,iRegion)) < 1.4141 & abs(fr(:,iPair,iRegion)) ~= 0);
+        %  kp = find( abs(fr(:,iPair,iRegion)) ~= 0);
 
 
-        scatterHistDiff(squeeze(d_prime{iRegion}(:, 1)), squeeze(d_prime{iRegion}(:, 2)), '', '', rgb('Blue'), 0.5)
-        %scatter(squeeze(d_prime{iRegion}(:,1)),squeeze(d_prime{iRegion}(:,2)),4,'filled'); hold on; % 1.4142   -1.4142 = one of stims has 0 spikes
-        %nanmedian(d_prime(kp,iPair,iRegion))
-        %nanmean(d_prime(kp,iPair,iRegion))
-        %title([num2str(thesePairs(iPair,1)) ' vs ' num2str(thesePairs(iPair,2)) ', mean= ' num2str(nanmean(abs(d_prime(kp,iPair,iRegion))))])
+        scatterHistDiff(squeeze(fr{iRegion}(:, 1)), squeeze(fr{iRegion}(:, 2)), '', '', rgb('Blue'), 0.5)
+        %scatter(squeeze(fr{iRegion}(:,1)),squeeze(fr{iRegion}(:,2)),4,'filled'); hold on; % 1.4142   -1.4142 = one of stims has 0 spikes
+        %nanmedian(fr(kp,iPair,iRegion))
+        %nanmean(fr(kp,iPair,iRegion))
+        %title([num2str(thesePairs(iPair,1)) ' vs ' num2str(thesePairs(iPair,2)) ', mean= ' num2str(nanmean(abs(fr(kp,iPair,iRegion))))])
         xlabel('1 vs 2')
         ylabel('1 vs 3')
         %xlim([-1.4, 1.4])
