@@ -1,8 +1,8 @@
 function [expData, session_data, regions] = cl_loadPerStimulusData(load_type, keep_type, loadVids) %% paramaters
 cl_myPaths;
 
-%% get loading info 
-% recording type exp info 
+%% get loading info
+% recording type exp info
 if contains(load_type, 'passive')
     info_table = readtable([csvPath, 'allPassiveRecs.csv'], 'VariableNamingRule', 'modify');
 elseif contains(load_type, 'taskGo')
@@ -11,7 +11,7 @@ else
     info_table = readtable([csvPath, 'allTaskRecs.csv'], 'VariableNamingRule', 'modify');
 end
 
-% regions to load 
+% regions to load
 regions = {'CP', 'GPe', 'SNr'}; % 'GPi', 'STN', 'SNr', 'SNc', 'VTA'};
 warning off;
 regions_id = [672, 1022, 381];
@@ -51,10 +51,11 @@ end
 
 
 expType = cl_expTypes(load_type);
+
 %% load data
 
-for iRecording = 1:length(use_recs) 
-    
+for iRecording = 1:length(use_recs)
+
     % this recording's info
     animal = unique_mice{mouse_thisDate_sites_shank_rec(iRecording, 1)};
     curr_thisDate = mouse_thisDate_sites_shank_rec(iRecording, 2);
@@ -62,7 +63,7 @@ for iRecording = 1:length(use_recs)
     curr_shank = mouse_thisDate_sites_shank_rec(iRecording, 4);
     curr_rec = mouse_thisDate_sites_shank_rec(iRecording, 5);
 
-    % load probe2ephys info 
+    % load probe2ephys info
     probe2ephys_location = cl_cortexlab_filename(animal, [], [], 'probe2ephys');
     if isempty(probe2ephys_location)
         disp('no histo')
@@ -75,17 +76,17 @@ for iRecording = 1:length(use_recs)
     thisDate_sites_shank_probe(isnan(thisDate_sites_shank_probe(:, 3)), 3) = 0; %replace nan by 0
 
     [~, probe_rec_idx] = ismember(mouse_thisDate_sites_shank_rec(iRecording, 2:4), thisDate_sites_shank_probe, 'rows');
-    
-    % get probe_ccf 
+
+    % get probe_ccf
     probe_ccf_location = cl_cortexlab_filename(animal, [], [], 'histo');
     load(probe_ccf_location)
     new_units = [];
     units_to_keep = [];
 
-    % get all experiments 
+    % get all experiments
     experiments = cl_find_experiments(animal, '', true);
     experiments = experiments([experiments.ephys]);
-    
+
     % are any of the ROIs present
     this_probe = probe_rec_idx;
     if this_probe > 0
@@ -110,20 +111,20 @@ for iRecording = 1:length(use_recs)
         these_regions_present = find(this_region_stop);
         if ~isempty(these_regions_present)
             these_exps = str2num(info_table.Exps{use_recs(iRecording)});
-            
+
             if isnan(curr_rec)
-               recording = [];
+                recording = [];
             else
-               recording = curr_rec;
+                recording = curr_rec;
             end
 
-            goodExp_max_trials = cl_get_max_good_experiment(experiments,  recording, site, these_exps, curr_thisDate, animal, expType{keep_type});
+            goodExp_max_trials = cl_get_max_good_experiment(experiments, recording, site, these_exps, curr_thisDate, animal, expType{keep_type});
 
-            for iExperiment =  goodExp_max_trials
+            for iExperiment = goodExp_max_trials
                 experiments = cl_find_experiments(animal, '', true);
                 experiments = experiments([experiments.ephys]);
                 thisDate = experiments(curr_thisDate).thisDate;
-                
+
                 verbose = false; % display load progress and some info figures
                 if loadVids
                     load_parts.cam = true;
@@ -133,7 +134,7 @@ for iRecording = 1:length(use_recs)
                 loadClusters = 0;
                 cl_load_experiment;
 
-              
+
                 %subselect shank
                 if ismember(experiment_type, keep_type)
                     if curr_shank > 0
@@ -152,7 +153,7 @@ for iRecording = 1:length(use_recs)
                             template_depths(shank_units) <= this_region_stop(these_regions_present(iRegion)));
                         units_to_keep = [units_to_keep; new_units];
                         units_to_keep_area = [units_to_keep_area; ones(size(new_units, 1), 1) .* these_regions_present(iRegion)];
-                        %units_to_keep_coords 
+                        %units_to_keep_coords
 
                         unit_closest_depth = arrayfun(@(x) ... %closest depth
                             find(probe_ccf(this_probe).probe_depths >= template_depths(shank_units(new_units(x))), 1, 'first'), 1:length(new_units));
@@ -176,7 +177,7 @@ for iRecording = 1:length(use_recs)
                         [unitType, qMetrics] = bc_qualityMetricsPipeline_JF(animal, thisDate, site, recording, 1, protocol, rerunQM, plotGUI, runQM);
                     end
                     %try
-                        
+
                     ephysProperties = bc_ephysPropertiesPipeline_JF(animal, thisDate, site, recording, 1, rerunEP, runEP, region);
                     %catch
                     %end
@@ -185,7 +186,7 @@ for iRecording = 1:length(use_recs)
                 end
 
                 expData.psth_conditions_all{iRecording, experiment_type} = unique(trial_conditions, 'rows');
-                
+
                 % get stim response
                 unique_templates = unique(spike_templates);
                 if contains(load_type, 'task')
@@ -228,7 +229,7 @@ for iRecording = 1:length(use_recs)
                 expData.trial_types{experiment_type, iRecording} = trial_conditions;
                 expData.no_move_trials{experiment_type, iRecording} = no_move_trials;
                 raster_window = [-0.2, 0.6];
-                
+
                 if loadVids
                     try
                         psth_bin_size = 0.01;
@@ -269,11 +270,8 @@ for iRecording = 1:length(use_recs)
 
                     end
 
-                    %stats = grpstats(passive_data_per_cond.psth_conditions{experiment_type}, trial_conditions);
-                    %responsive cell
 
-
-                    [curr_psth, curr_raster, t, raster_x, raster_y] = cl_raster_psth(spike_templates, spike_times_timeline, ...
+                    [~, curr_raster, t, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
                         unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size, ...
                         align_times, []);
 
@@ -308,8 +306,9 @@ for iRecording = 1:length(use_recs)
 
 
                     end
-                    %responsive cell?  shuffle pre/post labels
 
+
+                    % across all conds shuffle test
                     pre_activity = nanmean(curr_raster(:, 1:150), 2);
                     post_activity = nanmean(curr_raster(:, 250:400), 2);
                     all_activity = [pre_activity; post_activity];
@@ -326,87 +325,35 @@ for iRecording = 1:length(use_recs)
                     expData.pvalue_shuffled_0025{experiment_type}(iUnit + unitCount) = ...
                         real_diff >= prctile(shuffled_diffs, 97.5) || real_diff <= prctile(shuffled_diffs, 2.5);
 
-                    colorMtx = bc_colors(3, 'w');
-                    %                 figure();
-                    %                 subplot(6,2,[1,3, 5, 7])
-                    %                 scatter(t(raster_x), raster_y, 2, [0,0,0], 'filled')
-                    %                 ylabel('trial #')
-                    %                 xticklabels({''})
-                    %                 makepretty;
-                    %
-                    %                 subplot(6,2,[9, 11])
-                    %                 plot(t, curr_psth .* 1/psth_bin_size,'Color', colorMtx(2,:))
-                    %                 xlabel('time from stim onset (s)')
-                    %                 ylabel('spikes/s')
-                    %                 legend(['sign rank p-value = ', num2str(passive_data_per_cond.pvalue{experiment_type}(iUnit+unitCount),3)])
-                    %                 makepretty;
-                    %
-                    %                 subplot(6,2,[6, 8])
-                    %                 h = histogram(shuffled_diffs, 'FaceColor', colorMtx(1,:), 'EdgeColor', colorMtx(1,:), 'Normalization' ,'probability');
-                    %                 hold on;
-                    %                 ylims = ylim;
-                    %                 line([real_diff, real_diff], [ylims(1), ylims(2)], 'Color', colorMtx(2,:))
-                    %
-                    %                 l1 = line([real_diff, real_diff], [ylims(1), ylims(2)], 'Color', colorMtx(2,:));
-                    %                 l2 = line([pctile_2, pctile_2], [ylims(1), ylims(2)], 'Color', colorMtx(3,:));
-                    %                 line([pctile_1, pctile_1], [ylims(1), ylims(2)], 'Color', colorMtx(3,:))
-                    %                 xlabel('average f.r. post-stim - pre-stim')
-                    %                 ylabel('fraction')
-                    %                 legend([h, l1, l2], {'shuffled data', 'real value', '2.5%'})
-                    %
-                    %
-                    %                 makepretty;
-                    %
-
-                    %psth
-                    psth_bin_size_det = 0.001;
-                    raster_window_det = [-0.2, 0.6];
+                    % psth half trials 1
                     [curr_psth, ~, ~, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
                         unique_templates(shank_units(units_to_keep(iUnit))), raster_window_det, psth_bin_size_det, ...
                         align_times(1:2:end), trial_cond_idx(1:2:end));
                     expData.av_psth_1{experiment_type, iRecording}(iUnit, :, :) = curr_psth;
 
-                    %plot(nanmean(curr_psth(:,:)))
-                    % if iRecording > 1 && iUnit == 1
-                    %     if size(curr_psth,1) ~= size(passive_data_per_cond.psth{experiment_type},3)
-                    %         warning on;
-                    %         warning(['different number of stims for rec #', num2str(iRecording)])
-                    %         warning off;
-                    %     end
-                    % end
 
                     expData.psth{experiment_type}(iUnit + unitCount, 1, 1:size(curr_psth, 1), :) = curr_psth;
 
+                    % psth half trials 2
                     [curr_psth, ~, ~, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
                         unique_templates(shank_units(units_to_keep(iUnit))), raster_window_det, psth_bin_size_det, ...
                         align_times(2:2:end), trial_cond_idx(2:2:end));
 
                     expData.psth{experiment_type}(iUnit + unitCount, 2, 1:size(curr_psth, 1), :) = curr_psth;
                     expData.av_psth_2{experiment_type, iRecording}(iUnit, :, :) = curr_psth;
-                    % disp(unique_templates(shank_units(units_to_keep(iUnit))))
 
-                    [curr_psth, curr_raster, t, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
-                        unique_templates(shank_units(units_to_keep(iUnit))), raster_window_det, psth_bin_size_det, ...
-                        align_times(1:1:end), trial_cond_idx(1:1:end));
-                    expData.psth{experiment_type}(iUnit + unitCount, 3, 1:size(curr_psth, 1), :) = curr_psth;
 
-                    psth_bin_size_det = 0.001;
-                    raster_window_det = [-0.2, 0.6];
+                    % psth all trials
                     [curr_psth, curr_raster, t_det, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
                         unique_templates(shank_units(units_to_keep(iUnit))), raster_window_det, psth_bin_size_det, ...
                         align_times(1:1:end), trial_cond_idx(1:1:end));
+                    expData.psth{experiment_type}(iUnit + unitCount, 3, 1:size(curr_psth, 1), :) = curr_psth;
                     startIdx = find(t_det >= 0.05, 1, 'first');
                     stopIdx = find(t_det >= 0.2, 1, 'first');
                     expData.av_per_trial{experiment_type, iRecording}(iUnit, :) = nanmean(curr_raster(:, startIdx:stopIdx), 2);
                     startIdx = find(t_det >= -0.2, 1, 'first');
                     stopIdx = find(t_det >= -0.05, 1, 'first');
                     expData.av_per_trial_base{experiment_type, iRecording}(iUnit, :) = nanmean(curr_raster(:, startIdx:stopIdx), 2);
-                    expData.av_psth{experiment_type, iRecording}(iUnit, :, :) = curr_psth;
-                    %passive_data_per_cond.av_psth_std{experiment_type, iRecording}(iUnit,:,:) = nanstd(curr_raster);
-
-                    % area
-                    %passive_data_per_cond.unit_area{experiment_type, iRecording}(iUnit+unitCount)
-                    % unit type
 
 
                 end
@@ -429,31 +376,31 @@ for iRecording = 1:length(use_recs)
                     expData.unitType((unitCount + 1:unitCount + size(units_to_keep, 1))) = unitType(units_to_keep);
                 catch
                     rerunQM = 1;
-                    [unitType, qMetrics] = bc_qualityMetricsPipeline_JF(animal, thisDate, site, recording, 1, protocol, rerunQM, plotGUI, runQM);
+                    [unitType, ~] = bc_qualityMetricsPipeline_JF(animal, thisDate, site, recording, 1, protocol, rerunQM, plotGUI, runQM);
                     expData.unitType((unitCount + 1:unitCount + size(units_to_keep, 1))) = unitType(units_to_keep);
                 end
                 if isfield(ephysProperties, 'propLongISI')
-                    if size(ephysProperties.propLongISI,1) == size(unitType,1)
-                    try
-                    expData.pss((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.postSpikeSuppression(units_to_keep);
-                    expData.templateDuration((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.templateDuration(units_to_keep);
-                    expData.propLongISI((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.propLongISI(units_to_keep);
-                    expData.fr((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.spike_rateSimple(units_to_keep);
-                    catch
-                         expData.pss((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.postSpikeSuppression_ms(units_to_keep);
-                    expData.templateDuration((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.waveformDuration_peakTrough_us(units_to_keep);
-                    expData.propLongISI((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.propLongISI(units_to_keep);
-                    expData.fr((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.mean_firingRate(units_to_keep);
-                    end
+                    if size(ephysProperties.propLongISI, 1) == size(unitType, 1)
+                        try
+                            expData.pss((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.postSpikeSuppression(units_to_keep);
+                            expData.templateDuration((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.templateDuration(units_to_keep);
+                            expData.propLongISI((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.propLongISI(units_to_keep);
+                            expData.fr((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.spike_rateSimple(units_to_keep);
+                        catch
+                            expData.pss((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.postSpikeSuppression_ms(units_to_keep);
+                            expData.templateDuration((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.waveformDuration_peakTrough_us(units_to_keep);
+                            expData.propLongISI((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.propLongISI(units_to_keep);
+                            expData.fr((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.mean_firingRate(units_to_keep);
+                        end
                     else
 
-                    rerunEP = 1;
-                    ephysProperties = bc_ephysPropertiesPipeline_JF(animal, thisDate, site, recording, 1, rerunEP, runEP, region);
-                    expData.pss((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.postSpikeSuppression_ms(units_to_keep);
-                    expData.templateDuration((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.waveformDuration_peakTrough_us(units_to_keep);
-                    expData.propLongISI((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.propLongISI(units_to_keep);
-                    expData.fr((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.mean_firingRate(units_to_keep);
-               
+                        rerunEP = 1;
+                        ephysProperties = bc_ephysPropertiesPipeline_JF(animal, thisDate, site, recording, 1, rerunEP, runEP, region);
+                        expData.pss((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.postSpikeSuppression_ms(units_to_keep);
+                        expData.templateDuration((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.waveformDuration_peakTrough_us(units_to_keep);
+                        expData.propLongISI((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.propLongISI(units_to_keep);
+                        expData.fr((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.mean_firingRate(units_to_keep);
+
                     end
                 else
 
@@ -463,7 +410,7 @@ for iRecording = 1:length(use_recs)
                     expData.templateDuration((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.waveformDuration_peakTrough_us(units_to_keep);
                     expData.propLongISI((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.propLongISI(units_to_keep);
                     expData.fr((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.mean_firingRate(units_to_keep);
-               
+
                 end
                 % catch
                 %end
