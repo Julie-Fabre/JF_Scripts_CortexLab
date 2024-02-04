@@ -5,21 +5,21 @@ load_type = 'naive';
 loadVids = 0;
 for iExperimentType = 1:6
     [expData, session_data, regions] = cl_loadPerStimulusData(load_type, iExperimentType, loadVids);
-    save(['/home/julie/Dropbox/MATLAB/naive_data' num2str(iExperimentType) '.mat'], '-struct', 'task_data', '-v7.3');
+    save(['/home/julie/Dropbox/MATLAB/naive_data' num2str(iExperimentType) '.mat'], '-struct', 'expData', '-v7.3');
 end
 
 load_type = 'taskGo';
 loadVids = 0;
 for iExperimentType = 1:2
     [expData, session_data, regions] = cl_loadPerStimulusData(load_type, iExperimentType, loadVids);
-    save(['/home/julie/Dropbox/MATLAB/gogogo_data' num2str(iExperimentType) '.mat'], '-struct', 'task_data', '-v7.3');
+    save(['/home/julie/Dropbox/MATLAB/gogogo_data' num2str(iExperimentType) '.mat'], '-struct', 'expData', '-v7.3');
 end
 
-load_type = 'TaskNoGo';
+load_type = 'taskNoGo';
 loadVids = 0;
 for iExperimentType = 1:2
     [expData, session_data, regions] = cl_loadPerStimulusData(load_type, iExperimentType, loadVids);
-    save(['/home/julie/Dropbox/MATLAB/gonogo_data' num2str(iExperimentType) '.mat'], '-struct', 'task_data', '-v7.3');
+    save(['/home/julie/Dropbox/MATLAB/goNogo_data' num2str(iExperimentType) '.mat'], '-struct', 'expData', '-v7.3');
 end
 
 %% Fig 1: 

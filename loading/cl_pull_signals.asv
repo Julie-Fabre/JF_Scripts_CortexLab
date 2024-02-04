@@ -844,9 +844,9 @@
             trial_id = trial_conditions(:, 2);
             trial_conditions(trial_conditions(:, 1) > 16, 1) = trial_conditions(trial_conditions(:, 1) > 16, 1) - 16;
             trial_conditions(trial_conditions(:, 1) > 16, 1) = trial_conditions(trial_conditions(:, 1) > 16, 1) - 16;
-            trial_conditions(trial_conditions(:, 1) == 14, 1)= 4;% stim 1
-            trial_conditions(trial_conditions(:, 1) == 15, 1) = 6;% stim 3
-            trial_conditions(trial_conditions(:, 1) == 16, 1) = 12;% stim 2
+            trial_conditions(trial_conditions(:, 1) == 14, 1)
+            trial_conditions(trial_conditions(:, 1) == 15, 1)
+            trial_conditions(trial_conditions(:, 1) == 16, 1)
             stimIDs = trial_conditions(:, 1);
 
 
