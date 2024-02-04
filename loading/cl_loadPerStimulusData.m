@@ -119,7 +119,7 @@ for iRecording = 1:length(use_recs)
             end
 
             goodExp_max_trials = cl_get_max_good_experiment(experiments, recording, site, these_exps, curr_thisDate, animal, expType{keep_type});
-      
+
             for iExperiment = goodExp_max_trials
                 experiment = these_exps(iExperiment);
                 experiments = cl_find_experiments(animal, '', true);
@@ -137,57 +137,58 @@ for iRecording = 1:length(use_recs)
 
 
                 %subselect shank
-                    if curr_shank > 0
-                        shank_xdepth = [250 * (curr_shank - 1), 250 * (curr_shank - 1) + 32];
-                        shank_units = find(template_xdepths >= shank_xdepth(1) & template_xdepths <= shank_xdepth(2));
-                    else
-                        shank_units = 1:size(template_xdepths, 1)';
-                    end
-                    % get units we want to keep + store each units location (region + coordinates)
-                    units_to_keep = [];
-                    units_to_keep_area = [];
-                    units_to_keep_coords = [];
+                if curr_shank > 0
+                    shank_xdepth = [250 * (curr_shank - 1), 250 * (curr_shank - 1) + 32];
+                    shank_units = find(template_xdepths >= shank_xdepth(1) & template_xdepths <= shank_xdepth(2));
+                else
+                    shank_units = 1:size(template_xdepths, 1)';
+                end
+                % get units we want to keep + store each units location (region + coordinates)
+                units_to_keep = [];
+                units_to_keep_area = [];
+                units_to_keep_coords = [];
+                unit_side = [];
 
-                    for iRegion = 1:length(these_regions_present)
-                        new_units = find(template_depths(shank_units) >= this_region_start(these_regions_present(iRegion)) & ...
-                            template_depths(shank_units) <= this_region_stop(these_regions_present(iRegion)));
-                        units_to_keep = [units_to_keep; new_units];
-                        units_to_keep_area = [units_to_keep_area; ones(size(new_units, 1), 1) .* these_regions_present(iRegion)];
-                        %units_to_keep_coords
+                for iRegion = 1:length(these_regions_present)
+                    new_units = find(template_depths(shank_units) >= this_region_start(these_regions_present(iRegion)) & ...
+                        template_depths(shank_units) <= this_region_stop(these_regions_present(iRegion)));
+                    units_to_keep = [units_to_keep; new_units];
+                    units_to_keep_area = [units_to_keep_area; ones(size(new_units, 1), 1) .* these_regions_present(iRegion)];
+                    %units_to_keep_coords
 
-                        unit_closest_depth = arrayfun(@(x) ... %closest depth
-                            find(probe_ccf(this_probe).probe_depths >= template_depths(shank_units(new_units(x))), 1, 'first'), 1:length(new_units));
-                        units_to_keep_coords = [units_to_keep_coords; ...
-                            probe_ccf(this_probe).trajectory_coords(unit_closest_depth, :)];
-                        % AP, DV, ML
-                        bregma = [540,0,570];
-                        unit_side = probe_ccf(this_probe).trajectory_coords(unit_closest_depth,3) - bregma(1) / 2.5 < 0;%-1 for left, 1 for right 
-                    end
-                    protocol = '';
-                    rerunEP = 0;
-                    plotGUI = 0;
-                    runQM = 1;
-                    rerunQM = 0;
-                    region = '';
-                    runEP = 1;
-                    clearvars unitType
-                    try
-                        %rerunQM = 1;
-                        [unitType, qMetrics] = bc_qualityMetricsPipeline_JF(animal, thisDate, site, recording, 1, protocol, rerunQM, plotGUI, runQM);
-                        %bc_qualityMetricsPipeline_JF(animal, thisDate, site, recording, experiment_num, protocol, rerunQM, plotGUI, runQM)
-                    catch
-                        rerunQM = 1;
-                        [unitType, qMetrics] = bc_qualityMetricsPipeline_JF(animal, thisDate, site, recording, 1, protocol, rerunQM, plotGUI, runQM);
-                    end
-                    %try
+                    unit_closest_depth = arrayfun(@(x) ... %closest depth
+                        find(probe_ccf(this_probe).probe_depths >= template_depths(shank_units(new_units(x))), 1, 'first'), 1:length(new_units));
+                    units_to_keep_coords = [units_to_keep_coords; ...
+                        probe_ccf(this_probe).trajectory_coords(unit_closest_depth, :)];
+                    % AP, DV, ML
+                    bregma = [540, 0, 570];
+                    unit_side = [unit_side;...
+                        probe_ccf(this_probe).trajectory_coords(unit_closest_depth, 3) - bregma(1) / 2.5 < 0]; %-1 for left, 1 for right
+                end
+                protocol = '';
+                rerunEP = 0;
+                plotGUI = 0;
+                runQM = 1;
+                rerunQM = 0;
+                region = '';
+                runEP = 1;
+                clearvars unitType
+                try
+                    %rerunQM = 1;
+                    [unitType, qMetrics] = bc_qualityMetricsPipeline_JF(animal, thisDate, site, recording, 1, protocol, rerunQM, plotGUI, runQM);
+                    %bc_qualityMetricsPipeline_JF(animal, thisDate, site, recording, experiment_num, protocol, rerunQM, plotGUI, runQM)
+                catch
+                    rerunQM = 1;
+                    [unitType, qMetrics] = bc_qualityMetricsPipeline_JF(animal, thisDate, site, recording, 1, protocol, rerunQM, plotGUI, runQM);
+                end
+                %try
 
-                    ephysProperties = bc_ephysPropertiesPipeline_JF(animal, thisDate, site, recording, 1, rerunEP, runEP, region);
-                    %catch
-                    %end
-                    %(animal, thisDate, site, recording, experiment, rerun, runEP, region)
+                ephysProperties = bc_ephysPropertiesPipeline_JF(animal, thisDate, site, recording, 1, rerunEP, runEP, region);
+                %catch
+                %end
+                %(animal, thisDate, site, recording, experiment, rerun, runEP, region)
 
-               
-                
+
                 expData.psth_conditions_all{iRecording, keep_type} = unique(trial_conditions, 'rows');
 
                 % get stim response
@@ -262,16 +263,15 @@ for iRecording = 1:length(use_recs)
 
                 psth_bin_size = 0.001;
                 for iUnit = 1:size(units_to_keep, 1)
-
-                    if ~isempty(keep_trial)
-                        align_times = stimOn_times(keep_trial);
-                        [~, trial_cond_idx] = ismember(trial_conditions(keep_trial, :), expData.psth_conditions{keep_type}, 'rows');
-
+                    if exist('no_move_trials', 'var') % only in passive protocols
+                        keep_trials = no_move_trials;
                     else
-                        align_times = stimOn_times;
-                        [~, trial_cond_idx] = ismember(trial_conditions, expData.psth_conditions{keep_type}, 'rows');
-
+                        keep_trials = ones(n_trials(end), 1);
                     end
+
+
+                    align_times = stimOn_times(keep_trials);
+                    [~, trial_cond_idx] = ismember(trial_conditions(keep_trials, :), expData.psth_conditions{keep_type}, 'rows');
 
 
                     [~, curr_raster, t, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
@@ -280,8 +280,8 @@ for iRecording = 1:length(use_recs)
 
                     % p value test for *each* condition
                     for iCond = 1:size(expData.psth_conditions{keep_type}, 1)
-                        if ~isempty(keep_trial)
-                            [~, trial_cond_idx_single] = ismember(trial_conditions(keep_trial, :), expData.psth_conditions{keep_type}(iCond, :), 'rows');
+                        if ~isempty(keep_trials)
+                            [~, trial_cond_idx_single] = ismember(trial_conditions(keep_trials, :), expData.psth_conditions{keep_type}(iCond, :), 'rows');
                         else
                             [~, trial_cond_idx_single] = ismember(trial_conditions, expData.psth_conditions{keep_type}(iCond, :), 'rows');
 
@@ -330,7 +330,7 @@ for iRecording = 1:length(use_recs)
 
                     % psth half trials 1
                     [curr_psth, ~, ~, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
-                        unique_templates(shank_units(units_to_keep(iUnit))), raster_window_det, psth_bin_size_det, ...
+                        unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size, ...
                         align_times(1:2:end), trial_cond_idx(1:2:end));
                     expData.av_psth_1{keep_type, iRecording}(iUnit, :, :) = curr_psth;
 
@@ -339,7 +339,7 @@ for iRecording = 1:length(use_recs)
 
                     % psth half trials 2
                     [curr_psth, ~, ~, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
-                        unique_templates(shank_units(units_to_keep(iUnit))), raster_window_det, psth_bin_size_det, ...
+                        unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size, ...
                         align_times(2:2:end), trial_cond_idx(2:2:end));
 
                     expData.psth{keep_type}(iUnit + unitCount, 2, 1:size(curr_psth, 1), :) = curr_psth;
@@ -348,7 +348,7 @@ for iRecording = 1:length(use_recs)
 
                     % psth all trials
                     [curr_psth, curr_raster, t_det, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
-                        unique_templates(shank_units(units_to_keep(iUnit))), raster_window_det, psth_bin_size_det, ...
+                        unique_templates(shank_units(units_to_keep(iUnit))), raster_window, psth_bin_size, ...
                         align_times(1:1:end), trial_cond_idx(1:1:end));
                     expData.psth{keep_type}(iUnit + unitCount, 3, 1:size(curr_psth, 1), :) = curr_psth;
                     startIdx = find(t_det >= 0.05, 1, 'first');
@@ -371,7 +371,7 @@ for iRecording = 1:length(use_recs)
                     repmat([mouse_thisDate_sites_shank_rec(iRecording, 1), curr_thisDate, site, curr_shank], size(units_to_keep, 1), 1);
                 expData.unit_area(unitCount+1:unitCount+size(units_to_keep, 1), :) = units_to_keep_area;
                 expData.unit_coords(unitCount+1:unitCount+size(units_to_keep, 1), :) = units_to_keep_coords;
-                expData.unit_side(unitCount+1:unitCount+size(units_to_keep, 1), :) = units_side;
+                expData.unit_side(unitCount+1:unitCount+size(units_to_keep, 1)) = unit_side;
                 expData.t = t;
                 %                passive_data_per_cond.t_det = t_det;
                 expData.unitNum((unitCount + 1:unitCount + size(units_to_keep, 1))) = shank_units(units_to_keep);
@@ -427,7 +427,7 @@ for iRecording = 1:length(use_recs)
             % clear variables
             disp(['   ', num2str(iRecording), '/', num2str(length(use_recs))])
 
-            keep expType session_data mouse_thisDate_sites_shank_rec unique_mice expData use_recs info_table regions regions_id unitCount st load_type keep_type loadVids
+            keep expType session_data mouse_thisDate_sites_shank_rec unique_mice expData use_recs info_table regions regions_id unitCount load_type keep_type loadVids
         end
     end
     %catch
