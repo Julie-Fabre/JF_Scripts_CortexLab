@@ -1,8 +1,0 @@
-Phy cheatsheet
-
-pushd \\znas.cortexlab.net\Subjects 
-cd 
-conda activate phy-dev
-phy template-gui params.py 
-
-!SAVE!

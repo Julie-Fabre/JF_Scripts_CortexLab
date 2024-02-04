@@ -110,20 +110,22 @@ for iRecording = 1:length(use_recs)
         these_regions_present = find(this_region_stop);
         if ~isempty(these_regions_present)
             these_exps = str2num(info_table.Exps{use_recs(iRecording)});
-            
-            if isnan(curr_rec)
-               recording = [];
-            else
-               recording = curr_rec;
-            end
 
-            goodExp_max_trials = cl_get_max_good_experiment(experiments,  recording, site, these_exps, curr_thisDate, animal, expType{keep_type});
+            cl_get_max_good_experiment(experiments,  curr_rec, site, these_exps, curr_thisDate, animal, expType{keep_type});
 
-            for iExperiment =  goodExp_max_trials
+            load_me_max = exp_n_trials(find(n_trials_exp == max(n_trials_exp)));
+            for iExperiment = load_me_max 
+                experiment = load_me_max; %these_exps(iExperiment); %for now, just load 1 experiment
                 experiments = cl_find_experiments(animal, '', true);
                 experiments = experiments([experiments.ephys]);
                 thisDate = experiments(curr_thisDate).thisDate;
-                
+                if isnan(curr_rec)
+                    recording = [];
+                else
+                    recording = curr_rec;
+                end
+
+
                 verbose = false; % display load progress and some info figures
                 if loadVids
                     load_parts.cam = true;
@@ -131,7 +133,14 @@ for iRecording = 1:length(use_recs)
                 load_parts.imaging = false;
                 load_parts.ephys = true;
                 loadClusters = 0;
-                cl_load_experiment;
+                try
+                    cl_load_experiment
+
+                catch
+
+                    disp('error loading experiment')
+                    continue;
+                end
 
               
                 %subselect shank
