@@ -119,8 +119,9 @@ for iRecording = 1:length(use_recs)
             end
 
             goodExp_max_trials = cl_get_max_good_experiment(experiments, recording, site, these_exps, curr_thisDate, animal, expType{keep_type});
-
+      
             for iExperiment = goodExp_max_trials
+                experiment = these_exps(iExperiment);
                 experiments = cl_find_experiments(animal, '', true);
                 experiments = experiments([experiments.ephys]);
                 thisDate = experiments(curr_thisDate).thisDate;
@@ -136,7 +137,6 @@ for iRecording = 1:length(use_recs)
 
 
                 %subselect shank
-                if ismember(experiment_type, keep_type)
                     if curr_shank > 0
                         shank_xdepth = [250 * (curr_shank - 1), 250 * (curr_shank - 1) + 32];
                         shank_units = find(template_xdepths >= shank_xdepth(1) & template_xdepths <= shank_xdepth(2));
@@ -159,6 +159,9 @@ for iRecording = 1:length(use_recs)
                             find(probe_ccf(this_probe).probe_depths >= template_depths(shank_units(new_units(x))), 1, 'first'), 1:length(new_units));
                         units_to_keep_coords = [units_to_keep_coords; ...
                             probe_ccf(this_probe).trajectory_coords(unit_closest_depth, :)];
+                        % AP, DV, ML
+                        bregma = [540,0,570];
+                        unit_side = probe_ccf(this_probe).trajectory_coords(unit_closest_depth,3) - bregma(1) / 2.5 < 0;%-1 for left, 1 for right 
                     end
                     protocol = '';
                     rerunEP = 0;
@@ -183,25 +186,25 @@ for iRecording = 1:length(use_recs)
                     %end
                     %(animal, thisDate, site, recording, experiment, rerun, runEP, region)
 
-                end
-
-                expData.psth_conditions_all{iRecording, experiment_type} = unique(trial_conditions, 'rows');
+               
+                
+                expData.psth_conditions_all{iRecording, keep_type} = unique(trial_conditions, 'rows');
 
                 % get stim response
                 unique_templates = unique(spike_templates);
                 if contains(load_type, 'task')
-                    if experiment_type == 1
-                        expData.psth_conditions{experiment_type} = unique(trial_conditions, 'rows');
+                    if keep_type == 1
+                        expData.psth_conditions{keep_type} = unique(trial_conditions, 'rows');
 
                     else
-                        expData.psth_conditions{experiment_type} = unique(trial_conditions(ismember(trial_conditions(:, 1), ...
+                        expData.psth_conditions{keep_type} = unique(trial_conditions(ismember(trial_conditions(:, 1), ...
                             [1:13]) & ismember(trial_conditions(:, 2), [-90, 0, 90]), :), 'rows');
                     end
                 else
-                    %if experiment_type == 1%nat images
-                    expData.psth_conditions{experiment_type} = unique(trial_conditions, 'rows');
-                    expData.psth_conditions_all{iRecording, experiment_type} = unique(trial_conditions, 'rows');
-                    if experiment_type == 5
+                    %if keep_type == 1%nat images
+                    expData.psth_conditions{keep_type} = unique(trial_conditions, 'rows');
+                    expData.psth_conditions_all{iRecording, keep_type} = unique(trial_conditions, 'rows');
+                    if keep_type == 5
                         if size(trial_conditions, 2) == 2
 
                             these_guys = ismember(trial_conditions(:, 1), ...
@@ -209,7 +212,7 @@ for iRecording = 1:length(use_recs)
                             disp(unique(trial_conditions, 'rows'))
 
                             %if size(unique(trial_conditions(these_guys,:), 'rows'),1) ==3
-                            %passive_data_per_cond.psth_conditions{experiment_type} = unique(trial_conditions(these_guys,:), 'rows');
+                            %passive_data_per_cond.psth_conditions{keep_type} = unique(trial_conditions(these_guys,:), 'rows');
                             %else
                             %    disp('no stim screen location saved')
                             %    continue;
@@ -218,7 +221,7 @@ for iRecording = 1:length(use_recs)
                             continue;
                         end
                     else
-                        %passive_data_per_cond.psth_conditions_all{iRecording, experiment_type} = unique(trial_conditions, 'rows');
+                        %passive_data_per_cond.psth_conditions_all{iRecording, keep_type} = unique(trial_conditions, 'rows');
                     end
 
 
@@ -226,8 +229,8 @@ for iRecording = 1:length(use_recs)
 
                 % for half trials, identify max.
                 % then average on that half.
-                expData.trial_types{experiment_type, iRecording} = trial_conditions;
-                expData.no_move_trials{experiment_type, iRecording} = no_move_trials;
+                expData.trial_types{keep_type, iRecording} = trial_conditions;
+                expData.no_move_trials{keep_type, iRecording} = no_move_trials;
                 raster_window = [-0.2, 0.6];
 
                 if loadVids
@@ -262,11 +265,11 @@ for iRecording = 1:length(use_recs)
 
                     if ~isempty(keep_trial)
                         align_times = stimOn_times(keep_trial);
-                        [~, trial_cond_idx] = ismember(trial_conditions(keep_trial, :), expData.psth_conditions{experiment_type}, 'rows');
+                        [~, trial_cond_idx] = ismember(trial_conditions(keep_trial, :), expData.psth_conditions{keep_type}, 'rows');
 
                     else
                         align_times = stimOn_times;
-                        [~, trial_cond_idx] = ismember(trial_conditions, expData.psth_conditions{experiment_type}, 'rows');
+                        [~, trial_cond_idx] = ismember(trial_conditions, expData.psth_conditions{keep_type}, 'rows');
 
                     end
 
@@ -276,16 +279,16 @@ for iRecording = 1:length(use_recs)
                         align_times, []);
 
                     % p value test for *each* condition
-                    for iCond = 1:size(expData.psth_conditions{experiment_type}, 1)
+                    for iCond = 1:size(expData.psth_conditions{keep_type}, 1)
                         if ~isempty(keep_trial)
-                            [~, trial_cond_idx_single] = ismember(trial_conditions(keep_trial, :), expData.psth_conditions{experiment_type}(iCond, :), 'rows');
+                            [~, trial_cond_idx_single] = ismember(trial_conditions(keep_trial, :), expData.psth_conditions{keep_type}(iCond, :), 'rows');
                         else
-                            [~, trial_cond_idx_single] = ismember(trial_conditions, expData.psth_conditions{experiment_type}(iCond, :), 'rows');
+                            [~, trial_cond_idx_single] = ismember(trial_conditions, expData.psth_conditions{keep_type}(iCond, :), 'rows');
 
                         end
                         pvals_per_cond(iCond) = signrank(nanmean(curr_raster(logical(trial_cond_idx_single), 1:150), 2), ...
                             nanmean(curr_raster(logical(trial_cond_idx_single), 250:400), 2));
-                        expData.pvalue{experiment_type}(iUnit + unitCount, iCond) = pvals_per_cond(iCond);
+                        expData.pvalue{keep_type}(iUnit + unitCount, iCond) = pvals_per_cond(iCond);
 
 
                         pre_activity = nanmean(curr_raster(logical(trial_cond_idx_single), 1:150), 2);
@@ -298,10 +301,10 @@ for iRecording = 1:length(use_recs)
                         pctile_2 = prctile(shuffled_diffs, 95);
                         pctile_1 = prctile(shuffled_diffs, 5);
 
-                        expData.pvalue_shuffled_005_per_cond{experiment_type}(iUnit + unitCount, iCond) = ...
+                        expData.pvalue_shuffled_005_per_cond{keep_type}(iUnit + unitCount, iCond) = ...
                             real_diff >= pctile_2 || real_diff <= pctile_1;
 
-                        expData.pvalue_shuffled_0025_per_cond{experiment_type}(iUnit + unitCount, iCond) = ...
+                        expData.pvalue_shuffled_0025_per_cond{keep_type}(iUnit + unitCount, iCond) = ...
                             real_diff >= prctile(shuffled_diffs, 97.5) || real_diff <= prctile(shuffled_diffs, 2.5);
 
 
@@ -319,41 +322,41 @@ for iRecording = 1:length(use_recs)
                     pctile_2 = prctile(shuffled_diffs, 95);
                     pctile_1 = prctile(shuffled_diffs, 5);
 
-                    expData.pvalue_shuffled_005{experiment_type}(iUnit + unitCount) = ...
+                    expData.pvalue_shuffled_005{keep_type}(iUnit + unitCount) = ...
                         real_diff >= pctile_2 || real_diff <= pctile_1;
 
-                    expData.pvalue_shuffled_0025{experiment_type}(iUnit + unitCount) = ...
+                    expData.pvalue_shuffled_0025{keep_type}(iUnit + unitCount) = ...
                         real_diff >= prctile(shuffled_diffs, 97.5) || real_diff <= prctile(shuffled_diffs, 2.5);
 
                     % psth half trials 1
                     [curr_psth, ~, ~, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
                         unique_templates(shank_units(units_to_keep(iUnit))), raster_window_det, psth_bin_size_det, ...
                         align_times(1:2:end), trial_cond_idx(1:2:end));
-                    expData.av_psth_1{experiment_type, iRecording}(iUnit, :, :) = curr_psth;
+                    expData.av_psth_1{keep_type, iRecording}(iUnit, :, :) = curr_psth;
 
 
-                    expData.psth{experiment_type}(iUnit + unitCount, 1, 1:size(curr_psth, 1), :) = curr_psth;
+                    expData.psth{keep_type}(iUnit + unitCount, 1, 1:size(curr_psth, 1), :) = curr_psth;
 
                     % psth half trials 2
                     [curr_psth, ~, ~, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
                         unique_templates(shank_units(units_to_keep(iUnit))), raster_window_det, psth_bin_size_det, ...
                         align_times(2:2:end), trial_cond_idx(2:2:end));
 
-                    expData.psth{experiment_type}(iUnit + unitCount, 2, 1:size(curr_psth, 1), :) = curr_psth;
-                    expData.av_psth_2{experiment_type, iRecording}(iUnit, :, :) = curr_psth;
+                    expData.psth{keep_type}(iUnit + unitCount, 2, 1:size(curr_psth, 1), :) = curr_psth;
+                    expData.av_psth_2{keep_type, iRecording}(iUnit, :, :) = curr_psth;
 
 
                     % psth all trials
                     [curr_psth, curr_raster, t_det, ~, ~] = cl_raster_psth(spike_templates, spike_times_timeline, ...
                         unique_templates(shank_units(units_to_keep(iUnit))), raster_window_det, psth_bin_size_det, ...
                         align_times(1:1:end), trial_cond_idx(1:1:end));
-                    expData.psth{experiment_type}(iUnit + unitCount, 3, 1:size(curr_psth, 1), :) = curr_psth;
+                    expData.psth{keep_type}(iUnit + unitCount, 3, 1:size(curr_psth, 1), :) = curr_psth;
                     startIdx = find(t_det >= 0.05, 1, 'first');
                     stopIdx = find(t_det >= 0.2, 1, 'first');
-                    expData.av_per_trial{experiment_type, iRecording}(iUnit, :) = nanmean(curr_raster(:, startIdx:stopIdx), 2);
+                    expData.av_per_trial{keep_type, iRecording}(iUnit, :) = nanmean(curr_raster(:, startIdx:stopIdx), 2);
                     startIdx = find(t_det >= -0.2, 1, 'first');
                     stopIdx = find(t_det >= -0.05, 1, 'first');
-                    expData.av_per_trial_base{experiment_type, iRecording}(iUnit, :) = nanmean(curr_raster(:, startIdx:stopIdx), 2);
+                    expData.av_per_trial_base{keep_type, iRecording}(iUnit, :) = nanmean(curr_raster(:, startIdx:stopIdx), 2);
 
 
                 end
@@ -362,12 +365,13 @@ for iRecording = 1:length(use_recs)
 
             % save data in structure
             if ~isempty(units_to_keep)
-                expData.nz_trial_types{experiment_type, iRecording} = trial_conditions;
-                expData.nz_no_move_trials{experiment_type, iRecording} = no_move_trials;
+                expData.nz_trial_types{keep_type, iRecording} = trial_conditions;
+                expData.nz_no_move_trials{keep_type, iRecording} = no_move_trials;
                 expData.animal_thisDate_site_shank(unitCount+1:unitCount+size(units_to_keep, 1), :) = ...
                     repmat([mouse_thisDate_sites_shank_rec(iRecording, 1), curr_thisDate, site, curr_shank], size(units_to_keep, 1), 1);
                 expData.unit_area(unitCount+1:unitCount+size(units_to_keep, 1), :) = units_to_keep_area;
                 expData.unit_coords(unitCount+1:unitCount+size(units_to_keep, 1), :) = units_to_keep_coords;
+                expData.unit_side(unitCount+1:unitCount+size(units_to_keep, 1), :) = units_side;
                 expData.t = t;
                 %                passive_data_per_cond.t_det = t_det;
                 expData.unitNum((unitCount + 1:unitCount + size(units_to_keep, 1))) = shank_units(units_to_keep);

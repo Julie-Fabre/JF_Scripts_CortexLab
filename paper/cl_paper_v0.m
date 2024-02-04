@@ -46,3 +46,6 @@ end
 %% ~~ Tasks - neural data ~~
 
 %% ~~ Suppl.: motion, movement ect. ; cell types ; delineating subregions ~~
+
+%% Suppl: histo
+%% Suppl: bombcell 

@@ -82,8 +82,11 @@ if isempty(goodExps)
         & contains(goodExp_info_all.expDef, protocol));
     if isempty(goodExps) % if there are no experiments with no timeline/ephys pbs, return no exps.
         goodExp_max_trials = [];
-        continue;
+    else
+        goodExp_max_trials = exp_idx(goodExps(find(goodExp_info_all.n_keep_trials(goodExps) == max(goodExp_info_all.n_keep_trials(goodExps)))));
     end
+else
+    goodExp_max_trials = goodExps(find(goodExp_info_all.n_keep_trials(goodExps) == max(goodExp_info_all.n_keep_trials(goodExps))));
 end
 
 % of those, get the experiments with the maximum number of trials

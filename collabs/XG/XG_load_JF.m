@@ -1,0 +1,57 @@
+%% load ephys data, align to laser onsets 
+
+%% ~~ loading info ~~
+close all;
+myPaths;
+animal = 'XG006';
+date = '2022-06-30';
+site = 1;
+recording = [];
+experiment = 1;
+verbose = true;
+load_parts.cam=false;
+load_parts.ephys=true;
+
+%% ~~ extract sync channel ~~
+
+[ephysAPfile,aa] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys_ap',site,recording);
+if size(ephysAPfile,2) ==2 %keep only ap
+    ephysAPfile = ephysAPfile{1};
+end
+isSpikeGlx = contains(ephysAPfile, '_g');
+if isSpikeGlx
+     [ephysKSfile,~] = AP_cortexlab_filenameJF(animal,date,experiment,'ephys',site,recording);
+    if isempty(dir([ephysKSfile filesep 'sync.mat']))
+        sync = syncFT(ephysAPfile, 385, ephysKSfile);
+    end
+end
+
+
+%% ~~ load data from experiment ~~ 
+loadClusters = 1;% whether to load phy results
+JF_loadExperiment_forXin;
+
+
+%% ~~ plot data in GUI ~~ 
+curr_shank=NaN;
+% Controls: 
+% up/down - switch between units (clicking on unit also selects)
+% left/right - switch between alignments
+% pageup/pagedown - switch between trial groupings
+% m - select depth range to plot multiunit
+% u - go to unit number
+plotMe = laserParamsAllLaserOn.Amp == 1400 & laserParamsAllLaserOn.Ramp == 3;
+AP_cellrasterJF_forXin({laser_on_flip_times(plotMe)}, ...
+    {find(plotMe)});
+
+
+%% plot data aligned to stim onset 
+AP_cellrasterJF_forXin({stimOn_times}, ...
+    {trial_conditions(:, 2)});
+
+
+
+
+
+
+

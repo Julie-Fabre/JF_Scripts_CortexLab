@@ -622,7 +622,7 @@
         case {'JF_GratingPassive', 'JF_GratingPassiveVarITI', 'JF_GratingPassiveVarITI_moreComb', 'JF_GratingPassiveVarITI_moreCombnew', ...
                 'JF_GratingPassiveVarITI_moreCombnew_correct'}
             stimOn_times = photodiode_flip_times(2:2:end);
-%            JF_correct_passive_photodiode; 
+%            cl_correct_passive_photodiode; 
 
             % Get stim ID and conditions
             azimuths = unique(signals_events.stimAzimuthValues);
@@ -667,7 +667,7 @@
         case {'JF_Locations', 'JF_LocationsFit', 'JF_LocationsVarITI', 'JF_locations', 'JF_locationsFit', 'JF_locationsVarITI', ...
                 'JF_locationsFitVarITIGrating'}
             stimOn_times = photodiode_flip_times(2:2:end);
-            JF_correct_passive_photodiode; 
+            cl_correct_passive_photodiode; 
 
             % Get stim ID and conditions
             conditions = unique(signals_events.stim_idValues)';
@@ -706,7 +706,7 @@
 
         case {'JF_natural_images', 'JF_natural_imagesVarITI', 'JF_natural_images_VarITInew', 'JF_natural_images_VarITI', 'JF_natural_imagesFitVarITI'}
             stimOn_times = photodiode_flip_times(2:2:end);
-            JF_correct_passive_photodiode; 
+            cl_correct_passive_photodiode; 
             
 
             % Get stim ID and conditions
@@ -750,7 +750,7 @@
 
             % Get stim times (first flip is initializing gray to black)
             stimOn_times = photodiode_flip_times(2:2:end);
-            JF_correct_passive_photodiode; 
+            cl_correct_passive_photodiode; 
 
             if isfield(block.events, 'stim_aziValues')
                 if max(signals_events.stim_idValues) > 44
@@ -949,7 +949,7 @@
 
 
             stimOn_times = photodiode_flip_times(2:2:end);
-            JF_correct_passive_photodiode; 
+            cl_correct_passive_photodiode; 
 
             % sanity check: times between stim on times in signals
             signals_photodiode_iti_diff = diff(signals_events.stimOnTimes(2:end)) - diff(stimOn_times) - 0.5';
