@@ -3,11 +3,11 @@ cl_myPaths;
 
 %% get loading info
 % recording type exp info
-if contains(load_type, 'passive')
+if contains(load_type, 'naive')
     info_table = readtable([csvPath, 'allPassiveRecs.csv'], 'VariableNamingRule', 'modify');
 elseif contains(load_type, 'taskGo')
     info_table = readtable([csvPath, 'allTaskGoGoGoRecs.csv'], 'VariableNamingRule', 'modify');
-else
+elseif contains(load_type, 'taskNoGo')
     info_table = readtable([csvPath, 'allTaskRecs.csv'], 'VariableNamingRule', 'modify');
 end
 
@@ -423,7 +423,7 @@ for iRecording = 1:length(use_recs)
             % clear variables
             disp(['   ', num2str(iRecording), '/', num2str(length(use_recs))])
 
-            keep expType session_data mouse_thisDate_sites_shank_rec unique_mice passive_data_per_cond use_recs info_table regions regions_id unitCount st load_type keep_type loadVids
+            keep expType session_data mouse_thisDate_sites_shank_rec unique_mice expData use_recs info_table regions regions_id unitCount st load_type keep_type loadVids
         end
     end
     %catch
