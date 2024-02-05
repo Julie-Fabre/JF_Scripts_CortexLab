@@ -18,16 +18,18 @@ for iExperiment = 1:size(exp_idx, 2)
         verbose = false;
         try
             cl_load_experiment;
+            goodExpInfo.n_trials = length(keep_trials);
+            goodExpInfo.n_keep_trials = sum(keep_trials);
         catch
             goodExpInfo.n_trials = 0;
             goodExpInfo.n_keep_trials = 0;
-            goodExpInfo.facecam_exists = 0;
-            goodExpInfo.bad_facecam = 1;
-            goodExpInfo.eyecam_exists = 0;
-            goodExpInfo.bad_eyecam = 1;
-            goodExpInfo.error_sync = 1;
-            goodExpInfo.bad_flipper = 1;
-            goodExpInfo.expDef = expDef;
+            facecam_exists = 0;
+            bad_facecam = 1;
+            eyecam_exists = 0;
+            bad_eyecam = 1;
+            error_sync = 1;
+            bad_flipper = 1;
+            expDef = expDef;
         end
         
         if exist('no_move_trials', 'var')% only in passive protocols
@@ -36,8 +38,6 @@ for iExperiment = 1:size(exp_idx, 2)
             keep_trials = ones(n_trials(end),1);
         end
 
-        goodExpInfo.n_trials = length(keep_trials);
-        goodExpInfo.n_keep_trials = sum(keep_trials);
         goodExpInfo.facecam_exists = facecam_exists;
         goodExpInfo.bad_facecam = bad_facecam;
         goodExpInfo.eyecam_exists = eyecam_exists;

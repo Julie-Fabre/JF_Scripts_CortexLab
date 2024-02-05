@@ -119,7 +119,9 @@ for iRecording = 1:length(use_recs)
             end
 
             goodExp_max_trials = cl_get_max_good_experiment(experiments, recording, site, these_exps, curr_thisDate, animal, expType{keep_type});
-
+            if isempty(goodExp_max_trials)
+                continue;
+            end
             for iExperiment = goodExp_max_trials
                 experiment = these_exps(iExperiment);
                 experiments = cl_find_experiments(animal, '', true);
@@ -133,7 +135,11 @@ for iRecording = 1:length(use_recs)
                 load_parts.imaging = false;
                 load_parts.ephys = true;
                 loadClusters = 0;
-                cl_load_experiment;
+                try
+                    cl_load_experiment;
+                catch
+                    keyboard
+                end
 
 
                 %subselect shank
@@ -162,7 +168,7 @@ for iRecording = 1:length(use_recs)
                         probe_ccf(this_probe).trajectory_coords(unit_closest_depth, :)];
                     % AP, DV, ML
                     bregma = [540, 0, 570];
-                    unit_side = [unit_side;...
+                    unit_side = [unit_side; ...
                         probe_ccf(this_probe).trajectory_coords(unit_closest_depth, 3) - bregma(1) / 2.5 < 0]; %-1 for left, 1 for right
                 end
                 protocol = '';
@@ -231,7 +237,9 @@ for iRecording = 1:length(use_recs)
                 % for half trials, identify max.
                 % then average on that half.
                 expData.trial_types{keep_type, iRecording} = trial_conditions;
-                expData.no_move_trials{keep_type, iRecording} = no_move_trials;
+                if exist('no_move_trials', 'var')
+                    expData.no_move_trials{keep_type, iRecording} = no_move_trials;
+                end
                 raster_window = [-0.2, 0.6];
 
                 if loadVids

@@ -216,7 +216,7 @@
                 warning('Stim signals/photodiode offset over threshold');
                 xlabel('Stim number');
                 ylabel('Photodiode - signals stim time');
-                title([animal, ' ', day, ' ', num2str(experiment)]);
+                title([animal, ' ', thisDate, ' ', num2str(experiment)]);
             end
 
             % Get first movement time after stim onset
