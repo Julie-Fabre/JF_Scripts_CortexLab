@@ -1,5 +1,6 @@
 function cl_plotExCell_psth(animal, experiment, iProbe, unit, align_type, group_type, ...
-    raster_window, psth_bin_size, plot_raster, plot_psth)
+    raster_window, psth_bin_size, plot_raster, plot_psth, color_type)
+% QQ to do: add s.e.m. , psths in spikes/per second 
 
 cl_myPaths;
 
@@ -65,7 +66,7 @@ spike_templates = new_spike_idx(spike_templates);
 % plot
 figure();
 if plot_raster && plot_psth
-    theseColors = cl_paper_plotting('spatialFreq');
+    theseColors = cl_paper_plotting(color_type);
     subplot(5, 1, 1:4)
     raster_dots = scatter(t(raster_x), raster_y, 0.5, 'k');
     [~, mappedVector] = ismember(raster_group_id, psth_group_id);
@@ -80,7 +81,20 @@ if plot_raster && plot_psth
     hold off;
 
 elseif plot_psth
+    theseColors = cl_paper_plotting(color_type);
+    for iGroup = 1:size(psth_group_id,1)
+        plot(t,smoothdata(curr_psth(iGroup, :), 'gaussian', [0 50]), 'Color', theseColors(iGroup,:)); hold on;
+    end
+    xlim([raster_window(1)+psth_bin_size*10, raster_window(2)-psth_bin_size*10])
+    hold off;
 elseif plot_raster
+    theseColors = cl_paper_plotting(color_type);
+    subplot(5, 1, 1:4)
+    raster_dots = scatter(t(raster_x), raster_y, 0.5, 'k');
+    [~, mappedVector] = ismember(raster_group_id, psth_group_id);
+    set(raster_dots,'CData',theseColors(mappedVector,:));
+    xlim([raster_window(1)+psth_bin_size*10, raster_window(2)-psth_bin_size*10])
+
 end
 
 
