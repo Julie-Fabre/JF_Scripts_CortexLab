@@ -72,21 +72,28 @@ if plot_raster && plot_psth
     [~, mappedVector] = ismember(raster_group_id, psth_group_id);
     set(raster_dots,'CData',theseColors(mappedVector,:));
     xlim([raster_window(1)+psth_bin_size*10, raster_window(2)-psth_bin_size*10])
+    ylabel('trial # (sorted)')
+    xlabel('time (s)')
 
     subplot(5, 1, 5)
     for iGroup = 1:size(psth_group_id,1)
-        plot(t,smoothdata(curr_psth(iGroup, :), 'gaussian', [0 50]), 'Color', theseColors(iGroup,:)); hold on;
+        plot(t,smoothdata(curr_psth(iGroup, :)./psth_bin_size, 'gaussian', [0 50]), 'Color', theseColors(iGroup,:)); hold on;
     end
     xlim([raster_window(1)+psth_bin_size*10, raster_window(2)-psth_bin_size*10])
     hold off;
+    ylabel('sp/s')
+    xlabel('time (s)')
 
 elseif plot_psth
     theseColors = cl_paper_plotting(color_type);
     for iGroup = 1:size(psth_group_id,1)
-        plot(t,smoothdata(curr_psth(iGroup, :), 'gaussian', [0 50]), 'Color', theseColors(iGroup,:)); hold on;
+        plot(t,smoothdata(curr_psth(iGroup, :)./psth_bin_size, 'gaussian', [0 50]), 'Color', theseColors(iGroup,:)); hold on;
     end
     xlim([raster_window(1)+psth_bin_size*10, raster_window(2)-psth_bin_size*10])
     hold off;
+    ylabel('sp/s')
+    xlabel('time (s)')
+
 elseif plot_raster
     theseColors = cl_paper_plotting(color_type);
     subplot(5, 1, 1:4)
@@ -94,6 +101,8 @@ elseif plot_raster
     [~, mappedVector] = ismember(raster_group_id, psth_group_id);
     set(raster_dots,'CData',theseColors(mappedVector,:));
     xlim([raster_window(1)+psth_bin_size*10, raster_window(2)-psth_bin_size*10])
+    ylabel('trial # (sorted)')
+    xlabel('time (s)')
 
 end
 
