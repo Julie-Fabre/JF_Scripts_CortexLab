@@ -17,7 +17,7 @@ end
 close all;
 load_type = 'taskGo';
 loadVids = 0;
-for iExperimentType = 2
+for iExperimentType = 2%1:2
     [expData, session_data, regions] = cl_loadPerStimulusData(load_type, iExperimentType, loadVids);
     save(['/home/julie/Dropbox/MATLAB/gogogo_data' num2str(iExperimentType) '.mat'], '-struct', 'expData', '-v7.3');
 end
@@ -25,7 +25,7 @@ end
 close all;
 load_type = 'taskNoGo';
 loadVids = 0;
-for iExperimentType = 2
+for iExperimentType = 2%1:2
     [expData, session_data, regions] = cl_loadPerStimulusData(load_type, iExperimentType, loadVids);
     save(['/home/julie/Dropbox/MATLAB/goNogo_data' num2str(iExperimentType) '.mat'], '-struct', 'expData', '-v7.3');
 end

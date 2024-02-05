@@ -180,19 +180,14 @@ for iRecording = 1:length(use_recs)
                 runEP = 1;
                 clearvars unitType
                 try
-                    %rerunQM = 1;
                     [unitType, qMetrics] = bc_qualityMetricsPipeline_JF(animal, thisDate, site, recording, 1, protocol, rerunQM, plotGUI, runQM);
                     %bc_qualityMetricsPipeline_JF(animal, thisDate, site, recording, experiment_num, protocol, rerunQM, plotGUI, runQM)
                 catch
                     rerunQM = 1;
                     [unitType, qMetrics] = bc_qualityMetricsPipeline_JF(animal, thisDate, site, recording, 1, protocol, rerunQM, plotGUI, runQM);
                 end
-                %try
 
                 ephysProperties = bc_ephysPropertiesPipeline_JF(animal, thisDate, site, recording, 1, rerunEP, runEP, region);
-                %catch
-                %end
-                %(animal, thisDate, site, recording, experiment, rerun, runEP, region)
 
 
                 expData.psth_conditions_all{iRecording, keep_type} = unique(trial_conditions, 'rows');
@@ -391,7 +386,7 @@ for iRecording = 1:length(use_recs)
                     [unitType, ~] = bc_qualityMetricsPipeline_JF(animal, thisDate, site, recording, 1, protocol, rerunQM, plotGUI, runQM);
                     expData.unitType((unitCount + 1:unitCount + size(units_to_keep, 1))) = unitType(units_to_keep);
                 end
-                if isfield(ephysProperties, 'propLongISI')
+                if ismember('propLongISI', ephysProperties.Properties.VariableNames)
                     if size(ephysProperties.propLongISI, 1) == size(unitType, 1)
                         try
                             expData.pss((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.postSpikeSuppression(units_to_keep);
