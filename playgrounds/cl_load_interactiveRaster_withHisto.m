@@ -37,7 +37,7 @@ iArea = 3;
 regions_name ={'CP', 'GPe', 'SNr'};
 regions_id = [672, 1022, 381];%CP, GPe, SNr
 %% Load data from experiment
-iProbe = 9;
+iProbe = 8;
 
 curr_day = probe2ephys(iProbe).day; % (set which day to use)
 site = probe2ephys(iProbe).site; 
@@ -52,7 +52,7 @@ depths_idx_all = find(probe_ccf(iProbe).trajectory_areas == regions_id(iArea));
 depths_start = probe_ccf(iProbe).probe_depths(depths_idx_all(1))
 depths_stop = probe_ccf(iProbe).probe_depths(depths_idx_all(end))
 
-experiment = 2;%experiments(curr_day).experiment(1);%find(n_trials == max(n_trials));
+experiment = 1;%experiments(curr_day).experiment(1);%find(n_trials == max(n_trials));
 
 [ephysAPfile, aa] = cl_cortexlab_filename(animal, thisDate, experiment, 'ephys_includingCompressed', site, recording);
 if size(ephysAPfile, 2) == 2 %keep only ap

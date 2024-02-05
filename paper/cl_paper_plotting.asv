@@ -1,0 +1,15 @@
+function cl_paper_plotting(plot_type)
+
+    if strcmp(plot_type, 'regions')
+    elseif strcmp(plot_type, 'spatialFreq')
+    elseif strcmp(plot_type, 'ori')
+    elseif strcmp(plot_type, 'locations')
+    elseif strcmp(plot_type, 'natImg')
+    elseif strcmp(plot_type, 'cwStims')
+    elseif strcmp(plot_type, 'taskEvts')
+        % stim 
+        % move
+        % reward 
+    end
+
+end

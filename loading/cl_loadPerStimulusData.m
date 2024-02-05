@@ -138,7 +138,7 @@ for iRecording = 1:length(use_recs)
                 try
                     cl_load_experiment;
                 catch
-                    keyboard
+                    continue;
                 end
 
 

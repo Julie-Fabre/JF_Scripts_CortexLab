@@ -91,6 +91,7 @@ if ~isnan(curr_shank)
     theseSpikes = ismember(spike_xdepths, theseChannelPositions);
     spike_times = spike_times(theseSpikes);
     spike_templates = spike_templates(theseSpikes);
+    
     %rename 
     good_templates_idx = unique(spike_templates);
     new_spike_idx = nan(max(spike_templates), 1);
