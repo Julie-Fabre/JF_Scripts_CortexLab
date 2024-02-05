@@ -34,6 +34,18 @@ end
 %% Fig 1: 
 % Example cells visual 
 
+cl_plotExCell_psth('JF090', 1, 8, 3, 'stimOn_noMove', 2,...
+    [-0.2, 0.6], 0.001, 1, 1, 'spatialFreq')
+
+cl_plotExCell_psth('JF090', 1, 8, 3, 'stimOn_noMove', 3,...
+    [-0.2, 0.6], 0.001, 1, 1, 'ori')
+
+cl_plotExCell_psth('JF090', 2, 8, 3, 'stimOn_noMove', 1,...
+    [-0.2, 0.6], 0.001, 1, 1, 'locations')
+
+cl_plotExCell_psth('JF090', 3, 8, 3, 'stimOn_noMove', 1,...
+    [-0.2, 0.6], 0.001, 1, 1, 'natImg')
+
 % Percentage cells visual 
 
 % Population cells visual 
@@ -45,6 +57,8 @@ end
 %% Fig 2: selective cells, and throughout 
 
 % Selectivity index (+ percentage "selective") 
+regions = {'CP', 'GPe', 'SNr'};
+cl_selectivity;
 
 % Population selectivity 
 
