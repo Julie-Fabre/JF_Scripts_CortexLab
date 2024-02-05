@@ -36,15 +36,17 @@
 % selectivity index based on this
 % matrix of neurons mean response to each condition. use absolute value
 % (mean subtracted)
-datasetlocations = {'/home/julie/Dropbox/MATLAB/naive_data1.mat', ...
-    '/home/julie/Dropbox/MATLAB/naive_data2.mat', ...
-    '/home/julie/Dropbox/MATLAB/naive_data3.mat', ...
-    '/home/julie/Dropbox/MATLAB/naive_data6.mat', ...
-    '/home/julie/Dropbox/MATLAB/naive_data4.mat', ...
-    '/home/julie/Dropbox/MATLAB/naive_data5.mat'};
+datasetlocations = {'/home/julie/Dropbox/MATLAB/naive_data1.mat', ...%gratings
+    '/home/julie/Dropbox/MATLAB/naive_data2.mat', ...%ori
+    '/home/julie/Dropbox/MATLAB/naive_data3.mat', ...%nat images
+    '/home/julie/Dropbox/MATLAB/naive_data6.mat', ...%nat images
+    '/home/julie/Dropbox/MATLAB/naive_data4.mat', ...%cw stims
+    '/home/julie/Dropbox/MATLAB/naive_data5.mat', ...%cw stims
+    '/home/julie/Dropbox/MATLAB/gogogo_data2.mat', ...%cw stims go go go
+    '/home/julie/Dropbox/MATLAB/gonogo_data2.mat'};%cw stims go no go
 conditionsIndex = [1, 2, 6, 3, 5, 4];
 selectivity_index = cell(6,3);
-for iDataset = [1:3,5]
+for iDataset = [1:3]
 
     % for each condition, measure
     passive_data_per_cond = load(datasetlocations{iDataset});
@@ -71,61 +73,66 @@ for iDataset = [1:3,5]
 
         use_conditions = 1:size(passive_data_per_cond.psth{conditionsIndex(iDataset)}, 3);
         nonEmptyRecs = find(~cellfun(@isempty, passive_data_per_cond.psth_conditions_all));
-        % use_conditions
+        unique_recs = unique(passive_data_per_cond.animal_thisDate_site_shank, 'rows');
+
         for iUnit = 1:size(curr_units, 1)
-            %            iUnit = iUnit+1
+
             thisUnit = curr_units(iUnit);
             [~, iRec]= ismember(passive_data_per_cond.animal_thisDate_site_shank(thisUnit,:), unique_recs, 'rows');
 
             conditions = passive_data_per_cond.psth_conditions_all{nonEmptyRecs(iRec)};
 
-            if iDataset == 1
-                use_conditions = conditions(:,2);%gratings
-            elseif iDataset == 2
-            elseif iDataset == 3
-            elseif iDataset == 4
-            elseif iDataset == 5
-            elseif iDataset == 6
-            end
-            %             baseline_per_cond = squeeze(nanmean(passive_data_per_cond.psth{{conditionsIndex(iDataset)}}(thisUnit, 1, use_conditions, 1:50), 4));
-            %             baseline_sub_average_per_cond = arrayfun(@(x) nanmean(abs(squeeze(passive_data_per_cond.psth{{conditionsIndex(iDataset)}}(thisUnit, 1, x, 55:70)) ...
-            %                 -baseline_per_cond(x))+baseline_per_cond(x)), 1:size(baseline_per_cond, 1));
-            %
-            %             max_half_trials = find(baseline_sub_average_per_cond == max(baseline_sub_average_per_cond));
-            %             if length(max_half_trials) > 1
-            %                 max_half_trials = max_half_trials(1);
-            %             end
-            %
-            %             baseline_per_cond_cv = squeeze(nanmean(passive_data_per_cond.psth{{conditionsIndex(iDataset)}}(thisUnit, 2, use_conditions, 1:50), 4));
-            %             baseline_sub_average_per_cond_cv = arrayfun(@(x) nanmean(abs(squeeze(passive_data_per_cond.psth{{conditionsIndex(iDataset)}}(thisUnit, 2, x, 55:70)) ...
-            %                 -baseline_per_cond_cv(x))+baseline_per_cond_cv(x)), 1:size(baseline_per_cond_cv, 1));
-            %             selectivity_index{iRegion}(thisUnit, iCondition) = abs((baseline_sub_average_per_cond_cv(max_half_trials) -...
-            %                 nanmean(baseline_sub_average_per_cond_cv))./ ...
-            %                 nanmax(baseline_sub_average_per_cond_cv)); % (c.v. max  - mean ) / max
-
-            baseline_per_cond = squeeze(nanmean(passive_data_per_cond.psth{conditionsIndex(iDataset)}(thisUnit, 1, use_conditions, 1:200), 4)) .* 100;
-            baseline_sub_average_per_cond = nanmean(abs(squeeze(passive_data_per_cond.psth{conditionsIndex(iDataset)}(thisUnit, 1, :, 250:450))), 2) .* 100;
-
-            max_half_trials = find(baseline_sub_average_per_cond == max(baseline_sub_average_per_cond));
-            if length(max_half_trials) > 1
-                max_half_trials = max_half_trials(1);
+            if iDataset == 1 % gratings
+                conditions = conditions(:,2);
+                use_conditions = unique(conditions);
+                [~, condType] = ismember(conditions, use_conditions);
+            elseif iDataset == 2 % orientations
+                 conditions = conditions(:,3);
+                use_conditions = unique(conditions);
+                [~, condType] = ismember(conditions, use_conditions);
+            elseif iDataset == 3 % locations
+                conditions = conditions(:,1);
+                use_conditions = unique(conditions);
+                [~, condType] = ismember(conditions, use_conditions);
+            elseif iDataset == 4 % nat images 
+                conditions = conditions(:,1);
+                use_conditions = unique(conditions);
+                [~, condType] = ismember(conditions, use_conditions);
+            elseif iDataset == 5 % nat images
+                conditions = conditions(:,1);
+                use_conditions = unique(conditions);
+                [~, condType] = ismember(conditions, use_conditions);
+            elseif iDataset == 6 % cw stims
+            elseif iDataset == 7 % cw stims
+            elseif iDataset == 8 || iDataset == 9 % cw stims in tasks 
             end
 
-            baseline_per_cond_cv = squeeze(nanmean(passive_data_per_cond.psth{conditionsIndex(iDataset)}(thisUnit, 2, use_conditions, 1:200), 4)) .* 100;
-            baseline_sub_average_per_cond_cv = nanmean(abs(squeeze(passive_data_per_cond.psth{conditionsIndex(iDataset)}(thisUnit, 2, :, 250:450))), 2) .* 100;
+            
+            for iCond = 1:size(use_conditions,1)
+                baseline_per_cond(iCond) = squeeze(nanmean(nanmean(passive_data_per_cond.psth{conditionsIndex(iDataset)}(thisUnit,...
+                    1, condType == iCond, 1:200), 3), 4)) .* 100;
+                baseline_sub_average_per_cond(iCond) = squeeze(nanmean(nanmean(passive_data_per_cond.psth{conditionsIndex(iDataset)}(thisUnit,...
+                    1, condType == iCond, 250:450), 3), 4)) .* 100;
+    
+                max_half_trials = find(baseline_sub_average_per_cond == max(baseline_sub_average_per_cond));
+                if length(max_half_trials) > 1
+                    max_half_trials = max_half_trials(1);
+                end
+    
+                baseline_per_cond_cv(iCond) = squeeze(nanmean(nanmean(passive_data_per_cond.psth{conditionsIndex(iDataset)}(thisUnit,...
+                    2, condType == iCond, 1:200), 3), 4)) .* 100;
+                baseline_sub_average_per_cond_cv(iCond) = squeeze(nanmean(nanmean(passive_data_per_cond.psth{conditionsIndex(iDataset)}(thisUnit,...
+                    2, condType == iCond, 250:450), 3), 4)) .* 100;
+            end
+            
             selectivity_index{iDataset, iRegion}(iUnit) = abs((baseline_sub_average_per_cond_cv(max_half_trials) - ...
                 nanmean(baseline_sub_average_per_cond_cv))./ ...
                 nanmax(baseline_sub_average_per_cond_cv)); % (c.v. max  - mean ) / max
 
-            % clf;
-            % hold on;
-            % for ii =1:5
-            % plot(squeeze(passive_data_per_cond.psth{{conditionsIndex(iDataset)}}(thisUnit, 2, ii, :)).*100)
-            % end
-            % plot(squeeze(nanmean(passive_data_per_cond.psth{{conditionsIndex(iDataset)}}(thisUnit, 2, :, :))).*100, 'LineWidth',2)
+
 
         end
-        %end
+
     end
 end
 
@@ -133,8 +140,8 @@ end
 cl_plottingSettings;
 
 figure();
-datatype_sets = [1, 1; 2, 2; 3, 6; 5, 6];
-for iDatatype = 1:4
+datatype_sets = [1, 1; 2, 2; 3, 3; 4, 5; 6, 7; 8, 8; 9, 9];
+for iDatatype = 1:3
     for iRegion = 1:size(regions, 2)
         n_conditions = length(unique(datatype_sets(iDatatype,:)));
         datasets = datatype_sets(iDatatype,:);
