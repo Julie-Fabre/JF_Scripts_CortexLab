@@ -2,7 +2,7 @@
 %% Find experiments with the task + cortical widefield + striatal ephys
 cl_myPaths;
 
-animals = {'JF101'};
+animals = {'JF090'};
 curr_animal = 1; % (set which animal to use)
 animal = animals{curr_animal};
 
@@ -27,21 +27,32 @@ brainsawPath_curr = [cl_cortexlab_filename(animal, '', '', 'histo_folder', '', '
     ya_getLocations(brainglobeLocation, brainsawPath_curr, channelColToRegister, ...
     channelColToTransform, atlasType, atlasSpecies, atlasResolution_um);
 [tv, av, st, bregma] = ya_loadAllenAtlas([atlasLocation.folder, filesep, atlasLocation.name]);
-%ya_plotHistoPerMouse_JF(outputDir, st);
+ya_plotHistoPerMouse_JF(outputDir, st);
 
 load([outputDir, '/probe2ephys.mat'])
 load([outputDir, '/probe_ccf.mat'])
 
+
+iArea = 3;
+regions_name ={'CP', 'GPe', 'SNr'};
+regions_id = [672, 1022, 381];%CP, GPe, SNr
 %% Load data from experiment
+iProbe = 9;
 
-curr_day = 5; % (set which day to use)
+curr_day = probe2ephys(iProbe).day; % (set which day to use)
+site = probe2ephys(iProbe).site; 
+curr_shank = probe2ephys(iProbe).shank; 
+if isfield(probe2ephys, 'recording')
+    recording = probe2ephys(iProbe).recording; 
+else
+    recording =[];
+end
 thisDate = experiments(curr_day).thisDate; % date
+depths_idx_all = find(probe_ccf(iProbe).trajectory_areas == regions_id(iArea));
+depths_start = probe_ccf(iProbe).probe_depths(depths_idx_all(1))
+depths_stop = probe_ccf(iProbe).probe_depths(depths_idx_all(end))
 
-
-site = 1; %1,1; 2,4; 3,7
-recording = [];
-
-experiment = experiments(curr_day).experiment(2); %experiments(curr_day).experiment(1);%find(n_trials == max(n_trials));
+experiment = 2;%experiments(curr_day).experiment(1);%find(n_trials == max(n_trials));
 
 [ephysAPfile, aa] = cl_cortexlab_filename(animal, thisDate, experiment, 'ephys_includingCompressed', site, recording);
 if size(ephysAPfile, 2) == 2 %keep only ap
@@ -59,8 +70,9 @@ load_parts.imaging = false;
 load_parts.ephys = true;
 loadClusters = 0;
 cl_load_experiment;
-curr_shank = NaN;
-%AP_cellrasterJF({stimOn_times, stimOn_times}, {trial_conditions(:,1), trial_conditions(:,2)})
+
+
+cl_cellraster_histo({stimOn_times, stimOn_times}, {trial_conditions(:,2), trial_conditions(:,3)})
 
 
 %AP_cellrasterJF({stimOn_times,wheel_move_time,signals_events.responseTimes(1:size(stimOn_times,1))'}, ...

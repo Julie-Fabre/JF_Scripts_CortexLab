@@ -3,7 +3,7 @@
 %% Load data 
 load_type = 'naive';
 loadVids = 0;
-for iExperimentType = 1:6
+for iExperimentType = 5:6% 1:6
     [expData, session_data, regions] = cl_loadPerStimulusData(load_type, iExperimentType, loadVids);
     save(['/home/julie/Dropbox/MATLAB/naive_data' num2str(iExperimentType) '.mat'], '-struct', 'expData', '-v7.3');
 end
@@ -30,6 +30,7 @@ for iExperimentType = 2%1:2
     save(['/home/julie/Dropbox/MATLAB/goNogo_data' num2str(iExperimentType) '.mat'], '-struct', 'expData', '-v7.3');
 end
 
+
 %% Fig 1: 
 % Example cells visual 
 
@@ -40,7 +41,7 @@ end
 % Example cells selectivity 
 
 % Cell types 
-
+% fast responses in GPe/SNr ? 
 %% Fig 2: selective cells, and throughout 
 
 % Selectivity index (+ percentage "selective") 
@@ -57,3 +58,6 @@ end
 
 %% Suppl: histo
 %% Suppl: bombcell 
+
+
+%% others: RPE, ect. 
