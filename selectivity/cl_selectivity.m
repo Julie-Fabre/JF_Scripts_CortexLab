@@ -36,7 +36,12 @@
 % selectivity index based on this
 % matrix of neurons mean response to each condition. use absolute value
 % (mean subtracted)
+
+% QQ homogenize so same number conds 
+
+
 datasetlocations = {'/home/julie/Dropbox/MATLAB/naive_data1.mat', ...%gratings
+    '/home/julie/Dropbox/MATLAB/naive_data1.mat',...
     '/home/julie/Dropbox/MATLAB/naive_data2.mat', ...%ori
     '/home/julie/Dropbox/MATLAB/naive_data3.mat', ...%nat images
     '/home/julie/Dropbox/MATLAB/naive_data6.mat', ...%nat images
