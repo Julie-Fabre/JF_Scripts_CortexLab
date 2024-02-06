@@ -40,21 +40,31 @@
 % QQ homogenize so same number conds 
 
 
-datasetlocations = {'/home/julie/Dropbox/MATLAB/naive_data1.mat', ...%gratings
-    '/home/julie/Dropbox/MATLAB/naive_data1.mat',...
-    '/home/julie/Dropbox/MATLAB/naive_data2.mat', ...%ori
-    '/home/julie/Dropbox/MATLAB/naive_data3.mat', ...%nat images
-    '/home/julie/Dropbox/MATLAB/naive_data6.mat', ...%nat images
-    '/home/julie/Dropbox/MATLAB/naive_data4.mat', ...%cw stims
-    '/home/julie/Dropbox/MATLAB/naive_data5.mat', ...%cw stims
-    '/home/julie/Dropbox/MATLAB/gogogo_data2.mat', ...%cw stims go go go
-    '/home/julie/Dropbox/MATLAB/gonogo_data2.mat'};%cw stims go no go
-conditionsIndex = [1, 2, 6, 3, 5, 4];
-selectivity_index = cell(6,3);
-for iDataset = [1:3]
+datasetlocations = {'/home/julie/Dropbox/MATLAB/naive_data1.mat', ...%1 gratings - sp freq
+    '/home/julie/Dropbox/MATLAB/naive_data1.mat',...%2 gratings - ori
+    '/home/julie/Dropbox/MATLAB/naive_data2.mat', ...%3 location
+    '/home/julie/Dropbox/MATLAB/naive_data3.mat', ...%4 nat images
+    '/home/julie/Dropbox/MATLAB/naive_data6.mat', ...%5 nat images
+    '/home/julie/Dropbox/MATLAB/naive_data4.mat', ...%6 cw stims
+    '/home/julie/Dropbox/MATLAB/naive_data5.mat', ...%7 cw stims
+    '/home/julie/Dropbox/MATLAB/gogogo_data2.mat', ...%8 cw stims go go go
+    '/home/julie/Dropbox/MATLAB/goNogo_data2.mat',...%9 cw stims go no go
+    '/home/julie/Dropbox/MATLAB/naive_data4.mat', ...%10 cw stims
+    '/home/julie/Dropbox/MATLAB/naive_data5.mat', ...%11 cw stims
+    '/home/julie/Dropbox/MATLAB/gogogo_data2.mat', ...%12 cw stims go go go
+    '/home/julie/Dropbox/MATLAB/goNogo_data2.mat'};%13 cw stims go no go
+
+conditionsIndex = [1, 1, 2, 3, 6, 4, 5, 2, 2, 4, 5, 2, 2];
+
+selectivity_index = cell(13,3);
+
+for iDataset = 1:13
 
     % for each condition, measure
     passive_data_per_cond = load(datasetlocations{iDataset});
+    if iDataset == 8 || iDataset == 9 || iDataset == 12 || iDataset == 13
+            passive_data_per_cond.psth_conditions_all = passive_data_per_cond.psth_conditions_all(:,2);
+    end
     keep passive_data_per_cond regions conditionsIndex iDataset datasetlocations selectivity_index
     n_conditions = 1;
     %conditionsIndex = 6;%[1,2,6];
@@ -77,15 +87,23 @@ for iDataset = [1:3]
        % selectivity_index{iDataset,iRegion} = nan(size(curr_units, 1), 1);
 
         use_conditions = 1:size(passive_data_per_cond.psth{conditionsIndex(iDataset)}, 3);
+        
         nonEmptyRecs = find(~cellfun(@isempty, passive_data_per_cond.psth_conditions_all));
+       
         unique_recs = unique(passive_data_per_cond.animal_thisDate_site_shank, 'rows');
 
         for iUnit = 1:size(curr_units, 1)
 
             thisUnit = curr_units(iUnit);
             [~, iRec]= ismember(passive_data_per_cond.animal_thisDate_site_shank(thisUnit,:), unique_recs, 'rows');
-
-            conditions = passive_data_per_cond.psth_conditions_all{nonEmptyRecs(iRec)};
+            try
+                conditions = passive_data_per_cond.psth_conditions_all{nonEmptyRecs(iRec)};
+            catch
+                continue;
+            end
+            if sum(nanmean(squeeze(passive_data_per_cond.psth{conditionsIndex(iDataset)}(thisUnit,1,:,250:450)))==0)>190
+                continue;
+            end
 
             if iDataset == 1 % gratings
                 conditions = conditions(:,2);
@@ -107,9 +125,60 @@ for iDataset = [1:3]
                 conditions = conditions(:,1);
                 use_conditions = unique(conditions);
                 [~, condType] = ismember(conditions, use_conditions);
-            elseif iDataset == 6 % cw stims
-            elseif iDataset == 7 % cw stims
-            elseif iDataset == 8 || iDataset == 9 % cw stims in tasks 
+            elseif iDataset == 6 % cw stims, stim 1 v 2
+                %conditions = conditions(:,1);
+                use_conditions = conditions(ismember(conditions(:,1), [1,3]) & conditions(:,2)==-90,:);
+                [~, condType] = ismember(conditions, use_conditions, 'rows');
+            elseif iDataset == 7 % cw stims, stim 1 v 2
+                %conditions = conditions(:,1);
+                if sum(use_conditions(:,1) == 12) > 0
+                    use_conditions = conditions(ismember(conditions(:,1), [4,12]) & conditions(:,2)==-90,:);
+                else
+                    use_conditions = conditions(ismember(conditions(:,1), [1,3]) & conditions(:,2)==-90,:);
+                end
+                [~, condType] = ismember(conditions, use_conditions);
+            elseif iDataset == 8 || iDataset == 9 % cw stims in tasks, stim 1 v 2
+                if sum(use_conditions(:,1) == 12) > 0
+                    try
+                    use_conditions = conditions(ismember(conditions(:,1), [4,12]) & conditions(:,2)==-90,:);
+                    catch
+                        keyboard
+                    end
+                else
+                    try
+                    use_conditions = conditions(ismember(conditions(:,1), [1,3]) & conditions(:,2)==-90,:);
+                    catch
+                        keyboard
+                    end
+                end
+                [~, condType] = ismember(conditions, use_conditions);
+             elseif iDataset == 10 % cw stims, stim 1 v 2
+                %conditions = conditions(:,1);
+                use_conditions = conditions(ismember(conditions(:,1), [3,2]) & conditions(:,2)==-90,:);
+                [~, condType] = ismember(conditions, use_conditions, 'rows');
+             elseif iDataset == 11 % cw stims, stim 1 v 2
+                %conditions = conditions(:,1);
+                if sum(use_conditions(:,1) == 12) > 0
+                    use_conditions = conditions(ismember(conditions(:,1), [12,6]) & conditions(:,2)==-90,:);
+                else
+                    use_conditions = conditions(ismember(conditions(:,1), [3,2]) & conditions(:,2)==-90,:);
+                end
+                [~, condType] = ismember(conditions, use_conditions);
+            elseif iDataset == 12 || iDataset == 13 % cw stims in tasks, stim 1 v 2
+                if sum(use_conditions(:,1) == 12) > 0
+                    try
+                    use_conditions = conditions(ismember(conditions(:,1), [12,6]) & conditions(:,2)==-90,:);
+                    catch
+                        keyboard
+                    end
+                else
+                    try
+                    use_conditions = conditions(ismember(conditions(:,1), [3,2]) & conditions(:,2)==-90,:);
+                    catch
+                        keyboard
+                    end
+                end
+                [~, condType] = ismember(conditions, use_conditions);
             end
 
             
@@ -126,13 +195,29 @@ for iDataset = [1:3]
     
                 baseline_per_cond_cv(iCond) = squeeze(nanmean(nanmean(passive_data_per_cond.psth{conditionsIndex(iDataset)}(thisUnit,...
                     2, condType == iCond, 1:200), 3), 4)) .* 100;
+               % passive_data_per_cond.av_per_trial_base{nonEmptyRecs(iRec)}
+                baseline_per_cond_cv_sem(iCond) = squeeze(nanstd(nanmean(passive_data_per_cond.psth{conditionsIndex(iDataset)}(thisUnit,...
+                    2, condType == iCond, 1:200), 3).*100, [], 4));%./sqrt(size(passive_data_per_cond.psth{conditionsIndex(iDataset)}));
                 baseline_sub_average_per_cond_cv(iCond) = squeeze(nanmean(nanmean(passive_data_per_cond.psth{conditionsIndex(iDataset)}(thisUnit,...
                     2, condType == iCond, 250:450), 3), 4)) .* 100;
             end
             
-            selectivity_index{iDataset, iRegion}(iUnit) = abs((baseline_sub_average_per_cond_cv(max_half_trials) - ...
+            selectivity_index{iDataset, iRegion}(iUnit) = abs(...
+                (baseline_sub_average_per_cond_cv(max_half_trials) - ...
                 nanmean(baseline_sub_average_per_cond_cv))./ ...
                 nanmax(baseline_sub_average_per_cond_cv)); % (c.v. max  - mean ) / max
+            if selectivity_index{iDataset, iRegion}(iUnit) ==0.5
+                selectivity_index{iDataset, iRegion}(iUnit)=NaN;%QQ testy
+            end
+
+            % if selectivity_index{iDataset, iRegion}(iUnit) ==0.5
+            %     keyboard;
+            % end
+
+%selectivity_index{iDataset, iRegion}(iUnit) = abs((baseline_sub_average_per_cond_cv(max_half_trials) - ...
+%                nanmean(baseline_sub_average_per_cond_cv))./ ...
+%               baseline_per_cond_cv_sem(1)); 
+
 
 
 
@@ -144,9 +229,11 @@ end
 
 cl_plottingSettings;
 
-figure();
-datatype_sets = [1, 1; 2, 2; 3, 3; 4, 5; 6, 7; 8, 8; 9, 9];
-for iDatatype = 1:3
+%% naive 
+figure(3);
+clf;
+datatype_sets = [1, 1; 2, 2; 3, 3; 4, 5; 6, 7; 8, 8; 9, 9; 6, 7; 8, 8; 9, 9];
+for iDatatype = 1:4
     for iRegion = 1:size(regions, 2)
         n_conditions = length(unique(datatype_sets(iDatatype,:)));
         datasets = datatype_sets(iDatatype,:);
@@ -156,8 +243,8 @@ for iDatatype = 1:3
         elseif n_conditions ==2
             this_selec_idx = [selectivity_index{datasets(1), iRegion}(:); selectivity_index{datasets(2), iRegion}(:)];
         end
-
-            subplot( 1, 4,iDatatype)
+            figure(3);
+            subplot( 1, 4 ,iDatatype)
             hold on;
             [N, edges, bin] = histcounts(this_selec_idx, 0:0.05:1);
             unit_n = sum(~isnan(this_selec_idx));
@@ -170,7 +257,7 @@ for iDatatype = 1:3
             end
             axis square;
             % add median
-            ylim([0, 0.4])
+            ylim([0, 1])
             sem = nanstd(this_selec_idx) ./ sqrt(length(this_selec_idx(~isnan(this_selec_idx))));
             line([nanmedian(this_selec_idx) - sem, ...
                 nanmedian(this_selec_idx) + sem], ...
@@ -178,7 +265,7 @@ for iDatatype = 1:3
             scatter(nanmedian(this_selec_idx), ...
                 0.25+0.05*iRegion, 25, regionColors{iRegion});
 
-            makepretty;
+            prettify_plot;
             
 
             index_concat{iRegion}=this_selec_idx;
@@ -186,28 +273,71 @@ for iDatatype = 1:3
 
     end
 
-    %  data12 = table;
-    % data12.selectivityIndex = [selectivity_index{1}(:); selectivity_index{2}(:)];
-    % data12.brainRegion = [ones(length(selectivity_index{1}), 1); ones(length(selectivity_index{2}), 1) .* 2];
-    % lme12 = fitlme(data12, 'selectivityIndex ~ brainRegion');
-    % 
-    % data13 = table;
-    % data13.selectivityIndex = [selectivity_index{1}(:); selectivity_index{3}(:)];
-    % data13.brainRegion = [ones(length(selectivity_index{1}), 1); ones(length(selectivity_index{3}), 1) .* 2];
-    % lme13 = fitlme(data13, 'selectivityIndex ~ brainRegion');
-    % 
-    % data23 = table;
-    % data23.selectivityIndex = [selectivity_index{2}(:); selectivity_index{3}(:)];
-    % data23.brainRegion = [ones(length(selectivity_index{2}), 1) .* 1; ones(length(selectivity_index{3}), 1) .* 2];
-    % lme23 = fitlme(data23, 'selectivityIndex ~ brainRegion');
+    % data = table;
+    % data.selectivityIndex = [index_concat{1}(:); index_concat{2}(:); index_concat{3}(:)];
+    % data.brainRegion = [ones(length(index_concat{1}), 1); ones(length(index_concat{2}), 1) .* 2; ones(length(index_concat{3}), 1) .* 3];
+    % lme = fitlme(data, 'selectivityIndex ~ brainRegion');
+    % disp(lme)
+    % %emm = emmeans(lme, {'brainRegion'});
+    % [p, t, stats] = anova1(data.selectivityIndex, data.brainRegion);
+    % [c, m, h, gnames] = multcompare(stats);
+end
 
-    data = table;
-    data.selectivityIndex = [index_concat{1}(:); index_concat{2}(:); index_concat{3}(:)];
-    data.brainRegion = [ones(length(index_concat{1}), 1); ones(length(index_concat{2}), 1) .* 2; ones(length(index_concat{3}), 1) .* 3];
-    lme = fitlme(data, 'selectivityIndex ~ brainRegion');
-    disp(lme)
-    %emm = emmeans(lme, {'brainRegion'});
-    [p, t, stats] = anova1(data.selectivityIndex, data.brainRegion);
-    [c, m, h, gnames] = multcompare(stats);
+
+%% task stimuli 
+figure(4);
+clf;
+datatype_sets = [1, 1; 2, 2; 3, 3; 4, 5; 6, 7; 8, 8; 9, 9; 10, 11; 12, 12;13, 13];
+titles = {'stim 1 v 2, naive', 'stim 1 v 2, gogogo', 'stim 1 v 2, go/noGo',...
+    'stim 2 v 3, naive', 'stim 2 v 3, gogogo', 'stim 2 v 3, go/noGo'};
+for iDatatype = 5:11
+    for iRegion = 1:size(regions, 2)
+        n_conditions = length(unique(datatype_sets(iDatatype,:)));
+        datasets = datatype_sets(iDatatype,:);
+        
+        if n_conditions ==1 
+            this_selec_idx = selectivity_index{datasets(1), iRegion}(:);
+        elseif n_conditions ==2
+            this_selec_idx = [selectivity_index{datasets(1), iRegion}(:); selectivity_index{datasets(2), iRegion}(:)];
+        end
+            figure(4);
+            subplot( 2, 3 ,iDatatype-4)
+            hold on;
+            title(titles{iDatatype-4})
+            [N, edges, bin] = histcounts(this_selec_idx, 0:0.05:1);
+            unit_n = sum(~isnan(this_selec_idx));
+            hist_bin = edges(1:end-1) + diff(edges) ./ 2;
+            stairs(hist_bin, N./unit_n, 'Color', regionColors{iRegion}, 'LineWidth', 2, 'LineStyle', regionLineStyle{iRegion})
+
+            if iRegion == 1 && iDatatype == 1
+                ylabel('fraction of cells')
+                xlabel('c.v. selectivity index')
+            end
+            axis square;
+            % add median
+            ylim([0, 1])
+            sem = nanstd(this_selec_idx) ./ sqrt(length(this_selec_idx(~isnan(this_selec_idx))));
+            line([nanmedian(this_selec_idx) - sem, ...
+                nanmedian(this_selec_idx) + sem], ...
+                [0.25 + 0.05 * iRegion, 0.25 + 0.05 * iRegion], 'Color', regionColors{iRegion}, 'LineWidth', 2, 'LineStyle', regionLineStyle{iRegion});
+            scatter(nanmedian(this_selec_idx), ...
+                0.25+0.05*iRegion, 25, regionColors{iRegion});
+
+            prettify_plot;
+            
+
+            index_concat{iRegion}=this_selec_idx;
+       
+
+    end
+
+    % data = table;
+    % data.selectivityIndex = [index_concat{1}(:); index_concat{2}(:); index_concat{3}(:)];
+    % data.brainRegion = [ones(length(index_concat{1}), 1); ones(length(index_concat{2}), 1) .* 2; ones(length(index_concat{3}), 1) .* 3];
+    % lme = fitlme(data, 'selectivityIndex ~ brainRegion');
+    % disp(lme)
+    % %emm = emmeans(lme, {'brainRegion'});
+    % [p, t, stats] = anova1(data.selectivityIndex, data.brainRegion);
+    % [c, m, h, gnames] = multcompare(stats);
 end
 

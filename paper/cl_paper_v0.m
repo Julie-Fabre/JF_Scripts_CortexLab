@@ -67,6 +67,8 @@ cl_selectivity;
 %% ~~ Tasks - behavior data ~~
 
 %% ~~ Tasks - neural data ~~
+cl_plot_PSTHs(1, 0);%contra
+cl_plot_PSTHs(0, 1);%center
 
 %% ~~ Suppl.: motion, movement ect. ; cell types ; delineating subregions ~~
 
