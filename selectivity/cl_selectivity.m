@@ -249,7 +249,7 @@ for iDatatype = 1:4
             [N, edges, bin] = histcounts(this_selec_idx, 0:0.05:1);
             unit_n = sum(~isnan(this_selec_idx));
             hist_bin = edges(1:end-1) + diff(edges) ./ 2;
-            stairs(hist_bin, N./unit_n, 'Color', regionColors{iRegion}, 'LineWidth', 2, 'LineStyle', regionLineStyle{iRegion})
+            stairs(hist_bin, cumsum(N./unit_n), 'Color', regionColors{iRegion}, 'LineWidth', 2, 'LineStyle', regionLineStyle{iRegion})
 
             if iRegion == 1 && iDatatype == 1
                 ylabel('fraction of cells')
@@ -258,12 +258,12 @@ for iDatatype = 1:4
             axis square;
             % add median
             ylim([0, 1])
-            sem = nanstd(this_selec_idx) ./ sqrt(length(this_selec_idx(~isnan(this_selec_idx))));
-            line([nanmedian(this_selec_idx) - sem, ...
-                nanmedian(this_selec_idx) + sem], ...
-                [0.25 + 0.05 * iRegion, 0.25 + 0.05 * iRegion], 'Color', regionColors{iRegion}, 'LineWidth', 2, 'LineStyle', regionLineStyle{iRegion});
-            scatter(nanmedian(this_selec_idx), ...
-                0.25+0.05*iRegion, 25, regionColors{iRegion});
+            % sem = nanstd(this_selec_idx) ./ sqrt(length(this_selec_idx(~isnan(this_selec_idx))));
+            % line([nanmedian(this_selec_idx) - sem, ...
+            %     nanmedian(this_selec_idx) + sem], ...
+            %     [0.25 + 0.05 * iRegion, 0.25 + 0.05 * iRegion], 'Color', regionColors{iRegion}, 'LineWidth', 2, 'LineStyle', regionLineStyle{iRegion});
+            % scatter(nanmedian(this_selec_idx), ...
+            %     0.25+0.05*iRegion, 25, regionColors{iRegion});
 
             prettify_plot;
             
@@ -284,13 +284,13 @@ for iDatatype = 1:4
 end
 
 
-%% task stimuli 
+%% task stimuli - region v region
 figure(4);
 clf;
 datatype_sets = [1, 1; 2, 2; 3, 3; 4, 5; 6, 7; 8, 8; 9, 9; 10, 11; 12, 12;13, 13];
 titles = {'stim 1 v 2, naive', 'stim 1 v 2, gogogo', 'stim 1 v 2, go/noGo',...
     'stim 2 v 3, naive', 'stim 2 v 3, gogogo', 'stim 2 v 3, go/noGo'};
-for iDatatype = 5:11
+for iDatatype = 5:10
     for iRegion = 1:size(regions, 2)
         n_conditions = length(unique(datatype_sets(iDatatype,:)));
         datasets = datatype_sets(iDatatype,:);
@@ -307,7 +307,7 @@ for iDatatype = 5:11
             [N, edges, bin] = histcounts(this_selec_idx, 0:0.05:1);
             unit_n = sum(~isnan(this_selec_idx));
             hist_bin = edges(1:end-1) + diff(edges) ./ 2;
-            stairs(hist_bin, N./unit_n, 'Color', regionColors{iRegion}, 'LineWidth', 2, 'LineStyle', regionLineStyle{iRegion})
+            stairs(hist_bin, cumsum(N./unit_n), 'Color', regionColors{iRegion}, 'LineWidth', 2, 'LineStyle', regionLineStyle{iRegion})
 
             if iRegion == 1 && iDatatype == 1
                 ylabel('fraction of cells')
@@ -316,14 +316,15 @@ for iDatatype = 5:11
             axis square;
             % add median
             ylim([0, 1])
-            sem = nanstd(this_selec_idx) ./ sqrt(length(this_selec_idx(~isnan(this_selec_idx))));
-            line([nanmedian(this_selec_idx) - sem, ...
-                nanmedian(this_selec_idx) + sem], ...
-                [0.25 + 0.05 * iRegion, 0.25 + 0.05 * iRegion], 'Color', regionColors{iRegion}, 'LineWidth', 2, 'LineStyle', regionLineStyle{iRegion});
-            scatter(nanmedian(this_selec_idx), ...
-                0.25+0.05*iRegion, 25, regionColors{iRegion});
+            % sem = nanstd(this_selec_idx) ./ sqrt(length(this_selec_idx(~isnan(this_selec_idx))));
+            % line([nanmedian(this_selec_idx) - sem, ...
+            %     nanmedian(this_selec_idx) + sem], ...
+            %     [0.25 + 0.05 * iRegion, 0.25 + 0.05 * iRegion], 'Color', regionColors{iRegion}, 'LineWidth', 2, 'LineStyle', regionLineStyle{iRegion});
+            % scatter(nanmedian(this_selec_idx), ...
+            %     0.25+0.05*iRegion, 25, regionColors{iRegion});
 
             prettify_plot;
+           % ylim([0, 1])
             
 
             index_concat{iRegion}=this_selec_idx;
@@ -340,4 +341,81 @@ for iDatatype = 5:11
     % [p, t, stats] = anova1(data.selectivityIndex, data.brainRegion);
     % [c, m, h, gnames] = multcompare(stats);
 end
+
+
+%% task stimuli - task v task
+figure(5);
+clf;
+datatype_sets = [1, 1; 2, 2; 3, 3; 4, 5; 6, 7; 8, 8; 9, 9; 10, 11; 12, 12; 13, 13];
+datatype_sets_mng = [1,2,3,4,5,6,7,8,9,10];
+titles = {'stim 1 v 2, naive', 'stim 1 v 2, gogogo', 'stim 1 v 2, go/noGo',...
+    'stim 2 v 3, naive', 'stim 2 v 3, gogogo', 'stim 2 v 3, go/noGo'};
+this_selec_idx_sum =[];
+for iRegion = 1:size(regions, 2)
+   for iDatatype = 5:10
+        n_conditions = length(unique(datatype_sets(iDatatype,:)));
+        datasets = datatype_sets(iDatatype,:);
+        
+        if n_conditions ==1 
+            this_selec_idx = selectivity_index{datasets(1), iRegion}(:);
+        elseif n_conditions ==2
+            this_selec_idx = [selectivity_index{datasets(1), iRegion}(:); selectivity_index{datasets(2), iRegion}(:)];
+        end
+            %figure(4);
+           % subplot(2, 3, iDatatype-4)
+            %hold on;
+            %title(titles{iDatatype-4})
+            [N, edges, bin] = histcounts(this_selec_idx, 0:0.05:1);
+            unit_n_sum(iRegion,datatype_sets_mng(iDatatype)-4) = sum(~isnan(this_selec_idx));
+            N_sum(iRegion,datatype_sets_mng(iDatatype)-4,:) = N;
+            hist_bin_sum(iRegion,datatype_sets_mng(iDatatype)-4,:) = edges(1:end-1) + diff(edges) ./ 2;
+
+
+
+       
+
+    end
+
+    % data = table;
+    % data.selectivityIndex = [index_concat{1}(:); index_concat{2}(:); index_concat{3}(:)];
+    % data.brainRegion = [ones(length(index_concat{1}), 1); ones(length(index_concat{2}), 1) .* 2; ones(length(index_concat{3}), 1) .* 3];
+    % lme = fitlme(data, 'selectivityIndex ~ brainRegion');
+    % disp(lme)
+    % %emm = emmeans(lme, {'brainRegion'});
+    % [p, t, stats] = anova1(data.selectivityIndex, data.brainRegion);
+    % [c, m, h, gnames] = multcompare(stats);
+end
+
+
+regionColorsFull{1} = [0    0.7461    1.0000; 0.1    0.8    1.0000;  0.2    0.9    1.0000];
+regionColorsFull{2} = [0.1797    0.5430    0.3398; 0.3    0.6    0.5; 0.4    0.7    0.6];
+regionColorsFull{3} = [1.0000    0.5469         0; 1.0000    0.6         0.1;  1.0000    0.7         0.2];
+figure(5);
+clf;
+for iRegion=1:3
+    subplot(2,3,iRegion)
+    hold on;
+    stairs(squeeze(hist_bin_sum(iRegion,1,:)), cumsum(squeeze(N_sum(iRegion,1,:)./unit_n_sum(iRegion,1))),...
+        'Color', regionColorsFull{iRegion}(1,:), 'LineWidth', 2, 'LineStyle', '-');
+    stairs(squeeze(hist_bin_sum(iRegion,2,:)),cumsum(squeeze(N_sum(iRegion,2,:)./unit_n_sum(iRegion,2))),...
+        'Color', regionColorsFull{iRegion}(2,:), 'LineWidth', 2, 'LineStyle', ':');
+    stairs(squeeze(hist_bin_sum(iRegion,3,:)), cumsum(squeeze(N_sum(iRegion,3,:)./unit_n_sum(iRegion,3))),...
+        'Color', regionColorsFull{iRegion}(3,:), 'LineWidth', 2, 'LineStyle', '-.');
+end
+
+for iRegion=1:3
+    subplot(2,3,iRegion+3)
+    hold on;
+
+    
+    stairs(squeeze(hist_bin_sum(iRegion,4,:)), cumsum(squeeze(N_sum(iRegion,4,:)./unit_n_sum(iRegion,4))),...
+        'Color', regionColorsFull{iRegion}(1,:), 'LineWidth', 2, 'LineStyle', '-');
+    stairs(squeeze(hist_bin_sum(iRegion,5,:)),cumsum(squeeze(N_sum(iRegion,5,:)./unit_n_sum(iRegion,5))),...
+        'Color', regionColorsFull{iRegion}(2,:), 'LineWidth', 2, 'LineStyle', ':');
+    stairs(squeeze(hist_bin_sum(iRegion,6,:)), cumsum(squeeze(N_sum(iRegion,6,:)./unit_n_sum(iRegion,6))),...
+        'Color', regionColorsFull{iRegion}(3,:), 'LineWidth', 2, 'LineStyle', '-.');
+end
+
+prettify_plot;
+
 
