@@ -5,6 +5,7 @@ regions = {'CP', 'GPe', 'SNr'};
 
 keep passive_data regions
 figure(1);clf;
+figure(2);clf;
 
 cl_myPaths;
 regionResolution = [1, 1, 1, 1, 1, 1, 1];
@@ -22,7 +23,7 @@ zscore_psth = (passive_data.psth_average(:, 250:450) - nanmean(passive_data.psth
 dFR_psth = (passive_data.psth_average(:, 250:450) - nanmean(passive_data.psth_average(:, 1:200), 2)) ./ ...
     nanmean(passive_data.psth_average(:, 1:200), 2);
 
-thisCmap_limits = [-80, 80];
+thisCmap_limits = [-300, 300];
 theseColors = {rgb('DeepSkyBlue'); rgb('SeaGreen'); rgb('DarkOrange'); rgb('Crimson'); rgb('Hotpink'); rgb('Black'); rgb('Brown')};
 
 if ~exist('st', 'var')
@@ -94,7 +95,7 @@ for iRegion = 1:size(regions, 2)
         axis equal
         axis square
         axis image
-        makepretty;
+        %makepretty;
 
         projection_view_lims(iChunk, 1, :) = xlim .* 10;
         projection_view_lims(iChunk, 2, :) = ylim .* 10;
@@ -111,18 +112,19 @@ for iRegion = 1:size(regions, 2)
     theseLocationsBregmaAbs = [(theseLocations(:, 3)), ...
         theseLocations(:, 1), ...
         theseLocations(:, 2)]; %AP, DV, ML -> ML, AP, DV
+    
+    prettify_plot('XLimits', 'col');
 end
 
 
 %% AP chunks in ML x DV projection 
-
 for iRegion = 1:size(regions, 2)
 
     curr_plot_structure = st.id(strcmp(st.acronym, regions{iRegion}));
 
-    figure(1);
+    figure(2);
 
-    projection_views = repmat([1,2],nChunks, 1);%[1,2; 1,3; 2,3];%ML/AP, ML/DV, AP/DV
+    projection_views = repmat([1,3],nChunks, 1);%[1,2; 1,3; 2,3];%ML/AP, ML/DV, AP/DV
 
 
     % initialize variables
@@ -152,7 +154,6 @@ for iRegion = 1:size(regions, 2)
         axis equal
         axis square
         axis image
-        makepretty;
 
         projection_view_lims(iChunk, 1, :) = xlim .* 10;
         projection_view_lims(iChunk, 2, :) = ylim .* 10;
@@ -164,6 +165,7 @@ for iRegion = 1:size(regions, 2)
             projection_view_lims(iChunk, 2, 2)};
 
     end
+    prettify_plot; 
 
     theseLocations = passive_data.unit_coords;
     theseLocationsBregmaAbs = [(theseLocations(:, 3)), ...
@@ -205,7 +207,7 @@ for iRegion = 1:size(regions, 2)
         % remove any data points outside of the ROI
          clearvars regionLocation
         % get structure boundaries and plot outline
-        region_area = permute(av(round(chunks_region(iRegion, iChunk)):-1:round(chunks_region(iRegion, iChunk+1)), ...
+        region_area = permute(av(round(chunks_region(iRegion, iChunk)):1:round(chunks_region(iRegion, iChunk+1)), ...
             1:1:end, 1:1:end/2) == curr_plot_structure, [3, 1, 2]); % / 2 to only get one hemispehere
         % AP, DV, ML -> ML, AP, DV
 
@@ -221,7 +223,7 @@ for iRegion = 1:size(regions, 2)
             end
         end
 
-        figure(1)
+        figure(2);
         subplot(nChunks, size(regions, 2), iRegion+(size(regions, 2) * (iChunk - 1)))
 
         binnedArrayPixelSmooth(isIN == 0) = mean(thisCmap_limits);
@@ -263,7 +265,7 @@ for iRegion = 1:size(regions, 2)
             ax.XTickLabel{i} = ['\color[rgb]', sprintf('{%f,%f,%f}%s', cm, ax.XTickLabel{i})];
         end
 
-        makepretty;
+        prettify_plot;
         clearvars isIN
         caxis(thisCmap_limits)
         set(gca, 'color', [0.5, 0.5, 0.5]);
@@ -272,3 +274,4 @@ for iRegion = 1:size(regions, 2)
     end
     keep passive_data regions thisCmap_limits st av regionResolution structure_alpha theseColors dFR_psth iRegion bregma nChunks chunks_region
 end
+
