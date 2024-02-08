@@ -19,11 +19,11 @@ regionResolution = [1, 1, 1, 1, 1, 1, 1];
 %     NaN,NaN];...%SNc;
 passive_data.psth_average = squeeze(nanmean(passive_data.psth{1}(:, 3, :, :), 3));
 zscore_psth = (passive_data.psth_average(:, 250:450) - nanmean(passive_data.psth_average(:, 1:200), 2)) ./ ...
-    nanstd(passive_data.psth_average(:, 1:200), [], 2);
+   ( nanstd(passive_data.psth_average(:, 1:200), [], 2)  +0.001);
 dFR_psth = (passive_data.psth_average(:, 250:450) - nanmean(passive_data.psth_average(:, 1:200), 2)) ./ ...
-    nanmean(passive_data.psth_average(:, 1:200), 2);
+    (nanmean(passive_data.psth_average(:, 1:200), 2)  +0.001);
 
-thisCmap_limits = [-300, 300];
+thisCmap_limits = [-30, 30];
 theseColors = {rgb('DeepSkyBlue'); rgb('SeaGreen'); rgb('DarkOrange'); rgb('Crimson'); rgb('Hotpink'); rgb('Black'); rgb('Brown')};
 
 if ~exist('st', 'var')
@@ -33,7 +33,7 @@ end
 structure_alpha = 0.2;
 
 %% get each region's limits and define chunks
-nChunks = 4;
+nChunks = 5;
 clearvars chunks_region
 % for iRegion = 1:size(regions, 2)
 %     clearvars regionLocation
@@ -85,7 +85,7 @@ for iRegion = 1:size(regions, 2)
         thisChunk_AP = regionLocation(projection_views(1, 1), :);
         thisChunk_DV = regionLocation(projection_views(1, 2), :);
 
-        subplot(nChunks, size(regions, 2), iRegion+(size(regions, 2) * (4 - iChunk)))
+        subplot(nChunks, size(regions, 2), iRegion+(size(regions, 2) * (nChunks - iChunk)))
         boundary_projection{iChunk} = boundary(thisChunk_AP', ...
             thisChunk_DV', 0);
 
@@ -141,10 +141,11 @@ for iRegion = 1:size(regions, 2)
 
         [regionLocation(1, :), regionLocation(2, :), regionLocation(3, :)] ...
             = ind2sub(size(region_area), find(region_area)); %ML, AP, DV
+        regionLocation(2, :) = regionLocation(2, :) + round(chunks_region(iRegion, iChunk)) - 1;
         thisChunk_AP = regionLocation(projection_views(1, 1), :);
         thisChunk_DV = regionLocation(projection_views(1, 2), :);
 
-        subplot(nChunks, size(regions, 2), iRegion+(size(regions, 2) * (4 - iChunk)))
+        subplot(nChunks, size(regions, 2), iRegion+(size(regions, 2) * (nChunks - iChunk)))
         boundary_projection{iChunk} = boundary(thisChunk_AP', ...
             thisChunk_DV', 0);
 
@@ -175,7 +176,7 @@ for iRegion = 1:size(regions, 2)
     bregma_ml_point = bregma(1) / 2.5; %2.5 is difference in scaling between 
     % brainreg (25 um resolution) and allen (10um resolution, where this bregma value comes from)
 
-    theseLocationsBregmaAbs(:,1) = abs(theseLocationsBregmaAbs(:,1) - bregma_ml_point); % squash right hemisphere on the left
+   theseLocationsBregmaAbs(:,1) = bregma_ml_point - abs(theseLocationsBregmaAbs(:,1) - bregma_ml_point); % squash right hemisphere on the left
 
     %% plot average increase for each bin
 
@@ -189,7 +190,10 @@ for iRegion = 1:size(regions, 2)
 
         for iBinX = 1:size(Xedges, 2)
             for iBinY = 1:size(Yedges, 2)
-                theseNeurons = binX == iBinX & binY == iBinY & passive_data.unit_area == iRegion &...
+                theseNeurons = binX == iBinX & binY == iBinY &...
+                    theseLocationsBregmaAbs(:,2) >= round(chunks_region(iRegion, iChunk)) &...
+                    theseLocationsBregmaAbs(:,2) < round(chunks_region(iRegion, iChunk+1))&...
+                    passive_data.unit_area == iRegion &...
                 (passive_data.unitType' ==1 | passive_data.unitType' ==2);
                 binnedArrayTot = [];
                 if sum(theseNeurons) > 0
@@ -207,7 +211,7 @@ for iRegion = 1:size(regions, 2)
         binnedArrayPixel(binnedArrayPixel == 0) = NaN;
 
         % smooth data
-        binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, 4, 4);
+        binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, 2, 2);
         %binnedArrayPixelSmooth = binnedArrayPixel;
 
         % remove any data points outside of the ROI
@@ -230,7 +234,7 @@ for iRegion = 1:size(regions, 2)
         end
 
         figure(2);
-        subplot(nChunks, size(regions, 2), iRegion+(size(regions, 2) * (iChunk - 1)))
+        subplot(nChunks, size(regions, 2), iRegion+(size(regions, 2) * (nChunks - iChunk)))
 
         binnedArrayPixelSmooth(isIN == 0) = mean(thisCmap_limits);
         ax = gca;
