@@ -165,12 +165,17 @@ for iRegion = 1:size(regions, 2)
             projection_view_lims(iChunk, 2, 2)};
 
     end
-    prettify_plot; 
+   % prettify_plot; 
 
-    theseLocations = passive_data.unit_coords;
+     theseLocations = passive_data.unit_coords;
     theseLocationsBregmaAbs = [(theseLocations(:, 3)), ...
         theseLocations(:, 1), ...
-        theseLocations(:, 2)]; %AP, DV, ML -> ML, AP, DV
+        theseLocations(:, 2)];% go from AP, DV, ML to ML, AP, DV (like loaded Atlas) 
+
+    bregma_ml_point = bregma(1) / 2.5; %2.5 is difference in scaling between 
+    % brainreg (25 um resolution) and allen (10um resolution, where this bregma value comes from)
+
+    theseLocationsBregmaAbs(:,1) = bregma_ml_point - abs(theseLocationsBregmaAbs(:,1) - bregma_ml_point); % squash right hemisphere on the left
 
     %% plot average increase for each bin
 
@@ -183,8 +188,8 @@ for iRegion = 1:size(regions, 2)
 
         for iBinX = 1:size(Xedges, 2)
             for iBinY = 1:size(Yedges, 2)
-                theseNeurons = binX == iBinX & binY == iBinY & passive_data.unit_area == iRegion; % &...
-                %(passive_data.unitType' ==1 | passive_data.unitType' ==2);
+                theseNeurons = binX == iBinX & binY == iBinY & passive_data.unit_area == iRegion &...
+                (passive_data.unitType' ==1 | passive_data.unitType' ==2);
                 binnedArrayTot = [];
                 if sum(theseNeurons) > 0
                     %remove any infs QQ i need to deal with this!
@@ -201,8 +206,8 @@ for iRegion = 1:size(regions, 2)
         binnedArrayPixel(binnedArrayPixel == 0) = NaN;
 
         % smooth data
-        %binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, 4, 4);
-        binnedArrayPixelSmooth = binnedArrayPixel;
+        binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, 4, 4);
+        %binnedArrayPixelSmooth = binnedArrayPixel;
 
         % remove any data points outside of the ROI
          clearvars regionLocation
@@ -265,7 +270,7 @@ for iRegion = 1:size(regions, 2)
             ax.XTickLabel{i} = ['\color[rgb]', sprintf('{%f,%f,%f}%s', cm, ax.XTickLabel{i})];
         end
 
-        prettify_plot;
+        %prettify_plot;
         clearvars isIN
         caxis(thisCmap_limits)
         set(gca, 'color', [0.5, 0.5, 0.5]);
