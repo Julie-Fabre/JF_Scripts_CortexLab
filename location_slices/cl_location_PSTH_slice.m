@@ -167,7 +167,7 @@ for iRegion = 1:size(regions, 2)
     end
    % prettify_plot; 
 
-     theseLocations = passive_data.unit_coords;
+    theseLocations = passive_data.unit_coords;
     theseLocationsBregmaAbs = [(theseLocations(:, 3)), ...
         theseLocations(:, 1), ...
         theseLocations(:, 2)];% go from AP, DV, ML to ML, AP, DV (like loaded Atlas) 
@@ -175,7 +175,7 @@ for iRegion = 1:size(regions, 2)
     bregma_ml_point = bregma(1) / 2.5; %2.5 is difference in scaling between 
     % brainreg (25 um resolution) and allen (10um resolution, where this bregma value comes from)
 
-    theseLocationsBregmaAbs(:,1) = bregma_ml_point - abs(theseLocationsBregmaAbs(:,1) - bregma_ml_point); % squash right hemisphere on the left
+    theseLocationsBregmaAbs(:,1) = abs(theseLocationsBregmaAbs(:,1) - bregma_ml_point); % squash right hemisphere on the left
 
     %% plot average increase for each bin
 
@@ -183,6 +183,7 @@ for iRegion = 1:size(regions, 2)
         [N, Xedges, Yedges, binX, binY] = histcounts2(theseLocationsBregmaAbs(:, projection_views(iChunk, 1)), ...
             theseLocationsBregmaAbs(:, projection_views(iChunk, 2)), projection_view_bins{iChunk}{1}, ...
             projection_view_bins{iChunk}{2}); %par rapport a bregma!
+
 
         binnedArrayPixel = nan(size(Xedges, 2), size(Yedges, 2)); % initialize
 
