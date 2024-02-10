@@ -386,6 +386,7 @@ for iRecording = 1:length(use_recs)
                     [unitType, ~] = bc_qualityMetricsPipeline_JF(animal, thisDate, site, recording, 1, protocol, rerunQM, plotGUI, runQM);
                     expData.unitType((unitCount + 1:unitCount + size(units_to_keep, 1))) = unitType(units_to_keep);
                 end
+
                 if ismember('propLongISI', ephysProperties.Properties.VariableNames)
                     if size(ephysProperties.propLongISI, 1) == size(unitType, 1)
                         try
@@ -419,8 +420,6 @@ for iRecording = 1:length(use_recs)
                     expData.fr((unitCount + 1:unitCount + size(units_to_keep, 1))) = ephysProperties.mean_firingRate(units_to_keep);
 
                 end
-                % catch
-                %end
 
                 %passive_data_per_cond
                 unitCount = unitCount + size(units_to_keep, 1);

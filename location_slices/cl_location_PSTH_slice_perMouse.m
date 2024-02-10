@@ -1,14 +1,18 @@
 
 %% cl_locationPSTH
-passive_data = load('/home/julie/Dropbox/MATLAB/naive_data1.mat');
-index = 1;
-%passive_data = load('/home/julie/Dropbox/MATLAB/gogogo_data2.mat');
-%passive_data = load('/home/julie/Dropbox/MATLAB/goNogo_data2.mat');
-%index = 2;
+if contains(load_type, 'naive')
+    passive_data = load('/home/julie/Dropbox/MATLAB/naive_data1.mat');
+    index = 1;
+elseif contains(load_type, 'taskGo')
+    passive_data = load('/home/julie/Dropbox/MATLAB/gogogo_data2.mat');
+    index = 2;
+elseif contains(load_type, 'taskNoGo')
+    passive_data = load('/home/julie/Dropbox/MATLAB/goNogo_data2.mat');
+    index = 2;
+end
 
-regions = {'CP', 'GPe', 'SNr'};
 pcells = true;
-keep passive_data regions pcells index
+keep passive_data regions pcells index load_type unique_mice
 figure(1);clf;
 figure(2);clf;
 
@@ -60,7 +64,31 @@ for iRegion = 1:size(regions, 2)
     chunks_region(iRegion,:) =  region_ap_boundaries(iRegion, 1):(region_ap_boundaries(iRegion, 2)-region_ap_boundaries(iRegion, 1))/nChunks:region_ap_boundaries(iRegion, 2);
 end
 
+cl_myPaths;
+
+%% get loading info
+% recording type exp info
+if contains(load_type, 'naive')
+    info_table = readtable([csvPath, 'allPassiveRecs.csv'], 'VariableNamingRule', 'modify');
+elseif contains(load_type, 'taskGo')
+    info_table = readtable([csvPath, 'allTaskGoGoGoRecs.csv'], 'VariableNamingRule', 'modify');
+elseif contains(load_type, 'taskNoGo')
+    info_table = readtable([csvPath, 'allTaskRecs.csv'], 'VariableNamingRule', 'modify');
+end
+
+% regions to load
+regions = {'CP', 'GPe', 'SNr'}; % 'GPi', 'STN', 'SNr', 'SNc', 'VTA'};
+warning off;
+regions_id = [672, 1022, 381];
+
+% get all mice x thisDate x site combinations
+use_recs_full = strcmp(info_table.Use_, 'Yes');
+
+info_table = sortrows(info_table, 1); % make sure data is sorted by mouse
+unique_mice = unique(info_table.Mouse(use_recs_full), 'stable');
+
 %% Visualize AP chunks in ML x AP projection
+
 for iRegion = 1:size(regions, 2)
 
     curr_plot_structure = st.id(strcmp(st.acronym, regions{iRegion}));
@@ -120,15 +148,19 @@ end
 
 
 %% AP chunks in ML x DV projection 
+mice = unique_mice(passive_data.animal_thisDate_site_shank(passive_data.unit_area == iRegion,1));
+for iMouse = 1:size(unique_mice,1)
+    mouse = unique_mice{iMouse};
+    curr_fig = figure('Name', mouse);
 for iRegion = 1:size(regions, 2)
 
     curr_plot_structure = st.id(strcmp(st.acronym, regions{iRegion}));
 
-    figure(2);
+    
 
     projection_views = repmat([1,3],nChunks, 1);%[1,2; 1,3; 2,3];%ML/AP, ML/DV, AP/DV
 
-
+figure(curr_fig)
     % initialize variables
     boundary_projection = cell(3, 1);
     projection_view_bins = cell(3, 1);
@@ -181,7 +213,7 @@ for iRegion = 1:size(regions, 2)
    theseLocationsBregmaAbs(:,1) = bregma_ml_point - abs(theseLocationsBregmaAbs(:,1) - bregma_ml_point); % squash right hemisphere on the left
 
     %% plot average increase for each bin
-
+try
     for iChunk = 1:nChunks
         [N, Xedges, Yedges, binX, binY] = histcounts2(theseLocationsBregmaAbs(:, projection_views(iChunk, 1)), ...
             theseLocationsBregmaAbs(:, projection_views(iChunk, 2)), projection_view_bins{iChunk}{1}, ...
@@ -197,13 +229,13 @@ for iRegion = 1:size(regions, 2)
                     theseLocationsBregmaAbs(:,2) >= round(chunks_region(iRegion, iChunk)) &...
                     theseLocationsBregmaAbs(:,2) < round(chunks_region(iRegion, iChunk+1))&...
                     passive_data.unit_area == iRegion &...
-                    (passive_data.unitType' ==1);% | passive_data.unitType' ==2);
+                    (passive_data.unitType' ==1) & passive_data.animal_thisDate_site_shank(:,1)==iMouse;% | passive_data.unitType' ==2);
                 else
                     theseNeurons = binX == iBinX & binY == iBinY &...
                     theseLocationsBregmaAbs(:,2) >= round(chunks_region(iRegion, iChunk)) &...
                     theseLocationsBregmaAbs(:,2) < round(chunks_region(iRegion, iChunk+1))&...
                     passive_data.unit_area == iRegion &...
-                    (passive_data.unitType' ==1 | passive_data.unitType' ==2);
+                    (passive_data.unitType' ==1 | passive_data.unitType' ==2) & passive_data.animal_thisDate_site_shank(:,1)==iMouse;
                end
 
                 binnedArrayTot = [];
@@ -251,7 +283,7 @@ for iRegion = 1:size(regions, 2)
             end
         end
 
-        figure(2);
+        figure(curr_fig);
         subplot(nChunks, size(regions, 2), iRegion+(size(regions, 2) * (nChunks - iChunk)))
         if pcells
             binnedArrayPixelSmooth(isIN == 0) = min(thisCmap_limits);
@@ -303,6 +335,9 @@ for iRegion = 1:size(regions, 2)
         xlim([projection_view_bins{iChunk}{1}(1), projection_view_bins{iChunk}{1}(end)])
         ylim([projection_view_bins{iChunk}{2}(1), projection_view_bins{iChunk}{2}(end)])
     end
-    keep passive_data regions thisCmap_limits st av regionResolution structure_alpha theseColors dFR_psth iRegion bregma nChunks chunks_region pcells index
+catch
+end
+end
+    keep passive_data regions thisCmap_limits st av regionResolution structure_alpha theseColors dFR_psth iRegion bregma nChunks chunks_region pcells index unique_mice load_type
 end
 
