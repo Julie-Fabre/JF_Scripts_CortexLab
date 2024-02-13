@@ -15,9 +15,13 @@ end
 regions = {'CP', 'GPe', 'SNr'}; % 'GPi', 'STN', 'SNr', 'SNc', 'VTA'};
 warning off;
 regions_id = [672, 1022, 381];
-
+regions_id_old_histo = [574, 611, 823]; % only keep striatum in old ones?, ,611,823];
 % get all mice x thisDate x site combinations
-use_recs_full = strcmp(info_table.Use_, 'Yes');
+if ismember('OldHisto_', info_table.Properties.VariableNames)
+    use_recs_full = strcmp(info_table.Use_, 'Yes') & ~strcmp(info_table.OldHisto_, 'Yes');
+else
+    use_recs_full = strcmp(info_table.Use_, 'Yes');
+end
 
 info_table = sortrows(info_table, 1); % make sure data is sorted by mouse
 unique_mice = unique(info_table.Mouse(use_recs_full), 'stable');
@@ -44,7 +48,7 @@ for iMouse = 1:length(unique_mice)
         info_table.Shanks(use_recs_full & strcmp(info_table.Mouse, unique_mice(iMouse))), ...
         info_table.Rec_Exp(use_recs_full & strcmp(info_table.Mouse, unique_mice(iMouse)))];
 
-    mouse_thisDate_sites_shank_rec = [mouse_thisDate_sites_shank_rec; repmat(iMouse, length(thisDate_sites_shank_rec), 1), ...
+    mouse_thisDate_sites_shank_rec = [mouse_thisDate_sites_shank_rec; repmat(iMouse, size(thisDate_sites_shank_rec, 1), 1), ...
         thisDate_sites_shank_rec];
 
 end
@@ -70,7 +74,14 @@ for iRecording = 1:length(use_recs)
         continue;
     end
     load(probe2ephys_location)
-    thisDate_sites_shank_probe = [probe2ephys.day; probe2ephys.site; probe2ephys.shank]';
+    try
+        thisDate_sites_shank_probe = [probe2ephys.day; probe2ephys.site; probe2ephys.shank]';
+        old_histo = false;
+    catch
+        % old histo
+        thisDate_sites_shank_probe = [probe2ephys.day; probe2ephys.site; nan(1, size(probe2ephys, 2))]';
+        old_histo = true;
+    end
 
     mouse_thisDate_sites_shank_rec(isnan(mouse_thisDate_sites_shank_rec(:, 4)), 4) = 0; %replace nan by 0
     thisDate_sites_shank_probe(isnan(thisDate_sites_shank_probe(:, 3)), 3) = 0; %replace nan by 0
@@ -91,8 +102,26 @@ for iRecording = 1:length(use_recs)
     this_probe = probe_rec_idx;
     if this_probe > 0
         for iRegion = 1:size(regions, 2)
-            this_region = regions_id(iRegion);
-            this_region_idx = find(probe_ccf(this_probe).trajectory_areas == this_region);
+            if size(probe_ccf, 1) < this_probe
+                % Get field names
+                fields = fieldnames(probe_ccf);
+                
+                % Iterate over each field and add the value
+                for i = 1:length(fields)
+                    fieldName = fields{i}; % Get field name
+                    probe_ccf(this_probe).(fieldName) = 0; % Add value
+                end
+            end
+                if old_histo
+                    this_region = regions_id_old_histo(iRegion);
+                    this_region_idx = find(probe_ccf(this_probe).trajectory_areas == this_region);
+                else
+
+                    this_region = regions_id(iRegion);
+                    this_region_idx = find(probe_ccf(this_probe).trajectory_areas == this_region);
+
+                end
+           
             if ~isempty(this_region_idx)
                 try
                     this_region_start(iRegion) = probe_ccf(this_probe).probe_depths(this_region_idx(1));
@@ -386,7 +415,10 @@ for iRecording = 1:length(use_recs)
                     [unitType, ~] = bc_qualityMetricsPipeline_JF(animal, thisDate, site, recording, 1, protocol, rerunQM, plotGUI, runQM);
                     expData.unitType((unitCount + 1:unitCount + size(units_to_keep, 1))) = unitType(units_to_keep);
                 end
-
+                
+                if isstruct(ephysProperties)
+                    ephysProperties = struct2table(ephysProperties)
+                end
                 if ismember('propLongISI', ephysProperties.Properties.VariableNames)
                     if size(ephysProperties.propLongISI, 1) == size(unitType, 1)
                         try
@@ -429,7 +461,7 @@ for iRecording = 1:length(use_recs)
             % clear variables
             disp(['   ', num2str(iRecording), '/', num2str(length(use_recs))])
 
-            keep expType session_data mouse_thisDate_sites_shank_rec unique_mice expData use_recs info_table regions regions_id unitCount load_type keep_type loadVids
+            keep regions_id_old_histo expType session_data mouse_thisDate_sites_shank_rec unique_mice expData use_recs info_table regions regions_id unitCount load_type keep_type loadVids
         end
     end
     %catch

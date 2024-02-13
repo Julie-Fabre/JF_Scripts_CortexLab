@@ -102,6 +102,10 @@ switch file
             filepattern = [animal, filesep, '*istology/slices/probe_ccf.mat'];
             [filename, file_exists] = check_locations(filepattern, server_location);
         end
+        if ~file_exists
+            filepattern = [animal, filesep, '*istology/processed/slices/probe_ccf.mat'];
+            [filename, file_exists] = check_locations(filepattern, server_location);
+        end
     case 'histo_folder'
         filepattern = [animal, filesep, '*istology'];
         [filename, file_exists] = check_locations(filepattern, server_location);
@@ -281,19 +285,19 @@ switch file
 
         filepattern = [animal, filesep, thisDate, filesep, ...
             'ephys', site_dir, filesep, 'experiment*', filesep, 'recording*', ...
-            filesep, 'continuous', filesep, 'Neuropix-3a-100.0', filesep, 'continuous.dat'];
+            filesep, 'continuous', filesep, 'Neuropix-3a-100.0', filesep, 'continuous.*dat'];
         [filename, file_exists] = check_locations(filepattern, server_location);
 
         if ~file_exists
             filepattern = [animal, filesep, thisDate, filesep, ...
                 'ephys', site_dir, filesep, 'recording*', ...
-                filesep, 'continuous', filesep, 'Neuropix-3a-100.0', filesep, 'continuous.dat'];
+                filesep, 'continuous', filesep, 'Neuropix-3a-100.0', filesep, 'continuous.*dat'];
             [filename, file_exists] = check_locations(filepattern, server_location);
         end
         if ~file_exists
             filepattern = [animal, filesep, thisDate, filesep, ...
                 'ephys', site_dir, ...
-                filesep, 'continuous', filesep, 'Neuropix-3a-100.0', filesep, 'continuous.dat'];
+                filesep, 'continuous', filesep, 'Neuropix-3a-100.0', filesep, 'continuous.*dat'];
             [filename, file_exists] = check_locations(filepattern, server_location);
         end
 
@@ -429,6 +433,10 @@ switch file
         % (sometimes upper/lowecase "Histology" folder)
         filepattern = [animal, filesep, '*istology', filesep, 'slices', filesep, 'probe_ccf.mat'];
         [filename, file_exists] = check_locations(filepattern, server_location);
+         if ~file_exists
+            filepattern = [animal, filesep, '*istology/downsampled_stacks/025_micron/brainreg/probe2ephys.mat'];
+            [filename, file_exists] = check_locations(filepattern, server_location);
+        end
 
 end
 end

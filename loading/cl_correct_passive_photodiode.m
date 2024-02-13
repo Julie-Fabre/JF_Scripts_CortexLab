@@ -26,7 +26,7 @@ if length(signals_events.stim_idValues) < length(stimOn_times) % too many photod
     end
 
 elseif length(signals_events.stim_idValues) > length(stimOn_times) % some photodiode flips missing
-    warning([animal, ' ', day, ': more stim on times than photodiode flips, attempting to correct ...']);
+    warning([animal, ' ', thisDate, ': more stim on times than photodiode flips, attempting to correct ...']);
     flip_problem = 2;
     
     % do any of them violate min ITI / stim on time - if so, pad with NaNs at missing spots  

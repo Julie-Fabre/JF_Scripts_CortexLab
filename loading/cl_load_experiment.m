@@ -511,9 +511,10 @@ if load_parts.ephys
         if isempty(ephysMetaDir) %.cbin
             ephysMetaDir = dir([ephysAP_path(1:end-4), 'meta']);
         end
+        if isSpikeGlx
         [scalingFactor, channelMapImro, probeType] = bc_readSpikeGLXMetaFile([ephysMetaDir.folder, filesep, ephysMetaDir.name]);
         isSpikeGlx = isSpikeGlx(1);
-        if isSpikeGlx && strcmp(probeType, '2')
+        if strcmp(probeType, '2')
             max_depth = 2880;
             if any(max_depth-channel_positions(:, 2) < 0) %1.0
                 max_depth = 3840;
@@ -523,6 +524,10 @@ if load_parts.ephys
                 channel_positions(:, 2) = max_depth - channel_positions(:, 2);
             end
 
+        else
+            max_depth = 3840;
+            channel_positions(:, 2) = max_depth - channel_positions(:, 2); % 0 = tip in NP1s, 3840 = top, reorder here
+        end
         else
             max_depth = 3840;
             channel_positions(:, 2) = max_depth - channel_positions(:, 2); % 0 = tip in NP1s, 3840 = top, reorder here

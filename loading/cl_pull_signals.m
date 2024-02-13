@@ -619,7 +619,7 @@
 
 
 
-        case {'JF_GratingPassive', 'JF_GratingPassiveVarITI', 'JF_GratingPassiveVarITI_moreComb', 'JF_GratingPassiveVarITI_moreCombnew', ...
+        case { 'JF_GratingPassive', 'JF_GratingPassiveVarITI', 'JF_GratingPassiveVarITI_moreComb', 'JF_GratingPassiveVarITI_moreCombnew', ...
                 'JF_GratingPassiveVarITI_moreCombnew_correct'}
             stimOn_times = photodiode_flip_times(2:2:end);
 %            cl_correct_passive_photodiode; 

@@ -34,7 +34,7 @@ load([outputDir, '/probe_ccf.mat'])
 
 %% Load data from experiment
 
-curr_day = 5; % (set which day to use)
+curr_day = 2; % (set which day to use)
 thisDate = experiments(curr_day).thisDate; % date
 
 
@@ -54,7 +54,7 @@ qMetricsExist = dir(fullfile(savePath, 'qMetric*.mat'));
 
 
 verbose = false; % display load progress and some info figures
-load_parts.cam = false;
+load_parts.cam = true;
 load_parts.imaging = false;
 load_parts.ephys = true;
 loadClusters = 0;

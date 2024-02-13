@@ -1,14 +1,19 @@
 
 %% cl_locationPSTH
-passive_data = load('/home/julie/Dropbox/MATLAB/naive_data1.mat');
-index = 1;
-%passive_data = load('/home/julie/Dropbox/MATLAB/gogogo_data2.mat');
-%passive_data = load('/home/julie/Dropbox/MATLAB/goNogo_data2.mat');
-%index = 2;
+if contains(load_type, 'naive')
+    passive_data = load('/home/julie/Dropbox/MATLAB/naive_data1.mat');
+    index = 1;
+elseif contains(load_type, 'taskGo')
+    passive_data = load('/home/julie/Dropbox/MATLAB/gogogo_data2_nosnr106.mat');
+    index = 2;
+elseif contains(load_type, 'taskNoGo')
+    passive_data = load('/home/julie/Dropbox/MATLAB/goNogo_data2.mat');
+    index = 2;
+end
 
 regions = {'CP', 'GPe', 'SNr'};
-pcells = true;
-keep passive_data regions pcells index
+%pcells = true;
+keep passive_data regions pcells index load_type
 figure(1);clf;
 figure(2);clf;
 
@@ -229,8 +234,8 @@ for iRegion = 1:size(regions, 2)
         end
 
         % smooth data
-        binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, 2, 2);
-        %binnedArrayPixelSmooth = binnedArrayPixel;
+        %binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, 2, 2);
+        binnedArrayPixelSmooth = binnedArrayPixel;
 
         % remove any data points outside of the ROI
          clearvars regionLocation
@@ -303,6 +308,6 @@ for iRegion = 1:size(regions, 2)
         xlim([projection_view_bins{iChunk}{1}(1), projection_view_bins{iChunk}{1}(end)])
         ylim([projection_view_bins{iChunk}{2}(1), projection_view_bins{iChunk}{2}(end)])
     end
-    keep passive_data regions thisCmap_limits st av regionResolution structure_alpha theseColors dFR_psth iRegion bregma nChunks chunks_region pcells index
+    keep passive_data regions thisCmap_limits st av regionResolution structure_alpha theseColors dFR_psth iRegion bregma nChunks chunks_region pcells index load_type
 end
 

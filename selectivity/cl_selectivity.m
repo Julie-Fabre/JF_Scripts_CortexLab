@@ -131,14 +131,14 @@ for iDataset = 1:13
                 [~, condType] = ismember(conditions, use_conditions, 'rows');
             elseif iDataset == 7 % cw stims, stim 1 v 2
                 %conditions = conditions(:,1);
-                if sum(use_conditions(:,1) == 12) > 0
+                if sum(conditions(:,1) == 12) > 0
                     use_conditions = conditions(ismember(conditions(:,1), [4,12]) & conditions(:,2)==-90,:);
                 else
                     use_conditions = conditions(ismember(conditions(:,1), [1,3]) & conditions(:,2)==-90,:);
                 end
-                [~, condType] = ismember(conditions, use_conditions);
+                [~, condType] = ismember(conditions, use_conditions, 'rows');
             elseif iDataset == 8 || iDataset == 9 % cw stims in tasks, stim 1 v 2
-                if sum(use_conditions(:,1) == 12) > 0
+                if sum(conditions(:,1) == 12) > 0
                     try
                     use_conditions = conditions(ismember(conditions(:,1), [4,12]) & conditions(:,2)==-90,:);
                     catch
@@ -151,21 +151,21 @@ for iDataset = 1:13
                         keyboard
                     end
                 end
-                [~, condType] = ismember(conditions, use_conditions);
+                [~, condType] = ismember(conditions, use_conditions, 'rows');
              elseif iDataset == 10 % cw stims, stim 1 v 2
                 %conditions = conditions(:,1);
                 use_conditions = conditions(ismember(conditions(:,1), [3,2]) & conditions(:,2)==-90,:);
                 [~, condType] = ismember(conditions, use_conditions, 'rows');
              elseif iDataset == 11 % cw stims, stim 1 v 2
                 %conditions = conditions(:,1);
-                if sum(use_conditions(:,1) == 12) > 0
+                if sum(conditions(:,1) == 12) > 0
                     use_conditions = conditions(ismember(conditions(:,1), [12,6]) & conditions(:,2)==-90,:);
                 else
                     use_conditions = conditions(ismember(conditions(:,1), [3,2]) & conditions(:,2)==-90,:);
                 end
-                [~, condType] = ismember(conditions, use_conditions);
+                [~, condType] = ismember(conditions, use_conditions, 'rows');
             elseif iDataset == 12 || iDataset == 13 % cw stims in tasks, stim 1 v 2
-                if sum(use_conditions(:,1) == 12) > 0
+                if sum(conditions(:,1) == 12) > 0
                     try
                     use_conditions = conditions(ismember(conditions(:,1), [12,6]) & conditions(:,2)==-90,:);
                     catch
@@ -178,7 +178,7 @@ for iDataset = 1:13
                         keyboard
                     end
                 end
-                [~, condType] = ismember(conditions, use_conditions);
+                [~, condType] = ismember(conditions, use_conditions, 'rows');
             end
 
             

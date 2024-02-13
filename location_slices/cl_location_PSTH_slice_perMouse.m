@@ -12,7 +12,7 @@ elseif contains(load_type, 'taskNoGo')
 end
 
 pcells = true;
-keep passive_data regions pcells index load_type unique_mice
+keep passive_data pcells index load_type
 figure(1);clf;
 figure(2);clf;
 
@@ -37,6 +37,30 @@ if ~exist('st', 'var')
 end
 
 structure_alpha = 0.2;
+
+
+cl_myPaths;
+
+%% get loading info
+% recording type exp info
+if contains(load_type, 'naive')
+    info_table = readtable([csvPath, 'allPassiveRecs.csv'], 'VariableNamingRule', 'modify');
+elseif contains(load_type, 'taskGo')
+    info_table = readtable([csvPath, 'allTaskGoGoGoRecs.csv'], 'VariableNamingRule', 'modify');
+elseif contains(load_type, 'taskNoGo')
+    info_table = readtable([csvPath, 'allTaskRecs.csv'], 'VariableNamingRule', 'modify');
+end
+
+% regions to load
+regions = {'CP', 'GPe', 'SNr'}; % 'GPi', 'STN', 'SNr', 'SNc', 'VTA'};
+warning off;
+regions_id = [672, 1022, 381];
+
+% get all mice x thisDate x site combinations
+use_recs_full = strcmp(info_table.Use_, 'Yes');
+
+info_table = sortrows(info_table, 1); % make sure data is sorted by mouse
+unique_mice = unique(info_table.Mouse(use_recs_full), 'stable');
 
 %% get each region's limits and define chunks
 nChunks = 5;
@@ -64,28 +88,6 @@ for iRegion = 1:size(regions, 2)
     chunks_region(iRegion,:) =  region_ap_boundaries(iRegion, 1):(region_ap_boundaries(iRegion, 2)-region_ap_boundaries(iRegion, 1))/nChunks:region_ap_boundaries(iRegion, 2);
 end
 
-cl_myPaths;
-
-%% get loading info
-% recording type exp info
-if contains(load_type, 'naive')
-    info_table = readtable([csvPath, 'allPassiveRecs.csv'], 'VariableNamingRule', 'modify');
-elseif contains(load_type, 'taskGo')
-    info_table = readtable([csvPath, 'allTaskGoGoGoRecs.csv'], 'VariableNamingRule', 'modify');
-elseif contains(load_type, 'taskNoGo')
-    info_table = readtable([csvPath, 'allTaskRecs.csv'], 'VariableNamingRule', 'modify');
-end
-
-% regions to load
-regions = {'CP', 'GPe', 'SNr'}; % 'GPi', 'STN', 'SNr', 'SNc', 'VTA'};
-warning off;
-regions_id = [672, 1022, 381];
-
-% get all mice x thisDate x site combinations
-use_recs_full = strcmp(info_table.Use_, 'Yes');
-
-info_table = sortrows(info_table, 1); % make sure data is sorted by mouse
-unique_mice = unique(info_table.Mouse(use_recs_full), 'stable');
 
 %% Visualize AP chunks in ML x AP projection
 

@@ -54,7 +54,7 @@ end
 %     nanstd(task_data.psth(:,val_t_1),[],2);
 region_max = [1, 1, 1, 1, 1, 1, 1];
 region_smooth = [1, 1, 1, 1, 1, 1, 1];
-region_lims = [5, 2, 2, 1, 1, 1];
+region_lims = [1.5, 1.5, 1.5, 1, 1, 1];
 plot_regions = [1, 2, 3];
 
 
@@ -105,7 +105,7 @@ try
     % end
 
     train_image = (train_image - nanmean(train_image(:, val_t_1), 2)) ./ ...
-        nanstd(train_image(:, val_t_1), [], 2);
+        (nanstd(train_image(:, val_t_1), [], 2)+0.0001;
     [~, cell_idx] = sort(nanmean(train_image(:, val_t_2), 2));
 
     %go 1
