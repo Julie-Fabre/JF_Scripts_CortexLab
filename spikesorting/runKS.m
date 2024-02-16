@@ -1,23 +1,39 @@
 % JF_runKSandBombcell(animal, date, site, recording, rerunKS, rerunQM)
 
 rerunQM = 1;
+rerunKS = 1;
+
+JF_runKSandBombcell('JF115', '2024-02-15', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF115', '2024-02-15', 2, [],rerunKS,0)
+JF_runKSandBombcell('JF115', '2024-02-15', 3, [],rerunKS,0)%error
+
+JF_extract_sync;
 
 set(0,'DefaultFigureVisible','off')
 %% ongoing
 rerunKS = 1;
 %JF052, JF045, JF053, JF054
-JF_runKSandBombcell('JF045', '2021-06-16', 1, [],rerunKS,0)
-JF_runKSandBombcell('JF045', '2021-06-16', 2, [],rerunKS,0)
-JF_runKSandBombcell('JF045', '2021-06-16', 3, [],rerunKS,0)
-JF_runKSandBombcell('JF045', '2021-06-18', 1, [],rerunKS,0)
 
-JF_runKSandBombcell('JF045', '2021-08-31', 1, [],rerunKS,0)
-JF_runKSandBombcell('JF045', '2021-08-31', 2, [],rerunKS,0)
-JF_runKSandBombcell('JF045', '2021-08-31', 1, [],rerunKS,0)
-JF_runKSandBombcell('JF045', '2021-09-01', 1, [],rerunKS,0)
-
+JF_runKSandBombcell('JF052', '2021-08-31', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF052', '2021-08-31', 2, [],rerunKS,0)
+JF_runKSandBombcell('JF052', '2021-08-31', 3, [],rerunKS,0)
 JF_runKSandBombcell('JF052', '2021-09-01', 1, [],rerunKS,0)
-JF_runKSandBombcell('JF117', '2024-01-21', 2, [],rerunKS,0)
+
+JF_runKSandBombcell('JF053', '2021-09-27', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF053', '2021-09-27', 2, [],rerunKS,0)
+JF_runKSandBombcell('JF053', '2021-09-27', 3, [],rerunKS,0)
+JF_runKSandBombcell('JF053', '2021-09-27', 4, [],rerunKS,0)
+
+JF_runKSandBombcell('JF054', '2021-09-25', 1, [],rerunKS,0)%error
+JF_runKSandBombcell('JF054', '2021-09-25', 2, [],rerunKS,0)%error
+JF_runKSandBombcell('JF054', '2021-09-26', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF054', '2021-09-26', 2, [],rerunKS,0)
+JF_runKSandBombcell('JF054', '2021-09-26', 3, [],rerunKS,0)%error
+JF_runKSandBombcell('JF054', '2021-09-26', 4, [],rerunKS,0)
+JF_runKSandBombcell('JF054', '2021-09-26', 5, [],rerunKS,0)
+JF_runKSandBombcell('JF054', '2021-09-26', 6, [],rerunKS,0)
+
+%JF_runKSandBombcell('JF117', '2024-01-21', 2, [],rerunKS,0)
 
 JF_extract_sync;
 

@@ -15,7 +15,7 @@ loadVids = 0;
 for iExperimentType = 2 %1:2
     [expData, session_data, regions] = cl_loadPerStimulusData(load_type, iExperimentType, loadVids);
     save(['/home/julie/Dropbox/MATLAB/gogogo_data', num2str(iExperimentType), '.mat'], '-struct', 'expData', '-v7.3');
-end
+end%80:error
 
 close all;
 load_type = 'taskNoGo';
@@ -25,7 +25,7 @@ for iExperimentType = 2 %1:2
     save(['/home/julie/Dropbox/MATLAB/goNogo_data', num2str(iExperimentType), '.mat'], '-struct', 'expData', '-v7.3');
 end
 
-%% Fig 1: visual responses in naïve mouse are sparsely present in striatum, extremely rare in GPe/SNr
+%% Fig 1: visual responses in naïve mouse are sparsely present in striatum, more rare in GPe/SNr
 
 %% -Example cells visual
 
@@ -41,11 +41,16 @@ cl_plotExCell_psth('JF090', 2, 8, 3, 'stimOn_noMove', 1, ...
 cl_plotExCell_psth('JF090', 3, 8, 3, 'stimOn_noMove', 1, ...
     [-0.2, 0.6], 0.001, 1, 1, 'natImg')
 
-%% -Percentage cells visual
-
 %% -Population cells visual
+% redo 
+
+%% -Percentage cells visual
+% using peak/trough 
+
+
 
 %% -location plots
+%redo with peak 
 pcells = false;
 load_type = 'naive';
 cl_location_PSTH_slice;
@@ -53,12 +58,16 @@ cl_location_PSTH_slice;
 pcells = true;
 cl_location_PSTH_slice;
 
+%% allen atlas connectivity
+
 %%  Fig 2: naïve striatal visual responses are selective to stimulus features
 %% - Example cells sp freq.
 %% - Example cells ori.
 %% - Example cells location
 %% - Example cells nat images
 %% - response to stimuli (ordered)
+cl_selectivity_simple;
+
 %% - selectivity index 
 regions = {'CP', 'GPe', 'SNr'};
 cl_selectivity;
@@ -74,6 +83,7 @@ cl_selectivity;
 pcells=false;
 load_type='taskGo';
 cl_location_PSTH_slice;
+
 pcells=true;
 cl_location_PSTH_slice;
 
@@ -101,6 +111,12 @@ cl_stimId_gogogo;
 cl_plot_PSTHs(1, 0); %contra
 cl_plot_PSTHs(0, 1); %center
 
+
+pcells=false;
+load_type='taskNoGo';
+cl_location_PSTH_slice;
+pcells=true;
+cl_location_PSTH_slice;
 %% ~~ Suppl.: motion, movement ect. ; cell types ; delineating subregions ~~
 
 %% Suppl: histo

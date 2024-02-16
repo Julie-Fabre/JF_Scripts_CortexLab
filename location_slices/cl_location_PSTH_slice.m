@@ -1,10 +1,10 @@
 
 %% cl_locationPSTH
 if contains(load_type, 'naive')
-    passive_data = load('/home/julie/Dropbox/MATLAB/naive_data1.mat');
+    passive_data = load('/home/julie/Dropbox/MATLAB/naive_data1_inclOldHisto.mat');
     index = 1;
 elseif contains(load_type, 'taskGo')
-    passive_data = load('/home/julie/Dropbox/MATLAB/gogogo_data2_nosnr106.mat');
+    passive_data = load('/home/julie/Dropbox/MATLAB/gogogo_data2.mat');
     index = 2;
 elseif contains(load_type, 'taskNoGo')
     passive_data = load('/home/julie/Dropbox/MATLAB/goNogo_data2.mat');
@@ -25,11 +25,11 @@ passive_data.psth_average = squeeze(nanmean(passive_data.psth{index}(:, 3, :, :)
 %   ( nanstd(passive_data.psth_average(:, 1:200), [], 2)  +0.001); -> need
 %   to zscore all neurons in bin together. 
 dFR_psth = (passive_data.psth_average(:, 250:450) - nanmean(passive_data.psth_average(:, 1:200), 2)) ./ ...
-    (nanmean(passive_data.psth_average(:, 1:200), 2)  +0.001);
+    (nanmean(passive_data.psth_average(:, 1:200), 2)  +1);
 if pcells 
     thisCmap_limits = [-100, 100];
 else
-    thisCmap_limits = [-65, 65];
+    thisCmap_limits = [-90, 90];
 end
 theseColors = {rgb('DeepSkyBlue'); rgb('SeaGreen'); rgb('DarkOrange'); rgb('Crimson'); rgb('Hotpink'); rgb('Black'); rgb('Brown')};
 
@@ -218,7 +218,16 @@ for iRegion = 1:size(regions, 2)
                         pcells_2d = sum(passive_data.pvalue_shuffled_005{index}(theseNeurons))/sum(theseNeurons);
                         binnedArrayPixel(iBinX, iBinY) = pcells_2d;
                     else
-                        mean_2d = nanmean(abs(dFR_psth(theseNeurons, :)), 2);
+                        % mean_2d = (nanmean(nanmean(passive_data.psth_average(theseNeurons, 260:360))).*100 - ...
+                        %     nanmean(nanmean(passive_data.psth_average(theseNeurons, 1:100))).*100) ./...
+                        %      (nanmean(nanmean(passive_data.psth_average(theseNeurons, 1:100))).*100);%nanmean(abs(dFR_psth(theseNeurons, :)), 2);
+
+                        mean_2d = nanmean(abs((nanmean(passive_data.psth_average(theseNeurons, 260:360),2).*100 - ...
+                            nanmean(passive_data.psth_average(theseNeurons, 1:100),2).*100))) ./...
+                            (nanmean(nanmean(passive_data.psth_average(theseNeurons, 1:100))).*100);
+
+                   %   mean_2d = (abs(nanmean(passive_data.psth_average(theseNeurons, 260:360))).*100 -  nanmean(passive_data.psth_average(theseNeurons, 1:100))).*100)) ./...
+                    %     (nanmean(nanmean(passive_data.psth_average(theseNeurons, 1:100))).*100);%nanmean(abs(dFR_psth(theseNeurons, :)), 2);
                         binnedArrayPixel(iBinX, iBinY) = nanmean(mean_2d(~isinf(mean_2d)));
                     end
 
@@ -234,8 +243,8 @@ for iRegion = 1:size(regions, 2)
         end
 
         % smooth data
-        %binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, 2, 2);
-        binnedArrayPixelSmooth = binnedArrayPixel;
+        binnedArrayPixelSmooth = smooth2a(binnedArrayPixel, 2, 2);
+      %  binnedArrayPixelSmooth = binnedArrayPixel;
 
         % remove any data points outside of the ROI
          clearvars regionLocation

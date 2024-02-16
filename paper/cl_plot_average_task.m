@@ -221,7 +221,7 @@ try
     %c.Label.String = (region_clim_string{iRegion});
     colormap(brewermap([], '*BrBG'));
 
-    title('No go')
+    title('Stim 3')
     makepretty;
     clim([-region_lims(iRegion), region_lims(iRegion)])
 

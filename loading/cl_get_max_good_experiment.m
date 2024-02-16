@@ -8,9 +8,9 @@ for iExperiment = 1:size(exp_idx, 2)
 
     [goodExpInfo_name, goodExpInfo_exists] = cl_cortexlab_filename(animal, thisDate, experiment, 'goodExpInfo', site, recording);
 
-    %if goodExpInfo_exists
-     %   load(goodExpInfo_name)
-    %else
+    if goodExpInfo_exists
+        load(goodExpInfo_name)
+    else
         goodExpInfo = struct;
 
         load_parts.ephys = true;
@@ -58,7 +58,7 @@ for iExperiment = 1:size(exp_idx, 2)
         save([expInfo_name filesep, num2str(experiment), ...
             filesep, ['goodExpInfo_', num2str(site), '_' num2str(recording) '.mat']], 'goodExpInfo')
 
-    %end
+    end
     
     % select bext experiment: correct protocol, no errors (or at least no
     % ephys ones) and max. n trials.

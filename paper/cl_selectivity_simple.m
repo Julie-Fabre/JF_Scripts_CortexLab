@@ -57,24 +57,15 @@ datasetlocations = {'/home/julie/Dropbox/MATLAB/naive_data1.mat', ...%1 gratings
 conditionsIndex = [1, 1, 2, 3, 6, 4, 5, 2, 2, 4, 5, 2, 2];
 
 selectivity_index = cell(13,3);
-selectivity_anova= cell(13,3);
-selectivity_simple= cell(13,3);
 
-for iDataset = 1:5%13
+for iDataset = 1:13
 
     % for each condition, measure
     passive_data_per_cond = load(datasetlocations{iDataset});
     if iDataset == 8 || iDataset == 9 || iDataset == 12 || iDataset == 13
             passive_data_per_cond.psth_conditions_all = passive_data_per_cond.psth_conditions_all(:,2);
     end
-    keep passive_data_per_cond regions conditionsIndex iDataset datasetlocations selectivity_index selectivity_anova selectivity_simple
-
-                nonEmptyRecs = find(~cellfun(@isempty, passive_data_per_cond.psth_conditions_all));
-            passive_data_per_cond.animal_thisDate_site_shank(isnan(passive_data_per_cond.animal_thisDate_site_shank(:, 4)), 4) = 0;
-
-            unique_recs = unique(passive_data_per_cond.animal_thisDate_site_shank, 'rows');
-            numCells_cum = cumsum(cellfun(@(x) size(x,1), passive_data_per_cond.av_per_trial));
-
+    keep passive_data_per_cond regions conditionsIndex iDataset datasetlocations selectivity_index
     n_conditions = 1;
     %conditionsIndex = 6;%[1,2,6];
     for iRegion = [1, 2, 3]
@@ -105,9 +96,6 @@ for iDataset = 1:5%13
 
             thisUnit = curr_units(iUnit);
             [~, iRec]= ismember(passive_data_per_cond.animal_thisDate_site_shank(thisUnit,:), unique_recs, 'rows');
-         thisRec = nonEmptyRecs(iRec);
-
-
             try
                 conditions = passive_data_per_cond.psth_conditions_all{nonEmptyRecs(iRec)};
             catch
@@ -120,99 +108,80 @@ for iDataset = 1:5%13
             if iDataset == 1 % gratings
                 conditions = conditions(:,2);
                 use_conditions = unique(conditions);
-                [conds, condType] = ismember(conditions, use_conditions);
-                trial_types = passive_data_per_cond.trial_types{thisRec}(:,2);
+                [~, condType] = ismember(conditions, use_conditions);
             elseif iDataset == 2 % orientations
                  conditions = conditions(:,3);
                 use_conditions = unique(conditions);
-                [conds, condType] = ismember(conditions, use_conditions);
-                trial_types = passive_data_per_cond.trial_types{thisRec}(:,3);
+                [~, condType] = ismember(conditions, use_conditions);
             elseif iDataset == 3 % locations
                 conditions = conditions(:,1);
                 use_conditions = unique(conditions);
-                [conds, condType] = ismember(conditions, use_conditions);
-                trial_types = passive_data_per_cond.trial_types{thisRec}(:,1);
+                [~, condType] = ismember(conditions, use_conditions);
             elseif iDataset == 4 % nat images 
                 conditions = conditions(:,1);
                 use_conditions = unique(conditions);
-                [conds, condType] = ismember(conditions, use_conditions);
-                trial_types = passive_data_per_cond.trial_types{thisRec}(:,1);
+                [~, condType] = ismember(conditions, use_conditions);
             elseif iDataset == 5 % nat images
                 conditions = conditions(:,1);
                 use_conditions = unique(conditions);
-                [conds, condType] = ismember(conditions, use_conditions);
-                trial_types = passive_data_per_cond.trial_types{ithisRec}(:,1);
+                [~, condType] = ismember(conditions, use_conditions);
             elseif iDataset == 6 % cw stims, stim 1 v 2
                 %conditions = conditions(:,1);
                 use_conditions = conditions(ismember(conditions(:,1), [1,3]) & conditions(:,2)==-90,:);
-                %trial_types = passive_data_per_cond.trial_types{iRec}(ismember(passive_data_per_cond.trial_types{iRec}(:,2), -90),1);
-                [conds, condType] = ismember(conditions, use_conditions, 'rows');
+                [~, condType] = ismember(conditions, use_conditions, 'rows');
             elseif iDataset == 7 % cw stims, stim 1 v 2
                 %conditions = conditions(:,1);
                 if sum(conditions(:,1) == 12) > 0
                     use_conditions = conditions(ismember(conditions(:,1), [4,12]) & conditions(:,2)==-90,:);
-                    %trial_types = passive_data_per_cond.trial_types{iRec}(ismember(passive_data_per_cond.trial_types{iRec}(:,2), -90),1);
                 else
                     use_conditions = conditions(ismember(conditions(:,1), [1,3]) & conditions(:,2)==-90,:);
-                    %trial_types = passive_data_per_cond.trial_types{iRec}(ismember(passive_data_per_cond.trial_types{iRec}(:,2), -90),1);
                 end
-                [conds, condType] = ismember(conditions, use_conditions, 'rows');
+                [~, condType] = ismember(conditions, use_conditions, 'rows');
             elseif iDataset == 8 || iDataset == 9 % cw stims in tasks, stim 1 v 2
                 if sum(conditions(:,1) == 12) > 0
                     try
                     use_conditions = conditions(ismember(conditions(:,1), [4,12]) & conditions(:,2)==-90,:);
-                    %trial_types = passive_data_per_cond.trial_types{iRec}(ismember(passive_data_per_cond.trial_types{iRec}(:,2), -90),1);
                     catch
                         keyboard
                     end
                 else
                     try
                     use_conditions = conditions(ismember(conditions(:,1), [1,3]) & conditions(:,2)==-90,:);
-                    %trial_types = passive_data_per_cond.trial_types{iRec}(ismember(passive_data_per_cond.trial_types{iRec}(:,2), -90),1);
                     catch
                         keyboard
                     end
                 end
-                [conds, condType] = ismember(conditions, use_conditions, 'rows');
+                [~, condType] = ismember(conditions, use_conditions, 'rows');
              elseif iDataset == 10 % cw stims, stim 1 v 2
                 %conditions = conditions(:,1);
                 use_conditions = conditions(ismember(conditions(:,1), [3,2]) & conditions(:,2)==-90,:);
-                [conds, condType] = ismember(conditions, use_conditions, 'rows');
-                %trial_types = passive_data_per_cond.trial_types{iRec}(ismember(passive_data_per_cond.trial_types{iRec}(:,2), -90),1);
+                [~, condType] = ismember(conditions, use_conditions, 'rows');
              elseif iDataset == 11 % cw stims, stim 1 v 2
                 %conditions = conditions(:,1);
                 if sum(conditions(:,1) == 12) > 0
                     use_conditions = conditions(ismember(conditions(:,1), [12,6]) & conditions(:,2)==-90,:);
-                    %trial_types = passive_data_per_cond.trial_types{iRec}(ismember(passive_data_per_cond.trial_types{iRec}(:,2), -90),1);
                 else
                     use_conditions = conditions(ismember(conditions(:,1), [3,2]) & conditions(:,2)==-90,:);
-                    %trial_types = passive_data_per_cond.trial_types{iRec}(ismember(passive_data_per_cond.trial_types{iRec}(:,2), -90),1);
                 end
-                [conds, condType] = ismember(conditions, use_conditions, 'rows');
+                [~, condType] = ismember(conditions, use_conditions, 'rows');
             elseif iDataset == 12 || iDataset == 13 % cw stims in tasks, stim 1 v 2
                 if sum(conditions(:,1) == 12) > 0
                     try
                     use_conditions = conditions(ismember(conditions(:,1), [12,6]) & conditions(:,2)==-90,:);
-                    %trial_types = passive_data_per_cond.trial_types{iRec}(ismember(passive_data_per_cond.trial_types{iRec}(:,2), -90),1);
                     catch
                         keyboard
                     end
                 else
                     try
                     use_conditions = conditions(ismember(conditions(:,1), [3,2]) & conditions(:,2)==-90,:);
-                    %trial_types = passive_data_per_cond.trial_types{iRec}(ismember(passive_data_per_cond.trial_types{iRec}(:,2), -90),1);
                     catch
                         keyboard
                     end
                 end
-                [conds, condType] = ismember(conditions, use_conditions, 'rows');
+                [~, condType] = ismember(conditions, use_conditions, 'rows');
             end
+
             
-trial_types = trial_types(passive_data_per_cond.no_move_trials{iRec});
-
-
-            anova_data = [];
-            anova_group = [];
             for iCond = 1:size(use_conditions,1)
                 baseline_per_cond(iCond) = squeeze(nanmean(nanmean(passive_data_per_cond.psth{conditionsIndex(iDataset)}(thisUnit,...
                     1, condType == iCond, 1:200), 3), 4)) .* 100;
@@ -231,19 +200,8 @@ trial_types = trial_types(passive_data_per_cond.no_move_trials{iRec});
                     2, condType == iCond, 1:200), 3).*100, [], 4));%./sqrt(size(passive_data_per_cond.psth{conditionsIndex(iDataset)}));
                 baseline_sub_average_per_cond_cv(iCond) = squeeze(nanmean(nanmean(passive_data_per_cond.psth{conditionsIndex(iDataset)}(thisUnit,...
                     2, condType == iCond, 250:450), 3), 4)) .* 100;
-
-                a_d = passive_data_per_cond.av_per_trial{thisRec}(thisUnit-(numCells_cum(thisRec-1)),trial_types==use_conditions(iCond));
-                %passive_data_per_cond.trial_types{iRec}(:)
-                anova_data = [anova_data,  a_d];
-                anova_group = [anova_group; ones(size(a_d,2),1).*iCond];
             end
-
-            [p, tbl, stats] = anova1(anova_data, anova_group, 'off'); % 'off' to suppress figure output
-
-            selectivity_anova{iDataset, iRegion}(iUnit) = p;
             
-            selectivity_simple{iDataset, iRegion}(iUnit, iCond) = baseline_sub_average_per_cond_cv;
-
             selectivity_index{iDataset, iRegion}(iUnit) = abs(...
                 (baseline_sub_average_per_cond_cv(max_half_trials) - ...
                 nanmean(baseline_sub_average_per_cond_cv))./ ...
@@ -272,7 +230,6 @@ end
 cl_plottingSettings;
 
 %% naive 
-% selectivity index
 figure(3);
 clf;
 datatype_sets = [1, 1; 2, 2; 3, 3; 4, 5; 6, 7; 8, 8; 9, 9; 6, 7; 8, 8; 9, 9];
@@ -326,7 +283,6 @@ for iDatatype = 1:4
     % [c, m, h, gnames] = multcompare(stats);
 end
 
-% selectivity simple 
 
 %% task stimuli - region v region
 figure(4);
