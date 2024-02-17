@@ -72,7 +72,7 @@ cp_snr_ProjectionData.normalized_projection_volume = [];
 cp_snr_ProjectionData.projection_intensity = [];
 cp_snr_ProjectionData.injection_area = [];
 
-for iInjection = size(injectionAreas, 2)
+for iInjection = 1:size(injectionAreas, 2)
 
 
     if ~exist([dropboxPath, 'MATLAB/onPaths/JF_Scripts_CortexLab/queryAllenAtlas/', injectionAreas{iInjection}, '.mat'], 'file')
@@ -87,9 +87,9 @@ for iInjection = size(injectionAreas, 2)
             proj_temp = getProjectionDataFromExperiment(expIDs(iExpID));
             proj = [proj, proj_temp{1, 1}];
         end
-        save([dropboxPath, 'MATLAB/onPaths/JF_Scripts_CortexLab/queryAllenAtlas/', injectionAreas{iInjection}, '.mat'], 'proj')
+        save([dropboxPath, 'MATLAB/onPaths/JF_Scripts_CortexLab/DATA/queryAllenAtlas/', injectionAreas{iInjection}, '.mat'], 'proj')
     else
-        load([dropboxPath, 'MATLAB/onPaths/JF_Scripts_CortexLab/queryAllenAtlas/', injectionAreas{iInjection}, '.mat'])
+        load([dropboxPath, 'MATLAB/onPaths/JF_Scripts_CortexLab/DATA/queryAllenAtlas/', injectionAreas{iInjection}, '.mat'])
     end
 
     if strcmp(injectionAreas(iInjection), 'CP')
@@ -133,9 +133,9 @@ for iInjection = size(injectionAreas, 2)
 
 
 end
-%save([dropboxPath, '/MATLAB/onPaths/JF_Scripts_CortexLab/queryAllenAtlas/VIS_Str.mat'], 'visProjectionData')
-save([dropboxPath, '/MATLAB/onPaths/JF_Scripts_CortexLab/queryAllenAtlas/Str_gpe_medial.mat'], 'cp_gpe_ProjectionData')
-save([dropboxPath, '/MATLAB/onPaths/JF_Scripts_CortexLab/queryAllenAtlas/Str_snr_medial.mat'], 'cp_snr_ProjectionData')
+save([dropboxPath, '/MATLAB/onPaths/JF_Scripts_CortexLab/queryAllenAtlas/DATA/VIS_Str.mat'], 'visProjectionData')
+save([dropboxPath, '/MATLAB/onPaths/JF_Scripts_CortexLab/queryAllenAtlas/DATA/Str_gpe_medial.mat'], 'cp_gpe_ProjectionData')
+save([dropboxPath, '/MATLAB/onPaths/JF_Scripts_CortexLab/queryAllenAtlas/DATA/Str_snr_medial.mat'], 'cp_snr_ProjectionData')
 %% plot data 3D - striatum 
 curr_plot_structure_idx = find(contains(st.name, 'audoputamen'));
 slice_spacing = 10;
@@ -239,7 +239,7 @@ set(gcf, 'Color', 'w')
 OptionZ.FrameRate = 25;
 OptionZ.Duration = 15;
 OptionZ.Periodic = true;
-CaptureFigVid([-20, 10; -110, 10; -190, 80; -290, 10; -380, 10], 'vid_vis_to_str', OptionZ)
+CaptureFigVid([-20, 10; -110, 10; -190, 80; -290, 10; -380, 10], [dropboxPath, '/MATLAB/onPaths/JF_Scripts_CortexLab/queryAllenAtlas/DATA/vid_vis_to_str'], OptionZ)
 
 %% plot data 3D - GPe
 figure();
@@ -343,7 +343,7 @@ set(gcf, 'Color', 'w')
 OptionZ.FrameRate = 25;
 OptionZ.Duration = 15;
 OptionZ.Periodic = true;
-CaptureFigVid([-20, 10; -110, 10; -190, 80; -290, 10; -380, 10], 'vid_str_to_gpe', OptionZ)
+CaptureFigVid([-20, 10; -110, 10; -190, 80; -290, 10; -380, 10], [dropboxPath, '/MATLAB/onPaths/JF_Scripts_CortexLab/queryAllenAtlas/DATA/vid_str_to_gpe'], OptionZ)
 
 %% plot data 3D -SNr
 
@@ -449,7 +449,7 @@ set(gcf, 'Color', 'w')
 OptionZ.FrameRate = 25;
 OptionZ.Duration = 15;
 OptionZ.Periodic = true;
-CaptureFigVid([-20, 10; -110, 10; -190, 80; -290, 10; -380, 10], 'vid_str_to_snr', OptionZ)
+CaptureFigVid([-20, 10; -110, 10; -190, 80; -290, 10; -380, 10], [dropboxPath, '/MATLAB/onPaths/JF_Scripts_CortexLab/queryAllenAtlas/DATA/vid_str_to_snr'], OptionZ)
 
 
 figure();
