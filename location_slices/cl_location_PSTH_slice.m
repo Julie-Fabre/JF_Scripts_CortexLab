@@ -27,9 +27,9 @@ passive_data.psth_average = squeeze(nanmean(passive_data.psth{index}(:, 3, :, :)
 dFR_psth = (passive_data.psth_average(:, 250:450) - nanmean(passive_data.psth_average(:, 1:200), 2)) ./ ...
     (nanmean(passive_data.psth_average(:, 1:200), 2)  +1);
 if pcells 
-    thisCmap_limits = [-50, 50];
+    thisCmap_limits = [-100, 100];
 else
-    thisCmap_limits = [-65, 65];
+    thisCmap_limits = [-90, 90];
 end
 theseColors = {rgb('DeepSkyBlue'); rgb('SeaGreen'); rgb('DarkOrange'); rgb('Crimson'); rgb('Hotpink'); rgb('Black'); rgb('Brown')};
 
@@ -268,7 +268,7 @@ for iRegion = 1:size(regions, 2)
         figure(2);
         subplot(nChunks, size(regions, 2), iRegion+(size(regions, 2) * (nChunks - iChunk)))
         if pcells
-            binnedArrayPixelSmooth(isIN == 0) = mean(thisCmap_limits);
+            binnedArrayPixelSmooth(isIN == 0) = min(thisCmap_limits);
         else
             binnedArrayPixelSmooth(isIN == 0) = mean(thisCmap_limits);
         end
@@ -316,16 +316,6 @@ for iRegion = 1:size(regions, 2)
         set(gca, 'color', [0.5, 0.5, 0.5]);
         xlim([projection_view_bins{iChunk}{1}(1), projection_view_bins{iChunk}{1}(end)])
         ylim([projection_view_bins{iChunk}{2}(1), projection_view_bins{iChunk}{2}(end)])
-
-        % Remove axes
-axis off;
-
-% Alternatively, to remove only specific components:
-set(gca, 'XTick', [], 'YTick', []); % Remove tick marks
- xlabel(''); % Remove x-axis label
- ylabel(''); % Remove y-axis label
-% title(''); % Remove title
-
     end
     keep passive_data regions thisCmap_limits st av regionResolution structure_alpha theseColors dFR_psth iRegion bregma nChunks chunks_region pcells index load_type
 end
