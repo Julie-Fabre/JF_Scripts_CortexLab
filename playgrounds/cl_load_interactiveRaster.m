@@ -13,11 +13,11 @@ experiments = experiments([experiments.ephys]);
 
 %% Load data from experiment
 
-curr_day = 2; % (set which day to use)
+curr_day = 3; % (set which day to use)
 thisDate = experiments(curr_day).thisDate; % date
 
 
-site = 2; %1,1; 2,4; 3,7
+site = 1; %1,1; 2,4; 3,7
 recording = [];
 
 experiment = experiments(curr_day).experiment(2); %experiments(curr_day).experiment(1);%find(n_trials == max(n_trials));

@@ -43,10 +43,11 @@ cl_plotExCell_psth('JF090', 3, 8, 3, 'stimOn_noMove', 1, ...
 
 %% -Population cells visual
 % redo 
+cl_population_PSTH;
 
 %% -Percentage cells visual
 % using peak/trough 
-
+cl_percentage_cells;
 
 
 %% -location plots
@@ -65,10 +66,8 @@ cl_location_PSTH_slice;
 %% - Example cells ori.
 %% - Example cells location
 %% - Example cells nat images
-%% - response to stimuli (ordered)
-cl_selectivity_simple;
 
-%% - selectivity index 
+%% - selectivity index (simple and full)
 regions = {'CP', 'GPe', 'SNr'};
 cl_selectivity;
 

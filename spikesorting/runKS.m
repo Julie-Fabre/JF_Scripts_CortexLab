@@ -3,9 +3,13 @@
 rerunQM = 1;
 rerunKS = 1;
 
-JF_runKSandBombcell('JF115', '2024-02-15', 1, [],rerunKS,0)
-JF_runKSandBombcell('JF115', '2024-02-15', 2, [],rerunKS,0)
 JF_runKSandBombcell('JF115', '2024-02-15', 3, [],rerunKS,0)%error
+
+
+JF_runKSandBombcell('JF115', '2024-02-16', 1, [],rerunKS,0)
+JF_runKSandBombcell('JF115', '2024-02-16', 2, [],rerunKS,0)
+JF_runKSandBombcell('JF115', '2024-02-16', 3, [],rerunKS,0)
+
 
 JF_extract_sync;
 
