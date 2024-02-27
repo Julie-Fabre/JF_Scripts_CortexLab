@@ -59,6 +59,7 @@ server2 = zaruPath;
 server3 = znasPath;
 server4 = zserverPath;
 server5 = localExtHdPath;
+server6 = zortexPath;
 % Check that servers are accessible (login needed on restart)
 % if ~exist([server1])
 %     error('Zserver not available');
@@ -77,7 +78,7 @@ server_location{end+1} = [server2];
 server_location{end+1} = [server1];
 server_location{end+1} = [server4];
 server_location{end+1} = [server5];
-
+server_location{end+1} = [server6];
 
 switch file
     case 'goodExpInfo'

@@ -15,7 +15,7 @@ for iTask = 1:3
     end
 cl_plot_average_task(task_data, idx, contra, center,  keepUnits, keepVis)
 
-%cl_plot_average_task_diff(task_data, idx, contra, center,  keepUnits, keepVis)
+cl_plot_average_task_diff(task_data, idx, contra, center,  keepUnits, keepVis)
 
 end
 end

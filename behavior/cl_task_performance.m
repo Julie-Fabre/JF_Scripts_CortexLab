@@ -610,6 +610,8 @@ for iAnimal = 1:size(animalsAll, 2)
                 bhv.stim_rxn_time(curr_day) = stim_rxn_time;
                 bhv.stim_rxn_timeSEM(curr_day) = stim_rxn_timeSEM;
                 bhv.protocol{curr_day} = expDefName;
+                bhv.duration(curr_day) = block.duration;
+                %bhv.expDuration = stim;
                 %stims
                 catch
                 end
@@ -801,6 +803,8 @@ for iAnimal = 1:size(animalsAll, 2)
     bhvOut(iAnimal).stim_to_move = bhv.stim_to_move;
     bhvOut(iAnimal).stim_to_moveMean = bhv.stim_to_moveMean;
     bhvOut(iAnimal).protocol = bhv.protocol; 
+    bhvOut(iAnimal).water_amount = bhv.water_amount;
+    bhvOut(iAnimal).duration = bhv.duration;
 
     if length(noGoDay) >= 1
         bhvOut(iAnimal).movingFracGo1(noGoDay, :) = bhv.movingFracGo1(noGoDay, :);

@@ -1,7 +1,10 @@
 
 %% cl_locationPSTH
-if contains(load_type, 'naive')
-    passive_data = load('/home/julie/Dropbox/MATLAB/naive_data1_inclOldHisto.mat');
+if contains(load_type, 'taskNaive')
+    passive_data = load('/home/julie/Dropbox/MATLAB/naive_data5.mat');
+    index = 5;
+elseif contains(load_type, 'naive')
+    passive_data = load('/home/julie/Dropbox/MATLAB/naive_data1.mat');
     index = 1;
 elseif contains(load_type, 'taskGo')
     passive_data = load('/home/julie/Dropbox/MATLAB/gogogo_data2.mat');
@@ -9,6 +12,7 @@ elseif contains(load_type, 'taskGo')
 elseif contains(load_type, 'taskNoGo')
     passive_data = load('/home/julie/Dropbox/MATLAB/goNogo_data2.mat');
     index = 2;
+
 end
 
 regions = {'CP', 'GPe', 'SNr'};
@@ -24,10 +28,20 @@ passive_data.psth_average = squeeze(nanmean(passive_data.psth{index}(:, 3, :, :)
 %zscore_psth = (passive_data.psth_average(:, 250:450) - nanmean(passive_data.psth_average(:, 1:200), 2)) ./ ...
 %   ( nanstd(passive_data.psth_average(:, 1:200), [], 2)  +0.001); -> need
 %   to zscore all neurons in bin together. 
-dFR_psth = (passive_data.psth_average(:, 250:450) - nanmean(passive_data.psth_average(:, 1:200), 2)) ./ ...
-    (nanmean(passive_data.psth_average(:, 1:200), 2)  +1);
+
+
+% dFR_psth = (passive_data.psth_average(:, 250:450) - nanmean(passive_data.psth_average(:, 1:200), 2)) ./ ...
+%     (nanmean(passive_data.psth_average(:, 1:200), 2)  +1);
+
+dFR_psth = (squeeze(passive_data.psth{index}(:, 3, 1, 250:450)) - nanmean(squeeze(passive_data.psth{index}(:, 3, 1, 1:200)), 2)) ./ ...
+    (nanmean(squeeze(passive_data.psth{index}(:, 3, 1, 1:200)), 2)  +0.001);
+
+average_across_images = squeeze(nanmean(passive_data.psth{index}(:, 3, 1, :), 3));
+zscore_psth = (average_across_images - nanmean(average_across_images(:, 1:200), 2)) ./ ...
+    (nanstd(average_across_images(:, 1:200), [], 2) + 0.001);
+
 if pcells 
-    thisCmap_limits = [-100, 100];
+    thisCmap_limits = [-60, 60];
 else
     thisCmap_limits = [-90, 90];
 end
@@ -92,7 +106,7 @@ for iRegion = 1:size(regions, 2)
         thisChunk_AP = regionLocation(projection_views(1, 1), :);
         thisChunk_DV = regionLocation(projection_views(1, 2), :);
 
-        subplot(nChunks, size(regions, 2), iRegion+(size(regions, 2) * (nChunks - iChunk)))
+        subplot(size(regions, 2), nChunks, (iRegion - 1).*nChunks + iChunk)
         boundary_projection{iChunk} = boundary(thisChunk_AP', ...
             thisChunk_DV', 0);
 
@@ -152,7 +166,7 @@ for iRegion = 1:size(regions, 2)
         thisChunk_AP = regionLocation(projection_views(1, 1), :);
         thisChunk_DV = regionLocation(projection_views(1, 2), :);
 
-        subplot(nChunks, size(regions, 2), iRegion+(size(regions, 2) * (nChunks - iChunk)))
+       subplot(size(regions, 2), nChunks, (iRegion - 1).*nChunks + iChunk)
         boundary_projection{iChunk} = boundary(thisChunk_AP', ...
             thisChunk_DV', 0);
 
@@ -202,7 +216,7 @@ for iRegion = 1:size(regions, 2)
                     theseLocationsBregmaAbs(:,2) >= round(chunks_region(iRegion, iChunk)) &...
                     theseLocationsBregmaAbs(:,2) < round(chunks_region(iRegion, iChunk+1))&...
                     passive_data.unit_area == iRegion &...
-                    (passive_data.unitType' ==1);% | passive_data.unitType' ==2);
+                    (passive_data.unitType' ==1) ;% | passive_data.unitType' ==2);
                 else
                     theseNeurons = binX == iBinX & binY == iBinY &...
                     theseLocationsBregmaAbs(:,2) >= round(chunks_region(iRegion, iChunk)) &...
@@ -215,7 +229,10 @@ for iRegion = 1:size(regions, 2)
                 if sum(theseNeurons) > 0
                     
                     if pcells
-                        pcells_2d = sum(passive_data.pvalue_shuffled_005{index}(theseNeurons))/sum(theseNeurons);
+                        pcells_2d = sum( ...
+                             abs(nanmean(zscore_psth(theseNeurons, 250:350), 2))' > 0.15)/sum(theseNeurons);
+
+                      %      pcells_2d = sum(passive_data.pvalue_shuffled_005{index}(theseNeurons) )/sum(theseNeurons);
                         binnedArrayPixel(iBinX, iBinY) = pcells_2d;
                     else
                         % mean_2d = (nanmean(nanmean(passive_data.psth_average(theseNeurons, 260:360))).*100 - ...
@@ -225,6 +242,7 @@ for iRegion = 1:size(regions, 2)
                         mean_2d = nanmean(abs((nanmean(passive_data.psth_average(theseNeurons, 260:360),2).*100 - ...
                             nanmean(passive_data.psth_average(theseNeurons, 1:100),2).*100))) ./...
                             (nanmean(nanmean(passive_data.psth_average(theseNeurons, 1:100))).*100);
+                        
 
                    %   mean_2d = (abs(nanmean(passive_data.psth_average(theseNeurons, 260:360))).*100 -  nanmean(passive_data.psth_average(theseNeurons, 1:100))).*100)) ./...
                     %     (nanmean(nanmean(passive_data.psth_average(theseNeurons, 1:100))).*100);%nanmean(abs(dFR_psth(theseNeurons, :)), 2);
@@ -266,12 +284,12 @@ for iRegion = 1:size(regions, 2)
         end
 
         figure(2);
-        subplot(nChunks, size(regions, 2), iRegion+(size(regions, 2) * (nChunks - iChunk)))
-        if pcells
-            binnedArrayPixelSmooth(isIN == 0) = min(thisCmap_limits);
-        else
+        subplot(size(regions, 2), nChunks, (iRegion - 1).*nChunks + iChunk)
+        %if pcells
             binnedArrayPixelSmooth(isIN == 0) = mean(thisCmap_limits);
-        end
+        %else
+        %    binnedArrayPixelSmooth(isIN == 0) = mean(thisCmap_limits);
+        %end
         ax = gca;
         ax.YColor = 'w'; % Red
         ax.XColor = 'w'; % Red
@@ -316,7 +334,17 @@ for iRegion = 1:size(regions, 2)
         set(gca, 'color', [0.5, 0.5, 0.5]);
         xlim([projection_view_bins{iChunk}{1}(1), projection_view_bins{iChunk}{1}(end)])
         ylim([projection_view_bins{iChunk}{2}(1), projection_view_bins{iChunk}{2}(end)])
-    end
-    keep passive_data regions thisCmap_limits st av regionResolution structure_alpha theseColors dFR_psth iRegion bregma nChunks chunks_region pcells index load_type
-end
 
+        axis off;
+
+% Alternatively, to remove only specific components:
+set(gca, 'XTick', [], 'YTick', []); % Remove tick marks
+xlabel(''); % Remove x-axis label
+ylabel(''); % Remove y-axis label
+% title(''); % Remove title
+
+    end
+    
+    keep passive_data regions thisCmap_limits st av regionResolution structure_alpha theseColors dFR_psth iRegion bregma nChunks chunks_region pcells index load_type zscore_psth
+end
+prettify_plot

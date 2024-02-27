@@ -46,6 +46,7 @@ elseif contains(align_type, 'stimOn')
     align_group = trial_conditions(:, group_type);
 end
 
+if ~isnan(curr_shank)
 % rename and adjust for shank # 
 theseChannelPositions = [(curr_shank-1) * 250, (curr_shank-1)*250 + 32];
 theseChannels = ismember(channel_positions(:,1), theseChannelPositions);
@@ -58,6 +59,7 @@ good_templates_idx = unique(spike_templates);
 new_spike_idx = nan(max(spike_templates), 1);
 new_spike_idx(good_templates_idx) = 1:length(good_templates_idx);
 spike_templates = new_spike_idx(spike_templates);
+end
 
 % get raster + psth
 [curr_psth, ~, t, raster_x, raster_y, raster_group_id, psth_group_id] = cl_raster_psth(spike_templates, spike_times_timeline, ...

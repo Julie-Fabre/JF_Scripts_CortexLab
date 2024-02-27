@@ -62,7 +62,7 @@ selectivity_simple_cumsum= cell(13,3);
 selectivity_simple= cell(13,3);
 selectivity_index_cumsum = cell(13,3);
 
-for iDataset = 1:5%13
+for iDataset = 1:13
 
     % for each condition, measure
     passive_data_per_cond = load(datasetlocations{iDataset});
@@ -150,37 +150,42 @@ numCells_cum = [0,numCells_cum ];
                 use_conditions = conditions(ismember(conditions(:,1), [1,3]) & conditions(:,2)==-90,:);
                 %trial_types = passive_data_per_cond.trial_types{iRec}(ismember(passive_data_per_cond.trial_types{iRec}(:,2), -90),1);
                 [conds, condType] = ismember(conditions, use_conditions, 'rows');
+                trial_types = passive_data_per_cond.trial_types{conditionsIndex(iDataset),thisRec}(:,1);
             elseif iDataset == 7 % cw stims, stim 1 v 2
                 %conditions = conditions(:,1);
                 if sum(conditions(:,1) == 12) > 0
-                    use_conditions = conditions(ismember(conditions(:,1), [4,12]) & conditions(:,2)==-90,:);
+                    use_conditions = conditions(ismember(conditions(:,1), [4,6,12]) & conditions(:,2)==-90,:);
                     %trial_types = passive_data_per_cond.trial_types{iRec}(ismember(passive_data_per_cond.trial_types{iRec}(:,2), -90),1);
                 else
-                    use_conditions = conditions(ismember(conditions(:,1), [1,3]) & conditions(:,2)==-90,:);
+                    use_conditions = conditions(ismember(conditions(:,1), [1,2,3]) & conditions(:,2)==-90,:);
                     %trial_types = passive_data_per_cond.trial_types{iRec}(ismember(passive_data_per_cond.trial_types{iRec}(:,2), -90),1);
                 end
                 [conds, condType] = ismember(conditions, use_conditions, 'rows');
+                trial_types = passive_data_per_cond.trial_types{conditionsIndex(iDataset),thisRec}(:,1);
             elseif iDataset == 8 || iDataset == 9 % cw stims in tasks, stim 1 v 2
                 if sum(conditions(:,1) == 12) > 0
                     try
-                    use_conditions = conditions(ismember(conditions(:,1), [4,12]) & conditions(:,2)==-90,:);
+                    use_conditions = conditions(ismember(conditions(:,1), [4,5,12]) & conditions(:,2)==-90,:);
                     %trial_types = passive_data_per_cond.trial_types{iRec}(ismember(passive_data_per_cond.trial_types{iRec}(:,2), -90),1);
                     catch
                         keyboard
                     end
+                    trial_types = passive_data_per_cond.trial_types{conditionsIndex(iDataset),thisRec}(:,1);
                 else
                     try
-                    use_conditions = conditions(ismember(conditions(:,1), [1,3]) & conditions(:,2)==-90,:);
+                    use_conditions = conditions(ismember(conditions(:,1), [1,2,3]) & conditions(:,2)==-90,:);
                     %trial_types = passive_data_per_cond.trial_types{iRec}(ismember(passive_data_per_cond.trial_types{iRec}(:,2), -90),1);
                     catch
                         keyboard
                     end
+                    trial_types = passive_data_per_cond.trial_types{conditionsIndex(iDataset),thisRec}(:,1);
                 end
                 [conds, condType] = ismember(conditions, use_conditions, 'rows');
              elseif iDataset == 10 % cw stims, stim 1 v 2
                 %conditions = conditions(:,1);
                 use_conditions = conditions(ismember(conditions(:,1), [3,2]) & conditions(:,2)==-90,:);
                 [conds, condType] = ismember(conditions, use_conditions, 'rows');
+                trial_types = passive_data_per_cond.trial_types{conditionsIndex(iDataset),thisRec}(:,1);
                 %trial_types = passive_data_per_cond.trial_types{iRec}(ismember(passive_data_per_cond.trial_types{iRec}(:,2), -90),1);
              elseif iDataset == 11 % cw stims, stim 1 v 2
                 %conditions = conditions(:,1);
@@ -192,6 +197,7 @@ numCells_cum = [0,numCells_cum ];
                     %trial_types = passive_data_per_cond.trial_types{iRec}(ismember(passive_data_per_cond.trial_types{iRec}(:,2), -90),1);
                 end
                 [conds, condType] = ismember(conditions, use_conditions, 'rows');
+                trial_types = passive_data_per_cond.trial_types{conditionsIndex(iDataset),thisRec}(:,1);
             elseif iDataset == 12 || iDataset == 13 % cw stims in tasks, stim 1 v 2
                 if sum(conditions(:,1) == 12) > 0
                     try
@@ -209,6 +215,7 @@ numCells_cum = [0,numCells_cum ];
                     end
                 end
                 [conds, condType] = ismember(conditions, use_conditions, 'rows');
+                trial_types = passive_data_per_cond.trial_types{conditionsIndex(iDataset),thisRec}(:,1);
             end
             
             trial_types = trial_types(passive_data_per_cond.no_move_trials{conditionsIndex(iDataset),thisRec});

@@ -1,7 +1,7 @@
 
 %% JF_extract_sync(mouse)
-%function JF_extract_sync(animal)
-animals = {'JF115'};
+function JF_extract_sync(animals)
+%animals = {'JF078', 'JF123'};
 for iAnimal = 1:length(animals)
 animal = animals{iAnimal};
 cl_myPaths;
@@ -44,4 +44,4 @@ for iExperiment = 1:size(experiments, 1)
     end
 end
 end
-%end
+end

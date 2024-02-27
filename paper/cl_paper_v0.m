@@ -28,17 +28,60 @@ end
 %% Fig 1: visual responses in naïve mouse are sparsely present in striatum, more rare in GPe/SNr
 
 %% -Example cells visual
+% striatum 
+close all;
 
-cl_plotExCell_psth('JF090', 1, 8, 3, 'stimOn_noMove', 2, ...
-    [-0.2, 0.6], 0.001, 1, 1, 'spatialFreq')
+unit=223
 
-cl_plotExCell_psth('JF090', 1, 8, 3, 'stimOn_noMove', 3, ...
-    [-0.2, 0.6], 0.001, 1, 1, 'ori')
-
-cl_plotExCell_psth('JF090', 2, 8, 3, 'stimOn_noMove', 1, ...
+cl_plotExCell_psth('JF110', 2, 8, unit, 'stimOn_noMove', 1, ...
     [-0.2, 0.6], 0.001, 1, 1, 'locations')
 
-cl_plotExCell_psth('JF090', 3, 8, 3, 'stimOn_noMove', 1, ...
+
+cl_plotExCell_psth('JF110', 1, 8, unit, 'stimOn_noMove', 2, ...
+    [-0.2, 0.6], 0.001, 1, 1, 'spatialFreq')
+
+cl_plotExCell_psth('JF110', 1, 8, unit, 'stimOn_noMove', 3, ...
+    [-0.2, 0.6], 0.001, 1, 1, 'ori')
+
+
+cl_plotExCell_psth('JF110', 3, 8, unit, 'stimOn_noMove', 1, ...
+    [-0.2, 0.6], 0.001, 1, 1, 'natImg')
+
+% GPe
+for unit = [61,57,83,47,42,40,8]
+    cl_plotExCell_psth('JF109', 1,6, unit, 'stimOn_noMove', 2, ...
+    [-0.2, 0.6], 0.001, 1, 1, 'spatialFreq')
+end
+%unit=8
+
+cl_plotExCell_psth('JF109', 2, 6, unit, 'stimOn_noMove', 1, ...
+    [-0.2, 0.6], 0.001, 1, 1, 'locations')
+
+
+cl_plotExCell_psth('JF109', 1,6, unit, 'stimOn_noMove', 2, ...
+    [-0.2, 0.6], 0.001, 1, 1, 'spatialFreq')
+
+cl_plotExCell_psth('JF109', 1, 6, unit, 'stimOn_noMove', 3, ...
+    [-0.2, 0.6], 0.001, 1, 1, 'ori')
+
+
+cl_plotExCell_psth('JF109', 3, 6, unit, 'stimOn_noMove', 1, ...
+    [-0.2, 0.6], 0.001, 1, 1, 'natImg')
+
+% SNr 
+% cl_plotExCell_psth(animal, experiment, iProbe, unit, align_type, group_type, ...
+%    raster_window, psth_bin_size, plot_raster, plot_psth, color_type)
+unit=30;
+cl_plotExCell_psth('JF101', 1, 9, unit, 'stimOn_noMove', 2, ...
+    [-0.2, 0.6], 0.001, 1, 1, 'spatialFreq')
+
+cl_plotExCell_psth('JF101', 1, 9, unit, 'stimOn_noMove', 3, ...
+    [-0.2, 0.6], 0.001, 1, 1, 'ori')
+
+cl_plotExCell_psth('JF101', 2, 9, unit, 'stimOn_noMove', 1, ...
+    [-0.2, 0.6], 0.001, 1, 1, 'locations')
+
+cl_plotExCell_psth('JF101', 3, 9, unit, 'stimOn_noMove', 1, ...
     [-0.2, 0.6], 0.001, 1, 1, 'natImg')
 
 %% -Population cells visual
@@ -78,6 +121,8 @@ cl_selectivity;
 %% - task performance 
 %% - example cells
 %% - percentage cells 
+cl_fraction_cells_summary;
+
 %% - location plot
 pcells=false;
 load_type='taskGo';
@@ -86,10 +131,18 @@ cl_location_PSTH_slice;
 pcells=true;
 cl_location_PSTH_slice;
 
+pcells = false;
+load_type = 'taskNaive';
+cl_location_PSTH_slice;
+
+pcells = true;
+cl_location_PSTH_slice;
+
 
 %% Fig 4: visual responses after 3go training are distinguishable in striatum, not GPe/SNr 
 %% - example cells
 %% - PSTHs
+cl_plot_PSTHs(1, 0); %contra
 %% - dot plot?
 cl_stimId_gogogo;
 
@@ -99,6 +152,7 @@ cl_stimId_gogogo;
 %% - percentage cells
 %% - example cells 
 %% - PSTHs
+cl_plot_PSTHs(1, 0); %contra
 %% - dot plots 
 %% - drpime? sel? 
 
@@ -107,7 +161,7 @@ cl_stimId_gogogo;
 
 %% Supp.
 % PSTHs
-cl_plot_PSTHs(1, 0); %contra
+
 cl_plot_PSTHs(0, 1); %center
 
 

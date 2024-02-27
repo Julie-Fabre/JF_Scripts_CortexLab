@@ -7,6 +7,7 @@ if ispc % eww.
     zserverPath = '\\zserver.cortexlab.net\Subjects'; %
     zserverLabPath = '\\znas.cortexlab.net\Lab'; %
     zinuPath = '\\zinu.cortexlab.net\Subjects';
+    zortexPath = '\\zortex.cortexlab.net\Subjects';
 
     %% extra/backup drives
     dropboxPath = 'C:\Users\julie\Dropbox';
@@ -37,6 +38,7 @@ else
     zserverPath = '/home/netshare/zserver-data/'; %
     zserverLabPath = '/home/netshare/zserver-lab/'; %
     zinuPath = '/home/netshare/zinu/';
+    zortexPath = '/home/netshare/zortex';
 
     %% extra/backup drives
     dropboxPath = '/home/julie/Dropbox/';
