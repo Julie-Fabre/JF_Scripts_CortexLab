@@ -1,16 +1,8 @@
-clear all;
-close all;
-mice = {'JF067', 'JF078', 'JF_AL035', 'JF084', 'JF082'};
-iMouse = 1;
-mouse = mice{iMouse};
-savedirs = {'/home/netshare/zinu/JF067/UnitMatch/site1/UnitMatch.mat', ...
-    '/home/netshare/zinu/JF078/UnitMatch/site1/UnitMatch.mat', ...
-    '/home/netshare/zinu/JF_AL035/UnitMatch/site1/UnitMatch.mat', ...
-    '/home/netshare/zinu/JF084/UnitMatch/site1/UnitMatch.mat'}; %'/home/netshare/zinu/JF067/UnitMatch_1_11_enny'
 
 %% ~~ Figure 5 - example data (B-E)~~
-%% get match data
-SaveDir = savedirs{iMouse};
+%% Load matches
+mouse = 'JF067';
+SaveDir = '/home/netshare/zinu/JF067/UnitMatch/site1/UnitMatch.mat';
 load(SaveDir)
 
 GoodId = logical(UniqueIDConversion.GoodID);

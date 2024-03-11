@@ -7,8 +7,8 @@ trained_passive_animals = { 'AP028', 'AP029'};
 trained_animals = {'AP024', 'AP025', 'AP026', 'AP027', 'AP028', 'AP029'};
 naive_animals = {'AP032', 'AP033', 'AP034', 'AP035', 'AP036'}; %'AP034',
 ctx_passive_animals =  {'AP043', 'AP060', 'AP061'};
-trained = 0; %use trained or naive animals
-passive = 1;
+trained = 1; %use trained or naive animals
+passive = 0;
 kal = 0;
 ctxpassive=0;
 if trained == 1 && passive == 1
@@ -54,9 +54,9 @@ for curr_animal = 1:length(animals)
     animal = animals{curr_animal};
     
     if ctxpassive ==1
-        experiments = AP_find_experimentsJF(animal, protocol, protocol2, corona);
+        experiments = cl_find_experiments(animal, protocol, protocol2);
     else
-        experiments = AP_find_experimentsJF(animal, protocol, protocol2, corona);
+        experiments = cl_find_experiments(animal, protocol, protocol2);
     end
     experiments = experiments([experiments.imaging] & [experiments.ephys]);
 
@@ -65,8 +65,7 @@ for curr_animal = 1:length(animals)
     
     for curr_day = 1:length(experiments)
         thisCount = thisCount + 1;
-        day = experiments(curr_day).day;
-        thisDate = day;
+        thisDate = experiments(curr_day).thisDate;
         experiment = experiments(curr_day).experiment;
         % Load experiment
         n_aligned_depths = 3;
@@ -75,11 +74,11 @@ for curr_animal = 1:length(animals)
         load_parts.cam = false;
         load_parts.imaging = true;
         verbose = false;
-        [timeline_filename, timeline_exists] = AP_cortexlab_filenameJF(corona, animal, day, experiment, 'timeline');
-        [protocol_filename,protocol_exists] = AP_cortexlab_filenameJF(corona,animal,day,experiment,'protocol');
+        [timeline_filename, timeline_exists] = AP_cortexlab_filename(animal, thisDate, experiment, 'timeline');
+        [protocol_filename,protocol_exists] = AP_cortexlab_filename(animal,thisDate,experiment,'protocol');
 
         if timeline_exists
-            AP_load_experimentJF;
+           AP_load_experiment;
            
             if ephys_exists
                 
@@ -115,7 +114,7 @@ end
 clearvars -except trial_data_all redo trained protocol passive protocol2 kal ctxpassive
 disp('Finished loading all')
 % Save
-save_path = 'E:\analysis\wf_ephys_choiceworld\paper\data';
+save_path = '/home/julie/Dropbox/MATLAB/onPaths/PhD_thesis/andyData';
 if trained == 1 && passive == 1
     save_filename = [save_path, filesep, 'trial_activity_trainedPassive'];
 elseif trained == 1

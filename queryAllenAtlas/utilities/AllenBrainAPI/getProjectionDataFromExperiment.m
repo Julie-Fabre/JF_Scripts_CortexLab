@@ -24,7 +24,7 @@ function result = getProjectionDataFromExperiment(expID)
 %    max_voxel_z
 %    normalized_projection_volume
 %    projection_density .  .  .  . detected signal volume / structure volume  sum detected pixels / sum all pixels in a grid
-%    projection_intensity. .  .  . sum detected pixel intensity / sum all detected pixels
+%    projection_intensity  .  .  . sum detected pixel intensity / sum all detected pixels
 %    projection_energy. .  .  .  . sum detected pixel intensity / structure volume
 %    projection_volume
 %    section_data_set_id

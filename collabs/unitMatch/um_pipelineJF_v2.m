@@ -9,7 +9,7 @@ tmpdatafolder = extraHDPath; %'/media/julie/ExtraHD/data_temp'; % temporary fold
 MiceOpt = {'JF067', 'JF084', 'JF078', 'JF082','JFAL035'}; % Add all mice you want to analyze. 51 = ventricule mostly, don't include
 RecordingType(ismember(MiceOpt, {'JF067', 'JF078', 'JF_AL035', 'JF082', 'JF084'})) = {'Chronic'}; % 'Acute' or 'Chronic'
 miceDays = [1, 16;  3, 15; 1, 10;  1, 12; 1, 20]; % 1:11
-sites = [1, 1; 1, 4; 1, 3; 1, 2; 1, 1];
+sites = [1, 1; 2, 4; 1, 3; 1, 2; 1, 1];
 runMe = 1;
 saveJF = 1;
 for iMouse = 1:size(MiceOpt, 2)

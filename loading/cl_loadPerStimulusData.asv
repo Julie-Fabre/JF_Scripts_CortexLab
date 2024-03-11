@@ -1,3 +1,4 @@
+
 function [expData, session_data, regions] = cl_loadPerStimulusData(load_type, keep_type, loadVids) %% paramaters
 cl_myPaths;
 
@@ -17,11 +18,11 @@ warning off;
 regions_id = [672, 1022, 381];
 regions_id_old_histo = [574, 611, 823]; % only keep striatum in old ones?, ,611,823];
 % get all mice x thisDate x site combinations
-if ismember('OldHisto_', info_table.Properties.VariableNames)
-    use_recs_full = strcmp(info_table.Use_, 'Yes') & ~strcmp(info_table.OldHisto_, 'Yes');
-else
+%if ismember('OldHisto_', info_table.Properties.VariableNames)
+%    use_recs_full = strcmp(info_table.Use_, 'Yes') & ~strcmp(info_table.OldHisto_, 'Yes');
+%else
     use_recs_full = strcmp(info_table.Use_, 'Yes');
-end
+%end
 
 info_table = sortrows(info_table, 1); % make sure data is sorted by mouse
 unique_mice = unique(info_table.Mouse(use_recs_full), 'stable');
@@ -58,7 +59,7 @@ expType = cl_expTypes(load_type);
 
 %% load data
 
-for iRecording = 1:length(use_recs)
+for iRecording = 1:33%:length(use_recs)
 
     % this recording's info
     animal = unique_mice{mouse_thisDate_sites_shank_rec(iRecording, 1)};
@@ -74,6 +75,7 @@ for iRecording = 1:length(use_recs)
         continue;
     end
     load(probe2ephys_location)
+    clearvars thisDate_sites_shank_probe
     try
         thisDate_sites_shank_probe = [probe2ephys.day; probe2ephys.site; probe2ephys.shank]';
         old_histo = false;
@@ -194,8 +196,18 @@ for iRecording = 1:length(use_recs)
                     unit_closest_depth = arrayfun(@(x) ... %closest depth
                         find(probe_ccf(this_probe).probe_depths >= template_depths(shank_units(new_units(x))), 1, 'first'), 1:length(new_units));
                     if old_histo
-                        units_to_keep_coords = [units_to_keep_coords; ...
-                            permute(probe_ccf(this_probe).trajectory_coords(unit_closest_depth, :), [3,1,2])];
+                        units_to_keep_coords = [squeeze(units_to_keep_coords); ...
+                            squeeze(probe_ccf(this_probe).trajectory_coords(unit_closest_depth, :))]./2.5;
+                        % try
+                        %     units_coords_regularized = [probe_ccf(this_probe).trajectory_coords(unit_closest_depth, 1), ...
+                        %         probe_ccf(this_probe).trajectory_coords(unit_closest_depth, 3), ...
+                        %         probe_ccf(this_probe).trajectory_coords(unit_closest_depth, 2)]./2.5;
+                        %     units_to_keep_coords = [squeeze(units_to_keep_coords); ...
+                        %     squeeze(units_coords_regularized)]; %2.5 scaling factor bewteen allen and brainreg
+                        % catch
+                        %     keyboard;
+                        % end
+                        
                     else
                         units_to_keep_coords = [units_to_keep_coords; ...
                             probe_ccf(this_probe).trajectory_coords(unit_closest_depth, :)];
@@ -353,7 +365,8 @@ for iRecording = 1:length(use_recs)
                         expData.pvalue_shuffled_0025_per_cond_fake{keep_type}(iUnit + unitCount) = ...
                             fake_diff >= prctile(shuffled_diffs, 97.5) || fake_diff <= prctile(shuffled_diffs, 2.5);
                         
-                        curr_raster_smoothed_fr = smoothdata(curr_raster(logical(trial_cond_idx_single,:), 2, 'gaussian', [0 50]).*(1/psth_bin_size);
+                        clearvars curr_raster_smoothed_fr
+                        curr_raster_smoothed_fr = smoothdata(curr_raster(logical(trial_cond_idx_single),:), 2, 'gaussian', [0 50]).*(1/psth_bin_size);
                  
 
                         pre_activity_max = nanmax(curr_raster_smoothed_fr(:, 1:150),[],2);

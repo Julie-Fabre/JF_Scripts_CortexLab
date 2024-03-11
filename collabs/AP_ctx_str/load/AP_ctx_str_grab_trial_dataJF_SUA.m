@@ -28,7 +28,7 @@ fVdf_recast = ChangeU(Udf_aligned, fVdf, U_master);
 use_components = 1:200;
 
 % Deconvolve fluoresence (for use in regression)
-fVdf_deconv = AP_deconv_wfJF(fVdf);
+fVdf_deconv = AP_deconv_wf(fVdf);
 fVdf_deconv(isnan(fVdf_deconv)) = 0;
 
 %% Set parameters for striatal multiunit
@@ -96,7 +96,7 @@ end
 
 %% Load cell-types
 
-celltype_path = fullfile('E:/', animal, thisDate, '/analysis/');
+celltype_path = fullfile('/media/julie/Expansion', animal, thisDate, '/analysis/');
 
 if exist([celltype_path, 'qMetric.mat'], 'file') && redo == 0
     load([celltype_path, 'qMetric.mat']);

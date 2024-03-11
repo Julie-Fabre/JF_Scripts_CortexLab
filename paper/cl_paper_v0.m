@@ -4,7 +4,7 @@
 %% Load data
 load_type = 'naive';
 loadVids = 0;
-for iExperimentType = 1:6 %5:6% 1:6
+for iExperimentType = 2:6%1%:6 %5:6% 1:6
     [expData, session_data, regions] = cl_loadPerStimulusData(load_type, iExperimentType, loadVids);
     save(['/home/julie/Dropbox/MATLAB/naive_data', num2str(iExperimentType), '.mat'], '-struct', 'expData', '-v7.3');
 end
@@ -97,13 +97,15 @@ cl_percentage_cells;
 %redo with peak 
 pcells = false;
 load_type = 'naive';
-cl_location_PSTH_slice;
+figHandle = figure();
+cl_location_PSTH_slice(load_type, figHandle, pcells);
 
 pcells = true;
-cl_location_PSTH_slice;
+figHandle = figure();
+cl_location_PSTH_slice(load_type, figHandle, pcells);
 
 %% allen atlas connectivity
-
+cl_getAllenAtlasProjections_visual;
 %%  Fig 2: naïve striatal visual responses are selective to stimulus features
 %% - Example cells sp freq.
 %% - Example cells ori.
@@ -126,17 +128,21 @@ cl_fraction_cells_summary;
 %% - location plot
 pcells=false;
 load_type='taskGo';
-cl_location_PSTH_slice;
+figHandle = figure();
+cl_location_PSTH_slice(load_type, figHandle, pcells);
 
 pcells=true;
-cl_location_PSTH_slice;
+figHandle = figure();
+cl_location_PSTH_slice(load_type, figHandle, pcells);
 
 pcells = false;
 load_type = 'taskNaive';
-cl_location_PSTH_slice;
+figHandle = figure();
+cl_location_PSTH_slice(load_type, figHandle, pcells);
 
 pcells = true;
-cl_location_PSTH_slice;
+figHandle = figure();
+cl_location_PSTH_slice(load_type, figHandle, pcells);
 
 
 %% Fig 4: visual responses after 3go training are distinguishable in striatum, not GPe/SNr 
@@ -167,9 +173,12 @@ cl_plot_PSTHs(0, 1); %center
 
 pcells=false;
 load_type='taskNoGo';
-cl_location_PSTH_slice;
+figHandle = figure();
+cl_location_PSTH_slice(load_type, figHandle, pcells);
+
 pcells=true;
-cl_location_PSTH_slice;
+figHandle = figure();
+cl_location_PSTH_slice(load_type, figHandle, pcells);
 %% ~~ Suppl.: motion, movement ect. ; cell types ; delineating subregions ~~
 
 %% Suppl: histo
@@ -177,3 +186,24 @@ cl_location_PSTH_slice;
 %% Suppl: bombcell
 
 %% others: RPE, ect.
+
+
+
+
+%% location slices 
+cl_location_PSTH_slice_interp_nans('naive', '', 0);
+cl_location_PSTH_slice_interp_nans('naive', '', 1);
+
+cl_location_PSTH_slice_interp_nans('task', '', 0);
+cl_location_PSTH_slice_interp_nans('task', '', 1);
+
+cl_location_PSTH_slice_interp_nans('taskGo', '', 0);
+cl_location_PSTH_slice_interp_nans('taskGo', '', 1);
+
+cl_location_PSTH_slice_interp_nans('taskNoGo', '', 0);
+cl_location_PSTH_slice_interp_nans('taskNoGo', '', 1);
+
+cl_getAllenAtlasProjections_visual('VIS', '2D')
+cl_getAllenAtlasProjections_visual('mPFC', '2D')
+cl_getAllenAtlasProjections_visual('all', '2D')
+cl_getAllenAtlasProjections_visual('all_naive', '2D')

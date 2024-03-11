@@ -1,4 +1,4 @@
-
+function cl_location_PSTH_slice(load_type, figHandle, pcells)
 %% cl_locationPSTH
 if contains(load_type, 'taskNaive')
     passive_data = load('/home/julie/Dropbox/MATLAB/naive_data5.mat');
@@ -15,11 +15,19 @@ elseif contains(load_type, 'taskNoGo')
 
 end
 
+if nargin < 2 || isempty(figHandle)
+    figHandle = figure();
+end
+
+if nargin < 3 || isempty(pcells)
+    pcells = false;
+end
+
 regions = {'CP', 'GPe', 'SNr'};
 %pcells = true;
-keep passive_data regions pcells index load_type
+keep passive_data regions pcells index load_type figHandle
 figure(1);clf;
-figure(2);clf;
+figure(figHandle);clf;
 
 cl_myPaths;
 regionResolution = [1, 1, 1, 1, 1, 1, 1];
@@ -48,13 +56,14 @@ end
 theseColors = {rgb('DeepSkyBlue'); rgb('SeaGreen'); rgb('DarkOrange'); rgb('Crimson'); rgb('Hotpink'); rgb('Black'); rgb('Brown')};
 
 if ~exist('st', 'var')
-    [tv, av, st, bregma] = ya_loadAllenAtlas(atlasBrainRegLocation); % QQ bregma wrong in brainreg atlas
+    [tv, av, st, bregma] = ya_loadAllenAtlas(atlasBrainRegLocation); 
 end
 
 structure_alpha = 0.2;
 
 %% get each region's limits and define chunks
 nChunks = 5;
+nBins = 15;
 clearvars chunks_region
 % for iRegion = 1:size(regions, 2)
 %     clearvars regionLocation
@@ -121,18 +130,14 @@ for iRegion = 1:size(regions, 2)
         projection_view_lims(iChunk, 1, :) = xlim .* 10;
         projection_view_lims(iChunk, 2, :) = ylim .* 10;
         projection_view_bins{iChunk} = {projection_view_lims(iChunk, 1, 1): ...
-            (projection_view_lims(iChunk, 1, 2) - projection_view_lims(iChunk, 1, 1)) / 15: ...
+            (projection_view_lims(iChunk, 1, 2) - projection_view_lims(iChunk, 1, 1)) / nBins: ...
             projection_view_lims(iChunk, 1, 2), ...
             projection_view_lims(iChunk, 2, 1): ...
-            (projection_view_lims(iChunk, 2, 2) - projection_view_lims(iChunk, 2, 1)) / 15: ...
+            (projection_view_lims(iChunk, 2, 2) - projection_view_lims(iChunk, 2, 1)) / nBins: ...
             projection_view_lims(iChunk, 2, 2)};
 
     end
 
-    theseLocations = passive_data.unit_coords;
-    theseLocationsBregmaAbs = [(theseLocations(:, 3)), ...
-        theseLocations(:, 1), ...
-        theseLocations(:, 2)]; %AP, DV, ML -> ML, AP, DV
     
     prettify_plot('XLimits', 'col');
 end
@@ -143,7 +148,7 @@ for iRegion = 1:size(regions, 2)
 
     curr_plot_structure = st.id(strcmp(st.acronym, regions{iRegion}));
 
-    figure(2);
+    figure(figHandle);
 
     projection_views = repmat([1,3],nChunks, 1);%[1,2; 1,3; 2,3];%ML/AP, ML/DV, AP/DV
 
@@ -190,14 +195,17 @@ for iRegion = 1:size(regions, 2)
    % prettify_plot; 
 
     theseLocations = passive_data.unit_coords;
-    theseLocationsBregmaAbs = [(theseLocations(:, 3)), ...
-        theseLocations(:, 1), ...
-        theseLocations(:, 2)];% go from AP, DV, ML to ML, AP, DV (like loaded Atlas) 
+        theseLocationsBregmaAbs = [(theseLocations(:, 3)), ...
+            theseLocations(:, 1), ...
+            theseLocations(:, 2)]; % go from AP, DV, ML to ML, AP, DV (like loaded Atlas)
 
-    bregma_ml_point = bregma(1) / 2.5; %2.5 is difference in scaling between 
-    % brainreg (25 um resolution) and allen (10um resolution, where this bregma value comes from)
+        bregma_ml_point = bregma(3); %2.5 is difference in scaling between
+        % brainreg (25 um resolution) and allen (10um resolution, where this bregma value comes from)
+%theseLocationsBregmaAbs=theseLocationsBregmaAbs./2.5;
+        theseLocationsBregmaAbs(find(theseLocationsBregmaAbs(:, 1)>bregma_ml_point),1) =...
+            bregma_ml_point - (theseLocationsBregmaAbs(find(theseLocationsBregmaAbs(:, 1)>bregma_ml_point), 1))...
+            + bregma_ml_point;% squash right hemisphere on the left
 
-   theseLocationsBregmaAbs(:,1) = bregma_ml_point - abs(theseLocationsBregmaAbs(:,1) - bregma_ml_point); % squash right hemisphere on the left
 
     %% plot average increase for each bin
 
@@ -283,7 +291,7 @@ for iRegion = 1:size(regions, 2)
             end
         end
 
-        figure(2);
+        figure(figHandle);
         subplot(size(regions, 2), nChunks, (iRegion - 1).*nChunks + iChunk)
         %if pcells
             binnedArrayPixelSmooth(isIN == 0) = mean(thisCmap_limits);
@@ -345,6 +353,7 @@ ylabel(''); % Remove y-axis label
 
     end
     
-    keep passive_data regions thisCmap_limits st av regionResolution structure_alpha theseColors dFR_psth iRegion bregma nChunks chunks_region pcells index load_type zscore_psth
+    keep figHandle passive_data regions thisCmap_limits st av regionResolution structure_alpha theseColors dFR_psth iRegion bregma nChunks chunks_region pcells index load_type zscore_psth
 end
 prettify_plot
+end

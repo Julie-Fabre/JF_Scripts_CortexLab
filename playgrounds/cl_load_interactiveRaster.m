@@ -13,7 +13,7 @@ experiments = experiments([experiments.ephys]);
 
 %% Load data from experiment
 
-curr_day = 6; % (set which day to use)
+curr_day = 8; % (set which day to use)
 thisDate = experiments(curr_day).thisDate; % date
 
 
