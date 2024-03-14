@@ -1,7 +1,8 @@
 % get 3 D structure matrx (un smoothed, including NaNs).
 
 function cl_location_PSTH_slice_interp_nans(load_type, figHandle, pcells, incDec)
-%QQ add - use no move trials! 
+%QQ add - use no move trials!
+
 %% cl_locationPSTH
 if contains(load_type, 'taskNaive')
     passive_data = load('/home/julie/Dropbox/MATLAB/naive_data5.mat');
@@ -37,9 +38,13 @@ if nargin < 3 || isempty(pcells)
     pcells = false;
 end
 
+if nargin < 4 || isempty(incDec)
+    incDec = false;
+end
+
 regions = {'CP', 'GPe', 'SNr'};
 %pcells = true;
-keep passive_data regions pcells index load_type figHandle
+keep passive_data regions pcells index load_type figHandle incDec
 
 figure(figHandle);
 figHandle.Color = 'w';
@@ -102,7 +107,7 @@ region_ap_boundaries = [152, 307; ...
 
 for iRegion = 1:size(regions, 2)
     chunks_region(iRegion, :) = region_ap_boundaries(iRegion, 1):(region_ap_boundaries(iRegion, 2) - region_ap_boundaries(iRegion, 1)) / nChunks:region_ap_boundaries(iRegion, 2);
-    chunks_region_ap(iRegion,:) = (bregma(1) - chunks_region(iRegion, :)) * 25;
+    chunks_region_ap(iRegion, :) = (bregma(1) - chunks_region(iRegion, :)) * 25;
 end
 
 %% Visualize AP chunks in ML x AP projection
@@ -161,7 +166,7 @@ end
 
 for iRegion = 1:size(regions, 2)
 
-%% get data
+    %% get data
     curr_plot_structure = st.id(strcmp(st.acronym, regions{iRegion}));
 
     figure(figHandle);
@@ -250,18 +255,18 @@ for iRegion = 1:size(regions, 2)
                 if sum(theseNeurons) > 0
 
                     if pcells
-                        if sum(theseNeurons)>1
+                        if sum(theseNeurons) > 1
                             pcells_2d = sum( ...
                                 abs(nanmean(zscore_psth(theseNeurons, 250:350), 2))' > 0.25 & ...
-                                passive_data.pvalue_shuffled_005{index}(theseNeurons) ) / sum(theseNeurons);
+                                passive_data.pvalue_shuffled_005{index}(theseNeurons)) / sum(theseNeurons);
                         else
-                            pcells_2d =0;
+                            pcells_2d = 0;
                         end
 
                         %      pcells_2d = sum(passive_data.pvalue_shuffled_005{index}(theseNeurons) )/sum(theseNeurons);
                         binnedArrayPixel(iBinX, iBinY) = pcells_2d;
                     elseif incDec
-                         mean_2d_inc = nanmean((nanmean(passive_data.psth_average(theseNeurons, 260:360), 2) .* 100 - ...
+                        mean_2d_inc = nanmean((nanmean(passive_data.psth_average(theseNeurons, 260:360), 2) .* 100 - ...
                             nanmean(passive_data.psth_average(theseNeurons, 1:100), 2) .* 100)) ./ ...
                             (nanmean(nanmean(passive_data.psth_average(theseNeurons, 1:100))) .* 100 + 0.1);
                     else
@@ -321,6 +326,13 @@ for iRegion = 1:size(regions, 2)
     dataCell = regionSlices{iRegion};
     % nChunks = numel(dataCell);
     dataFilled = dataCell; % Initialize with original data for output
+
+    if iRegion==2 &&  contains(load_type, 'naive')%temporary really crappy Qq remove!!!
+        dataCell{15}(find(~isnan(dataFilled{15}) & ~isinf(dataFilled{15})))=NaN;
+         dataCell{16}(find(~isnan(dataFilled{16}) & ~isinf(dataFilled{16})))=NaN;
+        dataFilled{15}(find(~isnan(dataFilled{15}) & ~isinf(dataFilled{15})))=NaN;
+        dataFilled{16}(find(~isnan(dataFilled{15}) & ~isinf(dataFilled{15})))=NaN;
+    end
 
     % Intra-slice Interpolation
     for i = 1:nChunks
@@ -388,8 +400,13 @@ for iRegion = 1:size(regions, 2)
 
     % Define Gaussian kernel for smoothing
     % Adjust the size and sigma as per your data's characteristics
+    if iRegion==1
     gaussianSize = 5; % Size of the Gaussian filter
     gaussianSigma = 2; % Standard deviation of the Gaussian filter
+    else
+        gaussianSize = 5; % Size of the Gaussian filter
+        gaussianSigma = 4; % Standard deviation of the Gaussian filter
+    end
     G = fspecial('gaussian', gaussianSize, gaussianSigma);
 
     % Apply smoothing to each slice
@@ -413,8 +430,13 @@ for iRegion = 1:size(regions, 2)
     % Here, we focus on smoothing across the Z dimension (between slices)
 
     % Parameters for 1D Gaussian smoothing across slices
+    if iRegion==1
     zGaussianSize = 3; % Smaller size as we're only smoothing between a few slices
     zGaussianSigma = 1; % Adjust based on the desired level of cross-slice smoothing
+    else
+         zGaussianSize = 4; % Smaller size as we're only smoothing between a few slices
+    zGaussianSigma = 2; % Adjust based on the desired level of cross-slice smoothing
+    end
     zG = fspecial('gaussian', [zGaussianSize, 1], zGaussianSigma); % 1D Gaussian
 
     % Initialize an array to store the smoothed data (using the largest slice as a reference)
@@ -448,7 +470,10 @@ for iRegion = 1:size(regions, 2)
 
     dataCrossSmoothed_regions{iRegion} = dataCrossSmoothed;
 
-    %% plot data 
+    %% plot data
+    if iRegion > 1 && ~pcells
+        thisCmap_limits = [-12, 12];
+    end
     for iChunk = 1:nChunks
         clearvars regionLocation
         % get structure boundaries and plot outline
@@ -480,8 +505,8 @@ for iRegion = 1:size(regions, 2)
         ax.XColor = 'w'; % Red
 
         % Create a gray background layer
-        bg = ones(size( dataCrossSmoothed_regions{iRegion}{iChunk})) .* -Inf; % 0.5 corresponds to mid-gray in many colormaps
-        imagesc(projection_view_bins{iChunk}{1}, projection_view_bins{iChunk}{2},bg); % Plot the gray background
+        bg = ones(size(dataCrossSmoothed_regions{iRegion}{iChunk})) .* -Inf; % 0.5 corresponds to mid-gray in many colormaps
+        imagesc(projection_view_bins{iChunk}{1}, projection_view_bins{iChunk}{2}, bg); % Plot the gray background
         hold on; % Keep the gray background, and plot on top of it
 
         %projection_view_bins{iChunk}(isinf(projection_view_bins{iChunk})) =0;
@@ -490,25 +515,22 @@ for iRegion = 1:size(regions, 2)
 
         % NaN values transparent
         %set(gcf, 'color', [0.5, 0.5, 0.5]); -> this sets whole figure to
-        %gray. 
+        %gray.
         set(im, 'AlphaData', ~isnan(get(im, 'CData')));
 
         % Generate the colormap using brewermap
         originalColormap = brewermap([], '*RdBu');
-    middleIndex = ceil(size(originalColormap, 1) / 2);
-    whiteColor = [1, 1, 1];
-    grayColor = [0.5, 0.5, 0.5];
-    modifiedColormap = [grayColor; originalColormap(1:middleIndex-1, :); whiteColor; whiteColor;originalColormap(middleIndex+1:end, :)];
-    
-    % Apply the modified colormap
-    colormap(modifiedColormap);
-    
-    % Adjust caxis if necessary to include the extra colors added
-    % Assume thisCmap_limits is defined for your data's range
-    caxis([min(thisCmap_limits), max(thisCmap_limits)]);
+        middleIndex = ceil(size(originalColormap, 1)/2);
+        whiteColor = [1, 1, 1];
+        grayColor = [0.9, 0.9, 0.9];
+        modifiedColormap = [grayColor; originalColormap(1:middleIndex-1, :); whiteColor; whiteColor; originalColormap(middleIndex+1:end, :)];
 
+        % Apply the modified colormap
+        colormap(modifiedColormap);
 
-
+        % Adjust caxis if necessary to include the extra colors added
+        % Assume thisCmap_limits is defined for your data's range
+        caxis([min(thisCmap_limits), max(thisCmap_limits)]);
 
 
         %colorbar
@@ -526,7 +548,7 @@ for iRegion = 1:size(regions, 2)
             regionLocation(projection_views(iChunk, 2), :)', 0);
         plot(regionLocation(projection_views(iChunk, 1), boundary_projection{iChunk}), ...
             regionLocation(projection_views(iChunk, 2), boundary_projection{iChunk}), ...
-            'Color', theseColors{iRegion});
+            'Color', theseColors{iRegion}, 'LineWidth',2);
 
         axis equal
         axis square
@@ -558,28 +580,53 @@ for iRegion = 1:size(regions, 2)
         set(gca, 'XTick', [], 'YTick', []); % Remove tick marks
         xlabel(''); % Remove x-axis label
         ylabel(''); % Remove y-axis label
-        thisAp_slice = round(nanmean(chunks_region_ap(iRegion, iChunk:iChunk+1)) ./ 1000,2);
-        if iChunk==1
-            title(['Bregma: '  num2str(thisAp_slice)]); % Remove title
-        elseif iChunk==nChunks
-            title([num2str(thisAp_slice) 'mm']); % Remove title
+        thisAp_slice = round(nanmean(chunks_region_ap(iRegion, iChunk:iChunk+1))./1000, 2);
+        if iChunk == 1
+            title(['Bregma: ', num2str(thisAp_slice)]); % Remove title
+        elseif iChunk == nChunks
+            title([num2str(thisAp_slice), 'mm']); % Remove title
         else
             title([num2str(thisAp_slice)]); % Remove title
         end
 
-        if iChunk == 1
-                axis_length_mm = 0.5;
-                axis_length_atlas_units_x = (axis_length_mm * 1000) / (2.5 * 10) * diff(projection_view_bins{iChunk}{1}(2:3));
-                axis_length_atlas_units_y = (axis_length_mm * 1000) / (2.5 * 10) * diff(projection_view_bins{iChunk}{2}(2:3));
-                prettify_addScaleBars(axis_length_atlas_units_x, axis_length_atlas_units_y, ...
-                    [num2str(axis_length_mm), 'mm'], [num2str(axis_length_mm), 'mm'], 'topLeft', '', '')
-            end
-
 
     end
-    keep incDec chunks_region_ap dataCrossSmoothed_regions figHandle passive_data regions thisCmap_limits st av regionResolution structure_alpha theseColors  iRegion bregma nChunks chunks_region pcells index load_type zscore_psth
 
-    prettify_plot
+    % set x and ylims
+    xlims_region = nan(nChunks, 2);
+    ylims_region = nan(nChunks, 2);
+    for iChunk = 1:nChunks
+        subplot(size(regions, 2), nChunks, (iRegion - 1).*nChunks+iChunk)
+        xlims_region(iChunk, :) = xlim;
+        ylims_region(iChunk, :) = ylim;
+    end
+
+    diff_xlims_region = diff(xlims_region');
+    diff_ylims_region = diff(ylims_region');
+    for iChunk = 1:nChunks
+        subplot(size(regions, 2), nChunks, (iRegion - 1).*nChunks+iChunk)
+        xlims_here = (max(diff_xlims_region) - diff_xlims_region(iChunk)) ./ 2;
+        xlim([xlims_region(iChunk, 1) - xlims_here, xlims_region(iChunk, 2) + xlims_here])
+
+        ylims_here = (max(diff_ylims_region) - diff_ylims_region(iChunk)) ./ 2;
+        ylim([ylims_region(iChunk, 1) - ylims_here, ylims_region(iChunk, 2) + ylims_here])
+        if iChunk == 1
+            axis_length_mm = 1;
+            one_pixel_x = (diff(projection_view_bins{iChunk}{1}(2:3)));
+            one_pixel_x_um = one_pixel_x * 25;
+            one_pixel_y = (diff(projection_view_bins{iChunk}{2}(2:3)));
+            one_pixel_y_um = one_pixel_y * 25;
+            axis_length_atlas_units_x = (axis_length_mm * 1000) / (one_pixel_x_um);
+            axis_length_atlas_units_y = (axis_length_mm * 1000) / (one_pixel_y_um);
+            prettify_addScaleBars(axis_length_atlas_units_x, axis_length_atlas_units_y, ...
+                [num2str(axis_length_mm), 'mm'], [num2str(axis_length_mm), 'mm'], 'topLeft', '', '')
+        end
+
+    end
+
+    keep incDec chunks_region_ap dataCrossSmoothed_regions figHandle passive_data regions thisCmap_limits st av regionResolution structure_alpha theseColors iRegion bregma nChunks chunks_region pcells index load_type zscore_psth
+
+    %prettify_plot
 end
 
 

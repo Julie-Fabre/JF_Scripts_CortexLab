@@ -4,7 +4,7 @@
 %% Load data
 load_type = 'naive';
 loadVids = 0;
-for iExperimentType = 2:6%1%:6 %5:6% 1:6
+for iExperimentType = 6%1%:6 %5:6% 1:6
     [expData, session_data, regions] = cl_loadPerStimulusData(load_type, iExperimentType, loadVids);
     save(['/home/julie/Dropbox/MATLAB/naive_data', num2str(iExperimentType), '.mat'], '-struct', 'expData', '-v7.3');
 end
@@ -35,38 +35,59 @@ unit=223
 
 cl_plotExCell_psth('JF110', 2, 8, unit, 'stimOn_noMove', 1, ...
     [-0.2, 0.6], 0.001, 1, 1, 'locations')
-
+prettify_plot;
+xlim([-0.03, 0.32])
+prettify_addScaleBars(0.1, 20, '', '', '', 's', 'sp/s')
 
 cl_plotExCell_psth('JF110', 1, 8, unit, 'stimOn_noMove', 2, ...
     [-0.2, 0.6], 0.001, 1, 1, 'spatialFreq')
+prettify_plot;
+xlim([-0.03, 0.32])
+prettify_addScaleBars(0.1, 20, '', '', '', 's', 'sp/s')
 
 cl_plotExCell_psth('JF110', 1, 8, unit, 'stimOn_noMove', 3, ...
     [-0.2, 0.6], 0.001, 1, 1, 'ori')
-
+prettify_plot;
+xlim([-0.05, 0.32])
+prettify_addScaleBars(0.1, 20, '', '', '', 's', 'sp/s')
 
 cl_plotExCell_psth('JF110', 3, 8, unit, 'stimOn_noMove', 1, ...
     [-0.2, 0.6], 0.001, 1, 1, 'natImg')
+prettify_plot;
+xlim([-0.03, 0.32])
+prettify_addScaleBars(0.1, 20, '', '', '', 's', 'sp/s')
 
 % GPe
 for unit = [61,57,83,47,42,40,8]
     cl_plotExCell_psth('JF109', 1,6, unit, 'stimOn_noMove', 2, ...
     [-0.2, 0.6], 0.001, 1, 1, 'spatialFreq')
 end
+unit=61; %42
 %unit=8
 
 cl_plotExCell_psth('JF109', 2, 6, unit, 'stimOn_noMove', 1, ...
     [-0.2, 0.6], 0.001, 1, 1, 'locations')
-
+prettify_plot;
+xlim([-0.02, 0.36])
+prettify_addScaleBars(0.1, 20, '', '', '', 's', 'sp/s')
 
 cl_plotExCell_psth('JF109', 1,6, unit, 'stimOn_noMove', 2, ...
     [-0.2, 0.6], 0.001, 1, 1, 'spatialFreq')
+prettify_plot;
+xlim([-0.02, 0.36])
+prettify_addScaleBars(0.1, 20, '', '', '', 's', 'sp/s')
 
 cl_plotExCell_psth('JF109', 1, 6, unit, 'stimOn_noMove', 3, ...
     [-0.2, 0.6], 0.001, 1, 1, 'ori')
-
+prettify_plot;
+xlim([-0.02, 0.36])
+prettify_addScaleBars(0.1, 20, '', '', '', 's', 'sp/s')
 
 cl_plotExCell_psth('JF109', 3, 6, unit, 'stimOn_noMove', 1, ...
     [-0.2, 0.6], 0.001, 1, 1, 'natImg')
+prettify_plot;
+xlim([-0.02, 0.36])
+prettify_addScaleBars(0.1, 20, '', '', '', 's', 'sp/s')
 
 % SNr 
 % cl_plotExCell_psth(animal, experiment, iProbe, unit, align_type, group_type, ...
@@ -74,15 +95,28 @@ cl_plotExCell_psth('JF109', 3, 6, unit, 'stimOn_noMove', 1, ...
 unit=30;
 cl_plotExCell_psth('JF101', 1, 9, unit, 'stimOn_noMove', 2, ...
     [-0.2, 0.6], 0.001, 1, 1, 'spatialFreq')
+prettify_plot;
+xlim([-0.05, 0.3])
+prettify_addScaleBars(0.1, 20, '', '', '', 's', 'sp/s')
+
 
 cl_plotExCell_psth('JF101', 1, 9, unit, 'stimOn_noMove', 3, ...
     [-0.2, 0.6], 0.001, 1, 1, 'ori')
+prettify_plot;
+xlim([-0.05, 0.3])
+prettify_addScaleBars(0.1, 20, '', '', '', 's', 'sp/s')
 
 cl_plotExCell_psth('JF101', 2, 9, unit, 'stimOn_noMove', 1, ...
     [-0.2, 0.6], 0.001, 1, 1, 'locations')
+prettify_plot;
+xlim([-0.05, 0.3])
+prettify_addScaleBars(0.1, 20, '', '', '', 's', 'sp/s')
 
 cl_plotExCell_psth('JF101', 3, 9, unit, 'stimOn_noMove', 1, ...
     [-0.2, 0.6], 0.001, 1, 1, 'natImg')
+prettify_plot;
+xlim([-0.05, 0.3])
+prettify_addScaleBars(0.1, 20, '', '', '', 's', 'sp/s')
 
 %% -Population cells visual
 % redo 
@@ -90,7 +124,7 @@ cl_population_PSTH;
 
 %% -Percentage cells visual
 % using peak/trough 
-cl_percentage_cells;
+%cl_percentage_cells; (-> inside pop PSTH now)
 
 
 %% -location plots
@@ -160,6 +194,7 @@ cl_stimId_gogogo;
 %% - PSTHs
 cl_plot_PSTHs(1, 0); %contra
 %% - dot plots 
+
 %% - drpime? sel? 
 
 

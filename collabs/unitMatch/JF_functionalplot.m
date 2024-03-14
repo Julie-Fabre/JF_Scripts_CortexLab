@@ -657,9 +657,6 @@ acg_long_track = nan(size(theseUnits, 2), max_nRecs, 500);
 vis_long_track_pass = nan(size(theseUnits, 2), max_nRecs, 3, 1500);
 vis_long_track_pass_std = nan(size(theseUnits, 2), max_nRecs, 3, 1500);
 vis_long_track = nan(size(theseUnits, 2), max_nRecs, 3, 1500);
-
-%move_long_track_pass = nan(size(theseUnits, 2), max_nRecs, 2, 1500);
-%rew_long_track = nan(size(theseUnits, 2), max_nRecs, 2, 1500);
 waveforms_raw_long_track_enny = nan(size(theseUnits, 2), max_nRecs, 82);
 
 
@@ -795,27 +792,6 @@ for iRecording = 1:last_thisDate
         vis_long_track_pass(iUnit, thisRecording, 1:size(curr_psth, 1), :) = curr_psth;
         vis_long_track_pass_depth(iUnit, thisRecording, 1) = template_depths(thisUnit_0idx(1));
 
-        for iT = 1:size(curr_psth, 1)
-
-
-            [curr_psth, curr_raster, t, raster_x, raster_y] = cl_raster_psth(spike_templates_0idx, spike_times_timeline, ...
-                thisUnit_0idx, raster_window, psth_bin_size, stimOn_times(align_group_b(1:size(stimOn_times, 1)) == iT), align_group_b(align_group_b(1:size(stimOn_times, 1)) == iT));
-            %vis_long_track_pass_std(iUnit, thisRecording, 1:size(curr_psth, 1), :) = nanstd(smoothdata(curr_raster, 'gaussian', [10, 70]));
-            [N, T] = size(curr_raster); % N = Number_of_Trials, T = Number_of_Time_Points
-
-            % Calculate proportion of trials with a spike for each time point
-            p = sum(curr_raster) / N;
-
-            % Calculate variance for each time point
-            variance = p .* (1 - p);
-
-            % Calculate standard error for each time point
-            %SE = sqrt(variance / N);
-            vis_long_track_pass_std(iUnit, thisRecording, iT, :) = variance;
-        end
-
-        %catch
-        %end
 
     end
 
